@@ -2,6 +2,8 @@
   "name": "footballleagues",
   "version": "0.1.0",
   "private": true,
+  "main": "apps/mobile/index.js",
+  "packageManager": "pnpm@10.28.2",
   "scripts": {
     "dev": "pnpm -C apps/web dev",
     "dev:web": "pnpm -C apps/web dev",
@@ -9,5 +11,8 @@
     "build": "pnpm -C apps/web build",
     "start": "pnpm -C apps/web start",
     "lint": "pnpm -C apps/web lint"
+  },
+  "devDependencies": {
+    "expo": "~54.0.33"
   }
 }

@@ -1,0 +1,33 @@
+{
+  "cli": {
+    "version": ">= 16.32.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "prebuildCommand": "prebuild --no-install --platform android"
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "prebuildCommand": "prebuild --no-install --platform android"
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "prebuildCommand": "prebuild --no-install --platform android"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

@@ -11,5 +11,8 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
+// Required for pnpm where node_modules contains symlinks.
+config.resolver.unstable_enableSymlinks = true;
+config.resolver.disableHierarchicalLookup = true;
 
 module.exports = config;
