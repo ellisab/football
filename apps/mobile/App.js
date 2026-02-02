@@ -11,6 +11,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
+import { SvgUri } from 'react-native-svg';
 import {
   getCurrentGroup,
   getFinalResult,
@@ -72,9 +73,13 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   'upload.wikimedia.org',
   'i.imgur.com',
   'www.bundesliga-reisefuehrer.de',
+  'bundesliga-reisefuehrer.de',
   'www.bundesliga-logos.com',
+  'bundesliga-logos.com',
   'www.bundesliga.com',
+  'bundesliga.com',
   'www.bundesliga.de',
+  'bundesliga.de',
 ]);
 
 const kickoffFormatter = new Intl.DateTimeFormat('en-US', {
@@ -122,6 +127,18 @@ const normalizeIconUrl = (iconUrl) => {
   }
 };
 const getTheme = (scheme) => (scheme === 'dark' ? THEMES.dark : THEMES.light);
+const isSvgUrl = (iconUrl) => {
+  if (!iconUrl) return false;
+  try {
+    const url = new URL(iconUrl);
+    const pathname = url.pathname.toLowerCase();
+    if (pathname.endsWith('.svg')) return true;
+    const format = url.searchParams.get('format');
+    return format?.toLowerCase() === 'svg';
+  } catch {
+    return iconUrl.toLowerCase().includes('.svg');
+  }
+};
 
 const sortGoals = (match) => {
   if (!match?.goals || match.goals.length < 2) return match;
@@ -186,15 +203,27 @@ export default function App() {
   const renderTeamBadge = (name, iconUrl, size = 26) => {
     const normalizedUrl = normalizeIconUrl(iconUrl);
     const sizeStyle = { width: size, height: size, borderRadius: size / 2 };
+    const innerSize = Math.max(12, Math.round(size * 0.7));
     const textSize = Math.max(10, Math.round(size * 0.45));
     if (normalizedUrl && isAllowedImageHost(normalizedUrl)) {
+      const isSvg = isSvgUrl(normalizedUrl);
       return (
-        <Image
-          source={{ uri: normalizedUrl }}
-          accessibilityLabel={name ?? 'Team crest'}
-          resizeMode="contain"
-          style={[styles.teamLogo, sizeStyle]}
-        />
+        <View style={[styles.teamLogoFrame, sizeStyle]}>
+          {isSvg ? (
+            <SvgUri
+              uri={normalizedUrl}
+              width={innerSize}
+              height={innerSize}
+            />
+          ) : (
+            <Image
+              source={{ uri: normalizedUrl }}
+              accessibilityLabel={name ?? 'Team crest'}
+              resizeMode="contain"
+              style={{ width: innerSize, height: innerSize }}
+            />
+          )}
+        </View>
       );
     }
 
@@ -311,7 +340,7 @@ export default function App() {
         );
         if (!isActive) return;
         setMatches(Array.isArray(matchday) ? matchday.map(sortGoals) : []);
-      } catch (err) {
+      } catch {
         if (!isActive) return;
         setMatches([]);
         setGroupName('Latest Matchday');
@@ -675,10 +704,13 @@ const createStyles = (theme) =>
       fontSize: 18,
       fontWeight: '700',
     },
-    teamLogo: {
+    teamLogoFrame: {
+      alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: theme.logoBg,
       borderWidth: 1,
       borderColor: theme.logoBorder,
+      overflow: 'hidden',
     },
     teamLogoFallback: {
       alignItems: 'center',
