@@ -258,6 +258,31 @@ const formatSeasonRange = (season: number | undefined) => {
   return `${season}/${season + 1}`;
 };
 
+const getGroupsWithFallback = async (
+  leagueKey: string,
+  leagueShortcut: string,
+  season: number
+) => {
+  if (leagueKey !== "cl") {
+    return {
+      groups: await getGroups(leagueShortcut, season, REVALIDATE),
+      shortcut: leagueShortcut,
+    };
+  }
+
+  try {
+    return {
+      groups: await getGroups("cl", season, REVALIDATE),
+      shortcut: "cl",
+    };
+  } catch {
+    return {
+      groups: await getGroups(leagueShortcut, season, REVALIDATE),
+      shortcut: leagueShortcut,
+    };
+  }
+};
+
 const getCurrentSeasonYear = () => {
   const now = new Date();
   const year = now.getFullYear();
@@ -287,6 +312,24 @@ const sortGoals = (match: ApiMatch) => {
       (a, b) => (a.matchMinute ?? 0) - (b.matchMinute ?? 0)
     ),
   };
+};
+
+const areAllMatchesFinished = (matches: ApiMatch[]) => {
+  return (
+    matches.length > 0 &&
+    matches.every((match) => match.matchIsFinished === true)
+  );
+};
+
+const findNextGroup = (
+  groups: Array<{ groupOrderID?: number; groupName?: string }>,
+  currentGroupOrderID?: number
+) => {
+  if (!currentGroupOrderID) return undefined;
+  return groups
+    .filter((group) => typeof group.groupOrderID === "number")
+    .filter((group) => (group.groupOrderID ?? 0) > currentGroupOrderID)
+    .sort((a, b) => (a.groupOrderID ?? 0) - (b.groupOrderID ?? 0))[0];
 };
 
 export default async function Home({
@@ -326,8 +369,8 @@ export default async function Home({
   const tablePromise = getTable(effectiveShortcut, resolvedSeason, REVALIDATE);
   const groupsPromise =
     resolvedLeague === "cl"
-      ? getGroups(effectiveShortcut, resolvedSeason, REVALIDATE)
-      : null;
+      ? getGroupsWithFallback(resolvedLeague, effectiveShortcut, resolvedSeason)
+      : Promise.resolve({ groups: [], shortcut: effectiveShortcut });
   const playoffMatchesPromise =
     resolvedLeague === "cl"
       ? getMatchdayResults("ucl", resolvedSeason, 9, REVALIDATE)
@@ -336,7 +379,7 @@ export default async function Home({
     await Promise.allSettled([
       currentGroupPromise,
       tablePromise,
-      groupsPromise ?? Promise.resolve([]),
+      groupsPromise,
       playoffMatchesPromise,
     ]);
   const dataErrors: string[] = [];
@@ -351,7 +394,7 @@ export default async function Home({
       : (dataErrors.push("table"), []);
   const groups =
     groupsResult.status === "fulfilled"
-      ? groupsResult.value
+      ? groupsResult.value.groups
       : (() => {
           const reason = groupsResult.reason as { status?: number } | undefined;
           if (reason?.status === 404) return [];
@@ -376,6 +419,53 @@ export default async function Home({
     matchdayResult.status === "fulfilled"
       ? matchdayResult.value.map(sortGoals)
       : (dataErrors.push("matchday"), []);
+  const allCurrentRoundMatchesFinished = areAllMatchesFinished(matches);
+
+  let nextRoundMatches: ApiMatch[] = [];
+  let nextRoundLabel = "Next Matchday";
+  if (currentGroup?.groupOrderID && allCurrentRoundMatchesFinished) {
+    let scheduleGroups = Array.isArray(groups) ? groups : [];
+    if (scheduleGroups.length === 0) {
+      try {
+        const fallbackGroupData = await getGroupsWithFallback(
+          resolvedLeague,
+          effectiveShortcut,
+          resolvedSeason
+        );
+        scheduleGroups = Array.isArray(fallbackGroupData.groups)
+          ? fallbackGroupData.groups
+          : [];
+      } catch (error) {
+        const reason = error as { status?: number } | undefined;
+        if (reason?.status !== 404) {
+          dataErrors.push("next groups");
+        }
+      }
+    }
+
+    const nextGroup = findNextGroup(scheduleGroups, currentGroup.groupOrderID);
+    const fallbackNextGroupOrderID = currentGroup.groupOrderID + 1;
+    const nextGroupOrderID = nextGroup?.groupOrderID ?? fallbackNextGroupOrderID;
+
+    try {
+      const nextMatchday = await getMatchdayResults(
+        effectiveShortcut,
+        resolvedSeason,
+        nextGroupOrderID,
+        REVALIDATE
+      );
+      nextRoundMatches = nextMatchday.map(sortGoals);
+      if (nextGroup?.groupName) {
+        nextRoundLabel = nextGroup.groupName;
+      }
+    } catch (error) {
+      const reason = error as { status?: number } | undefined;
+      if (reason?.status !== 404) {
+        dataErrors.push("next matchday");
+      }
+    }
+  }
+  const hasNextRoundMatches = nextRoundMatches.length > 0;
 
   const knockoutGroups = Array.isArray(groups)
     ? groups.filter((group) => isKnockoutGroup(group.groupName))
@@ -439,6 +529,8 @@ export default async function Home({
     table: "table",
     groups: "groups",
     playoffs: "playoff matches",
+    "next groups": "next round groups",
+    "next matchday": "next round matches",
   };
   const visibleErrors = Array.from(new Set(dataErrors)).map(
     (key) => errorLabelMap[key] ?? key
@@ -539,6 +631,20 @@ export default async function Home({
               ) : (
                 matches.map((match) => renderMatchCard(match))
               )}
+              {hasNextRoundMatches ? (
+                <div className="grid gap-4 pt-1">
+                  <Separator className="bg-white/10" />
+                  <div className="grid gap-1">
+                    <div className="text-xs uppercase tracking-[0.3em] text-slate-300">
+                      {nextRoundLabel}
+                    </div>
+                    <div className="text-xs text-slate-300">
+                      Upcoming fixtures because the current round is finished.
+                    </div>
+                  </div>
+                  {nextRoundMatches.map((match) => renderMatchCard(match))}
+                </div>
+              ) : null}
               {resolvedLeague === "bl1" || resolvedLeague === "bl2" || resolvedLeague === "cl" ? (
                 <div className="grid gap-6 pt-2">
                   <Card className="border-white/10 bg-white/5 shadow-[0_0_45px_rgba(15,23,42,0.45)]">

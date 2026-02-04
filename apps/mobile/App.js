@@ -197,10 +197,24 @@ const isKnockoutGroup = (name) => {
   );
 };
 
+const areAllMatchesFinished = (items) => {
+  return items.length > 0 && items.every((item) => item?.matchIsFinished === true);
+};
+
+const findNextGroup = (groups, currentGroupOrderID) => {
+  if (!currentGroupOrderID || !Array.isArray(groups)) return undefined;
+  return groups
+    .filter((group) => typeof group?.groupOrderID === 'number')
+    .filter((group) => group.groupOrderID > currentGroupOrderID)
+    .sort((a, b) => (a.groupOrderID ?? 0) - (b.groupOrderID ?? 0))[0];
+};
+
 export default function App() {
   const [activeLeague, setActiveLeague] = useState('bl1');
   const [groupName, setGroupName] = useState('Latest Matchday');
   const [matches, setMatches] = useState([]);
+  const [nextGroupName, setNextGroupName] = useState('');
+  const [nextMatches, setNextMatches] = useState([]);
   const [table, setTable] = useState([]);
   const [bracketMatches, setBracketMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -395,10 +409,58 @@ export default function App() {
           groupOrderID
         );
         if (!isActive) return;
-        setMatches(Array.isArray(matchday) ? matchday.map(sortGoals) : []);
+        const currentRoundMatches = Array.isArray(matchday)
+          ? matchday.map(sortGoals)
+          : [];
+        setMatches(currentRoundMatches);
+
+        setNextGroupName('');
+        setNextMatches([]);
+
+        if (areAllMatchesFinished(currentRoundMatches)) {
+          let scheduleGroups =
+            groupsResult.status === 'fulfilled' &&
+            Array.isArray(groupsResult.value?.groups)
+              ? groupsResult.value.groups
+              : [];
+
+          if (scheduleGroups.length === 0) {
+            try {
+              const fallbackGroups = await getGroups(dataShortcut, season);
+              scheduleGroups = Array.isArray(fallbackGroups)
+                ? fallbackGroups
+                : [];
+            } catch {
+              scheduleGroups = [];
+            }
+          }
+
+          const nextGroup = findNextGroup(scheduleGroups, groupOrderID);
+          const nextGroupOrderID = nextGroup?.groupOrderID ?? groupOrderID + 1;
+
+          try {
+            const nextRoundResults = await getMatchdayResults(
+              dataShortcut,
+              season,
+              nextGroupOrderID
+            );
+            if (!isActive) return;
+            const normalizedNextMatches = Array.isArray(nextRoundResults)
+              ? nextRoundResults.map(sortGoals)
+              : [];
+            if (normalizedNextMatches.length > 0) {
+              setNextGroupName(nextGroup?.groupName || 'Next Matchday');
+              setNextMatches(normalizedNextMatches);
+            }
+          } catch {
+            // No upcoming round available yet.
+          }
+        }
       } catch {
         if (!isActive) return;
         setMatches([]);
+        setNextGroupName('');
+        setNextMatches([]);
         setGroupName('Latest Matchday');
         setTable([]);
         setBracketMatches([]);
@@ -414,8 +476,8 @@ export default function App() {
     };
   }, [activeLeague, season]);
 
-  const sections = useMemo(
-    () => [
+  const sections = useMemo(() => {
+    const result = [
       {
         key: 'matchday',
         title: groupName,
@@ -425,17 +487,30 @@ export default function App() {
           error || 'No match results available yet for this matchday.',
         data: matches,
       },
-      {
-        key: 'table',
-        title: 'Table',
-        subtitle: 'Updated standings for the selected season.',
-        type: 'table',
-        emptyText: error || 'Table data is not available yet.',
-        data: table,
-      },
-    ],
-    [groupName, season, matches, table, error]
-  );
+    ];
+
+    if (nextMatches.length > 0) {
+      result.push({
+        key: 'next-matchday',
+        title: nextGroupName || 'Next Matchday',
+        subtitle: `Season ${season} · upcoming fixtures`,
+        type: 'match',
+        emptyText: 'No upcoming fixtures available yet.',
+        data: nextMatches,
+      });
+    }
+
+    result.push({
+      key: 'table',
+      title: 'Table',
+      subtitle: 'Updated standings for the selected season.',
+      type: 'table',
+      emptyText: error || 'Table data is not available yet.',
+      data: table,
+    });
+
+    return result;
+  }, [groupName, season, matches, nextGroupName, nextMatches, table, error]);
 
   const renderHeader = () => (
     <View style={styles.header}>
