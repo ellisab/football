@@ -46,20 +46,20 @@ export function LeagueSelector({
     <div className="grid gap-4">
       <div className="grid gap-2">
         <Select value={currentLeague} onValueChange={onLeagueChange}>
-          <SelectTrigger className="w-full border-white/20 bg-white/5 text-slate-100">
+          <SelectTrigger className="w-full border-slate-300 bg-white/80 text-slate-900 dark:border-white/20 dark:bg-white/5 dark:text-slate-100">
             <SelectValue placeholder="Select league" />
           </SelectTrigger>
           <SelectContent
             position="popper"
             align="start"
             sideOffset={8}
-            className="w-[--radix-select-trigger-width] max-w-[calc(100vw-2rem)] border-white/10 bg-slate-950/95 text-slate-100 shadow-xl backdrop-blur"
+            className="w-[--radix-select-trigger-width] max-w-[calc(100vw-2rem)] border-slate-200 bg-white/95 text-slate-900 shadow-xl backdrop-blur dark:border-white/10 dark:bg-slate-950/95 dark:text-slate-100"
           >
             {leagues.map((item) => (
               <SelectItem
                 key={item.shortcut}
                 value={item.shortcut}
-                className="focus:bg-white/10"
+                className="focus:bg-slate-200/80 dark:focus:bg-white/10"
               >
                 {item.label}
               </SelectItem>

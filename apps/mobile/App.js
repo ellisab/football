@@ -233,8 +233,6 @@ export default function App() {
   };
   const dynamicStyles = useMemo(
     () => ({
-      badge: { borderColor: leagueTheme.accent },
-      badgeText: { color: leagueTheme.accent },
       tabActive: {
         borderColor: leagueTheme.accent,
         backgroundColor: leagueTheme.accentSoft,
@@ -514,11 +512,6 @@ export default function App() {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <View style={[styles.badge, dynamicStyles.badge]}>
-        <Text style={[styles.badgeText, dynamicStyles.badgeText]}>
-          OpenLigaDB Live
-        </Text>
-      </View>
       <Text style={styles.title}>Matchday Atlas</Text>
       <Text style={styles.subtitle}>
         Follow the latest matchday results and tables for your favorite leagues.
@@ -701,7 +694,7 @@ export default function App() {
           }
           ListFooterComponent={
             <Text style={styles.footerText}>
-              Data updates every 60 seconds. Built with Expo + OpenLigaDB.
+              Data updates every 60 seconds. Built with Expo.
             </Text>
           }
         />
@@ -715,20 +708,6 @@ const createStyles = (theme) =>
     container: {
       flex: 1,
       backgroundColor: theme.background,
-    },
-    badge: {
-      alignSelf: 'flex-start',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 999,
-      borderWidth: 1,
-      marginBottom: 12,
-      backgroundColor: theme.cardMuted,
-    },
-    badgeText: {
-      fontSize: 12,
-      fontWeight: '600',
-      letterSpacing: 1,
     },
     header: {
       paddingHorizontal: 20,

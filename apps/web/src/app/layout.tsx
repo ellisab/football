@@ -23,7 +23,7 @@ const monoFont = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Matchday Atlas",
-  description: "Live matchday results and tables powered by OpenLigaDB.",
+  description: "Matchday results and tables for your favorite leagues.",
 };
 
 export default function RootLayout({

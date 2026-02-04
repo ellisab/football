@@ -123,6 +123,18 @@
   body {
     @apply bg-background text-foreground overflow-x-hidden;
   }
+  .app-shell {
+    background:
+      radial-gradient(circle at top, rgba(14, 165, 233, 0.16), transparent 55%),
+      radial-gradient(circle at 20% 18%, rgba(244, 114, 182, 0.12), transparent 40%),
+      linear-gradient(135deg, #f8fafc, #e2e8f0 45%, #f1f5f9);
+  }
+  .dark .app-shell {
+    background:
+      radial-gradient(circle at top, rgba(12, 74, 110, 0.12), transparent 55%),
+      radial-gradient(circle at 20% 20%, rgba(190, 24, 93, 0.08), transparent 40%),
+      linear-gradient(135deg, #0b1020, #101827 40%, #0f172a);
+  }
   .font-display {
     font-family: var(--font-display);
   }

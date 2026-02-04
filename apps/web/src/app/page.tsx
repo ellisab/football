@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
-import { Badge } from "@footballleagues/ui/badge";
 import {
   Card,
   CardContent,
@@ -195,13 +194,13 @@ const renderTeamBadge = (name?: string, iconUrl?: string) => {
         alt={name ?? "Team crest"}
         width={28}
         height={28}
-        className="h-7 w-7 rounded-full bg-white/10 object-contain"
+        className="h-7 w-7 rounded-full bg-slate-200/80 dark:bg-white/10 object-contain"
       />
     );
   }
 
   return (
-    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-xs font-semibold text-white/70">
+    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200/80 dark:bg-white/10 text-xs font-semibold text-slate-600 dark:text-white/70">
       {(name ?? "T").slice(0, 1)}
     </div>
   );
@@ -217,13 +216,13 @@ const renderMatchCard = (match: ApiMatch) => {
   return (
     <div
       key={match.matchID ?? `${match.team1?.teamId}-${match.team2?.teamId}`}
-      className="grid w-full min-w-0 max-w-full min-h-[132px] gap-2 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/40 p-4"
+      className="grid w-full min-w-0 max-w-full min-h-[132px] gap-2 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-slate-950/40 p-4"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
         <span>{formatKickoff(match.matchDateTimeUTC ?? match.matchDateTime)}</span>
         <span>{match.matchIsFinished ? "Final" : "Scheduled"}</span>
       </div>
-      <div className="grid gap-2 text-sm font-semibold text-white">
+      <div className="grid gap-2 text-sm font-semibold text-slate-900 dark:text-white">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
             {renderTeamBadge(match.team1?.teamName, match.team1?.teamIconUrl)}
@@ -241,7 +240,7 @@ const renderMatchCard = (match: ApiMatch) => {
         </div>
       </div>
       {goals.length > 0 ? (
-        <div className="grid gap-1 text-center text-xs text-slate-300">
+        <div className="grid gap-1 text-center text-xs text-slate-600 dark:text-slate-300">
           {goals.map((goal, index) => (
             <div key={goal.goalID ?? `${goal.goalGetterName}-${goal.matchMinute}-${index}`}>
               {goal.matchMinute ?? "-"}&apos; {goal.goalGetterName ?? "Goal"}
@@ -539,18 +538,15 @@ export default async function Home({
   return (
     <div
       style={themeStyles}
-      className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(12,74,110,0.12),_transparent_55%),radial-gradient(circle_at_20%_20%,_rgba(190,24,93,0.08),_transparent_40%),linear-gradient(135deg,_#0b1020,_#101827_40%,_#0f172a)] text-slate-100"
+      className="app-shell min-h-screen w-full overflow-x-hidden text-slate-900 dark:text-slate-100"
     >
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-12 pt-8 sm:gap-10 sm:px-8 sm:pb-20 sm:pt-14">
         <section className="grid gap-6">
-          <Badge className="w-fit border border-[color:var(--accent-glow)] bg-[color:var(--accent-soft)] text-[color:var(--accent)]">
-            OpenLigaDB Live
-          </Badge>
           <div className="grid gap-4">
-            <h1 className="font-display text-3xl uppercase tracking-[0.12em] text-slate-100 sm:text-5xl sm:tracking-[0.18em] lg:text-6xl">
+            <h1 className="font-display text-3xl uppercase tracking-[0.12em] text-slate-900 dark:text-slate-100 sm:text-5xl sm:tracking-[0.18em] lg:text-6xl">
               Matchday Atlas
             </h1>
-            <p className="max-w-2xl text-sm text-slate-200/80 sm:text-lg">
+            <p className="max-w-2xl text-sm text-slate-700 dark:text-slate-200/80 sm:text-lg">
               Follow the latest matchday results and tables for your favorite leagues,
               refreshed every minute.
             </p>
@@ -558,40 +554,40 @@ export default async function Home({
         </section>
 
         <div className="sticky top-0 z-30 -mx-4 px-4 py-4 sm:-mx-8 sm:px-8">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 shadow-[0_0_45px_rgba(15,23,42,0.45)] backdrop-blur sm:px-6">
-            <span className="text-xs uppercase tracking-[0.3em] text-slate-300">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/70 dark:bg-white/5 px-4 py-4 shadow-[0_0_45px_rgba(15,23,42,0.45)] backdrop-blur sm:px-6">
+            <span className="text-xs uppercase tracking-[0.3em] text-slate-600 dark:text-slate-300">
               Competition
             </span>
             <LeagueSelector leagues={leagueOptions} currentLeague={resolvedLeague} />
           </div>
         </div>
 
-        <Separator className="bg-white/10" />
+        <Separator className="bg-slate-200/80 dark:bg-white/10" />
         {visibleErrors.length > 0 ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          <div className="rounded-2xl border border-amber-300 dark:border-amber-500/30 bg-amber-100 dark:bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100">
             Some data failed to load: {visibleErrors.join(", ")}. Try refreshing.
           </div>
         ) : null}
 
         {resolvedLeague === "cl" && bracketMatches.length > 0 ? (
           <section className="grid gap-6">
-            <Card className="border-white/10 bg-white/5 shadow-[0_0_45px_rgba(15,23,42,0.45)]">
+            <Card className="border-slate-200 dark:border-white/10 bg-white/70 dark:bg-white/5 shadow-[0_0_45px_rgba(15,23,42,0.45)]">
               <CardHeader>
-                <CardTitle className="text-xl text-slate-100 sm:text-2xl">
+                <CardTitle className="text-xl text-slate-900 dark:text-slate-100 sm:text-2xl">
                   Champions League Bracket
                 </CardTitle>
-                <CardDescription className="text-slate-200/70">
+                <CardDescription className="text-slate-600 dark:text-slate-200/70">
                   Knockout rounds based on the latest groups data.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-5">
                 {bracketMatches.map(({ group, matches: roundMatches }) => (
                   <div key={group.groupID ?? group.groupName} className="grid gap-3">
-                    <div className="text-xs uppercase tracking-[0.3em] text-slate-300">
+                    <div className="text-xs uppercase tracking-[0.3em] text-slate-600 dark:text-slate-300">
                       {group.groupName ?? "Round"}
                     </div>
                     {roundMatches.length === 0 ? (
-                      <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-sm text-slate-200">
+                      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-slate-950/40 p-4 text-sm text-slate-700 dark:text-slate-200">
                         No matches available yet.
                       </div>
                     ) : (
@@ -614,18 +610,18 @@ export default async function Home({
               : "lg:grid-cols-[1.3fr_1fr]"
           }`}
         >
-          <Card className="border-white/10 bg-white/5 shadow-[0_0_45px_rgba(15,23,42,0.45)]">
+          <Card className="border-slate-200 dark:border-white/10 bg-white/70 dark:bg-white/5 shadow-[0_0_45px_rgba(15,23,42,0.45)]">
             <CardHeader>
-              <CardTitle className="text-xl text-slate-100 sm:text-2xl">
+              <CardTitle className="text-xl text-slate-900 dark:text-slate-100 sm:text-2xl">
                 {currentGroup?.groupName ?? "Latest Matchday"}
               </CardTitle>
-              <CardDescription className="text-slate-200/70">
+              <CardDescription className="text-slate-600 dark:text-slate-200/70">
                 {activeLeagueLabel} · Season {resolvedSeason}
               </CardDescription>
             </CardHeader>
             <CardContent className="grid w-full min-w-0 gap-4">
               {matches.length === 0 ? (
-                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-6 text-slate-200">
+                <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-slate-950/40 p-6 text-slate-700 dark:text-slate-200">
                   No match results available yet for this matchday.
                 </div>
               ) : (
@@ -633,12 +629,12 @@ export default async function Home({
               )}
               {hasNextRoundMatches ? (
                 <div className="grid gap-4 pt-1">
-                  <Separator className="bg-white/10" />
+                  <Separator className="bg-slate-200/80 dark:bg-white/10" />
                   <div className="grid gap-1">
-                    <div className="text-xs uppercase tracking-[0.3em] text-slate-300">
+                    <div className="text-xs uppercase tracking-[0.3em] text-slate-600 dark:text-slate-300">
                       {nextRoundLabel}
                     </div>
-                    <div className="text-xs text-slate-300">
+                    <div className="text-xs text-slate-600 dark:text-slate-300">
                       Upcoming fixtures because the current round is finished.
                     </div>
                   </div>
@@ -647,12 +643,12 @@ export default async function Home({
               ) : null}
               {resolvedLeague === "bl1" || resolvedLeague === "bl2" || resolvedLeague === "cl" ? (
                 <div className="grid gap-6 pt-2">
-                  <Card className="border-white/10 bg-white/5 shadow-[0_0_45px_rgba(15,23,42,0.45)]">
+                  <Card className="border-slate-200 dark:border-white/10 bg-white/70 dark:bg-white/5 shadow-[0_0_45px_rgba(15,23,42,0.45)]">
                     <CardHeader>
-                      <CardTitle className="text-xl text-slate-100 sm:text-2xl">
+                      <CardTitle className="text-xl text-slate-900 dark:text-slate-100 sm:text-2xl">
                         Table
                       </CardTitle>
-                      <CardDescription className="text-slate-200/70">
+                      <CardDescription className="text-slate-600 dark:text-slate-200/70">
                         Updated standings for the selected season.
                       </CardDescription>
                     </CardHeader>
@@ -662,17 +658,17 @@ export default async function Home({
                           {table.map((row, index) => (
                             <div
                               key={row.teamInfoId ?? row.teamName}
-                              className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white"
+                              className="flex items-center justify-between rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-slate-950/40 px-4 py-3 text-sm text-slate-900 dark:text-white"
                             >
                               <div className="flex min-w-0 items-center gap-3">
-                                <span className="w-6 text-white/70">{index + 1}</span>
+                                <span className="w-6 text-slate-600 dark:text-white/70">{index + 1}</span>
                                 {renderTeamBadge(row.teamName, row.teamIconUrl)}
                                 <span className="min-w-0 truncate font-semibold">
                                   {row.teamName}
                                 </span>
                               </div>
                               <div className="text-right">
-                                <div className="text-xs text-slate-300">Pts</div>
+                                <div className="text-xs text-slate-600 dark:text-slate-300">Pts</div>
                                 <div className="text-base font-semibold">{row.points}</div>
                               </div>
                             </div>
@@ -682,38 +678,38 @@ export default async function Home({
                       <div className="hidden overflow-x-auto px-4 pb-2 sm:block sm:px-0">
                         <Table className="min-w-[640px]">
                           <TableHeader>
-                            <TableRow className="border-white/10">
-                              <TableHead className="w-12 text-slate-300">Pos</TableHead>
-                              <TableHead className="text-slate-300">Team</TableHead>
-                              <TableHead className="text-slate-300">MP</TableHead>
-                              <TableHead className="text-slate-300">W</TableHead>
-                              <TableHead className="text-slate-300">D</TableHead>
-                              <TableHead className="text-slate-300">L</TableHead>
-                              <TableHead className="text-slate-300">GD</TableHead>
-                              <TableHead className="text-right text-slate-300">Pts</TableHead>
+                            <TableRow className="border-slate-200 dark:border-white/10">
+                              <TableHead className="w-12 text-slate-600 dark:text-slate-300">Pos</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-300">Team</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-300">MP</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-300">W</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-300">D</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-300">L</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-300">GD</TableHead>
+                              <TableHead className="text-right text-slate-600 dark:text-slate-300">Pts</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {table.map((row, index) => (
                               <TableRow
                                 key={row.teamInfoId ?? row.teamName}
-                                className="border-white/5"
+                                className="border-slate-200/70 dark:border-white/5"
                               >
-                                <TableCell className="font-semibold text-white/80">
+                                <TableCell className="font-semibold text-slate-700 dark:text-white/80">
                                   {index + 1}
                                 </TableCell>
-                                <TableCell className="font-semibold text-white">
+                                <TableCell className="font-semibold text-slate-900 dark:text-white">
                                   <div className="flex items-center gap-3">
                                     {renderTeamBadge(row.teamName, row.teamIconUrl)}
                                     <span>{row.teamName}</span>
                                   </div>
                                 </TableCell>
-                                <TableCell className="text-slate-200">{row.matches}</TableCell>
-                                <TableCell className="text-slate-200">{row.won}</TableCell>
-                                <TableCell className="text-slate-200">{row.draw}</TableCell>
-                                <TableCell className="text-slate-200">{row.lost}</TableCell>
-                                <TableCell className="text-slate-200">{row.goalDiff}</TableCell>
-                                <TableCell className="text-right font-semibold text-white">
+                                <TableCell className="text-slate-700 dark:text-slate-200">{row.matches}</TableCell>
+                                <TableCell className="text-slate-700 dark:text-slate-200">{row.won}</TableCell>
+                                <TableCell className="text-slate-700 dark:text-slate-200">{row.draw}</TableCell>
+                                <TableCell className="text-slate-700 dark:text-slate-200">{row.lost}</TableCell>
+                                <TableCell className="text-slate-700 dark:text-slate-200">{row.goalDiff}</TableCell>
+                                <TableCell className="text-right font-semibold text-slate-900 dark:text-white">
                                   {row.points}
                                 </TableCell>
                               </TableRow>
@@ -733,12 +729,12 @@ export default async function Home({
             resolvedLeague !== "bl1" &&
             resolvedLeague !== "bl2" &&
             resolvedLeague !== "cl" ? (
-              <Card className="border-white/10 bg-white/5 shadow-[0_0_45px_rgba(15,23,42,0.45)]">
+              <Card className="border-slate-200 dark:border-white/10 bg-white/70 dark:bg-white/5 shadow-[0_0_45px_rgba(15,23,42,0.45)]">
                 <CardHeader>
-                  <CardTitle className="text-xl text-slate-100 sm:text-2xl">
+                  <CardTitle className="text-xl text-slate-900 dark:text-slate-100 sm:text-2xl">
                     Table
                   </CardTitle>
-                  <CardDescription className="text-slate-200/70">
+                  <CardDescription className="text-slate-600 dark:text-slate-200/70">
                     Updated standings for the selected season.
                   </CardDescription>
                 </CardHeader>
@@ -746,35 +742,35 @@ export default async function Home({
                   <div className="overflow-x-auto px-4 pb-2 sm:px-0">
                     <Table className="min-w-[640px]">
                     <TableHeader>
-                      <TableRow className="border-white/10">
-                        <TableHead className="w-12 text-slate-300">Pos</TableHead>
-                        <TableHead className="text-slate-300">Team</TableHead>
-                        <TableHead className="text-slate-300">MP</TableHead>
-                        <TableHead className="text-slate-300">W</TableHead>
-                        <TableHead className="text-slate-300">D</TableHead>
-                        <TableHead className="text-slate-300">L</TableHead>
-                        <TableHead className="text-slate-300">GD</TableHead>
-                        <TableHead className="text-right text-slate-300">Pts</TableHead>
+                      <TableRow className="border-slate-200 dark:border-white/10">
+                        <TableHead className="w-12 text-slate-600 dark:text-slate-300">Pos</TableHead>
+                        <TableHead className="text-slate-600 dark:text-slate-300">Team</TableHead>
+                        <TableHead className="text-slate-600 dark:text-slate-300">MP</TableHead>
+                        <TableHead className="text-slate-600 dark:text-slate-300">W</TableHead>
+                        <TableHead className="text-slate-600 dark:text-slate-300">D</TableHead>
+                        <TableHead className="text-slate-600 dark:text-slate-300">L</TableHead>
+                        <TableHead className="text-slate-600 dark:text-slate-300">GD</TableHead>
+                        <TableHead className="text-right text-slate-600 dark:text-slate-300">Pts</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {table.map((row, index) => (
-                        <TableRow key={row.teamInfoId ?? row.teamName} className="border-white/5">
-                          <TableCell className="font-semibold text-white/80">
+                        <TableRow key={row.teamInfoId ?? row.teamName} className="border-slate-200/70 dark:border-white/5">
+                          <TableCell className="font-semibold text-slate-700 dark:text-white/80">
                             {index + 1}
                           </TableCell>
-                          <TableCell className="font-semibold text-white">
+                          <TableCell className="font-semibold text-slate-900 dark:text-white">
                             <div className="flex items-center gap-3">
                               {renderTeamBadge(row.teamName, row.teamIconUrl)}
                               <span>{row.teamName}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-slate-200">{row.matches}</TableCell>
-                          <TableCell className="text-slate-200">{row.won}</TableCell>
-                          <TableCell className="text-slate-200">{row.draw}</TableCell>
-                          <TableCell className="text-slate-200">{row.lost}</TableCell>
-                          <TableCell className="text-slate-200">{row.goalDiff}</TableCell>
-                          <TableCell className="text-right font-semibold text-white">
+                          <TableCell className="text-slate-700 dark:text-slate-200">{row.matches}</TableCell>
+                          <TableCell className="text-slate-700 dark:text-slate-200">{row.won}</TableCell>
+                          <TableCell className="text-slate-700 dark:text-slate-200">{row.draw}</TableCell>
+                          <TableCell className="text-slate-700 dark:text-slate-200">{row.lost}</TableCell>
+                          <TableCell className="text-slate-700 dark:text-slate-200">{row.goalDiff}</TableCell>
+                          <TableCell className="text-right font-semibold text-slate-900 dark:text-white">
                             {row.points}
                           </TableCell>
                         </TableRow>
@@ -789,7 +785,7 @@ export default async function Home({
           </div>
         </section>
 
-        <footer className="text-sm text-slate-300">
+        <footer className="text-sm text-slate-600 dark:text-slate-300">
           Data updates every 60 seconds. Built with Next.js + shadcn/ui components.
         </footer>
       </main>
