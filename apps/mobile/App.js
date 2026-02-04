@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -81,6 +81,12 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   'www.bundesliga.de',
   'bundesliga.de',
 ]);
+const WIKIMEDIA_HOST = 'upload.wikimedia.org';
+const WIKIMEDIA_THUMB_SIZE = 120;
+const WIKIMEDIA_IMAGE_HEADERS = {
+  'User-Agent':
+    'Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36',
+};
 
 const kickoffFormatter = new Intl.DateTimeFormat('en-US', {
   weekday: 'short',
@@ -121,9 +127,36 @@ const normalizeIconUrl = (iconUrl) => {
     if (url.protocol === 'http:' && ALLOWED_IMAGE_HOSTS.has(url.hostname)) {
       url.protocol = 'https:';
     }
+    const lowerPath = url.pathname.toLowerCase();
+    if (
+      url.hostname === WIKIMEDIA_HOST &&
+      lowerPath.includes('/wikipedia/commons/') &&
+      !lowerPath.includes('/wikipedia/commons/thumb/') &&
+      lowerPath.endsWith('.svg')
+    ) {
+      const fileName = url.pathname.split('/').pop();
+      if (fileName) {
+        const directory = url.pathname.slice(0, -(fileName.length + 1));
+        const thumbDirectory = directory.replace(
+          '/wikipedia/commons/',
+          '/wikipedia/commons/thumb/'
+        );
+        url.pathname = `${thumbDirectory}/${fileName}/${WIKIMEDIA_THUMB_SIZE}px-${fileName}.png`;
+      }
+    }
     return url.toString();
   } catch {
     return iconUrl;
+  }
+};
+
+const getImageRequestHeaders = (iconUrl) => {
+  if (!iconUrl) return undefined;
+  try {
+    const { hostname } = new URL(iconUrl);
+    return hostname === WIKIMEDIA_HOST ? WIKIMEDIA_IMAGE_HEADERS : undefined;
+  } catch {
+    return undefined;
   }
 };
 const getTheme = (scheme) => (scheme === 'dark' ? THEMES.dark : THEMES.light);
@@ -172,6 +205,7 @@ export default function App() {
   const [bracketMatches, setBracketMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [failedIconUrls, setFailedIconUrls] = useState({});
 
   const colorScheme = useColorScheme();
   const theme = useMemo(() => getTheme(colorScheme), [colorScheme]);
@@ -199,13 +233,29 @@ export default function App() {
     }),
     [leagueTheme, theme]
   );
+  const markIconLoadFailed = useCallback((iconUrl) => {
+    if (!iconUrl) return;
+    setFailedIconUrls((prev) => {
+      if (prev[iconUrl]) return prev;
+      return { ...prev, [iconUrl]: true };
+    });
+  }, []);
+
+  useEffect(() => {
+    setFailedIconUrls({});
+  }, [activeLeague, season]);
 
   const renderTeamBadge = (name, iconUrl, size = 26) => {
     const normalizedUrl = normalizeIconUrl(iconUrl);
     const sizeStyle = { width: size, height: size, borderRadius: size / 2 };
     const innerSize = Math.max(12, Math.round(size * 0.7));
     const textSize = Math.max(10, Math.round(size * 0.45));
-    if (normalizedUrl && isAllowedImageHost(normalizedUrl)) {
+    const requestHeaders = getImageRequestHeaders(normalizedUrl);
+    if (
+      normalizedUrl &&
+      isAllowedImageHost(normalizedUrl) &&
+      !failedIconUrls[normalizedUrl]
+    ) {
       const isSvg = isSvgUrl(normalizedUrl);
       return (
         <View style={[styles.teamLogoFrame, sizeStyle]}>
@@ -214,13 +264,19 @@ export default function App() {
               uri={normalizedUrl}
               width={innerSize}
               height={innerSize}
+              onError={() => markIconLoadFailed(normalizedUrl)}
             />
           ) : (
             <Image
-              source={{ uri: normalizedUrl }}
+              source={
+                requestHeaders
+                  ? { uri: normalizedUrl, headers: requestHeaders }
+                  : { uri: normalizedUrl }
+              }
               accessibilityLabel={name ?? 'Team crest'}
               resizeMode="contain"
               style={{ width: innerSize, height: innerSize }}
+              onError={() => markIconLoadFailed(normalizedUrl)}
             />
           )}
         </View>
