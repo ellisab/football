@@ -313,7 +313,10 @@ export default function App() {
         const dataShortcut = activeLeague === 'cl' ? 'ucl' : activeLeague;
         const groupShortcut = activeLeague === 'cl' ? 'cl' : activeLeague;
         const groupPromise = getCurrentGroup(dataShortcut);
-        const tablePromise = getTable(dataShortcut, season);
+        const tablePromise =
+          activeLeague === 'dfb'
+            ? Promise.resolve([])
+            : getTable(dataShortcut, season);
         const groupsPromise =
           activeLeague === 'cl'
             ? (async () => {
@@ -498,17 +501,19 @@ export default function App() {
       });
     }
 
-    result.push({
-      key: 'table',
-      title: 'Table',
-      subtitle: 'Updated standings for the selected season.',
-      type: 'table',
-      emptyText: error || 'Table data is not available yet.',
-      data: table,
-    });
+    if (activeLeague !== 'dfb') {
+      result.push({
+        key: 'table',
+        title: 'Table',
+        subtitle: 'Updated standings for the selected season.',
+        type: 'table',
+        emptyText: error || 'Table data is not available yet.',
+        data: table,
+      });
+    }
 
     return result;
-  }, [groupName, season, matches, nextGroupName, nextMatches, table, error]);
+  }, [activeLeague, groupName, season, matches, nextGroupName, nextMatches, table, error]);
 
   const renderHeader = () => (
     <View style={styles.header}>
