@@ -41,6 +41,21 @@ export const matchesLeagueGroup = (league: ApiLeague, groupKey: LeagueKey) => {
   return nameHit || shortcutHit;
 };
 
+const resolveGroupKeyForLeague = (league: ApiLeague): LeagueKey | undefined => {
+  const leagueShortcut = normalizeText(league.leagueShortcut);
+  const leagueName = normalizeText(league.leagueName);
+
+  const shortcutMatch = LEAGUE_GROUPS.find((group) =>
+    group.shortcutMatch.some((needle) => leagueShortcut.startsWith(needle))
+  );
+  if (shortcutMatch) return shortcutMatch.key;
+
+  const nameMatch = LEAGUE_GROUPS.find((group) =>
+    group.nameMatch.some((needle) => leagueName.includes(needle))
+  );
+  return nameMatch?.key;
+};
+
 export const buildLeagueEntriesByGroup = (leagues: ApiLeague[]) => {
   const map = new Map<LeagueKey, ApiLeague[]>();
 
@@ -53,12 +68,9 @@ export const buildLeagueEntriesByGroup = (leagues: ApiLeague[]) => {
       continue;
     }
 
-    for (const group of LEAGUE_GROUPS) {
-      if (matchesLeagueGroup(league, group.key)) {
-        map.get(group.key)?.push(league);
-        break;
-      }
-    }
+    const resolvedGroup = resolveGroupKeyForLeague(league);
+    if (!resolvedGroup) continue;
+    map.get(resolvedGroup)?.push(league);
   }
 
   return map;

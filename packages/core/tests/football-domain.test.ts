@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  buildLeagueEntriesByGroup,
   findNextGroup,
   getCurrentSeasonYear,
   normalizeIconUrl,
@@ -86,4 +87,28 @@ test("normalizeIconUrl upgrades allowed http hosts to https", () => {
   const normalized = normalizeIconUrl("http://upload.wikimedia.org/logo.svg");
 
   assert.equal(normalized, "https://upload.wikimedia.org/logo.svg");
+});
+
+test("buildLeagueEntriesByGroup prioritizes shortcut over broad name matches", () => {
+  const leagues = [
+    {
+      leagueShortcut: "bl2",
+      leagueName: "2. Fußball-Bundesliga 2025/2026",
+      leagueSeason: 2025,
+      sport: { sportName: "Fußball" },
+    },
+    {
+      leagueShortcut: "bl1",
+      leagueName: "Fußball-Bundesliga 2025/2026",
+      leagueSeason: 2025,
+      sport: { sportName: "Fußball" },
+    },
+  ];
+
+  const grouped = buildLeagueEntriesByGroup(leagues);
+
+  assert.equal(grouped.get("bl2")?.length, 1);
+  assert.equal(grouped.get("bl2")?.[0]?.leagueShortcut, "bl2");
+  assert.equal(grouped.get("bl1")?.length, 1);
+  assert.equal(grouped.get("bl1")?.[0]?.leagueShortcut, "bl1");
 });
