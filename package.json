@@ -8,11 +8,21 @@
     "dev": "pnpm -C apps/web dev",
     "dev:web": "pnpm -C apps/web dev",
     "dev:mobile": "pnpm -C apps/mobile start",
+    "build:web": "pnpm -C apps/web build",
+    "build:mobile": "pnpm -C apps/mobile build",
+    "build:all": "pnpm -C apps/web build && pnpm -C apps/mobile build",
     "build": "pnpm -C apps/web build",
     "start": "pnpm -C apps/web start",
-    "lint": "pnpm -C apps/web lint"
+    "lint:web": "pnpm -C apps/web lint",
+    "lint:mobile": "pnpm -C apps/mobile lint",
+    "lint": "pnpm -C apps/web lint && pnpm -C apps/mobile lint",
+    "typecheck:web": "pnpm -C apps/web typecheck",
+    "typecheck:mobile": "pnpm -C apps/mobile typecheck",
+    "typecheck": "pnpm -C apps/web typecheck && pnpm -C apps/mobile typecheck",
+    "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
-    "expo": "~54.0.33"
+    "expo": "~54.0.33",
+    "tsx": "^4.20.6"
   }
 }

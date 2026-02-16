@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import type { LeagueKey, LeagueOption } from "@footballleagues/core";
 import {
   Select,
   SelectContent,
@@ -10,36 +11,27 @@ import {
   SelectValue,
 } from "@footballleagues/ui/select";
 
-export type LeagueOption = {
-  shortcut: string;
-  label: string;
-  seasons: number[];
-};
-
 type LeagueSelectorProps = {
   leagues: LeagueOption[];
-  currentLeague: string;
+  currentLeague: LeagueKey;
 };
 
-export function LeagueSelector({
-  leagues,
-  currentLeague,
-}: LeagueSelectorProps) {
+export function LeagueSelector({ leagues, currentLeague }: LeagueSelectorProps) {
   const router = useRouter();
   const [, startTransition] = useTransition();
 
-  const pushRoute = (nextLeague: string, nextSeason: number) => {
+  const pushRoute = (nextLeague: LeagueKey, nextSeason: number) => {
     startTransition(() => {
       router.push(`/?league=${nextLeague}&season=${nextSeason}`);
     });
   };
 
   const onLeagueChange = (value: string) => {
-    const nextSeasons =
-      leagues.find((item) => item.shortcut === value)?.seasons ?? [];
+    const nextLeague = value as LeagueKey;
+    const nextSeasons = leagues.find((item) => item.shortcut === nextLeague)?.seasons ?? [];
     const fallbackSeason = nextSeasons[0] ?? new Date().getFullYear();
 
-    pushRoute(value, fallbackSeason);
+    pushRoute(nextLeague, fallbackSeason);
   };
 
   return (

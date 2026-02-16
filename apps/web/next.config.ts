@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@footballleagues/core", "@footballleagues/ui"],
   experimental: {
     externalDir: true,
+    optimizePackageImports: ["lucide-react"],
   },
   allowedDevOrigins: [
     "http://192.168.2.74:3000",

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, JetBrains_Mono, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/shared/providers/theme-provider";
 
 const displayFont = Bebas_Neue({
   weight: ["400"],
