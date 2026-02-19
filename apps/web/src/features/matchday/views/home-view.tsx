@@ -3,8 +3,6 @@ import { formatKickoff, getFinalResult, type ApiMatch, type LeagueKey } from "@f
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
-  CircleDot,
-  Clock3,
   Flag,
   Goal,
   Medal,
@@ -47,7 +45,6 @@ const DIRECTION_COPY: Record<
     title: string;
     kicker: string;
     subtitle: string;
-    featuredTitle: string;
     featuredCta: string;
     accent: string;
     accentSoft: string;
@@ -58,7 +55,6 @@ const DIRECTION_COPY: Record<
     kicker: "Live Matchday · 23. Spieltag",
     subtitle:
       "Dark, cinematic, and electric. Built for obsessive fans who want the numbers fast.",
-    featuredTitle: "Stadium Spotlight",
     featuredCta: "Jump to table →",
     accent: "#3dffa0",
     accentSoft: "#1a3a2a",
@@ -68,7 +64,6 @@ const DIRECTION_COPY: Record<
     kicker: "23. Spieltag · Season 2025/26",
     subtitle:
       "Warm, editorial, and trustworthy. Magazine pacing with data clarity for every fan.",
-    featuredTitle: "Matchday Gazette",
     featuredCta: "View full table →",
     accent: "#e8b84b",
     accentSoft: "#efe6d6",
@@ -87,9 +82,6 @@ export function HomeView({ data }: { data: HomeData }) {
   const featuredKickoff = featuredMatch
     ? formatKickoff(featuredMatch.matchDateTimeUTC ?? featuredMatch.matchDateTime)
     : "Awaiting kickoff";
-  const featuredTitle = featuredMatch
-    ? `${featuredMatch.team1?.teamName ?? "Home"} vs ${featuredMatch.team2?.teamName ?? "Away"}`
-    : `${data.activeLeagueLabel} Matchday Highlights`;
 
   const actionCards = [
     {
@@ -125,9 +117,6 @@ export function HomeView({ data }: { data: HomeData }) {
         <section className="grid gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className={`text-xs uppercase tracking-[0.2em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
-                Gunsting Deals — UI Direction
-              </p>
               <h1
                 className={`text-3xl sm:text-4xl ${
                   isGazette
@@ -275,110 +264,6 @@ export function HomeView({ data }: { data: HomeData }) {
         </section>
 
         <section className="grid gap-3">
-          <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
-            Featured
-          </div>
-          <h2
-            className={`text-[2rem] leading-none sm:text-[2.45rem] ${
-              isGazette
-                ? "font-[var(--font-gazette-heading)] text-[#1a1612]"
-                : "font-[var(--font-stadium-heading)] uppercase text-[#ffffff]"
-            }`}
-          >
-            {copy.featuredTitle}
-          </h2>
-
-          <article
-            className={`overflow-hidden rounded-[1.5rem] border ${
-              isGazette
-                ? "border-[#e0d8cc] bg-[#fffdf9]"
-                : "border-[#222530] bg-[#0f141d]"
-            }`}
-          >
-            <div
-              className={`relative flex flex-wrap items-center justify-between gap-3 px-5 py-5 sm:px-7 sm:py-6 ${
-                isGazette
-                  ? "bg-[#1a1612]"
-                  : "bg-[linear-gradient(106deg,#101217_0%,#1e2633_46%,#0e1d17_100%)]"
-              }`}
-            >
-              <span
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-1 text-xs font-bold uppercase tracking-[0.08em] ${
-                  isGazette
-                    ? "bg-[#ffffff12] text-[#f5f1eb]"
-                    : "bg-[#ffffff12] text-[#e8edf7]"
-                }`}
-              >
-                <Trophy className="h-3.5 w-3.5" />
-                {getLeagueLabel(data.resolvedLeague, data.activeLeagueLabel)}
-              </span>
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.08em] ${
-                  isGazette
-                    ? "border-[#e8b84b80] text-[#e8b84b]"
-                    : "border-[#3dffa080] text-[#3dffa0]"
-                }`}
-              >
-                <Goal className="h-3.5 w-3.5" />
-                Featured Tie
-              </span>
-            </div>
-
-            <div className="grid gap-3 px-5 py-5 sm:px-7 sm:py-6">
-              <h3
-                className={`text-3xl leading-[1.08] sm:text-[2.35rem] ${
-                  isGazette
-                    ? "font-[var(--font-gazette-heading)] text-[#1a1612]"
-                    : "font-[var(--font-stadium-heading)] uppercase text-[#ffffff]"
-                }`}
-              >
-                {featuredTitle}
-              </h3>
-              <p className={`text-[0.98rem] ${isGazette ? "text-[#5f584f]" : "text-[#9ca6ba]"}`}>
-                {featuredMatch
-                  ? `${data.currentGroupName} in ${data.activeLeagueLabel}. Freshly updated fixtures and results.`
-                  : `We're fetching the latest fixtures for ${data.activeLeagueLabel}.`}
-              </p>
-
-              <div className="flex flex-wrap gap-2 text-sm">
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 ${
-                    isGazette ? "bg-[#f1ebe1] text-[#6f665a]" : "bg-[#1a202b] text-[#a7b0c3]"
-                  }`}
-                >
-                  <Clock3 className="h-4 w-4" />
-                  {featuredKickoff}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 ${
-                    isGazette ? "bg-[#f1ebe1] text-[#6f665a]" : "bg-[#1a202b] text-[#a7b0c3]"
-                  }`}
-                >
-                  <Flag className="h-4 w-4" />
-                  {featuredMatch?.matchIsFinished ? "Final" : "Upcoming"}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 ${
-                    isGazette ? "bg-[#efe6d6] text-[#8c6c2c]" : "bg-[#1a3a2a] text-[#3dffa0]"
-                  }`}
-                >
-                  <Goal className="h-4 w-4" />
-                  {featuredScore}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 ${
-                    isGazette ? "bg-[#f1ebe1] text-[#6f665a]" : "bg-[#1a202b] text-[#a7b0c3]"
-                  }`}
-                >
-                  <CircleDot className="h-4 w-4" />
-                  {featuredMatch ? `${featuredMatch.goals?.length ?? 0} goal events` : "No events yet"}
-                </span>
-              </div>
-            </div>
-          </article>
-        </section>
-
-        <section className="grid gap-4">
           <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
             Quick Actions
           </div>

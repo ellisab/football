@@ -176,20 +176,6 @@ export default function App() {
     return result;
   }, [activeLeague, error, groupName, matches, nextGroupName, nextMatches, season, table]);
 
-  const featuredMatch = matches[0] ?? nextMatches[0];
-  const featuredResult = featuredMatch ? getFinalResult(featuredMatch) : null;
-  const featuredScore = featuredResult
-    ? `${featuredResult.pointsTeam1 ?? 0} - ${featuredResult.pointsTeam2 ?? 0}`
-    : "Score pending";
-  const featuredKickoff = featuredMatch
-    ? formatKickoff(featuredMatch.matchDateTimeUTC ?? featuredMatch.matchDateTime)
-    : "Awaiting kickoff";
-  const featuredTitle = featuredMatch
-    ? `${featuredMatch.team1?.teamName ?? "Home"} vs ${featuredMatch.team2?.teamName ?? "Away"}`
-    : `${getLeagueLabel(activeLeague)} Matchday Highlights`;
-  const featuredSummary = featuredMatch
-    ? `${groupName} in ${getLeagueLabel(activeLeague)}. Freshly updated fixtures and results.`
-    : `Fetching the latest fixtures for ${getLeagueLabel(activeLeague)}.`;
   const isGazette = designDirection === "gazette";
 
   const actionCards = useMemo(
@@ -291,45 +277,6 @@ export default function App() {
               ? "Warm, editorial design with fixtures, standings, and knockout drama in one place."
               : "Live fixtures, tables, and knockout drama in one pitch-side view."}
           </Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionKicker}>Featured</Text>
-        <Text style={styles.sectionTitle}>{isGazette ? "Matchday Gazette" : "Stadium Spotlight"}</Text>
-      </View>
-
-      <View style={styles.featuredCard}>
-        <View style={styles.featuredBanner}>
-          <View style={styles.featuredBadge}>
-            <Text style={styles.featuredBadgeText}>{getLeagueLabel(activeLeague)}</Text>
-          </View>
-          <View style={styles.featuredBadge}>
-            <Text style={styles.featuredBadgeText}>Featured Tie</Text>
-          </View>
-        </View>
-
-        <View style={styles.featuredBody}>
-          <Text style={styles.featuredTitle}>{featuredTitle}</Text>
-          <Text style={styles.featuredSummary}>{featuredSummary}</Text>
-          <View style={styles.featuredMetaRow}>
-            <View style={styles.featuredMetaChip}>
-              <Text style={styles.featuredMetaText}>{featuredKickoff}</Text>
-            </View>
-            <View style={styles.featuredMetaChip}>
-              <Text style={styles.featuredMetaText}>
-                {featuredMatch?.matchIsFinished ? "Final" : "Upcoming"}
-              </Text>
-            </View>
-            <View style={styles.featuredMetaChip}>
-              <Text style={styles.featuredMetaText}>{featuredScore}</Text>
-            </View>
-            <View style={styles.featuredMetaChip}>
-              <Text style={styles.featuredMetaText}>
-                {featuredMatch ? `${featuredMatch.goals?.length ?? 0} goal events` : "No events yet"}
-              </Text>
-            </View>
-          </View>
         </View>
       </View>
 
