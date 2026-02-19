@@ -39,6 +39,23 @@ type AppSection = {
   data: SectionItem[];
 };
 
+const MATCHDAY_REGEX = /(\d{1,2})\.\s*spieltag/i;
+const PLAYOFF_REGEX = /playoffs?/i;
+
+const getMatchdayNumber = (groupName: string) => {
+  return groupName.match(MATCHDAY_REGEX)?.[1] ?? null;
+};
+
+const getStageLabel = (groupName: string) => {
+  const normalized = groupName.trim();
+  if (!normalized) return "Matchday";
+
+  const matchdayNumber = getMatchdayNumber(normalized);
+  if (matchdayNumber) return `${matchdayNumber}. Spieltag`;
+
+  return normalized;
+};
+
 const getLeagueLabel = (league: LeagueKey) => {
   return MOBILE_LEAGUES.find((entry) => entry.key === league)?.label ?? league.toUpperCase();
 };
@@ -74,6 +91,12 @@ export default function App() {
     loading,
     error,
   } = useHomeData(activeLeague, season);
+  const stageLabel = getStageLabel(groupName);
+  const matchdayNumber = getMatchdayNumber(groupName);
+  const isChampionsLeaguePlayoffRound =
+    activeLeague === "cl" &&
+    PLAYOFF_REGEX.test(groupName) &&
+    bracketMatches.some((round) => PLAYOFF_REGEX.test(round?.group?.groupName ?? ""));
 
   const markIconLoadFailed = useCallback((iconUrl: string | undefined) => {
     if (!iconUrl) return;
@@ -140,16 +163,18 @@ export default function App() {
   };
 
   const sections = useMemo<AppSection[]>(() => {
-    const result: AppSection[] = [
-      {
+    const result: AppSection[] = [];
+
+    if (!isChampionsLeaguePlayoffRound) {
+      result.push({
         key: "matchday",
         title: groupName,
         subtitle: `Season ${season}`,
         type: "match",
-        emptyText: error || "No match results available yet for this matchday.",
+        emptyText: error || "No match results available yet for this round.",
         data: matches,
-      },
-    ];
+      });
+    }
 
     if (nextMatches.length > 0) {
       result.push({
@@ -174,7 +199,17 @@ export default function App() {
     }
 
     return result;
-  }, [activeLeague, error, groupName, matches, nextGroupName, nextMatches, season, table]);
+  }, [
+    activeLeague,
+    error,
+    groupName,
+    isChampionsLeaguePlayoffRound,
+    matches,
+    nextGroupName,
+    nextMatches,
+    season,
+    table,
+  ]);
 
   const isGazette = designDirection === "gazette";
 
@@ -247,7 +282,11 @@ export default function App() {
           <View style={styles.heroTagRow}>
             <View style={styles.heroTag}>
               <Text style={styles.heroTagText}>
-                {isGazette ? "Matchday Gazette" : "Live Matchday"}
+                {isGazette
+                  ? stageLabel
+                  : matchdayNumber
+                    ? "Live Matchday"
+                    : `Live ${stageLabel}`}
               </Text>
             </View>
             <View style={styles.heroTag}>
@@ -259,7 +298,11 @@ export default function App() {
           </View>
 
           <Text style={styles.heroKicker}>
-            {isGazette ? "The matchday, at a glance." : "Stadium lights are on"}
+            {isGazette
+              ? `${stageLabel}, at a glance.`
+              : matchdayNumber
+                ? "Stadium lights are on"
+                : `Live ${stageLabel}`}
           </Text>
           <Text style={styles.heroTitle}>
             {isGazette ? (
