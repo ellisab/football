@@ -16,13 +16,13 @@ export function TeamBadge({ name, iconUrl }: TeamBadgeProps) {
         alt={name ?? "Team crest"}
         width={28}
         height={28}
-        className="h-7 w-7 rounded-full bg-slate-200/80 object-contain dark:bg-white/10"
+        className="h-7 w-7 rounded-full bg-[#f1f2f6] object-contain"
       />
     );
   }
 
   return (
-    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200/80 text-xs font-semibold text-slate-600 dark:bg-white/10 dark:text-white/70">
+    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#f1f2f6] text-xs font-semibold text-[#575b66]">
       {(name ?? "T").slice(0, 1)}
     </div>
   );

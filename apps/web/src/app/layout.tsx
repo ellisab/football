@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, JetBrains_Mono, Source_Sans_3 } from "next/font/google";
+import { JetBrains_Mono, Manrope, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
 
-const displayFont = Bebas_Neue({
-  weight: ["400"],
+const displayFont = Playfair_Display({
+  weight: ["500", "700"],
   subsets: ["latin"],
   variable: "--font-display",
 });
 
-const bodyFont = Source_Sans_3({
-  weight: ["400", "600", "700"],
+const bodyFont = Manrope({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-body",
 });
@@ -36,7 +36,7 @@ export default function RootLayout({
       <body
         className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
         </ThemeProvider>
       </body>
