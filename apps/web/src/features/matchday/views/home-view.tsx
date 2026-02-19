@@ -67,9 +67,8 @@ const DIRECTION_COPY: Record<
 > = {
   stadium: {
     title: "Your Match Control",
-    subtitle:
-      "Dark, cinematic, and electric. Built for obsessive fans who want the numbers fast.",
-    featuredCta: "Jump to table →",
+    subtitle: "",
+    featuredCta: "Jump to table",
     accent: "#3dffa0",
     accentSoft: "#1a3a2a",
   },
@@ -77,7 +76,7 @@ const DIRECTION_COPY: Record<
     title: "Your Matchday Control Room",
     subtitle:
       "Warm, editorial, and trustworthy. Magazine pacing with data clarity for every fan.",
-    featuredCta: "View full table →",
+    featuredCta: "View full table",
     accent: "#e8b84b",
     accentSoft: "#efe6d6",
   },
@@ -211,13 +210,7 @@ export function HomeView({ data }: { data: HomeData }) {
           </div>
         </section>
 
-        <section
-          className={`relative overflow-hidden rounded-[1.7rem] border px-4 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7 ${
-            isGazette
-              ? "border-[#3a3428] bg-[#1a1612] text-[#f5f1eb]"
-              : "border-[#222530] bg-[linear-gradient(135deg,#0c0e12_0%,#111820_100%)] text-[#ffffff]"
-          }`}
-        >
+        <section className="relative overflow-hidden px-4 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7">
           {!isGazette && matchdayNumber ? (
             <div className="pointer-events-none absolute right-0 top-0 text-[9rem] font-black leading-none text-[#3dffa014] sm:text-[11rem]">
               {matchdayNumber}
@@ -253,9 +246,11 @@ export function HomeView({ data }: { data: HomeData }) {
               >
                 {copy.title}
               </h2>
-              <p className={`max-w-2xl text-sm sm:text-base ${isGazette ? "text-[#8a8278]" : "text-[#9da6b8]"}`}>
-                {copy.subtitle}
-              </p>
+              {copy.subtitle ? (
+                <p className={`max-w-2xl text-sm sm:text-base ${isGazette ? "text-[#8a8278]" : "text-[#9da6b8]"}`}>
+                  {copy.subtitle}
+                </p>
+              ) : null}
             </div>
 
             <div
@@ -374,13 +369,7 @@ export function HomeView({ data }: { data: HomeData }) {
               </p>
             </div>
 
-            <div
-              className={`grid gap-4 rounded-2xl border p-4 sm:p-6 ${
-                isGazette
-                  ? "border-[#e0d8cc] bg-[#f8f2e9]"
-                  : "border-[#222530] bg-[#0c0f16]"
-              }`}
-            >
+            <div className="grid gap-4">
               {data.matches.length === 0 ? (
                 <div
                   className={`rounded-2xl border p-5 ${
