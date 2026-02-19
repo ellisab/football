@@ -39,11 +39,26 @@ const getLeagueLabel = (league: LeagueKey, fallbackLabel: string) => {
   return leagueStyles[league]?.label ?? stripSeasonSuffix(fallbackLabel);
 };
 
+const MATCHDAY_REGEX = /(\d{1,2})\.\s*spieltag/i;
+
+const getMatchdayNumber = (groupName: string) => {
+  return groupName.match(MATCHDAY_REGEX)?.[1] ?? null;
+};
+
+const getStageLabel = (groupName: string) => {
+  const normalized = groupName.trim();
+  if (!normalized) return "Matchday";
+
+  const matchdayNumber = getMatchdayNumber(normalized);
+  if (matchdayNumber) return `${matchdayNumber}. Spieltag`;
+
+  return normalized;
+};
+
 const DIRECTION_COPY: Record<
   DesignDirection,
   {
     title: string;
-    kicker: string;
     subtitle: string;
     featuredCta: string;
     accent: string;
@@ -52,7 +67,6 @@ const DIRECTION_COPY: Record<
 > = {
   stadium: {
     title: "Your Match Control",
-    kicker: "Live Matchday · 23. Spieltag",
     subtitle:
       "Dark, cinematic, and electric. Built for obsessive fans who want the numbers fast.",
     featuredCta: "Jump to table →",
@@ -61,7 +75,6 @@ const DIRECTION_COPY: Record<
   },
   gazette: {
     title: "Your Matchday Control Room",
-    kicker: "23. Spieltag · Season 2025/26",
     subtitle:
       "Warm, editorial, and trustworthy. Magazine pacing with data clarity for every fan.",
     featuredCta: "View full table →",
@@ -73,6 +86,19 @@ const DIRECTION_COPY: Record<
 export function HomeView({ data }: { data: HomeData }) {
   const copy = DIRECTION_COPY[data.direction];
   const isGazette = data.direction === "gazette";
+  const isChampionsLeaguePlayoffRound =
+    data.resolvedLeague === "cl" &&
+    /playoffs?/i.test(data.currentGroupName) &&
+    data.bracketMatches.some((round) => /playoffs?/i.test(round.group.groupName ?? ""));
+  const stageLabel = getStageLabel(data.currentGroupName);
+  const matchdayNumber = getMatchdayNumber(data.currentGroupName);
+  const heroKicker = isGazette
+    ? matchdayNumber
+      ? `${matchdayNumber}. Spieltag · Season ${data.resolvedSeason}`
+      : `${stageLabel} · Season ${data.resolvedSeason}`
+    : matchdayNumber
+      ? `Live Matchday · ${matchdayNumber}. Spieltag`
+      : `Live ${stageLabel}`;
 
   const featuredMatch = data.matches[0] ?? data.nextRoundMatches[0];
   const featuredResult = featuredMatch ? getFinalResult(featuredMatch) : null;
@@ -192,9 +218,9 @@ export function HomeView({ data }: { data: HomeData }) {
               : "border-[#222530] bg-[linear-gradient(135deg,#0c0e12_0%,#111820_100%)] text-[#ffffff]"
           }`}
         >
-          {!isGazette ? (
+          {!isGazette && matchdayNumber ? (
             <div className="pointer-events-none absolute right-0 top-0 text-[9rem] font-black leading-none text-[#3dffa014] sm:text-[11rem]">
-              23
+              {matchdayNumber}
             </div>
           ) : null}
 
@@ -207,7 +233,7 @@ export function HomeView({ data }: { data: HomeData }) {
                     : "border-[#3dffa080] bg-[#1a3a2a] text-[#3dffa0]"
                 }`}
               >
-                {copy.kicker}
+                {heroKicker}
               </span>
               <span className={`rounded-full border px-3 py-1 ${isGazette ? "border-[#d8d0c4] bg-[#ffffff10] text-[#d0c8bc]" : "border-[#2b303b] bg-[#13161d] text-[#9ca6ba]"}`}>
                 {getLeagueLabel(data.resolvedLeague, data.activeLeagueLabel)}
@@ -328,63 +354,65 @@ export function HomeView({ data }: { data: HomeData }) {
           </section>
         ) : null}
 
-        <section id="matches" className="grid gap-4">
-          <div className="grid gap-1">
-            <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
-              Matchday
-            </div>
-            <h2
-              className={`text-[2rem] leading-none sm:text-[2.45rem] ${
-                isGazette
-                  ? "font-[var(--font-gazette-heading)] text-[#1a1612]"
-                  : "font-[var(--font-stadium-heading)] uppercase text-[#ffffff]"
-              }`}
-            >
-              {data.currentGroupName}
-            </h2>
-            <p className={`text-sm ${isGazette ? "text-[#5f584f]" : "text-[#9ca6ba]"}`}>
-              {data.activeLeagueLabel} · Season {data.resolvedSeason}
-            </p>
-          </div>
-
-          <div
-            className={`grid gap-4 rounded-2xl border p-4 sm:p-6 ${
-              isGazette
-                ? "border-[#e0d8cc] bg-[#f8f2e9]"
-                : "border-[#222530] bg-[#0c0f16]"
-            }`}
-          >
-            {data.matches.length === 0 ? (
-              <div
-                className={`rounded-2xl border p-5 ${
+        {!isChampionsLeaguePlayoffRound ? (
+          <section id="matches" className="grid gap-4">
+            <div className="grid gap-1">
+              <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
+                Matchday
+              </div>
+              <h2
+                className={`text-[2rem] leading-none sm:text-[2.45rem] ${
                   isGazette
-                    ? "border-[#e0d8cc] bg-[#fffdf9] text-[#6b6257]"
-                    : "border-[#1f2431] bg-[#131720] text-[#97a2b8]"
+                    ? "font-[var(--font-gazette-heading)] text-[#1a1612]"
+                    : "font-[var(--font-stadium-heading)] uppercase text-[#ffffff]"
                 }`}
               >
-                No match results available yet for this round.
-              </div>
-            ) : (
-              data.matches.map((match, index) => (
-                <MatchCard key={getMatchKey(match, index)} match={match} direction={data.direction} />
-              ))
-            )}
+                {data.currentGroupName}
+              </h2>
+              <p className={`text-sm ${isGazette ? "text-[#5f584f]" : "text-[#9ca6ba]"}`}>
+                {data.activeLeagueLabel} · Season {data.resolvedSeason}
+              </p>
+            </div>
 
-            {data.nextRoundMatches.length > 0 ? (
-              <div className={`grid gap-3 border-t pt-4 ${isGazette ? "border-[#e0d8cc]" : "border-[#1f2431]"}`}>
-                <div className="grid gap-1">
-                  <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
-                    Next Round
-                  </div>
-                  <div className={`text-sm ${isGazette ? "text-[#5f584f]" : "text-[#9ca6ba]"}`}>{data.nextRoundLabel}</div>
+            <div
+              className={`grid gap-4 rounded-2xl border p-4 sm:p-6 ${
+                isGazette
+                  ? "border-[#e0d8cc] bg-[#f8f2e9]"
+                  : "border-[#222530] bg-[#0c0f16]"
+              }`}
+            >
+              {data.matches.length === 0 ? (
+                <div
+                  className={`rounded-2xl border p-5 ${
+                    isGazette
+                      ? "border-[#e0d8cc] bg-[#fffdf9] text-[#6b6257]"
+                      : "border-[#1f2431] bg-[#131720] text-[#97a2b8]"
+                  }`}
+                >
+                  No match results available yet for this round.
                 </div>
-                {data.nextRoundMatches.map((match, index) => (
+              ) : (
+                data.matches.map((match, index) => (
                   <MatchCard key={getMatchKey(match, index)} match={match} direction={data.direction} />
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </section>
+                ))
+              )}
+
+              {data.nextRoundMatches.length > 0 ? (
+                <div className={`grid gap-3 border-t pt-4 ${isGazette ? "border-[#e0d8cc]" : "border-[#1f2431]"}`}>
+                  <div className="grid gap-1">
+                    <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
+                      Next Round
+                    </div>
+                    <div className={`text-sm ${isGazette ? "text-[#5f584f]" : "text-[#9ca6ba]"}`}>{data.nextRoundLabel}</div>
+                  </div>
+                  {data.nextRoundMatches.map((match, index) => (
+                    <MatchCard key={getMatchKey(match, index)} match={match} direction={data.direction} />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
 
         {data.showInlineTable || data.showSidebarTable ? (
           <section id="table" className="grid gap-4">
