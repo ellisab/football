@@ -19,7 +19,6 @@ import {
   isAllowedImageHost,
   isSvgUrl,
   normalizeIconUrl,
-  resolveLeagueTheme,
   type ApiMatch,
   type ApiTableRow,
   type LeagueKey,
@@ -40,6 +39,16 @@ type AppSection = {
   data: SectionItem[];
 };
 
+const getLeagueLabel = (league: LeagueKey) => {
+  return MOBILE_LEAGUES.find((entry) => entry.key === league)?.label ?? league.toUpperCase();
+};
+
+const getSectionKicker = (section: AppSection) => {
+  if (section.type === "table") return "Standings";
+  if (section.key === "next-matchday") return "Next Round";
+  return "Matchday";
+};
+
 export default function App() {
   const [activeLeague, setActiveLeague] = useState<LeagueKey>("bl1");
   const [failedIconUrls, setFailedIconUrls] = useState<Record<string, boolean>>({});
@@ -50,7 +59,6 @@ export default function App() {
   const statusBarStyle = colorScheme === "dark" ? "light" : "dark";
 
   const season = useMemo(() => getCurrentSeasonYear(), []);
-  const leagueTheme = resolveLeagueTheme(activeLeague);
 
   const {
     groupName,
@@ -62,21 +70,6 @@ export default function App() {
     loading,
     error,
   } = useHomeData(activeLeague, season);
-
-  const dynamicStyles = useMemo(
-    () => ({
-      tabActive: {
-        borderColor: leagueTheme.accent,
-        backgroundColor: leagueTheme.accentSoft,
-      },
-      tabIdle: {
-        borderColor: theme.border,
-        backgroundColor: theme.cardMuted,
-      },
-      tabTextActive: { color: leagueTheme.accent, fontWeight: "700" as const },
-    }),
-    [leagueTheme, theme]
-  );
 
   const markIconLoadFailed = useCallback((iconUrl: string | undefined) => {
     if (!iconUrl) return;
@@ -179,12 +172,71 @@ export default function App() {
     return result;
   }, [activeLeague, error, groupName, matches, nextGroupName, nextMatches, season, table]);
 
+  const featuredMatch = matches[0] ?? nextMatches[0];
+  const featuredResult = featuredMatch ? getFinalResult(featuredMatch) : null;
+  const featuredScore = featuredResult
+    ? `${featuredResult.pointsTeam1 ?? 0} - ${featuredResult.pointsTeam2 ?? 0}`
+    : "Score pending";
+  const featuredKickoff = featuredMatch
+    ? formatKickoff(featuredMatch.matchDateTimeUTC ?? featuredMatch.matchDateTime)
+    : "Awaiting kickoff";
+  const featuredTitle = featuredMatch
+    ? `${featuredMatch.team1?.teamName ?? "Home"} vs ${featuredMatch.team2?.teamName ?? "Away"}`
+    : `${getLeagueLabel(activeLeague)} Matchday Highlights`;
+  const featuredSummary = featuredMatch
+    ? `${groupName} in ${getLeagueLabel(activeLeague)}. Freshly updated fixtures and results.`
+    : `Fetching the latest fixtures for ${getLeagueLabel(activeLeague)}.`;
+
+  const actionCards = useMemo(
+    () => [
+      {
+        label: "Latest",
+        title: "Latest Results",
+        description: "Track every scoreline from first whistle to final.",
+      },
+      {
+        label: activeLeague === "dfb" ? "Insights" : "Standings",
+        title: activeLeague === "dfb" ? "Match Insights" : "Table Shift",
+        description:
+          activeLeague === "dfb"
+            ? "Scan upcoming ties and in-round momentum."
+            : "Jump straight to qualification and relegation pressure.",
+      },
+    ],
+    [activeLeague]
+  );
+
   const renderHeader = () => (
     <View style={styles.header}>
-      <Text style={styles.title}>Matchday Atlas</Text>
-      <Text style={styles.subtitle}>
-        Follow the latest matchday results and tables for your favorite leagues.
-      </Text>
+      <View style={styles.heroPanel}>
+        <View style={styles.heroPulseOne} />
+        <View style={styles.heroPulseTwo} />
+        <View style={styles.heroGrid}>
+          <View style={styles.heroTagRow}>
+            <View style={styles.heroTag}>
+              <Text style={styles.heroTagText}>Matchday Brief</Text>
+            </View>
+            <View style={styles.heroTag}>
+              <Text style={styles.heroTagText}>{getLeagueLabel(activeLeague)}</Text>
+            </View>
+            <View style={styles.heroTag}>
+              <Text style={styles.heroTagText}>Season {season}</Text>
+            </View>
+          </View>
+
+          <Text style={styles.heroKicker}>Stadium lights are on</Text>
+          <Text style={styles.heroTitle}>
+            Your <Text style={styles.heroTitleAccent}>matchday</Text> control room
+          </Text>
+          <Text style={styles.heroDescription}>
+            Live fixtures, tables, and knockout drama in one pitch-side view.
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionKicker}>Categories</Text>
+      </View>
       <View style={styles.tabs}>
         {MOBILE_LEAGUES.map((league) => {
           const isActive = league.key === activeLeague;
@@ -193,37 +245,105 @@ export default function App() {
             <Pressable
               key={league.key}
               onPress={() => setActiveLeague(league.key)}
-              style={[styles.tab, isActive ? dynamicStyles.tabActive : dynamicStyles.tabIdle]}
+              style={[styles.tab, isActive && styles.tabActive]}
             >
-              <Text style={[styles.tabText, isActive && dynamicStyles.tabTextActive]}>
-                {league.label}
-              </Text>
+              <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{league.label}</Text>
             </Pressable>
           );
         })}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionKicker}>Featured</Text>
+        <Text style={styles.sectionTitle}>Stadium Spotlight</Text>
+      </View>
+
+      <View style={styles.featuredCard}>
+        <View style={styles.featuredBanner}>
+          <View style={styles.featuredBadge}>
+            <Text style={styles.featuredBadgeText}>{getLeagueLabel(activeLeague)}</Text>
+          </View>
+          <View style={styles.featuredBadge}>
+            <Text style={styles.featuredBadgeText}>Featured Tie</Text>
+          </View>
+        </View>
+
+        <View style={styles.featuredBody}>
+          <Text style={styles.featuredTitle}>{featuredTitle}</Text>
+          <Text style={styles.featuredSummary}>{featuredSummary}</Text>
+          <View style={styles.featuredMetaRow}>
+            <View style={styles.featuredMetaChip}>
+              <Text style={styles.featuredMetaText}>{featuredKickoff}</Text>
+            </View>
+            <View style={styles.featuredMetaChip}>
+              <Text style={styles.featuredMetaText}>
+                {featuredMatch?.matchIsFinished ? "Final" : "Upcoming"}
+              </Text>
+            </View>
+            <View style={styles.featuredMetaChip}>
+              <Text style={styles.featuredMetaText}>{featuredScore}</Text>
+            </View>
+            <View style={styles.featuredMetaChip}>
+              <Text style={styles.featuredMetaText}>
+                {featuredMatch ? `${featuredMatch.goals?.length ?? 0} goal events` : "No events yet"}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionKicker}>Quick Actions</Text>
+      </View>
+      <View style={styles.quickActions}>
+        {actionCards.map((action) => (
+          <View key={action.title} style={styles.quickActionCard}>
+            <Text style={styles.quickActionLabel}>{action.label}</Text>
+            <Text style={styles.quickActionTitle}>{action.title}</Text>
+            <Text style={styles.quickActionDescription}>{action.description}</Text>
+          </View>
+        ))}
       </View>
     </View>
   );
 
   const renderMatchCard = (item: ApiMatch) => {
     const finalResult = getFinalResult(item);
+    const goalEvents = Array.isArray(item?.goals) ? item.goals : [];
     const score = finalResult
       ? `${finalResult?.pointsTeam1 ?? 0} - ${finalResult?.pointsTeam2 ?? 0}`
-      : "-";
+      : "- : -";
 
     return (
       <View
         key={item?.matchID ?? `${item?.team1?.teamId}-${item?.team2?.teamId}`}
         style={styles.card}
       >
-        <View style={styles.cardRow}>
-          <Text style={styles.kickoff}>
-            {formatKickoff(item?.matchDateTimeUTC || item?.matchDateTime)}
-          </Text>
-          <Text style={styles.status}>{item?.matchIsFinished ? "Final" : "Scheduled"}</Text>
+        <View style={styles.cardMetaRow}>
+          <View style={styles.cardMetaChip}>
+            <Text style={styles.cardMetaText}>
+              {formatKickoff(item?.matchDateTimeUTC || item?.matchDateTime)}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.cardMetaChip,
+              item?.matchIsFinished ? styles.cardMetaStatusFinal : styles.cardMetaStatusScheduled,
+            ]}
+          >
+            <Text
+              style={[
+                styles.cardMetaText,
+                item?.matchIsFinished ? styles.cardMetaStatusFinalText : styles.cardMetaStatusScheduledText,
+              ]}
+            >
+              {item?.matchIsFinished ? "Final" : "Scheduled"}
+            </Text>
+          </View>
         </View>
-        <View style={styles.cardRow}>
-          <View style={styles.teamRow}>
+
+        <View style={styles.teamRow}>
+          <View style={styles.teamLabelRow}>
             {renderTeamBadge(item?.team1?.teamName, item?.team1?.teamIconUrl)}
             <Text style={styles.team} numberOfLines={1}>
               {item?.team1?.teamName || "Home"}
@@ -231,20 +351,22 @@ export default function App() {
           </View>
           <Text style={styles.score}>{score}</Text>
         </View>
-        <View style={styles.teamRow}>
+
+        <View style={[styles.teamLabelRow, styles.teamLabelRowSecondary]}>
           {renderTeamBadge(item?.team2?.teamName, item?.team2?.teamIconUrl)}
           <Text style={styles.team} numberOfLines={1}>
             {item?.team2?.teamName || "Away"}
           </Text>
         </View>
-        {Array.isArray(item?.goals) && item.goals.length > 0 ? (
+
+        {goalEvents.length > 0 ? (
           <View style={styles.goalList}>
-            {item.goals.map((goal, index) => (
+            {goalEvents.map((goal, index) => (
               <Text
                 key={goal?.goalID ?? `${goal?.goalGetterName}-${goal?.matchMinute}-${index}`}
                 style={styles.goalItem}
               >
-                {goal?.matchMinute ?? "-"}' {goal?.goalGetterName ?? "Goal"}
+                {goal?.matchMinute ?? "-"}'  {goal?.goalGetterName ?? "Goal"}
               </Text>
             ))}
           </View>
@@ -254,36 +376,76 @@ export default function App() {
   };
 
   const renderTableRow = (row: ApiTableRow, index: number, total: number) => {
-    const isFirst = index === 0;
-    const isLast = index === total - 1;
+    const isLeader = index === 0;
+    const isEurope = index > 0 && index < 4;
+    const isBottom = index >= Math.max(total - 3, 0);
+
+    const zoneLabel = isLeader
+      ? "Leaders"
+      : isEurope
+        ? "Europe"
+        : isBottom
+          ? "Relegation"
+          : "Midtable";
 
     return (
-      <View
-        style={[
-          styles.tableRow,
-          isFirst && styles.tableRowFirst,
-          isLast && styles.tableRowLast,
-        ]}
-      >
-        <Text style={styles.tableCellPos}>{index + 1}</Text>
-        <View style={styles.tableCellTeam}>
-          {renderTeamBadge(row?.teamName, row?.teamIconUrl, 20)}
-          <Text style={styles.tableCellTeamText} numberOfLines={1}>
-            {row?.teamName ?? "Team"}
-          </Text>
+      <View>
+        <View
+          style={[
+            styles.tableRow,
+            isLeader && styles.tableRowLeader,
+            isEurope && styles.tableRowEurope,
+            isBottom && styles.tableRowBottom,
+          ]}
+        >
+          <View style={styles.tableMain}>
+            <View
+              style={[
+                styles.tablePosBadge,
+                isLeader && styles.tablePosLeader,
+                isEurope && styles.tablePosEurope,
+                isBottom && styles.tablePosBottom,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.tablePosText,
+                  isLeader && styles.tablePosTextLeader,
+                  isEurope && styles.tablePosTextEurope,
+                  isBottom && styles.tablePosTextBottom,
+                ]}
+              >
+                {index + 1}
+              </Text>
+            </View>
+            <View style={styles.tableCellTeam}>
+              {renderTeamBadge(row?.teamName, row?.teamIconUrl, 20)}
+              <Text style={styles.tableCellTeamText} numberOfLines={1}>
+                {row?.teamName ?? "Team"}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableMeta}>
+            <Text style={styles.tableZone}>{zoneLabel}</Text>
+            <Text style={styles.tableCellPts}>{row?.points ?? 0} pts</Text>
+          </View>
         </View>
-        <Text style={styles.tableCellStat}>{row?.matches ?? 0}</Text>
-        <Text style={styles.tableCellStat}>{row?.won ?? 0}</Text>
-        <Text style={styles.tableCellStat}>{row?.draw ?? 0}</Text>
-        <Text style={styles.tableCellStat}>{row?.lost ?? 0}</Text>
-        <Text style={styles.tableCellStat}>{row?.goalDiff ?? 0}</Text>
-        <Text style={styles.tableCellPts}>{row?.points ?? 0}</Text>
+
+        <View style={styles.tableStatsRow}>
+          <Text style={styles.tableStat}>MP {row?.matches ?? 0}</Text>
+          <Text style={styles.tableStat}>W {row?.won ?? 0}</Text>
+          <Text style={styles.tableStat}>D {row?.draw ?? 0}</Text>
+          <Text style={styles.tableStat}>L {row?.lost ?? 0}</Text>
+          <Text style={styles.tableStat}>GD {row?.goalDiff ?? 0}</Text>
+        </View>
       </View>
     );
   };
 
   const renderSectionHeader = ({ section }: { section: AppSection }) => (
     <View style={styles.section}>
+      <Text style={styles.sectionKicker}>{getSectionKicker(section)}</Text>
       <Text style={styles.sectionTitle}>{section.title}</Text>
       <Text style={styles.sectionSubtitle}>{section.subtitle}</Text>
       {section.data.length === 0 ? (
@@ -317,9 +479,13 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style={statusBarStyle} />
+      <View pointerEvents="none" style={styles.backgroundLayer}>
+        <View style={styles.backgroundOrbOne} />
+        <View style={styles.backgroundOrbTwo} />
+      </View>
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={leagueTheme.accent} />
+          <ActivityIndicator size="large" color={theme.primary} />
           <Text style={styles.loadingText}>Loading matches...</Text>
         </View>
       ) : (
@@ -333,6 +499,10 @@ export default function App() {
           }
           renderItem={renderSectionItem}
           renderSectionHeader={renderSectionHeader}
+          stickySectionHeadersEnabled={false}
+          showsVerticalScrollIndicator={false}
+          initialNumToRender={6}
+          windowSize={7}
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
             <View>
@@ -343,23 +513,30 @@ export default function App() {
                 </View>
               ) : null}
               {activeLeague === "cl" && bracketMatches.length > 0 ? (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Champions League Bracket</Text>
-                  <Text style={styles.sectionSubtitle}>
-                    Knockout rounds based on the latest groups data.
-                  </Text>
-                  {bracketMatches.map((round) => (
-                    <View key={round?.group?.groupID ?? round?.group?.groupName}>
-                      <Text style={styles.roundTitle}>{round?.group?.groupName ?? "Round"}</Text>
-                      {round.matches.length === 0 ? (
-                        <View style={styles.card}>
-                          <Text style={styles.emptyText}>No matches available yet.</Text>
+                <View>
+                  <View style={styles.section}>
+                    <Text style={styles.sectionKicker}>Knockout</Text>
+                    <Text style={styles.sectionTitle}>Champions League Bracket</Text>
+                    <Text style={styles.sectionSubtitle}>
+                      Knockout rounds based on the latest groups data.
+                    </Text>
+                  </View>
+                  <View style={styles.bracketCard}>
+                    {bracketMatches.map((round) => (
+                      <View key={round?.group?.groupID ?? round?.group?.groupName}>
+                        <View style={styles.section}>
+                          <Text style={styles.roundTitle}>{round?.group?.groupName ?? "Round"}</Text>
                         </View>
-                      ) : (
-                        round.matches.map((match) => renderMatchCard(match))
-                      )}
-                    </View>
-                  ))}
+                        {round.matches.length === 0 ? (
+                          <View style={styles.card}>
+                            <Text style={styles.emptyText}>No matches available yet.</Text>
+                          </View>
+                        ) : (
+                          round.matches.map((match) => renderMatchCard(match))
+                        )}
+                      </View>
+                    ))}
+                  </View>
                 </View>
               ) : null}
             </View>

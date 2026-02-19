@@ -1,12 +1,23 @@
 export type AppTheme = {
   background: string;
-  card: string;
-  cardMuted: string;
+  surface: string;
+  surfaceMuted: string;
+  surfaceSoft: string;
   text: string;
   textMuted: string;
+  textSoft: string;
   border: string;
   borderSubtle: string;
-  accent: string;
+  primary: string;
+  primarySoft: string;
+  primaryGlow: string;
+  heroBase: string;
+  heroHighlight: string;
+  heroShade: string;
+  heroTagBorder: string;
+  heroTagBg: string;
+  heroText: string;
+  heroTextMuted: string;
   warningText: string;
   warningBorder: string;
   warningBg: string;
@@ -15,40 +26,62 @@ export type AppTheme = {
   logoBorder: string;
 };
 
-const BASE_ACCENT = "#facc15";
+const PRIMARY_RED = "#d5001d";
 
 export const THEMES: Record<"light" | "dark", AppTheme> = {
   light: {
-    background: "#f8fafc",
-    card: "#ffffff",
-    cardMuted: "rgba(226, 232, 240, 0.7)",
-    text: "#0f172a",
-    textMuted: "#475569",
-    border: "rgba(15, 23, 42, 0.12)",
-    borderSubtle: "rgba(15, 23, 42, 0.08)",
-    accent: BASE_ACCENT,
-    warningText: "#92400e",
-    warningBorder: "rgba(180, 83, 9, 0.35)",
-    warningBg: "rgba(245, 158, 11, 0.2)",
-    emptyBg: "rgba(226, 232, 240, 0.7)",
-    logoBg: "rgba(15, 23, 42, 0.06)",
-    logoBorder: "rgba(15, 23, 42, 0.12)",
+    background: "#eceef2",
+    surface: "#ffffff",
+    surfaceMuted: "#f3f4f7",
+    surfaceSoft: "#f8f9fc",
+    text: "#111317",
+    textMuted: "#4f525a",
+    textSoft: "#646872",
+    border: "#d8dbe3",
+    borderSubtle: "#e3e5ec",
+    primary: PRIMARY_RED,
+    primarySoft: "#ffe4e8",
+    primaryGlow: "rgba(213, 0, 29, 0.24)",
+    heroBase: "#101217",
+    heroHighlight: "#b8001a",
+    heroShade: "#6d0010",
+    heroTagBorder: "rgba(255, 255, 255, 0.52)",
+    heroTagBg: "rgba(17, 19, 24, 0.28)",
+    heroText: "#fffafb",
+    heroTextMuted: "#ffd9df",
+    warningText: "#7e5610",
+    warningBorder: "#d9b468",
+    warningBg: "#fff7dd",
+    emptyBg: "#f2f3f7",
+    logoBg: "#f1f2f6",
+    logoBorder: "#d2d6df",
   },
   dark: {
-    background: "#0b1020",
-    card: "#101827",
-    cardMuted: "rgba(15, 23, 42, 0.5)",
-    text: "#f8fafc",
-    textMuted: "#cbd5f5",
-    border: "rgba(148, 163, 184, 0.18)",
-    borderSubtle: "rgba(148, 163, 184, 0.12)",
-    accent: BASE_ACCENT,
-    warningText: "#fde68a",
-    warningBorder: "rgba(245, 158, 11, 0.4)",
-    warningBg: "rgba(245, 158, 11, 0.15)",
-    emptyBg: "rgba(15, 23, 42, 0.5)",
-    logoBg: "rgba(255, 255, 255, 0.12)",
-    logoBorder: "rgba(255, 255, 255, 0.15)",
+    background: "#0f1219",
+    surface: "#161a23",
+    surfaceMuted: "#1f2430",
+    surfaceSoft: "#1c212c",
+    text: "#f8f9fc",
+    textMuted: "#d4d8e2",
+    textSoft: "#a5adbf",
+    border: "#2c3343",
+    borderSubtle: "#242b3a",
+    primary: PRIMARY_RED,
+    primarySoft: "#3b1a23",
+    primaryGlow: "rgba(213, 0, 29, 0.34)",
+    heroBase: "#11141c",
+    heroHighlight: "#b3001a",
+    heroShade: "#66000d",
+    heroTagBorder: "rgba(255, 255, 255, 0.38)",
+    heroTagBg: "rgba(255, 255, 255, 0.08)",
+    heroText: "#fff8fa",
+    heroTextMuted: "#f8c9d2",
+    warningText: "#f3cb86",
+    warningBorder: "#8a6937",
+    warningBg: "#2f2718",
+    emptyBg: "#222836",
+    logoBg: "#242b3a",
+    logoBorder: "#31384a",
   },
 };
 
