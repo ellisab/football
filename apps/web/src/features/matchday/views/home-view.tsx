@@ -51,7 +51,6 @@ const DIRECTION_COPY: Record<
     featuredCta: string;
     accent: string;
     accentSoft: string;
-    tone: Array<{ label: string; text: string }>;
   }
 > = {
   stadium: {
@@ -63,12 +62,6 @@ const DIRECTION_COPY: Record<
     featuredCta: "Jump to table →",
     accent: "#3dffa0",
     accentSoft: "#1a3a2a",
-    tone: [
-      { label: "Page Header", text: '"Stadium lights are on."' },
-      { label: "Empty State", text: '"No fixtures yet. Kickoff is coming."' },
-      { label: "Live Match", text: '"Live · 67\' — It\'s heating up."' },
-      { label: "CTA", text: '"Jump to table →"' },
-    ],
   },
   gazette: {
     title: "Your Matchday Control Room",
@@ -79,12 +72,6 @@ const DIRECTION_COPY: Record<
     featuredCta: "View full table →",
     accent: "#e8b84b",
     accentSoft: "#efe6d6",
-    tone: [
-      { label: "Page Header", text: '"The matchday, at a glance."' },
-      { label: "Empty State", text: '"No results yet — check back after kickoff."' },
-      { label: "Live Match", text: '"In play · 67 minutes"' },
-      { label: "CTA", text: '"View full table →"' },
-    ],
   },
 };
 
@@ -177,6 +164,38 @@ export function HomeView({ data }: { data: HomeData }) {
           </div>
         </section>
 
+        <section className="grid gap-4">
+          <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
+            Categories
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {data.leagueOptions.map((option) => {
+              const isActive = option.shortcut === data.resolvedLeague;
+              const Icon = leagueStyles[option.shortcut]?.icon ?? Goal;
+              const season = option.seasons[0] ?? data.resolvedSeason;
+
+              return (
+                <Link
+                  key={option.shortcut}
+                  href={buildHref(data.direction, option.shortcut, season)}
+                  className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                    isGazette
+                      ? isActive
+                        ? "border-[#e8b84b] bg-[#efe6d6] text-[#1a1612]"
+                        : "border-[#e0d8cc] bg-[#fffaf2] text-[#433d35] hover:bg-[#f4ece1]"
+                      : isActive
+                        ? "border-[#3dffa0] bg-[#1a3a2a] text-[#3dffa0]"
+                        : "border-[#232937] bg-[#141922] text-[#a5aec2] hover:border-[#2f3645] hover:bg-[#19202b]"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{getLeagueLabel(option.shortcut, option.label)}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
         <section
           className={`relative overflow-hidden rounded-[1.7rem] border px-4 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7 ${
             isGazette
@@ -252,38 +271,6 @@ export function HomeView({ data }: { data: HomeData }) {
                 <div className="text-lg font-semibold">{featuredMatch?.team2?.teamName ?? "Hamburger SV"}</div>
               </div>
             </div>
-          </div>
-        </section>
-
-        <section className="grid gap-4">
-          <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
-            Categories
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {data.leagueOptions.map((option) => {
-              const isActive = option.shortcut === data.resolvedLeague;
-              const Icon = leagueStyles[option.shortcut]?.icon ?? Goal;
-              const season = option.seasons[0] ?? data.resolvedSeason;
-
-              return (
-                <Link
-                  key={option.shortcut}
-                  href={buildHref(data.direction, option.shortcut, season)}
-                  className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
-                    isGazette
-                      ? isActive
-                        ? "border-[#e8b84b] bg-[#efe6d6] text-[#1a1612]"
-                        : "border-[#e0d8cc] bg-[#fffaf2] text-[#433d35] hover:bg-[#f4ece1]"
-                      : isActive
-                        ? "border-[#3dffa0] bg-[#1a3a2a] text-[#3dffa0]"
-                        : "border-[#232937] bg-[#141922] text-[#a5aec2] hover:border-[#2f3645] hover:bg-[#19202b]"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{getLeagueLabel(option.shortcut, option.label)}</span>
-                </Link>
-              );
-            })}
           </div>
         </section>
 
@@ -522,29 +509,6 @@ export function HomeView({ data }: { data: HomeData }) {
             <StandingsCard table={data.table} direction={data.direction} />
           </section>
         ) : null}
-
-        <section className="grid gap-3">
-          <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
-            Tone of Voice
-          </div>
-          <div className="grid gap-3 md:grid-cols-4">
-            {copy.tone.map((example) => (
-              <div
-                key={example.label}
-                className={`rounded-xl border p-4 ${
-                  isGazette
-                    ? "border-[#e0d8cc] bg-[#fffdf9]"
-                    : "border-[#222530] bg-[#13161d]"
-                }`}
-              >
-                <div className={`mb-1 text-[0.64rem] font-bold uppercase tracking-[0.16em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
-                  {example.label}
-                </div>
-                <div className={`text-sm ${isGazette ? "text-[#2a2420]" : "text-[#d7dce8]"}`}>{example.text}</div>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
     </div>
   );

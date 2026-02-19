@@ -235,6 +235,25 @@ export default function App() {
         })}
       </View>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionKicker}>Categories</Text>
+      </View>
+      <View style={styles.tabs}>
+        {MOBILE_LEAGUES.map((league) => {
+          const isActive = league.key === activeLeague;
+
+          return (
+            <Pressable
+              key={league.key}
+              onPress={() => setActiveLeague(league.key)}
+              style={[styles.tab, isActive && styles.tabActive]}
+            >
+              <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{league.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
       <View style={styles.heroPanel}>
         <View style={styles.heroPulseOne} />
         <View style={styles.heroPulseTwo} />
@@ -273,25 +292,6 @@ export default function App() {
               : "Live fixtures, tables, and knockout drama in one pitch-side view."}
           </Text>
         </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionKicker}>Categories</Text>
-      </View>
-      <View style={styles.tabs}>
-        {MOBILE_LEAGUES.map((league) => {
-          const isActive = league.key === activeLeague;
-
-          return (
-            <Pressable
-              key={league.key}
-              onPress={() => setActiveLeague(league.key)}
-              style={[styles.tab, isActive && styles.tabActive]}
-            >
-              <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{league.label}</Text>
-            </Pressable>
-          );
-        })}
       </View>
 
       <View style={styles.section}>
