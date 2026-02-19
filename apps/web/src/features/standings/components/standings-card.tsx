@@ -9,10 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from "@footballleagues/ui/table";
+import type { DesignDirection } from "@/features/matchday/server/types";
 import { TeamBadge } from "@/features/teams/components/team-badge";
 
 type StandingsCardProps = {
   table: ApiTableRow[];
+  direction?: DesignDirection;
 };
 
 type RankTone = {
@@ -22,53 +24,81 @@ type RankTone = {
   zone: string;
 };
 
-const getRankTone = (index: number, totalRows: number): RankTone => {
+const getRankTone = (
+  index: number,
+  totalRows: number,
+  direction: DesignDirection
+): RankTone => {
+  const isGazette = direction === "gazette";
+
   if (index === 0) {
     return {
-      mobileRow: "border-[#d9a3ad] bg-[#fff2f5]",
-      positionBadge: "bg-[#d5001d] text-white",
-      desktopRow: "bg-[#fff5f7]",
+      mobileRow: isGazette
+        ? "border-[#dcc8a0] bg-[#fcf4e5]"
+        : "border-[#2d553f] bg-[#15261f]",
+      positionBadge: isGazette ? "bg-[#e8b84b] text-[#1a1612]" : "bg-[#3dffa0] text-[#0c0e12]",
+      desktopRow: isGazette ? "bg-[#fff8ed]" : "bg-[#121f1a]",
       zone: "Leaders",
     };
   }
 
   if (index < 4) {
     return {
-      mobileRow: "border-[#dcc2c9] bg-[#fff8fa]",
-      positionBadge: "bg-[#f2d9de] text-[#8f1730]",
-      desktopRow: "bg-[#fff9fb]",
+      mobileRow: isGazette
+        ? "border-[#e6dac5] bg-[#fffcf6]"
+        : "border-[#2a3441] bg-[#151a22]",
+      positionBadge: isGazette ? "bg-[#f2ead8] text-[#8c6c2c]" : "bg-[#1f2835] text-[#8aa0c0]",
+      desktopRow: isGazette ? "bg-[#fffdf8]" : "bg-[#141a23]",
       zone: "Europe",
     };
   }
 
   if (index >= Math.max(totalRows - 3, 0)) {
     return {
-      mobileRow: "border-[#d1d4dc] bg-[#f5f6f9]",
-      positionBadge: "bg-[#e6e8ee] text-[#2f3340]",
-      desktopRow: "bg-[#f8f9fb]",
+      mobileRow: isGazette
+        ? "border-[#e1d7ca] bg-[#f8f2ea]"
+        : "border-[#46303a] bg-[#23171d]",
+      positionBadge: isGazette ? "bg-[#ece2d5] text-[#5f5547]" : "bg-[#3a2530] text-[#f2bdcb]",
+      desktopRow: isGazette ? "bg-[#faf5ee]" : "bg-[#1f151a]",
       zone: "Relegation",
     };
   }
 
   return {
-    mobileRow: "border-[#d9dce4] bg-[#fcfcfe]",
-    positionBadge: "bg-[#eef0f4] text-[#4f535e]",
+    mobileRow: isGazette
+      ? "border-[#e8dfd3] bg-[#fffdf9]"
+      : "border-[#232937] bg-[#131720]",
+    positionBadge: isGazette ? "bg-[#f2ebe1] text-[#60594e]" : "bg-[#1d2431] text-[#98a4bb]",
     desktopRow: "",
     zone: "Midtable",
   };
 };
 
-export function StandingsCard({ table }: StandingsCardProps) {
+export function StandingsCard({ table, direction = "stadium" }: StandingsCardProps) {
+  const isGazette = direction === "gazette";
+
   return (
-    <Card className="frost-card gap-0 overflow-hidden border-[#d8dbe3] bg-[#ffffff] py-0 shadow-none">
-      <CardHeader className="border-b border-[#e0e2e9] py-5">
-        <CardTitle className="font-display text-[1.85rem] leading-none text-[#12141a] sm:text-[2.2rem]">
+    <Card
+      className={`gap-0 overflow-hidden py-0 shadow-none ${
+        isGazette
+          ? "border-[#e0d8cc] bg-[#fffdf9]"
+          : "border-[#222530] bg-[#12161f]"
+      }`}
+    >
+      <CardHeader className={`py-5 ${isGazette ? "border-b border-[#e8dfd3]" : "border-b border-[#1e2230]"}`}>
+        <CardTitle
+          className={`text-[1.85rem] leading-none sm:text-[2.2rem] ${
+            isGazette
+              ? "font-[var(--font-gazette-heading)] text-[#1a1612]"
+              : "font-[var(--font-stadium-heading)] uppercase text-[#ffffff]"
+          }`}
+        >
           <span className="inline-flex items-center gap-2">
-            <Medal className="h-6 w-6 text-[#b61028]" />
+            <Medal className={`h-6 w-6 ${isGazette ? "text-[#8c6c2c]" : "text-[#3dffa0]"}`} />
             Table
           </span>
         </CardTitle>
-        <CardDescription className="text-[#4f525a]">
+        <CardDescription className={isGazette ? "text-[#6b6257]" : "text-[#9ca6ba]"}>
           Updated standings with qualification and relegation context.
         </CardDescription>
       </CardHeader>
@@ -77,12 +107,14 @@ export function StandingsCard({ table }: StandingsCardProps) {
         <div className="sm:hidden">
           <div className="grid gap-2 px-4 pb-2">
             {table.map((row, index) => {
-              const rankTone = getRankTone(index, table.length);
+              const rankTone = getRankTone(index, table.length, direction);
 
               return (
                 <div
                   key={row.teamInfoId ?? row.teamName}
-                  className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm text-[#1a1d25] ${rankTone.mobileRow}`}
+                  className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm ${
+                    isGazette ? "text-[#2a2420]" : "text-[#d6dce8]"
+                  } ${rankTone.mobileRow}`}
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <span
@@ -90,14 +122,24 @@ export function StandingsCard({ table }: StandingsCardProps) {
                     >
                       {index + 1}
                     </span>
-                    <TeamBadge name={row.teamName} iconUrl={row.teamIconUrl} />
+                    <TeamBadge
+                      name={row.teamName}
+                      iconUrl={row.teamIconUrl}
+                      className={isGazette ? "bg-[#f1ebe1]" : "bg-[#1f2633]"}
+                    />
                     <span className="min-w-0 truncate font-semibold">{row.teamName}</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-[0.65rem] uppercase tracking-[0.08em] text-[#5e616a]">
+                    <div
+                      className={`text-[0.65rem] uppercase tracking-[0.08em] ${
+                        isGazette ? "text-[#6f665a]" : "text-[#9aa4ba]"
+                      }`}
+                    >
                       {rankTone.zone}
                     </div>
-                    <div className="text-base font-semibold text-[#ae1127]">{row.points} pts</div>
+                    <div className={`text-base font-semibold ${isGazette ? "text-[#1a1612]" : "text-[#3dffa0]"}`}>
+                      {row.points} pts
+                    </div>
                   </div>
                 </div>
               );
@@ -108,43 +150,49 @@ export function StandingsCard({ table }: StandingsCardProps) {
         <div className="hidden overflow-x-auto px-4 pb-2 sm:block sm:px-0">
           <Table className="min-w-[640px]">
             <TableHeader>
-              <TableRow className="border-[#e0e2e9]">
-                <TableHead className="w-12 text-[#5c6069]">Pos</TableHead>
-                <TableHead className="text-[#5c6069]">Team</TableHead>
-                <TableHead className="text-[#5c6069]">MP</TableHead>
-                <TableHead className="text-[#5c6069]">W</TableHead>
-                <TableHead className="text-[#5c6069]">D</TableHead>
-                <TableHead className="text-[#5c6069]">L</TableHead>
-                <TableHead className="text-[#5c6069]">GD</TableHead>
-                <TableHead className="text-right text-[#5c6069]">Pts</TableHead>
+              <TableRow className={isGazette ? "border-[#e8dfd3]" : "border-[#1f2330]"}>
+                <TableHead className={`w-12 ${isGazette ? "text-[#6b6257]" : "text-[#9ba4b9]"}`}>Pos</TableHead>
+                <TableHead className={isGazette ? "text-[#6b6257]" : "text-[#9ba4b9]"}>Team</TableHead>
+                <TableHead className={isGazette ? "text-[#6b6257]" : "text-[#9ba4b9]"}>MP</TableHead>
+                <TableHead className={isGazette ? "text-[#6b6257]" : "text-[#9ba4b9]"}>W</TableHead>
+                <TableHead className={isGazette ? "text-[#6b6257]" : "text-[#9ba4b9]"}>D</TableHead>
+                <TableHead className={isGazette ? "text-[#6b6257]" : "text-[#9ba4b9]"}>L</TableHead>
+                <TableHead className={isGazette ? "text-[#6b6257]" : "text-[#9ba4b9]"}>GD</TableHead>
+                <TableHead className={`text-right ${isGazette ? "text-[#6b6257]" : "text-[#9ba4b9]"}`}>Pts</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
               {table.map((row, index) => {
-                const rankTone = getRankTone(index, table.length);
+                const rankTone = getRankTone(index, table.length, direction);
 
                 return (
                   <TableRow
                     key={row.teamInfoId ?? row.teamName}
-                    className={`border-[#e5e7ee] ${rankTone.desktopRow}`}
+                    className={`${isGazette ? "border-[#ece4d8]" : "border-[#1e2330]"} ${rankTone.desktopRow}`}
                   >
-                    <TableCell className="font-semibold text-[#4d515b]">{index + 1}</TableCell>
-                    <TableCell className="font-semibold text-[#14161d]">
+                    <TableCell className={`font-semibold ${isGazette ? "text-[#595244]" : "text-[#9ba4b9]"}`}>
+                      {index + 1}
+                    </TableCell>
+                    <TableCell className={`font-semibold ${isGazette ? "text-[#14110d]" : "text-[#f0f3f8]"}`}>
                       <div className="flex items-center gap-3">
-                        <TeamBadge name={row.teamName} iconUrl={row.teamIconUrl} />
+                        <TeamBadge
+                          name={row.teamName}
+                          iconUrl={row.teamIconUrl}
+                          className={isGazette ? "bg-[#f1ebe1]" : "bg-[#1f2633]"}
+                        />
                         <span>{row.teamName}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-[#4d515b]">{row.matches}</TableCell>
-                    <TableCell className="text-[#4d515b]">{row.won}</TableCell>
-                    <TableCell className="text-[#4d515b]">{row.draw}</TableCell>
-                    <TableCell className="text-[#4d515b]">{row.lost}</TableCell>
-                    <TableCell className="text-[#4d515b]">{row.goalDiff}</TableCell>
-                    <TableCell className="text-right font-semibold text-[#ae1127]">
+                    <TableCell className={isGazette ? "text-[#595244]" : "text-[#9ba4b9]"}>{row.matches}</TableCell>
+                    <TableCell className={isGazette ? "text-[#595244]" : "text-[#9ba4b9]"}>{row.won}</TableCell>
+                    <TableCell className={isGazette ? "text-[#595244]" : "text-[#9ba4b9]"}>{row.draw}</TableCell>
+                    <TableCell className={isGazette ? "text-[#595244]" : "text-[#9ba4b9]"}>{row.lost}</TableCell>
+                    <TableCell className={isGazette ? "text-[#595244]" : "text-[#9ba4b9]"}>{row.goalDiff}</TableCell>
+                    <TableCell className={`text-right font-semibold ${isGazette ? "text-[#1a1612]" : "text-[#3dffa0]"}`}>
                       <span className="inline-flex items-center gap-1">
                         {row.points}
-                        <Goal className="h-3.5 w-3.5" />
+                        <Goal className={`h-3.5 w-3.5 ${isGazette ? "text-[#8c6c2c]" : "text-[#3dffa0]"}`} />
                       </span>
                     </TableCell>
                   </TableRow>

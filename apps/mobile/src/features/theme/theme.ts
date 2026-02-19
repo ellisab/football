@@ -1,4 +1,5 @@
 export type AppTheme = {
+  direction: DesignDirection;
   background: string;
   surface: string;
   surfaceMuted: string;
@@ -26,65 +27,69 @@ export type AppTheme = {
   logoBorder: string;
 };
 
-const PRIMARY_RED = "#d5001d";
+export type DesignDirection = "stadium" | "gazette";
 
-export const THEMES: Record<"light" | "dark", AppTheme> = {
-  light: {
-    background: "#eceef2",
-    surface: "#ffffff",
-    surfaceMuted: "#f3f4f7",
-    surfaceSoft: "#f8f9fc",
-    text: "#111317",
-    textMuted: "#4f525a",
-    textSoft: "#646872",
-    border: "#d8dbe3",
-    borderSubtle: "#e3e5ec",
-    primary: PRIMARY_RED,
-    primarySoft: "#ffe4e8",
-    primaryGlow: "rgba(213, 0, 29, 0.24)",
-    heroBase: "#101217",
-    heroHighlight: "#b8001a",
-    heroShade: "#6d0010",
-    heroTagBorder: "rgba(255, 255, 255, 0.52)",
-    heroTagBg: "rgba(17, 19, 24, 0.28)",
-    heroText: "#fffafb",
-    heroTextMuted: "#ffd9df",
-    warningText: "#7e5610",
-    warningBorder: "#d9b468",
-    warningBg: "#fff7dd",
-    emptyBg: "#f2f3f7",
-    logoBg: "#f1f2f6",
-    logoBorder: "#d2d6df",
-  },
-  dark: {
-    background: "#0f1219",
-    surface: "#161a23",
-    surfaceMuted: "#1f2430",
-    surfaceSoft: "#1c212c",
-    text: "#f8f9fc",
-    textMuted: "#d4d8e2",
-    textSoft: "#a5adbf",
-    border: "#2c3343",
-    borderSubtle: "#242b3a",
-    primary: PRIMARY_RED,
-    primarySoft: "#3b1a23",
-    primaryGlow: "rgba(213, 0, 29, 0.34)",
-    heroBase: "#11141c",
-    heroHighlight: "#b3001a",
-    heroShade: "#66000d",
-    heroTagBorder: "rgba(255, 255, 255, 0.38)",
-    heroTagBg: "rgba(255, 255, 255, 0.08)",
-    heroText: "#fff8fa",
-    heroTextMuted: "#f8c9d2",
-    warningText: "#f3cb86",
-    warningBorder: "#8a6937",
-    warningBg: "#2f2718",
-    emptyBg: "#222836",
-    logoBg: "#242b3a",
-    logoBorder: "#31384a",
-  },
+const STADIUM_THEME: AppTheme = {
+  direction: "stadium",
+  background: "#0b0d12",
+  surface: "#13161d",
+  surfaceMuted: "#1b2030",
+  surfaceSoft: "#111820",
+  text: "#f7f9ff",
+  textMuted: "#9ca6ba",
+  textSoft: "#8d97ab",
+  border: "#232937",
+  borderSubtle: "#1d2330",
+  primary: "#3dffa0",
+  primarySoft: "#1a3a2a",
+  primaryGlow: "rgba(61, 255, 160, 0.3)",
+  heroBase: "#0c0e12",
+  heroHighlight: "#111820",
+  heroShade: "#0c1f17",
+  heroTagBorder: "rgba(61, 255, 160, 0.5)",
+  heroTagBg: "rgba(26, 58, 42, 0.55)",
+  heroText: "#ffffff",
+  heroTextMuted: "#9ca6ba",
+  warningText: "#a9dfc3",
+  warningBorder: "#2d553f",
+  warningBg: "#13241d",
+  emptyBg: "#131720",
+  logoBg: "#1f2633",
+  logoBorder: "#2b3345",
 };
 
-export const getTheme = (scheme: "light" | "dark" | null | undefined) => {
-  return scheme === "dark" ? THEMES.dark : THEMES.light;
+const GAZETTE_THEME: AppTheme = {
+  direction: "gazette",
+  background: "#f4eee5",
+  surface: "#fffdf9",
+  surfaceMuted: "#f1ebe1",
+  surfaceSoft: "#f8f2e9",
+  text: "#1a1612",
+  textMuted: "#6b6257",
+  textSoft: "#7c7266",
+  border: "#e0d8cc",
+  borderSubtle: "#e8dfd3",
+  primary: "#8c6c2c",
+  primarySoft: "#efe6d6",
+  primaryGlow: "rgba(232, 184, 75, 0.28)",
+  heroBase: "#1a1612",
+  heroHighlight: "#201a14",
+  heroShade: "#2f271e",
+  heroTagBorder: "rgba(232, 184, 75, 0.5)",
+  heroTagBg: "rgba(255, 255, 255, 0.07)",
+  heroText: "#f5f1eb",
+  heroTextMuted: "#d0c8bc",
+  warningText: "#8c6c2c",
+  warningBorder: "#dcc8a0",
+  warningBg: "#fff5e4",
+  emptyBg: "#f8f2e9",
+  logoBg: "#f1ebe1",
+  logoBorder: "#e3d9cb",
+};
+
+export const getTheme = (
+  _scheme: "light" | "dark" | null | undefined,
+  direction: DesignDirection
+) => {
+  return direction === "gazette" ? GAZETTE_THEME : STADIUM_THEME;
 };
