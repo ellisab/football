@@ -414,6 +414,35 @@ export function HomeView({ data }: { data: HomeData }) {
             <StandingsCard table={data.table} direction={data.direction} />
           </section>
         ) : null}
+
+        <footer
+          className={`mt-2 border-t pt-4 text-xs ${
+            isGazette ? "border-[#d8d0c4] text-[#6a6258]" : "border-[#1f2431] text-[#8e97ab]"
+          }`}
+        >
+          Data source:{" "}
+          <a
+            href="https://www.openligadb.de/"
+            target="_blank"
+            rel="noreferrer"
+            className={`font-semibold underline underline-offset-2 ${
+              isGazette ? "text-[#8c6c2c] hover:text-[#6f5420]" : "text-[#3dffa0] hover:text-[#72ffbc]"
+            }`}
+          >
+            OpenLigaDB
+          </a>
+          {" "}· License:{" "}
+          <a
+            href="https://www.openligadb.de/lizenz"
+            target="_blank"
+            rel="noreferrer"
+            className={`font-semibold underline underline-offset-2 ${
+              isGazette ? "text-[#8c6c2c] hover:text-[#6f5420]" : "text-[#3dffa0] hover:text-[#72ffbc]"
+            }`}
+          >
+            openligadb.de/lizenz
+          </a>
+        </footer>
       </main>
     </div>
   );
