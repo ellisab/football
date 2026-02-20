@@ -26,6 +26,8 @@ const getMatchKey = (match: ApiMatch, index: number) => {
 const leagueStyles: Record<LeagueKey, { label: string; icon: LucideIcon }> = {
   bl1: { label: "Bundesliga", icon: Goal },
   bl2: { label: "2. Bundesliga", icon: Shirt },
+  fbl1: { label: "Frauen-Bundesliga", icon: Shield },
+  fbl2: { label: "2. Frauen-Bundesliga", icon: Shirt },
   cl: { label: "Champions League", icon: Trophy },
   dfb: { label: "DFB Pokal", icon: Flag },
   pl: { label: "Premier League", icon: Shield },

@@ -20,6 +20,25 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
     shortcutMatch: ["bl2"],
   },
   {
+    key: "fbl1",
+    label: "Frauen-Bundesliga",
+    nameMatch: [
+      "1. frauen-bundesliga",
+      "1. frauen bundesliga",
+      "1. fussball-bundesliga damen",
+      "1. fußball-bundesliga damen",
+      "frauen fußball bundesliga",
+      "frauen fussball bundesliga",
+    ],
+    shortcutMatch: ["fbl1", "bl1f", "dbl1", "frbu"],
+  },
+  {
+    key: "fbl2",
+    label: "2. Frauen-Bundesliga",
+    nameMatch: ["2. frauen-bundesliga", "2. frauen bundesliga"],
+    shortcutMatch: ["fbl2", "bl2f"],
+  },
+  {
     key: "dfb",
     label: "DFB-Pokal",
     nameMatch: ["dfb-pokal", "dfb pokal"],
@@ -49,6 +68,16 @@ export const LEAGUE_THEMES: Record<LeagueKey, LeagueTheme> = {
     accent: "#38bdf8",
     accentSoft: "rgba(56, 189, 248, 0.15)",
     glow: "rgba(56, 189, 248, 0.25)",
+  },
+  fbl1: {
+    accent: "#ef4444",
+    accentSoft: "rgba(239, 68, 68, 0.15)",
+    glow: "rgba(239, 68, 68, 0.25)",
+  },
+  fbl2: {
+    accent: "#14b8a6",
+    accentSoft: "rgba(20, 184, 166, 0.15)",
+    glow: "rgba(20, 184, 166, 0.25)",
   },
   pl: {
     accent: "#22c55e",

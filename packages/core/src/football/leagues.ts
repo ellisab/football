@@ -26,29 +26,52 @@ export const isFootballLeague = (league: ApiLeague) => {
   );
 };
 
+const isShortcutMatch = (leagueShortcut: string, needle: string) => {
+  if (!leagueShortcut.startsWith(needle)) return false;
+  if (leagueShortcut.length === needle.length) return true;
+
+  const nextChar = leagueShortcut[needle.length];
+  return !/[a-z0-9]/i.test(nextChar);
+};
+
+const resolveGroupByShortcut = (leagueShortcut: string): LeagueKey | undefined => {
+  let bestMatch: { key: LeagueKey; length: number } | undefined;
+
+  for (const group of LEAGUE_GROUPS) {
+    for (const needle of group.shortcutMatch) {
+      if (!isShortcutMatch(leagueShortcut, needle)) continue;
+
+      if (!bestMatch || needle.length > bestMatch.length) {
+        bestMatch = { key: group.key, length: needle.length };
+      }
+    }
+  }
+
+  return bestMatch?.key;
+};
+
 export const matchesLeagueGroup = (league: ApiLeague, groupKey: LeagueKey) => {
   const group = LEAGUE_GROUPS.find((entry) => entry.key === groupKey);
   if (!group) return false;
 
   const leagueName = normalizeText(league.leagueName);
   const leagueShortcut = normalizeText(league.leagueShortcut);
+  const shortcutGroup = resolveGroupByShortcut(leagueShortcut);
+
+  if (shortcutGroup) {
+    return shortcutGroup === groupKey;
+  }
 
   const nameHit = group.nameMatch.some((needle) => leagueName.includes(needle));
-  const shortcutHit = group.shortcutMatch.some((needle) =>
-    leagueShortcut.startsWith(needle)
-  );
-
-  return nameHit || shortcutHit;
+  return nameHit;
 };
 
 const resolveGroupKeyForLeague = (league: ApiLeague): LeagueKey | undefined => {
   const leagueShortcut = normalizeText(league.leagueShortcut);
   const leagueName = normalizeText(league.leagueName);
 
-  const shortcutMatch = LEAGUE_GROUPS.find((group) =>
-    group.shortcutMatch.some((needle) => leagueShortcut.startsWith(needle))
-  );
-  if (shortcutMatch) return shortcutMatch.key;
+  const shortcutMatch = resolveGroupByShortcut(leagueShortcut);
+  if (shortcutMatch) return shortcutMatch;
 
   const nameMatch = LEAGUE_GROUPS.find((group) =>
     group.nameMatch.some((needle) => leagueName.includes(needle))

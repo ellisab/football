@@ -289,11 +289,17 @@ export const getHomeData = async (params: {
     nextRoundMatches,
     nextRoundLabel,
     showInlineTable:
-      resolvedLeague === "bl1" || resolvedLeague === "bl2" || resolvedLeague === "cl",
+      resolvedLeague === "bl1" ||
+      resolvedLeague === "bl2" ||
+      resolvedLeague === "fbl1" ||
+      resolvedLeague === "fbl2" ||
+      resolvedLeague === "cl",
     showSidebarTable:
       resolvedLeague !== "dfb" &&
       resolvedLeague !== "bl1" &&
       resolvedLeague !== "bl2" &&
+      resolvedLeague !== "fbl1" &&
+      resolvedLeague !== "fbl2" &&
       resolvedLeague !== "cl",
     bracketMatches,
     table,

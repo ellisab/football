@@ -112,3 +112,69 @@ test("buildLeagueEntriesByGroup prioritizes shortcut over broad name matches", (
   assert.equal(grouped.get("bl1")?.length, 1);
   assert.equal(grouped.get("bl1")?.[0]?.leagueShortcut, "bl1");
 });
+
+test("buildLeagueEntriesByGroup maps women Bundesliga shortcuts to dedicated groups", () => {
+  const leagues = [
+    {
+      leagueShortcut: "fbl1",
+      leagueName: "1. Frauen-Bundesliga 2025",
+      leagueSeason: 2025,
+      sport: { sportName: "Fußball" },
+    },
+    {
+      leagueShortcut: "fbl2",
+      leagueName: "2. Frauen-Bundesliga 2025",
+      leagueSeason: 2025,
+      sport: { sportName: "Fußball" },
+    },
+  ];
+
+  const grouped = buildLeagueEntriesByGroup(leagues);
+
+  assert.equal(grouped.get("fbl1")?.length, 1);
+  assert.equal(grouped.get("fbl1")?.[0]?.leagueShortcut, "fbl1");
+  assert.equal(grouped.get("fbl2")?.length, 1);
+  assert.equal(grouped.get("fbl2")?.[0]?.leagueShortcut, "fbl2");
+});
+
+test("buildLeagueEntriesByGroup resolves bl1f/bl2f by most specific shortcut match", () => {
+  const leagues = [
+    {
+      leagueShortcut: "bl1f",
+      leagueName: "1. Frauen-Bundesliga",
+      leagueSeason: 2023,
+      sport: { sportName: "Frauenfußball" },
+    },
+    {
+      leagueShortcut: "bl2f",
+      leagueName: "2. Frauen-Bundesliga",
+      leagueSeason: 2024,
+      sport: { sportName: "Frauenfußball" },
+    },
+    {
+      leagueShortcut: "bl1fan",
+      leagueName: "1. Fußball-Fan-Bundesliga 2022/2023",
+      leagueSeason: 2022,
+      sport: { sportName: "Fußball" },
+    },
+    {
+      leagueShortcut: "bl1/arena",
+      leagueName: "1. Fußball-Bundesliga 2018/2019 (Arena)",
+      leagueSeason: 2018,
+      sport: { sportName: "Fußball" },
+    },
+  ];
+
+  const grouped = buildLeagueEntriesByGroup(leagues);
+
+  assert.equal(grouped.get("fbl1")?.length, 1);
+  assert.equal(grouped.get("fbl1")?.[0]?.leagueShortcut, "bl1f");
+  assert.equal(
+    grouped.get("fbl1")?.some((entry) => entry.leagueShortcut === "bl1fan"),
+    false
+  );
+  assert.equal(grouped.get("fbl2")?.length, 1);
+  assert.equal(grouped.get("fbl2")?.[0]?.leagueShortcut, "bl2f");
+  assert.equal(grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "bl1/arena"), true);
+  assert.equal(grouped.get("bl2")?.length, 0);
+});
