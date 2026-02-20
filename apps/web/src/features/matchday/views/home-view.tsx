@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatKickoff, getFinalResult, type ApiMatch, type LeagueKey } from "@footballleagues/core";
+import { getFinalResult, type ApiMatch, type LeagueKey } from "@footballleagues/core";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
@@ -12,6 +12,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { BracketSection } from "@/features/champions-league/components/bracket-section";
+import { LocalKickoff } from "@/features/matchday/components/local-kickoff";
 import { MatchCard } from "@/features/matchday/components/match-card";
 import type { DesignDirection, HomeData } from "@/features/matchday/server/types";
 import { StandingsCard } from "@/features/standings/components/standings-card";
@@ -104,9 +105,6 @@ export function HomeView({ data }: { data: HomeData }) {
   const featuredScore = featuredResult
     ? `${featuredResult.pointsTeam1 ?? 0} - ${featuredResult.pointsTeam2 ?? 0}`
     : "Score pending";
-  const featuredKickoff = featuredMatch
-    ? formatKickoff(featuredMatch.matchDateTimeUTC ?? featuredMatch.matchDateTime)
-    : "Awaiting kickoff";
 
   const actionCards = [
     {
@@ -271,7 +269,10 @@ export function HomeView({ data }: { data: HomeData }) {
                   {featuredResult ? featuredScore : "— : —"}
                 </div>
                 <div className={`text-xs uppercase tracking-[0.12em] ${isGazette ? "text-[#e8b84b]" : "text-[#3dffa0]"}`}>
-                  {featuredKickoff}
+                  <LocalKickoff
+                    value={featuredMatch?.matchDateTimeUTC ?? featuredMatch?.matchDateTime}
+                    fallback="Awaiting kickoff"
+                  />
                 </div>
               </div>
               <div className="text-center sm:text-right">

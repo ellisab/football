@@ -1,7 +1,8 @@
 import type { ApiMatch } from "@footballleagues/core";
-import { formatKickoff, getFinalResult } from "@footballleagues/core";
+import { getFinalResult } from "@footballleagues/core";
 import { Clock3, Goal } from "lucide-react";
 import { TeamBadge } from "@/features/teams/components/team-badge";
+import { LocalKickoff } from "./local-kickoff";
 import type { DesignDirection } from "@/features/matchday/server/types";
 
 type MatchCardProps = {
@@ -32,7 +33,7 @@ export function MatchCard({ match, direction = "stadium" }: MatchCardProps) {
           }`}
         >
           <Clock3 className="h-3.5 w-3.5" />
-          {formatKickoff(match.matchDateTimeUTC ?? match.matchDateTime)}
+          <LocalKickoff value={match.matchDateTimeUTC ?? match.matchDateTime} />
         </span>
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${
