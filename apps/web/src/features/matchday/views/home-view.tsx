@@ -407,7 +407,7 @@ export function HomeView({ data }: { data: HomeData }) {
         ) : null}
 
         {data.showInlineTable || data.showSidebarTable ? (
-          <section id="table" className="grid gap-4">
+          <section id="table" className="grid gap-4 w-full min-w-0">
             <div className={`text-[0.7rem] font-semibold uppercase tracking-[0.22em] ${isGazette ? "text-[#1a3a8f]" : "text-[#3dffa0]"}`}>
               Standings
             </div>

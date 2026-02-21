@@ -104,32 +104,32 @@ export function StandingsCard({ table, direction = "stadium" }: StandingsCardPro
       </CardHeader>
 
       <CardContent className="px-0 py-4 sm:px-6 sm:py-5">
-        <div className="sm:hidden">
-          <div className="grid gap-2 px-4 pb-2">
+        <div className="sm:hidden w-full min-w-0">
+          <div className="flex flex-col gap-2 px-4 pb-2 w-full min-w-0">
             {table.map((row, index) => {
               const rankTone = getRankTone(index, table.length, direction);
 
               return (
                 <div
                   key={row.teamInfoId ?? row.teamName}
-                  className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm ${
+                  className={`flex items-center w-full min-w-0 justify-between gap-3 rounded-2xl border px-3 py-3 sm:px-4 text-sm ${
                     isGazette ? "text-[#2a2420]" : "text-[#d6dce8]"
                   } ${rankTone.mobileRow}`}
                 >
-                  <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex flex-1 min-w-0 items-center gap-2.5">
                     <span
-                      className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${rankTone.positionBadge}`}
+                      className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${rankTone.positionBadge}`}
                     >
                       {index + 1}
                     </span>
                     <TeamBadge
                       name={row.teamName}
                       iconUrl={row.teamIconUrl}
-                      className={isGazette ? "bg-[#f1ebe1]" : "bg-[#1f2633]"}
+                      className={`shrink-0 ${isGazette ? "bg-[#f1ebe1]" : "bg-[#1f2633]"}`}
                     />
-                    <span className="min-w-0 truncate font-semibold">{row.teamName}</span>
+                    <span className="truncate font-semibold">{row.teamName}</span>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 text-right">
                     <div
                       className={`text-[0.65rem] uppercase tracking-[0.08em] ${
                         isGazette ? "text-[#6f665a]" : "text-[#9aa4ba]"

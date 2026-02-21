@@ -15,9 +15,6 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["lucide-react"],
   },
   allowedDevOrigins: [
-    "http://192.168.2.74:3000",
-    "https://192.168.2.74:3000",
-    "192.168.2.74",
     "http://localhost:3000",
     "https://localhost:3000",
     "localhost",
