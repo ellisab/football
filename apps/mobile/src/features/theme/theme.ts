@@ -1,5 +1,4 @@
 export type AppTheme = {
-  direction: DesignDirection;
   background: string;
   surface: string;
   surfaceMuted: string;
@@ -27,10 +26,7 @@ export type AppTheme = {
   logoBorder: string;
 };
 
-export type DesignDirection = "stadium" | "gazette";
-
 const STADIUM_THEME: AppTheme = {
-  direction: "stadium",
   background: "#0b0d12",
   surface: "#13161d",
   surfaceMuted: "#1b2030",
@@ -58,38 +54,6 @@ const STADIUM_THEME: AppTheme = {
   logoBorder: "#2b3345",
 };
 
-const GAZETTE_THEME: AppTheme = {
-  direction: "gazette",
-  background: "#f4eee5",
-  surface: "#fffdf9",
-  surfaceMuted: "#f1ebe1",
-  surfaceSoft: "#f8f2e9",
-  text: "#1a1612",
-  textMuted: "#6b6257",
-  textSoft: "#7c7266",
-  border: "#e0d8cc",
-  borderSubtle: "#e8dfd3",
-  primary: "#8c6c2c",
-  primarySoft: "#efe6d6",
-  primaryGlow: "rgba(232, 184, 75, 0.28)",
-  heroBase: "#1a1612",
-  heroHighlight: "#201a14",
-  heroShade: "#2f271e",
-  heroTagBorder: "rgba(232, 184, 75, 0.5)",
-  heroTagBg: "rgba(255, 255, 255, 0.07)",
-  heroText: "#f5f1eb",
-  heroTextMuted: "#d0c8bc",
-  warningText: "#8c6c2c",
-  warningBorder: "#dcc8a0",
-  warningBg: "#fff5e4",
-  emptyBg: "#f8f2e9",
-  logoBg: "#f1ebe1",
-  logoBorder: "#e3d9cb",
-};
-
-export const getTheme = (
-  _scheme: "light" | "dark" | null | undefined,
-  direction: DesignDirection
-) => {
-  return direction === "gazette" ? GAZETTE_THEME : STADIUM_THEME;
+export const getTheme = (_scheme: "light" | "dark" | null | undefined) => {
+  return STADIUM_THEME;
 };

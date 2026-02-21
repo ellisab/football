@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import {
   Barlow,
   Barlow_Condensed,
-  DM_Sans,
-  DM_Serif_Display,
   JetBrains_Mono,
 } from "next/font/google";
 import "./globals.css";
@@ -19,18 +17,6 @@ const stadiumBodyFont = Barlow({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-stadium-body",
-});
-
-const gazetteHeadingFont = DM_Serif_Display({
-  weight: ["400"],
-  subsets: ["latin"],
-  variable: "--font-gazette-heading",
-});
-
-const gazetteBodyFont = DM_Sans({
-  weight: ["400", "500", "700"],
-  subsets: ["latin"],
-  variable: "--font-gazette-body",
 });
 
 const monoFont = JetBrains_Mono({
@@ -52,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${stadiumHeadingFont.variable} ${stadiumBodyFont.variable} ${gazetteHeadingFont.variable} ${gazetteBodyFont.variable} ${monoFont.variable} antialiased`}
+        className={`${stadiumHeadingFont.variable} ${stadiumBodyFont.variable} ${monoFont.variable} antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}

@@ -27,10 +27,7 @@ export const createStyles = (theme: AppTheme) =>
       width: 300,
       height: 300,
       borderRadius: 150,
-      backgroundColor:
-        theme.direction === "gazette"
-          ? "rgba(232, 184, 75, 0.14)"
-          : "rgba(17, 19, 24, 0.12)",
+      backgroundColor: "rgba(17, 19, 24, 0.12)",
     },
     listContent: {
       paddingBottom: 44,
@@ -50,45 +47,13 @@ export const createStyles = (theme: AppTheme) =>
       paddingTop: 12,
       gap: 16,
     },
-    directionSwitch: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 8,
-      paddingHorizontal: 20,
-      alignItems: "center",
-    },
-    directionButton: {
-      borderRadius: 14,
-      borderWidth: 1,
-      borderColor: theme.border,
-      backgroundColor: theme.surfaceMuted,
-      paddingHorizontal: 12,
-      paddingVertical: 7,
-    },
-    directionButtonActive: {
-      borderColor: theme.primary,
-      backgroundColor: theme.primarySoft,
-    },
-    directionButtonText: {
-      color: theme.textSoft,
-      fontSize: 11,
-      fontWeight: "700",
-      textTransform: "uppercase",
-      letterSpacing: 0.8,
-    },
-    directionButtonTextActive: {
-      color: theme.primary,
-    },
     heroPanel: {
       borderRadius: 28,
       overflow: "hidden",
       borderWidth: 1,
-      borderColor:
-        theme.direction === "gazette"
-          ? "rgba(232, 184, 75, 0.35)"
-          : "rgba(255, 255, 255, 0.2)",
+      borderColor: "rgba(255, 255, 255, 0.2)",
       backgroundColor: theme.heroBase,
-      shadowColor: theme.direction === "gazette" ? "#120e0a" : "rgba(14, 16, 21, 0.9)",
+      shadowColor: "rgba(14, 16, 21, 0.9)",
       shadowOpacity: 0.32,
       shadowRadius: 20,
       shadowOffset: { width: 0, height: 12 },
@@ -101,10 +66,7 @@ export const createStyles = (theme: AppTheme) =>
       width: 260,
       height: 260,
       borderRadius: 130,
-      backgroundColor:
-        theme.direction === "gazette"
-          ? "rgba(255, 236, 212, 0.2)"
-          : "rgba(255, 255, 255, 0.18)",
+      backgroundColor: "rgba(255, 255, 255, 0.18)",
     },
     heroPulseTwo: {
       position: "absolute",
@@ -151,8 +113,8 @@ export const createStyles = (theme: AppTheme) =>
       fontSize: 36,
       lineHeight: 34,
       fontWeight: "800",
-      textTransform: theme.direction === "gazette" ? "none" : "uppercase",
-      letterSpacing: theme.direction === "gazette" ? 0.3 : 1.2,
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
     },
     heroTitleAccent: {
       color: theme.primary,
@@ -181,8 +143,8 @@ export const createStyles = (theme: AppTheme) =>
       fontSize: 29,
       lineHeight: 30,
       fontWeight: "800",
-      textTransform: theme.direction === "gazette" ? "none" : "uppercase",
-      letterSpacing: theme.direction === "gazette" ? 0.3 : 1.2,
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
     },
     sectionSubtitle: {
       color: theme.textMuted,
@@ -228,7 +190,7 @@ export const createStyles = (theme: AppTheme) =>
       borderWidth: 1,
       borderColor: theme.border,
       backgroundColor: theme.surface,
-      shadowColor: theme.direction === "gazette" ? "#1a1612" : "#0a0c12",
+      shadowColor: "#0a0c12",
       shadowOpacity: 0.12,
       shadowRadius: 16,
       shadowOffset: { width: 0, height: 10 },
@@ -239,10 +201,7 @@ export const createStyles = (theme: AppTheme) =>
       paddingVertical: 12,
       backgroundColor: theme.heroHighlight,
       borderBottomWidth: 1,
-      borderBottomColor:
-        theme.direction === "gazette"
-          ? "rgba(232, 184, 75, 0.35)"
-          : "rgba(255, 255, 255, 0.22)",
+      borderBottomColor: "rgba(255, 255, 255, 0.22)",
       flexDirection: "row",
       flexWrap: "wrap",
       gap: 8,
@@ -254,14 +213,8 @@ export const createStyles = (theme: AppTheme) =>
       paddingHorizontal: 11,
       paddingVertical: 5,
       borderWidth: 1,
-      borderColor:
-        theme.direction === "gazette"
-          ? "rgba(232, 184, 75, 0.45)"
-          : "rgba(255, 255, 255, 0.36)",
-      backgroundColor:
-        theme.direction === "gazette"
-          ? "rgba(255, 255, 255, 0.08)"
-          : "rgba(255, 255, 255, 0.12)",
+      borderColor: "rgba(255, 255, 255, 0.36)",
+      backgroundColor: "rgba(255, 255, 255, 0.12)",
     },
     featuredBadgeText: {
       color: theme.heroText,
@@ -280,8 +233,8 @@ export const createStyles = (theme: AppTheme) =>
       fontSize: 28,
       lineHeight: 30,
       fontWeight: "800",
-      textTransform: theme.direction === "gazette" ? "none" : "uppercase",
-      letterSpacing: theme.direction === "gazette" ? 0.4 : 1,
+      textTransform: "uppercase",
+      letterSpacing: 1,
     },
     featuredSummary: {
       color: theme.textMuted,
@@ -319,7 +272,7 @@ export const createStyles = (theme: AppTheme) =>
       paddingHorizontal: 14,
       paddingVertical: 14,
       gap: 6,
-      shadowColor: theme.direction === "gazette" ? "#1a1612" : "#111319",
+      shadowColor: "#111319",
       shadowOpacity: 0.08,
       shadowRadius: 12,
       shadowOffset: { width: 0, height: 8 },
@@ -337,8 +290,8 @@ export const createStyles = (theme: AppTheme) =>
       fontSize: 21,
       lineHeight: 22,
       fontWeight: "800",
-      textTransform: theme.direction === "gazette" ? "none" : "uppercase",
-      letterSpacing: theme.direction === "gazette" ? 0.2 : 0.8,
+      textTransform: "uppercase",
+      letterSpacing: 0.8,
     },
     quickActionDescription: {
       color: theme.textMuted,
@@ -353,7 +306,7 @@ export const createStyles = (theme: AppTheme) =>
       backgroundColor: theme.surface,
       borderWidth: 1,
       borderColor: theme.border,
-      shadowColor: theme.direction === "gazette" ? "#1a1612" : "#0f1015",
+      shadowColor: "#0f1015",
       shadowOpacity: 0.08,
       shadowRadius: 10,
       shadowOffset: { width: 0, height: 8 },
@@ -421,7 +374,7 @@ export const createStyles = (theme: AppTheme) =>
       color: theme.primary,
       fontSize: 22,
       fontWeight: "800",
-      letterSpacing: theme.direction === "gazette" ? 0.1 : 0.8,
+      letterSpacing: 0.8,
     },
     teamLogoFrame: {
       alignItems: "center",
@@ -490,16 +443,16 @@ export const createStyles = (theme: AppTheme) =>
       gap: 10,
     },
     tableRowLeader: {
-      backgroundColor: theme.direction === "gazette" ? "#fcf4e5" : "#15261f",
-      borderColor: theme.direction === "gazette" ? "#dcc8a0" : "#2d553f",
+      backgroundColor: "#15261f",
+      borderColor: "#2d553f",
     },
     tableRowEurope: {
-      backgroundColor: theme.direction === "gazette" ? "#fffcf6" : "#151a22",
-      borderColor: theme.direction === "gazette" ? "#e6dac5" : "#2a3441",
+      backgroundColor: "#151a22",
+      borderColor: "#2a3441",
     },
     tableRowBottom: {
-      backgroundColor: theme.direction === "gazette" ? "#f8f2ea" : "#23171d",
-      borderColor: theme.direction === "gazette" ? "#e1d7ca" : "#46303a",
+      backgroundColor: "#23171d",
+      borderColor: "#46303a",
     },
     tablePosBadge: {
       width: 28,
@@ -507,20 +460,20 @@ export const createStyles = (theme: AppTheme) =>
       borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: theme.direction === "gazette" ? "#f2ebe1" : "#1d2431",
+      backgroundColor: "#1d2431",
       marginRight: 6,
     },
     tablePosLeader: {
       backgroundColor: theme.primary,
     },
     tablePosEurope: {
-      backgroundColor: theme.direction === "gazette" ? "#efe6d6" : "#1f2835",
+      backgroundColor: "#1f2835",
     },
     tablePosBottom: {
-      backgroundColor: theme.direction === "gazette" ? "#ece2d5" : "#3a2530",
+      backgroundColor: "#3a2530",
     },
     tablePosText: {
-      color: theme.direction === "gazette" ? "#60594e" : "#98a4bb",
+      color: "#98a4bb",
       fontSize: 12,
       fontWeight: "800",
     },
@@ -528,10 +481,10 @@ export const createStyles = (theme: AppTheme) =>
       color: "#ffffff",
     },
     tablePosTextEurope: {
-      color: theme.direction === "gazette" ? "#8c6c2c" : "#8aa0c0",
+      color: "#8aa0c0",
     },
     tablePosTextBottom: {
-      color: theme.direction === "gazette" ? "#5f5547" : "#f2bdcb",
+      color: "#f2bdcb",
     },
     tableMain: {
       flexDirection: "row",
@@ -589,7 +542,7 @@ export const createStyles = (theme: AppTheme) =>
       borderColor: theme.border,
       backgroundColor: theme.surface,
       paddingVertical: 10,
-      shadowColor: theme.direction === "gazette" ? "#1a1612" : "#10131b",
+      shadowColor: "#10131b",
       shadowOpacity: 0.08,
       shadowRadius: 12,
       shadowOffset: { width: 0, height: 8 },

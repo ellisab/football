@@ -4,7 +4,7 @@ import { getHomeData } from "@/features/matchday/server/get-home-data";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ league?: string; season?: string; direction?: string }>;
+  searchParams: Promise<{ league?: string; season?: string }>;
 }) {
   const params = await searchParams;
   const data = await getHomeData(params);

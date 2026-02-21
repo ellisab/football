@@ -23,7 +23,7 @@ import {
 import { MOBILE_LEAGUES } from "../features/leagues/constants";
 import { useHomeData } from "../features/matchday/hooks/use-home-data";
 import { createStyles } from "../features/theme/styles";
-import { getTheme, type DesignDirection } from "../features/theme/theme";
+import { getTheme } from "../features/theme/theme";
 
 type SectionItem = ApiMatch | ApiTableRow;
 
@@ -65,16 +65,12 @@ const getSectionKicker = (section: AppSection) => {
 
 export default function App() {
   const [activeLeague, setActiveLeague] = useState<LeagueKey>("bl1");
-  const [designDirection, setDesignDirection] = useState<DesignDirection>("stadium");
   const [failedIconUrls, setFailedIconUrls] = useState<Record<string, boolean>>({});
 
   const colorScheme = useColorScheme();
-  const theme = useMemo(
-    () => getTheme(colorScheme, designDirection),
-    [colorScheme, designDirection]
-  );
+  const theme = useMemo(() => getTheme(colorScheme), [colorScheme]);
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const statusBarStyle = designDirection === "stadium" ? "light" : "dark";
+  const statusBarStyle = "light";
 
   const season = useMemo(() => getCurrentSeasonYear(), []);
 
@@ -208,51 +204,27 @@ export default function App() {
     table,
   ]);
 
-  const isGazette = designDirection === "gazette";
-
   const actionCards = useMemo(
     () => [
       {
-        label: isGazette ? "Briefing" : "Latest",
-        title: isGazette ? "Matchday Brief" : "Latest Results",
-        description: isGazette
-          ? "The fixtures and table shifts that matter most today."
-          : "Track every scoreline from first whistle to final.",
+        label: "Latest",
+        title: "Latest Results",
+        description: "Track every scoreline from first whistle to final.",
       },
       {
-        label: activeLeague === "dfb" ? "Insights" : isGazette ? "Table" : "Standings",
-        title: activeLeague === "dfb" ? "Match Insights" : isGazette ? "Full Table" : "Table Shift",
+        label: activeLeague === "dfb" ? "Insights" : "Standings",
+        title: activeLeague === "dfb" ? "Match Insights" : "Table Shift",
         description:
           activeLeague === "dfb"
             ? "Scan upcoming ties and in-round momentum."
-            : isGazette
-              ? "A clean editorial table with qualification context."
-              : "Jump straight to qualification and relegation pressure.",
+            : "Jump straight to qualification and relegation pressure.",
       },
     ],
-    [activeLeague, isGazette]
+    [activeLeague]
   );
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <View style={styles.directionSwitch}>
-        {(["stadium", "gazette"] as const).map((direction) => {
-          const active = direction === designDirection;
-
-          return (
-            <Pressable
-              key={direction}
-              onPress={() => setDesignDirection(direction)}
-              style={[styles.directionButton, active && styles.directionButtonActive]}
-            >
-              <Text style={[styles.directionButtonText, active && styles.directionButtonTextActive]}>
-                {direction}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
       <View style={styles.section}>
         <Text style={styles.sectionKicker}>Categories</Text>
       </View>
@@ -279,11 +251,9 @@ export default function App() {
           <View style={styles.heroTagRow}>
             <View style={styles.heroTag}>
               <Text style={styles.heroTagText}>
-                {isGazette
-                  ? stageLabel
-                  : matchdayNumber
-                    ? "Live Matchday"
-                    : `Live ${stageLabel}`}
+                {matchdayNumber
+                  ? "Live Matchday"
+                  : `Live ${stageLabel}`}
               </Text>
             </View>
             <View style={styles.heroTag}>
@@ -295,27 +265,15 @@ export default function App() {
           </View>
 
           <Text style={styles.heroKicker}>
-            {isGazette
-              ? `${stageLabel}, at a glance.`
-              : matchdayNumber
-                ? "Stadium lights are on"
-                : `Live ${stageLabel}`}
+            {matchdayNumber
+              ? "Stadium lights are on"
+              : `Live ${stageLabel}`}
           </Text>
           <Text style={styles.heroTitle}>
-            {isGazette ? (
-              <>
-                Your <Text style={styles.heroTitleAccent}>Matchday</Text> Control Room
-              </>
-            ) : (
-              <>
-                Your <Text style={styles.heroTitleAccent}>matchday</Text> control room
-              </>
-            )}
+            Your <Text style={styles.heroTitleAccent}>matchday</Text> control room
           </Text>
           <Text style={styles.heroDescription}>
-            {isGazette
-              ? "Warm, editorial design with fixtures, standings, and knockout drama in one place."
-              : "Live fixtures, tables, and knockout drama in one pitch-side view."}
+            Live fixtures, tables, and knockout drama in one pitch-side view.
           </Text>
         </View>
       </View>

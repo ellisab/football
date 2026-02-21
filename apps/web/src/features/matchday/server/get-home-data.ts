@@ -29,7 +29,7 @@ import {
   type ApiMatch,
 } from "@footballleagues/core/openligadb";
 import { resolveLeagueTheme } from "@footballleagues/core/teams";
-import type { DesignDirection, HomeData } from "./types";
+import type { HomeData } from "./types";
 
 const REVALIDATE = { next: { revalidate: 60 } };
 
@@ -69,10 +69,6 @@ const ERROR_LABEL_MAP: Record<string, string> = {
   "knockout rounds": "knockout rounds",
 };
 
-const resolveDirection = (direction?: string): DesignDirection => {
-  return direction === "gazette" ? "gazette" : "stadium";
-};
-
 const getStatusCode = (error: unknown) => {
   const reason = error as { status?: number } | undefined;
   return reason?.status;
@@ -93,9 +89,7 @@ const normalizeLeagueEntries = async () => {
 export const getHomeData = async (params: {
   league?: string;
   season?: string;
-  direction?: string;
 }): Promise<HomeData> => {
-  const direction = resolveDirection(params.direction);
   const normalizedGroups = await normalizeLeagueEntries();
   const availableGroupKeys = getAvailableGroupKeys(normalizedGroups);
   const resolvedLeague = resolveLeagueSelection(params.league, availableGroupKeys);
@@ -282,7 +276,6 @@ export const getHomeData = async (params: {
   );
 
   return {
-    direction,
     resolvedLeague,
     resolvedSeason,
     activeLeagueLabel,

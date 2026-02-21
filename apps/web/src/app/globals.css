@@ -156,12 +156,6 @@
   .font-stadium-body {
     font-family: var(--font-stadium-body);
   }
-  .font-gazette-heading {
-    font-family: var(--font-gazette-heading);
-  }
-  .font-gazette-body {
-    font-family: var(--font-gazette-body);
-  }
   .app-shell {
     background:
       radial-gradient(circle at 16% -8%, rgba(213, 0, 29, 0.2), transparent 38%),

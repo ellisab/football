@@ -7,10 +7,7 @@ export type BracketRound = {
   matches: ApiMatch[];
 };
 
-export type DesignDirection = "stadium" | "gazette";
-
 export type HomeData = {
-  direction: DesignDirection;
   resolvedLeague: LeagueKey;
   resolvedSeason: number;
   activeLeagueLabel: string;
