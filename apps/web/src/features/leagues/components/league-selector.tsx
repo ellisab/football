@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { LeagueKey, LeagueOption } from "@footballleagues/core";
+import type { LeagueKey, LeagueOption } from "@footballleagues/core/leagues";
 import {
   Select,
   SelectContent,

@@ -15,12 +15,6 @@ export type LeagueGroupConfig = {
   shortcutMatch: string[];
 };
 
-export type LeagueTheme = {
-  accent: string;
-  accentSoft: string;
-  glow: string;
-};
-
 export type LeagueOption = {
   shortcut: LeagueKey;
   label: string;

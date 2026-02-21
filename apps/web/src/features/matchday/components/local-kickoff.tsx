@@ -1,6 +1,6 @@
 "use client";
 
-import { formatKickoff } from "@footballleagues/core";
+import { formatKickoff } from "@footballleagues/core/matches";
 
 type LocalKickoffProps = {
   value?: string;

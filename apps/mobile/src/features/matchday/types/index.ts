@@ -1,9 +1,5 @@
-import type {
-  ApiGroup,
-  ApiMatch,
-  ApiTableRow,
-  LeagueKey,
-} from "@footballleagues/core";
+import type { LeagueKey } from "@footballleagues/core/leagues";
+import type { ApiGroup, ApiMatch, ApiTableRow } from "@footballleagues/core/openligadb";
 
 export type BracketRound = {
   group: Pick<ApiGroup, "groupID" | "groupName" | "groupOrderID">;

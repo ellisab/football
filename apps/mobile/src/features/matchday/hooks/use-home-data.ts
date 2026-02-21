@@ -1,20 +1,24 @@
 import { useEffect, useState } from "react";
 import {
-  areAllMatchesFinished,
-  findNextGroup,
-  getCurrentGroup,
   getDataShortcutForLeague,
   getGroupShortcutForLeague,
+  type LeagueKey,
+} from "@footballleagues/core/leagues";
+import {
+  areAllMatchesFinished,
+  findNextGroup,
+  isKnockoutGroup,
+  sortGoals,
+} from "@footballleagues/core/matches";
+import {
+  getCurrentGroup,
   getGroups,
   getMatchdayResults,
   getMatchesByGroup,
   getTable,
-  isKnockoutGroup,
-  sortGoals,
   type ApiGroup,
   type ApiMatch,
-  type LeagueKey,
-} from "@footballleagues/core";
+} from "@footballleagues/core/openligadb";
 import type { BracketRound, HomeDataState } from "../types";
 
 const getStatusCode = (error: unknown) => {

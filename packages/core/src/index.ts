@@ -1,2 +1,4 @@
 export * from "./openligadb";
-export * from "./football";
+export * from "./leagues";
+export * from "./matches";
+export * from "./teams";

@@ -1,4 +1,4 @@
-import type { ApiTableRow } from "@footballleagues/core";
+import type { ApiTableRow } from "@footballleagues/core/openligadb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@footballleagues/ui/card";
 import { Goal, Medal } from "lucide-react";
 import {

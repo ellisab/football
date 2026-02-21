@@ -11,18 +11,15 @@ import {
   View,
 } from "react-native";
 import { SvgUri } from "react-native-svg";
+import { getCurrentSeasonYear, type LeagueKey } from "@footballleagues/core/leagues";
+import { formatKickoff } from "@footballleagues/core/matches";
+import { getFinalResult, type ApiMatch, type ApiTableRow } from "@footballleagues/core/openligadb";
 import {
-  formatKickoff,
-  getCurrentSeasonYear,
-  getFinalResult,
   getImageRequestHeaders,
   isAllowedImageHost,
   isSvgUrl,
   normalizeIconUrl,
-  type ApiMatch,
-  type ApiTableRow,
-  type LeagueKey,
-} from "@footballleagues/core";
+} from "@footballleagues/core/teams";
 import { MOBILE_LEAGUES } from "../features/leagues/constants";
 import { useHomeData } from "../features/matchday/hooks/use-home-data";
 import { createStyles } from "../features/theme/styles";

@@ -1,5 +1,4 @@
-import type { ApiMatch } from "@footballleagues/core";
-import { getFinalResult } from "@footballleagues/core";
+import { getFinalResult, type ApiMatch } from "@footballleagues/core/openligadb";
 import { Clock3, Goal } from "lucide-react";
 import { TeamBadge } from "@/features/teams/components/team-badge";
 import { LocalKickoff } from "./local-kickoff";

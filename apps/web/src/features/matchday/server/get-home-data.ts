@@ -1,30 +1,34 @@
 import {
-  areAllMatchesFinished,
   buildLeagueEntriesByGroup,
   buildLeagueOptions,
-  findNextGroup,
   getAvailableGroupKeys,
-  getAvailableLeagues,
-  getCurrentGroup,
   getCurrentSeasonYear,
   getDataShortcutForLeague,
-  getGroups,
-  getMatchdayResults,
-  getMatchesByGroup,
-  getTable,
-  isKnockoutGroup,
   keepLatestSeasonOnly,
   LEAGUE_GROUPS,
   pickLeagueEntryForSeason,
   resolveEffectiveLeagueShortcut,
   resolveLeagueSelection,
-  resolveLeagueTheme,
   resolveSeasonSelection,
+  type LeagueKey,
+} from "@footballleagues/core/leagues";
+import {
+  areAllMatchesFinished,
+  findNextGroup,
+  isKnockoutGroup,
   sortGoals,
+} from "@footballleagues/core/matches";
+import {
+  getAvailableLeagues,
+  getCurrentGroup,
+  getGroups,
+  getMatchdayResults,
+  getMatchesByGroup,
+  getTable,
   type ApiGroup,
   type ApiMatch,
-  type LeagueKey,
-} from "@footballleagues/core";
+} from "@footballleagues/core/openligadb";
+import { resolveLeagueTheme } from "@footballleagues/core/teams";
 import type { DesignDirection, HomeData } from "./types";
 
 const REVALIDATE = { next: { revalidate: 60 } };

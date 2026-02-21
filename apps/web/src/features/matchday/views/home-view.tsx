@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getFinalResult, type ApiMatch, type LeagueKey } from "@footballleagues/core";
+import type { LeagueKey } from "@footballleagues/core/leagues";
+import { getFinalResult, type ApiMatch } from "@footballleagues/core/openligadb";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,

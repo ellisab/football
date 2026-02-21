@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { isAllowedImageHost, normalizeIconUrl } from "@footballleagues/core";
+import { isAllowedImageHost, normalizeIconUrl } from "@footballleagues/core/teams";
 
 type TeamBadgeProps = {
   name?: string;
