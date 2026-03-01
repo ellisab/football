@@ -7,3 +7,33 @@ updates:
       day: "monday"
       time: "07:00"
       timezone: "Europe/Berlin"
+    open-pull-requests-limit: 8
+    groups:
+      mobile-minor-patch:
+        patterns:
+          - "expo*"
+          - "react-native*"
+          - "@react-native/*"
+        update-types:
+          - "minor"
+          - "patch"
+      web-minor-patch:
+        patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+        update-types:
+          - "minor"
+          - "patch"
+      tooling-minor-patch:
+        patterns:
+          - "eslint*"
+          - "@typescript-eslint/*"
+          - "typescript"
+          - "@types/*"
+          - "tailwind*"
+          - "@tailwindcss/*"
+        update-types:
+          - "minor"
+          - "patch"
