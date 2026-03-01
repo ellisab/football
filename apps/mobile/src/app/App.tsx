@@ -68,7 +68,10 @@ export default function App() {
   const [failedIconUrls, setFailedIconUrls] = useState<Record<string, boolean>>({});
 
   const colorScheme = useColorScheme();
-  const theme = useMemo(() => getTheme(colorScheme), [colorScheme]);
+  const normalizedColorScheme = colorScheme === "light" || colorScheme === "dark"
+    ? colorScheme
+    : undefined;
+  const theme = useMemo(() => getTheme(normalizedColorScheme), [normalizedColorScheme]);
   const styles = useMemo(() => createStyles(theme), [theme]);
   const statusBarStyle = "light";
 

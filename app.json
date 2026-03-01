@@ -3,11 +3,9 @@
     "name": "footballleagues",
     "slug": "footballleagues",
     "version": "1.0.0",
-    "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "icon": "./apps/mobile/assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "splash": {
       "image": "./apps/mobile/assets/splash-icon.png",
       "resizeMode": "contain",
@@ -25,10 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./apps/mobile/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+      }
     },
-    "entryPoint": "apps/mobile/index.js",
     "extra": {
       "eas": {
         "projectId": "f316471d-acdd-4cb5-837e-c504f63fd65d"

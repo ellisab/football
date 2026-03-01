@@ -7,6 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "expo:doctor": "pnpm dlx expo-doctor",
+    "expo:doctor:deps": "pnpm dlx expo install --check",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "typecheck": "tsc --noEmit",
     "build": "expo export"
@@ -14,10 +16,10 @@
   "dependencies": {
     "@footballleagues/core": "workspace:*",
     "expo": "~55.0.4",
-    "expo-status-bar": "~3.0.9",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-native": "0.84.1",
+    "expo-status-bar": "~55.0.4",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.2",
     "react-native-svg": "^15.15.3",
     "react-native-web": "^0.21.2"
   },

@@ -13,6 +13,8 @@
     "build:all": "pnpm -C apps/web build && pnpm -C apps/mobile build",
     "build": "pnpm -C apps/web build",
     "start": "pnpm -C apps/web start",
+    "doctor:mobile": "pnpm -C apps/mobile run expo:doctor",
+    "doctor:mobile:deps": "pnpm -C apps/mobile run expo:doctor:deps",
     "lint:web": "pnpm -C apps/web lint",
     "lint:mobile": "pnpm -C apps/mobile lint",
     "lint": "pnpm -C apps/web lint && pnpm -C apps/mobile lint",
@@ -22,7 +24,6 @@
     "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
-    "expo": "~55.0.4",
     "tsx": "^4.21.0"
   }
 }
