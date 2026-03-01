@@ -22,7 +22,7 @@
     "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
-    "expo": "~54.0.33",
+    "expo": "~55.0.4",
     "tsx": "^4.21.0"
   }
 }
