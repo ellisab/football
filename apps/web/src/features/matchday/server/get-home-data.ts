@@ -13,7 +13,6 @@ import {
   type LeagueKey,
 } from "@footballleagues/core/leagues";
 import {
-  areAllMatchesFinished,
   findNextGroup,
   isKnockoutGroup,
   sortGoals,
@@ -32,6 +31,7 @@ import { resolveLeagueTheme } from "@footballleagues/core/teams";
 import type { HomeData } from "./types";
 
 const REVALIDATE = { next: { revalidate: 60 } };
+const MAX_NEXT_GROUP_LOOKAHEAD = 8;
 
 const getGroupsWithFallback = async (
   leagueKey: LeagueKey,
@@ -164,13 +164,12 @@ export const getHomeData = async (params: {
       ? matchdayResult.value.map(sortGoals)
       : (dataErrors.push("matchday"), []);
 
-  const allCurrentRoundMatchesFinished = areAllMatchesFinished(matches);
-
   let nextRoundMatches: ApiMatch[] = [];
   let nextRoundLabel = "Next Matchday";
 
-  if (currentGroup?.groupOrderID && allCurrentRoundMatchesFinished) {
+  if (currentGroup?.groupOrderID) {
     let scheduleGroups = Array.isArray(groups) ? groups : [];
+    let nextGroupsFailed = false;
 
     if (scheduleGroups.length === 0) {
       try {
@@ -185,7 +184,7 @@ export const getHomeData = async (params: {
           : [];
       } catch (error) {
         if (getStatusCode(error) !== 404) {
-          dataErrors.push("next groups");
+          nextGroupsFailed = true;
         }
       }
     }
@@ -194,22 +193,65 @@ export const getHomeData = async (params: {
       scheduleGroups,
       currentGroup.groupOrderID
     );
-    const fallbackNextGroupOrderID = currentGroup.groupOrderID + 1;
-    const nextGroupOrderID = nextGroup?.groupOrderID ?? fallbackNextGroupOrderID;
 
-    try {
-      const nextMatchday = await getMatchdayResults(
-        effectiveShortcut,
-        resolvedSeason,
-        nextGroupOrderID,
-        REVALIDATE
-      );
-      nextRoundMatches = nextMatchday.map(sortGoals);
-      if (nextGroup?.groupName) {
-        nextRoundLabel = nextGroup.groupName;
+    const knownFutureGroupOrderIDs = scheduleGroups
+      .map((group) => group?.groupOrderID)
+      .filter(
+        (groupOrderID): groupOrderID is number =>
+          typeof groupOrderID === "number" &&
+          groupOrderID > (currentGroup.groupOrderID as number)
+      )
+      .sort((a, b) => a - b);
+    const fallbackFutureGroupOrderIDs = Array.from(
+      { length: MAX_NEXT_GROUP_LOOKAHEAD },
+      (_, index) => (currentGroup.groupOrderID as number) + index + 1
+    );
+    const candidateNextGroupOrderIDs = Array.from(
+      new Set([
+        ...(typeof nextGroup?.groupOrderID === "number"
+          ? [nextGroup.groupOrderID]
+          : []),
+        ...knownFutureGroupOrderIDs,
+        ...fallbackFutureGroupOrderIDs,
+      ])
+    );
+
+    let nextMatchdayFailed = false;
+
+    for (const candidateGroupOrderID of candidateNextGroupOrderIDs) {
+      try {
+        const nextMatchday = await getMatchdayResults(
+          effectiveShortcut,
+          resolvedSeason,
+          candidateGroupOrderID,
+          REVALIDATE
+        );
+        const normalizedNextRound = nextMatchday.map(sortGoals);
+
+        if (normalizedNextRound.length === 0) {
+          continue;
+        }
+
+        nextRoundMatches = normalizedNextRound;
+        const candidateGroup = scheduleGroups.find(
+          (group) => group?.groupOrderID === candidateGroupOrderID
+        );
+        if (candidateGroup?.groupName) {
+          nextRoundLabel = candidateGroup.groupName;
+        }
+        break;
+      } catch (error) {
+        if (getStatusCode(error) !== 404) {
+          nextMatchdayFailed = true;
+        }
       }
-    } catch (error) {
-      if (getStatusCode(error) !== 404) {
+    }
+
+    if (nextRoundMatches.length === 0) {
+      if (nextGroupsFailed) {
+        dataErrors.push("next groups");
+      }
+      if (nextMatchdayFailed) {
         dataErrors.push("next matchday");
       }
     }

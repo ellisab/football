@@ -5,7 +5,6 @@ import {
   type LeagueKey,
 } from "@footballleagues/core/leagues";
 import {
-  areAllMatchesFinished,
   findNextGroup,
   isKnockoutGroup,
   sortGoals,
@@ -25,6 +24,8 @@ const getStatusCode = (error: unknown) => {
   const reason = error as { status?: number } | undefined;
   return reason?.status;
 };
+
+const MAX_NEXT_GROUP_LOOKAHEAD = 8;
 
 export function useHomeData(activeLeague: LeagueKey, season: number) {
   const [state, setState] = useState<Omit<HomeDataState, "activeLeague">>({
@@ -168,31 +169,49 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
 
         let nextGroupName = "";
         let nextMatches: ApiMatch[] = [];
+        let scheduleGroups =
+          groupsResult.status === "fulfilled" &&
+          Array.isArray(groupsResult.value?.groups)
+            ? groupsResult.value.groups
+            : [];
 
-        if (areAllMatchesFinished(currentRoundMatches)) {
-          let scheduleGroups =
-            groupsResult.status === "fulfilled" &&
-            Array.isArray(groupsResult.value?.groups)
-              ? groupsResult.value.groups
-              : [];
-
-          if (scheduleGroups.length === 0) {
-            try {
-              const fallbackGroups = await getGroups(dataShortcut, season);
-              scheduleGroups = Array.isArray(fallbackGroups) ? fallbackGroups : [];
-            } catch {
-              scheduleGroups = [];
-            }
+        if (scheduleGroups.length === 0) {
+          try {
+            const fallbackGroups = await getGroups(dataShortcut, season);
+            scheduleGroups = Array.isArray(fallbackGroups) ? fallbackGroups : [];
+          } catch {
+            scheduleGroups = [];
           }
+        }
 
-          const nextGroup = findNextGroup(scheduleGroups, groupOrderID);
-          const nextGroupOrderID = nextGroup?.groupOrderID ?? groupOrderID + 1;
+        const nextGroup = findNextGroup(scheduleGroups, groupOrderID);
+        const knownFutureGroupOrderIDs = scheduleGroups
+          .map((group) => group?.groupOrderID)
+          .filter(
+            (orderID): orderID is number =>
+              typeof orderID === "number" && orderID > groupOrderID
+          )
+          .sort((a, b) => a - b);
+        const fallbackFutureGroupOrderIDs = Array.from(
+          { length: MAX_NEXT_GROUP_LOOKAHEAD },
+          (_, index) => groupOrderID + index + 1
+        );
+        const candidateNextGroupOrderIDs = Array.from(
+          new Set([
+            ...(typeof nextGroup?.groupOrderID === "number"
+              ? [nextGroup.groupOrderID]
+              : []),
+            ...knownFutureGroupOrderIDs,
+            ...fallbackFutureGroupOrderIDs,
+          ])
+        );
 
+        for (const candidateGroupOrderID of candidateNextGroupOrderIDs) {
           try {
             const nextRound = await getMatchdayResults(
               dataShortcut,
               season,
-              nextGroupOrderID
+              candidateGroupOrderID
             );
 
             if (!isMounted) return;
@@ -201,10 +220,17 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
               ? nextRound.map(sortGoals)
               : [];
 
-            if (normalizedNextMatches.length > 0) {
-              nextGroupName = nextGroup?.groupName || "Next Matchday";
-              nextMatches = normalizedNextMatches;
+            if (normalizedNextMatches.length === 0) {
+              continue;
             }
+
+            const candidateGroup = scheduleGroups.find(
+              (group) => group?.groupOrderID === candidateGroupOrderID
+            );
+
+            nextGroupName = candidateGroup?.groupName || "Next Matchday";
+            nextMatches = normalizedNextMatches;
+            break;
           } catch (error) {
             if (getStatusCode(error) !== 404) {
               // Ignore hard failure for next fixtures, keep the current payload.

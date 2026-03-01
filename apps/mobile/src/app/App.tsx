@@ -12,7 +12,11 @@ import {
 } from "react-native";
 import { SvgUri } from "react-native-svg";
 import { getCurrentSeasonYear, type LeagueKey } from "@footballleagues/core/leagues";
-import { formatKickoff } from "@footballleagues/core/matches";
+import {
+  formatKickoff,
+  groupKnockoutMatchesByTie,
+  type KnockoutTie,
+} from "@footballleagues/core/matches";
 import { getFinalResult, type ApiMatch, type ApiTableRow } from "@footballleagues/core/openligadb";
 import {
   getImageRequestHeaders,
@@ -25,13 +29,13 @@ import { useHomeData } from "../features/matchday/hooks/use-home-data";
 import { createStyles } from "../features/theme/styles";
 import { getTheme } from "../features/theme/theme";
 
-type SectionItem = ApiMatch | ApiTableRow;
+type SectionItem = ApiMatch | ApiTableRow | KnockoutTie;
 
 type AppSection = {
   key: string;
   title: string;
   subtitle: string;
-  type: "match" | "table";
+  type: "match" | "table" | "tie";
   emptyText: string;
   data: SectionItem[];
 };
@@ -160,26 +164,27 @@ export default function App() {
 
   const sections = useMemo<AppSection[]>(() => {
     const result: AppSection[] = [];
-
-    if (!isChampionsLeaguePlayoffRound) {
-      result.push({
-        key: "matchday",
-        title: groupName,
-        subtitle: `Season ${season}`,
-        type: "match",
-        emptyText: error || "No match results available yet for this round.",
-        data: matches,
-      });
-    }
+    const useTieSections = activeLeague === "cl";
 
     if (nextMatches.length > 0) {
       result.push({
         key: "next-matchday",
         title: nextGroupName || "Next Matchday",
         subtitle: `Season ${season} · upcoming fixtures`,
-        type: "match",
+        type: useTieSections ? "tie" : "match",
         emptyText: "No upcoming fixtures available yet.",
-        data: nextMatches,
+        data: useTieSections ? groupKnockoutMatchesByTie(nextMatches) : nextMatches,
+      });
+    }
+
+    if (!isChampionsLeaguePlayoffRound) {
+      result.push({
+        key: "matchday",
+        title: groupName,
+        subtitle: `Season ${season}`,
+        type: useTieSections ? "tie" : "match",
+        emptyText: error || "No match results available yet for this round.",
+        data: useTieSections ? groupKnockoutMatchesByTie(matches) : matches,
       });
     }
 
@@ -226,7 +231,7 @@ export default function App() {
     [activeLeague]
   );
 
-  const renderHeader = () => (
+  const renderTopControls = () => (
     <View style={styles.header}>
       <View style={styles.section}>
         <Text style={styles.sectionKicker}>Categories</Text>
@@ -246,7 +251,11 @@ export default function App() {
           );
         })}
       </View>
+    </View>
+  );
 
+  const renderOverviewPanels = () => (
+    <View style={styles.header}>
       <View style={styles.heroPanel}>
         <View style={styles.heroPulseOne} />
         <View style={styles.heroPulseTwo} />
@@ -364,6 +373,65 @@ export default function App() {
     );
   };
 
+  const renderTieCard = (tie: KnockoutTie) => {
+    const winnerRowStyle = {
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: "rgba(255, 120, 145, 0.45)",
+      backgroundColor: "rgba(170, 50, 80, 0.22)",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      alignSelf: "flex-start" as const,
+    };
+    const winnerTextStyle = {
+      color: "#ffb7c7",
+    };
+    const hasLiveLeg = tie.matches.some((match) => match.matchIsFinished !== true);
+
+    return (
+      <View key={tie.key}>
+        <View style={styles.section}>
+          <View style={tie.aggregateScore?.leader === "team1" ? winnerRowStyle : undefined}>
+            <Text
+              style={[
+                styles.roundTitle,
+                tie.aggregateScore?.leader === "team1" && winnerTextStyle,
+              ]}
+            >
+              {tie.team1.teamName ?? "Team 1"}
+            </Text>
+          </View>
+          <View style={tie.aggregateScore?.leader === "team2" ? winnerRowStyle : undefined}>
+            <Text
+              style={[
+                styles.roundTitle,
+                tie.aggregateScore?.leader === "team2" && winnerTextStyle,
+              ]}
+            >
+              {tie.team2.teamName ?? "Team 2"}
+            </Text>
+          </View>
+          {tie.aggregateScore ? (
+            <Text style={styles.sectionSubtitle}>
+              {hasLiveLeg ? "Live aggregate" : "Aggregate"} {tie.aggregateScore.team1} - {tie.aggregateScore.team2}
+            </Text>
+          ) : null}
+        </View>
+
+        {tie.matches.map((match, index) => (
+          <View key={match.matchID ?? `${tie.key}-${index}`}>
+            {tie.matches.length > 1 ? (
+              <View style={styles.section}>
+                <Text style={styles.sectionKicker}>Leg {index + 1}</Text>
+              </View>
+            ) : null}
+            {renderMatchCard(match)}
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   const renderTableRow = (row: ApiTableRow, index: number, total: number) => {
     const isLeader = index === 0;
     const isEurope = index > 0 && index < 4;
@@ -458,6 +526,10 @@ export default function App() {
       return renderMatchCard(item as ApiMatch);
     }
 
+    if (section.type === "tie") {
+      return renderTieCard(item as KnockoutTie);
+    }
+
     if (section.type === "table") {
       return renderTableRow(item as ApiTableRow, index, section.data.length);
     }
@@ -481,6 +553,7 @@ export default function App() {
         <SectionList<SectionItem, AppSection>
           sections={sections}
           keyExtractor={(item, index) =>
+            (item as KnockoutTie)?.key ||
             (item as ApiMatch)?.matchID?.toString?.() ||
             (item as ApiTableRow)?.teamInfoId?.toString?.() ||
             (item as ApiTableRow)?.teamName ||
@@ -495,40 +568,72 @@ export default function App() {
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
             <View>
-              {renderHeader()}
+              {renderTopControls()}
               {error ? (
                 <View style={styles.errorBanner}>
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               ) : null}
-              {activeLeague === "cl" && bracketMatches.length > 0 ? (
-                <View>
-                  <View style={styles.section}>
-                    <Text style={styles.sectionKicker}>Knockout</Text>
-                    <Text style={styles.sectionTitle}>Champions League Bracket</Text>
-                    <Text style={styles.sectionSubtitle}>
-                      Knockout rounds based on the latest groups data.
-                    </Text>
-                  </View>
-                  <View style={styles.bracketCard}>
-                    {bracketMatches.map((round) => (
-                      <View key={round?.group?.groupID ?? round?.group?.groupName}>
-                        <View style={styles.section}>
-                          <Text style={styles.roundTitle}>{round?.group?.groupName ?? "Round"}</Text>
-                        </View>
-                        {round.matches.length === 0 ? (
-                          <View style={styles.card}>
-                            <Text style={styles.emptyText}>No matches available yet.</Text>
-                          </View>
-                        ) : (
-                          round.matches.map((match) => renderMatchCard(match))
-                        )}
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              ) : null}
             </View>
+          }
+          ListFooterComponent={
+              <View>
+                {renderOverviewPanels()}
+                {activeLeague === "cl" && bracketMatches.length > 0 ? (
+                  <View>
+                    <View style={styles.section}>
+                      <Text style={styles.sectionKicker}>Knockout</Text>
+                      <Text style={styles.sectionTitle}>Champions League Bracket</Text>
+                      <Text style={styles.sectionSubtitle}>
+                        Knockout rounds based on the latest groups data.
+                      </Text>
+                    </View>
+                    <View style={styles.bracketCard}>
+                      {bracketMatches.map((round) => {
+                        const ties = groupKnockoutMatchesByTie(round.matches);
+
+                        return (
+                          <View key={round?.group?.groupID ?? round?.group?.groupName}>
+                            <View style={styles.section}>
+                              <Text style={styles.roundTitle}>{round?.group?.groupName ?? "Round"}</Text>
+                            </View>
+                            {ties.length === 0 ? (
+                              <View style={styles.card}>
+                                <Text style={styles.emptyText}>No matches available yet.</Text>
+                              </View>
+                            ) : (
+                              ties.map((tie) => (
+                                <View key={`${round?.group?.groupID ?? round?.group?.groupName}-${tie.key}`}>
+                                  <View style={styles.section}>
+                                    <Text style={styles.roundTitle}>
+                                      {tie.team1.teamName ?? "Team 1"} vs {tie.team2.teamName ?? "Team 2"}
+                                    </Text>
+                                    {tie.aggregateScore ? (
+                                      <Text style={styles.sectionSubtitle}>
+                                        Aggregate {tie.aggregateScore.team1} - {tie.aggregateScore.team2}
+                                      </Text>
+                                    ) : null}
+                                  </View>
+                                  {tie.matches.map((match, index) => (
+                                    <View key={match.matchID ?? `${tie.key}-${index}`}>
+                                      {tie.matches.length > 1 ? (
+                                        <View style={styles.section}>
+                                          <Text style={styles.sectionKicker}>Leg {index + 1}</Text>
+                                        </View>
+                                      ) : null}
+                                      {renderMatchCard(match)}
+                                    </View>
+                                  ))}
+                                </View>
+                              ))
+                            )}
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ) : null}
+              </View>
           }
         />
       )}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { LeagueKey } from "@footballleagues/core/leagues";
+import { groupKnockoutMatchesByTie } from "@footballleagues/core/matches";
 import { getFinalResult, type ApiMatch } from "@footballleagues/core/openligadb";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -22,6 +23,68 @@ const getMatchKey = (match: ApiMatch, index: number) => {
   return (
     match.matchID ?? `${match.team1?.teamId ?? "home"}-${match.team2?.teamId ?? "away"}-${index}`
   );
+};
+
+const renderGroupedTieCards = (
+  matches: ApiMatch[],
+  keyPrefix: string
+) => {
+  const ties = groupKnockoutMatchesByTie(matches);
+
+  if (ties.length === 0) {
+    return (
+      <div className="rounded-2xl border border-[#1f2431] bg-[#131720] p-5 text-[#97a2b8]">
+        No match results available yet for this round.
+      </div>
+    );
+  }
+
+  return ties.map((tie, tieIndex) => (
+    <div
+      key={`${keyPrefix}-${tie.key}-${tieIndex}`}
+      className="grid gap-3 rounded-2xl border border-[#222530] bg-[#151a22] p-3"
+    >
+      <div className="grid gap-2 px-1">
+        <div
+          className={`inline-flex items-center rounded-lg border px-2 py-1 text-sm font-semibold ${
+            tie.aggregateScore?.leader === "team1"
+              ? "border-[#6f3041] bg-[#3b1f29] text-[#ffb3c7]"
+              : "border-[#2a3040] bg-[#171c26] text-[#d6dbe6]"
+          }`}
+        >
+          {tie.team1.teamName ?? "Team 1"}
+        </div>
+        <div
+          className={`inline-flex items-center rounded-lg border px-2 py-1 text-sm font-semibold ${
+            tie.aggregateScore?.leader === "team2"
+              ? "border-[#6f3041] bg-[#3b1f29] text-[#ffb3c7]"
+              : "border-[#2a3040] bg-[#171c26] text-[#d6dbe6]"
+          }`}
+        >
+          {tie.team2.teamName ?? "Team 2"}
+        </div>
+        {tie.aggregateScore ? (
+          <div className="text-xs font-semibold uppercase tracking-[0.1em] text-[#3dffa0]">
+            {tie.matches.some((match) => match.matchIsFinished !== true) ? "Live Agg" : "Agg"}{" "}
+            {tie.aggregateScore.team1} - {tie.aggregateScore.team2}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="grid gap-3">
+        {tie.matches.map((match, matchIndex) => (
+          <div key={getMatchKey(match, matchIndex)} className="grid gap-1">
+            {tie.matches.length > 1 ? (
+              <div className="px-1 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-[#9ca6ba]">
+                Leg {matchIndex + 1}
+              </div>
+            ) : null}
+            <MatchCard match={match} />
+          </div>
+        ))}
+      </div>
+    </div>
+  ));
 };
 
 const leagueStyles: Record<LeagueKey, { label: string; icon: LucideIcon }> = {
@@ -228,6 +291,30 @@ export function HomeView({ data }: { data: HomeData }) {
           </div>
         ) : null}
 
+        {data.nextRoundMatches.length > 0 ? (
+          <section id="next-round" className="grid gap-4">
+            <div className="grid gap-1">
+              <div className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#3dffa0]">
+                Next Round
+              </div>
+              <h2 className="text-[2rem] leading-none font-[var(--font-stadium-heading)] uppercase text-[#ffffff] sm:text-[2.45rem]">
+                {data.nextRoundLabel}
+              </h2>
+              <p className="text-sm text-[#9ca6ba]">
+                {data.activeLeagueLabel} · Season {data.resolvedSeason}
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              {data.resolvedLeague === "cl"
+                ? renderGroupedTieCards(data.nextRoundMatches, "next")
+                : data.nextRoundMatches.map((match, index) => (
+                    <MatchCard key={getMatchKey(match, index)} match={match} />
+                  ))}
+            </div>
+          </section>
+        ) : null}
+
         {data.resolvedLeague === "cl" ? (
           <section id="bracket" className="grid gap-4">
             <BracketSection rounds={data.bracketMatches} />
@@ -249,29 +336,19 @@ export function HomeView({ data }: { data: HomeData }) {
             </div>
 
             <div className="grid gap-4">
-              {data.matches.length === 0 ? (
-                <div className="rounded-2xl border border-[#1f2431] bg-[#131720] p-5 text-[#97a2b8]">
-                  No match results available yet for this round.
-                </div>
+              {data.resolvedLeague === "cl" ? (
+                renderGroupedTieCards(data.matches, "current")
               ) : (
-                data.matches.map((match, index) => (
-                  <MatchCard key={getMatchKey(match, index)} match={match} />
-                ))
-              )}
-
-              {data.nextRoundMatches.length > 0 ? (
-                <div className="grid gap-3 border-t border-[#1f2431] pt-4">
-                  <div className="grid gap-1">
-                    <div className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#3dffa0]">
-                      Next Round
-                    </div>
-                    <div className="text-sm text-[#9ca6ba]">{data.nextRoundLabel}</div>
+                data.matches.length === 0 ? (
+                  <div className="rounded-2xl border border-[#1f2431] bg-[#131720] p-5 text-[#97a2b8]">
+                    No match results available yet for this round.
                   </div>
-                  {data.nextRoundMatches.map((match, index) => (
+                ) : (
+                  data.matches.map((match, index) => (
                     <MatchCard key={getMatchKey(match, index)} match={match} />
-                  ))}
-                </div>
-              ) : null}
+                  ))
+                )
+              )}
             </div>
           </section>
         ) : null}

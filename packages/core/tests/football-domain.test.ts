@@ -4,6 +4,7 @@ import {
   buildLeagueEntriesByGroup,
   findNextGroup,
   getCurrentSeasonYear,
+  groupKnockoutMatchesByTie,
   normalizeIconUrl,
   resolveLeagueSelection,
   resolveSeasonSelection,
@@ -177,4 +178,51 @@ test("buildLeagueEntriesByGroup resolves bl1f/bl2f by most specific shortcut mat
   assert.equal(grouped.get("fbl2")?.[0]?.leagueShortcut, "bl2f");
   assert.equal(grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "bl1/arena"), true);
   assert.equal(grouped.get("bl2")?.length, 0);
+});
+
+test("groupKnockoutMatchesByTie groups home and away legs into one tie", () => {
+  const ties = groupKnockoutMatchesByTie([
+    {
+      matchID: 1,
+      matchDateTimeUTC: "2026-03-01T20:00:00Z",
+      team1: { teamId: 1, teamName: "Team A" },
+      team2: { teamId: 2, teamName: "Team B" },
+      matchResults: [{ resultTypeID: 2, pointsTeam1: 2, pointsTeam2: 1 }],
+    },
+    {
+      matchID: 2,
+      matchDateTimeUTC: "2026-03-08T20:00:00Z",
+      team1: { teamId: 2, teamName: "Team B" },
+      team2: { teamId: 1, teamName: "Team A" },
+      matchResults: [{ resultTypeID: 2, pointsTeam1: 1, pointsTeam2: 0 }],
+    },
+  ]);
+
+  assert.equal(ties.length, 1);
+  assert.equal(ties[0]?.matches.length, 2);
+  assert.equal(ties[0]?.team1.teamName, "Team A");
+  assert.equal(ties[0]?.team2.teamName, "Team B");
+  assert.deepEqual(ties[0]?.aggregateScore, {
+    team1: 2,
+    team2: 2,
+    countedLegs: 2,
+    totalLegs: 2,
+    leader: null,
+  });
+});
+
+test("groupKnockoutMatchesByTie keeps single-leg rounds as single ties", () => {
+  const ties = groupKnockoutMatchesByTie([
+    {
+      matchID: 10,
+      matchDateTimeUTC: "2026-05-30T20:00:00Z",
+      team1: { teamId: 11, teamName: "Team C" },
+      team2: { teamId: 22, teamName: "Team D" },
+      matchIsFinished: false,
+    },
+  ]);
+
+  assert.equal(ties.length, 1);
+  assert.equal(ties[0]?.matches.length, 1);
+  assert.equal(ties[0]?.aggregateScore, undefined);
 });
