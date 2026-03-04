@@ -45,6 +45,16 @@ export const areAllMatchesFinished = (matches: ApiMatch[]) => {
   return matches.length > 0 && matches.every((match) => match.matchIsFinished === true);
 };
 
+export const hasAnyMatchResult = (matches: ApiMatch[]) => {
+  return matches.some((match) => {
+    if (match.matchIsFinished === true) {
+      return true;
+    }
+
+    return (match.matchResults?.length ?? 0) > 0;
+  });
+};
+
 export const findNextGroup = (
   groups: Array<Pick<ApiGroup, "groupOrderID" | "groupName">>,
   currentGroupOrderID?: number

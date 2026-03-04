@@ -14,6 +14,7 @@ import {
 } from "@footballleagues/core/leagues";
 import {
   findNextGroup,
+  hasAnyMatchResult,
   isKnockoutGroup,
   sortGoals,
 } from "@footballleagues/core/matches";
@@ -32,6 +33,9 @@ import type { HomeData } from "./types";
 
 const REVALIDATE = { next: { revalidate: 60 } };
 const MAX_NEXT_GROUP_LOOKAHEAD = 8;
+const isKnockoutLeague = (leagueKey: LeagueKey) => {
+  return leagueKey === "dfb" || leagueKey === "cl";
+};
 
 const getGroupsWithFallback = async (
   leagueKey: LeagueKey,
@@ -163,9 +167,12 @@ export const getHomeData = async (params: {
     matchdayResult.status === "fulfilled"
       ? matchdayResult.value.map(sortGoals)
       : (dataErrors.push("matchday"), []);
+  let currentGroupName = currentGroup?.groupName ?? "Latest Matchday";
+  let currentGroupMatches = matches;
+  const usesKnockoutLabels = isKnockoutLeague(resolvedLeague);
 
   let nextRoundMatches: ApiMatch[] = [];
-  let nextRoundLabel = "Next Matchday";
+  let nextRoundLabel = usesKnockoutLabels ? "Next Round" : "Next Matchday";
 
   if (currentGroup?.groupOrderID) {
     let scheduleGroups = Array.isArray(groups) ? groups : [];
@@ -215,6 +222,11 @@ export const getHomeData = async (params: {
         ...fallbackFutureGroupOrderIDs,
       ])
     );
+    let latestResultsGroupOrderID = hasAnyMatchResult(matches)
+      ? currentGroup.groupOrderID
+      : undefined;
+    let latestResultsGroupName = currentGroupName;
+    let latestResultsMatches = matches;
 
     let nextMatchdayFailed = false;
 
@@ -232,19 +244,39 @@ export const getHomeData = async (params: {
           continue;
         }
 
-        nextRoundMatches = normalizedNextRound;
         const candidateGroup = scheduleGroups.find(
           (group) => group?.groupOrderID === candidateGroupOrderID
         );
-        if (candidateGroup?.groupName) {
-          nextRoundLabel = candidateGroup.groupName;
+        const fallbackRoundLabel = usesKnockoutLabels
+          ? `Round ${candidateGroupOrderID}`
+          : `${candidateGroupOrderID}. Spieltag`;
+        const candidateGroupName = candidateGroup?.groupName ?? fallbackRoundLabel;
+        const candidateNextRoundLabel = candidateGroup?.groupName
+          ? candidateGroup.groupName
+          : usesKnockoutLabels
+            ? "Next Round"
+            : fallbackRoundLabel;
+
+        if (hasAnyMatchResult(normalizedNextRound)) {
+          latestResultsGroupOrderID = candidateGroupOrderID;
+          latestResultsGroupName = candidateGroupName;
+          latestResultsMatches = normalizedNextRound;
+          continue;
         }
+
+        nextRoundMatches = normalizedNextRound;
+        nextRoundLabel = candidateNextRoundLabel;
         break;
       } catch (error) {
         if (getStatusCode(error) !== 404) {
           nextMatchdayFailed = true;
         }
       }
+    }
+
+    if (latestResultsGroupOrderID) {
+      currentGroupName = latestResultsGroupName;
+      currentGroupMatches = latestResultsMatches;
     }
 
     if (nextRoundMatches.length === 0) {
@@ -323,8 +355,8 @@ export const getHomeData = async (params: {
     activeLeagueLabel,
     theme: resolveLeagueTheme(resolvedLeague),
     leagueOptions,
-    currentGroupName: currentGroup?.groupName ?? "Latest Matchday",
-    matches,
+    currentGroupName,
+    matches: currentGroupMatches,
     nextRoundMatches,
     nextRoundLabel,
     showInlineTable:

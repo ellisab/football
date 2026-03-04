@@ -6,6 +6,7 @@ import {
 } from "@footballleagues/core/leagues";
 import {
   findNextGroup,
+  hasAnyMatchResult,
   isKnockoutGroup,
   sortGoals,
 } from "@footballleagues/core/matches";
@@ -26,6 +27,9 @@ const getStatusCode = (error: unknown) => {
 };
 
 const MAX_NEXT_GROUP_LOOKAHEAD = 8;
+const isKnockoutLeague = (leagueKey: LeagueKey) => {
+  return leagueKey === "dfb" || leagueKey === "cl";
+};
 
 export function useHomeData(activeLeague: LeagueKey, season: number) {
   const [state, setState] = useState<Omit<HomeDataState, "activeLeague">>({
@@ -166,6 +170,8 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
         const currentRoundMatches = Array.isArray(matchday)
           ? matchday.map(sortGoals)
           : [];
+        let currentResultsGroupName = groupName;
+        let currentResultsMatches = currentRoundMatches;
 
         let nextGroupName = "";
         let nextMatches: ApiMatch[] = [];
@@ -205,6 +211,12 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
             ...fallbackFutureGroupOrderIDs,
           ])
         );
+        let latestResultsGroupOrderID = hasAnyMatchResult(currentRoundMatches)
+          ? groupOrderID
+          : undefined;
+        let latestResultsGroupName = groupName;
+        let latestResultsMatches = currentRoundMatches;
+        const usesKnockoutLabels = isKnockoutLeague(activeLeague);
 
         for (const candidateGroupOrderID of candidateNextGroupOrderIDs) {
           try {
@@ -227,8 +239,25 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
             const candidateGroup = scheduleGroups.find(
               (group) => group?.groupOrderID === candidateGroupOrderID
             );
+            const fallbackRoundLabel = usesKnockoutLabels
+              ? `Round ${candidateGroupOrderID}`
+              : `${candidateGroupOrderID}. Spieltag`;
+            const candidateGroupName =
+              candidateGroup?.groupName || fallbackRoundLabel;
+            const candidateNextRoundLabel = candidateGroup?.groupName
+              ? candidateGroup.groupName
+              : usesKnockoutLabels
+                ? "Next Round"
+                : fallbackRoundLabel;
 
-            nextGroupName = candidateGroup?.groupName || "Next Matchday";
+            if (hasAnyMatchResult(normalizedNextMatches)) {
+              latestResultsGroupOrderID = candidateGroupOrderID;
+              latestResultsGroupName = candidateGroupName;
+              latestResultsMatches = normalizedNextMatches;
+              continue;
+            }
+
+            nextGroupName = candidateNextRoundLabel;
             nextMatches = normalizedNextMatches;
             break;
           } catch (error) {
@@ -238,9 +267,14 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
           }
         }
 
+        if (latestResultsGroupOrderID) {
+          currentResultsGroupName = latestResultsGroupName;
+          currentResultsMatches = latestResultsMatches;
+        }
+
         setState({
-          groupName,
-          matches: currentRoundMatches,
+          groupName: currentResultsGroupName,
+          matches: currentResultsMatches,
           nextGroupName,
           nextMatches,
           table,
