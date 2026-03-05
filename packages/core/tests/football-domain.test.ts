@@ -4,7 +4,11 @@ import {
   buildLeagueEntriesByGroup,
   findNextGroup,
   getCurrentSeasonYear,
+  getLeagueLabel,
+  getStageLabel,
   groupKnockoutMatchesByTie,
+  hasLeagueTable,
+  isPlayoffRoundName,
   normalizeIconUrl,
   resolveLeagueSelection,
   resolveSeasonSelection,
@@ -54,6 +58,13 @@ test("resolveLeagueSelection falls back for unsupported leagues", () => {
   assert.equal(resolveLeagueSelection("pl", [...available]), "bl1");
 });
 
+test("league labels and table support come from the canonical config", () => {
+  assert.equal(getLeagueLabel("bl1"), "Bundesliga");
+  assert.equal(getLeagueLabel("dfb"), "DFB-Pokal");
+  assert.equal(hasLeagueTable("bl2"), true);
+  assert.equal(hasLeagueTable("dfb"), false);
+});
+
 test("sortGoals returns goals in chronological order", () => {
   const match = {
     goals: [
@@ -82,6 +93,13 @@ test("findNextGroup returns the next higher group order", () => {
 
   assert.equal(next?.groupOrderID, 2);
   assert.equal(next?.groupName, "Matchday 2");
+});
+
+test("stage helpers normalize matchday and playoff labels", () => {
+  assert.equal(getStageLabel("14. Spieltag"), "14. Spieltag");
+  assert.equal(getStageLabel("Quarter-finals"), "Quarter-finals");
+  assert.equal(isPlayoffRoundName("Champions League Playoffs"), true);
+  assert.equal(isPlayoffRoundName("Semi-finals"), false);
 });
 
 test("normalizeIconUrl upgrades allowed http hosts to https", () => {

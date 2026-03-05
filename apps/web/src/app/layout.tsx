@@ -5,7 +5,6 @@ import {
   JetBrains_Mono,
 } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/shared/providers/theme-provider";
 
 const stadiumHeadingFont = Barlow_Condensed({
   weight: ["600", "700", "800", "900"],
@@ -36,13 +35,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body
         className={`${stadiumHeadingFont.variable} ${stadiumBodyFont.variable} ${monoFont.variable} antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-          {children}
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );

@@ -7,12 +7,32 @@ const kickoffFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "2-digit",
   minute: "2-digit",
 });
+const MATCHDAY_REGEX = /(\d{1,2})\.\s*spieltag/i;
+const PLAYOFF_REGEX = /playoffs?/i;
 
 export const formatKickoff = (value?: string) => {
   if (!value) return "TBD";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "TBD";
   return kickoffFormatter.format(date);
+};
+
+export const getMatchdayNumber = (groupName: string) => {
+  return groupName.match(MATCHDAY_REGEX)?.[1] ?? null;
+};
+
+export const getStageLabel = (groupName: string) => {
+  const normalized = groupName.trim();
+  if (!normalized) return "Matchday";
+
+  const matchdayNumber = getMatchdayNumber(normalized);
+  if (matchdayNumber) return `${matchdayNumber}. Spieltag`;
+
+  return normalized;
+};
+
+export const isPlayoffRoundName = (groupName?: string) => {
+  return PLAYOFF_REGEX.test(groupName ?? "");
 };
 
 export const sortGoals = (match: ApiMatch) => {

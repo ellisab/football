@@ -1,0 +1,27 @@
+export type AppTheme = {
+  background: string;
+  surface: string;
+  surfaceMuted: string;
+  surfaceSoft: string;
+  text: string;
+  textMuted: string;
+  textSoft: string;
+  border: string;
+  borderSubtle: string;
+  primary: string;
+  primarySoft: string;
+  primaryGlow: string;
+  heroBase: string;
+  heroHighlight: string;
+  heroShade: string;
+  heroTagBorder: string;
+  heroTagBg: string;
+  heroText: string;
+  heroTextMuted: string;
+  warningText: string;
+  warningBorder: string;
+  warningBg: string;
+  emptyBg: string;
+  logoBg: string;
+  logoBorder: string;
+};

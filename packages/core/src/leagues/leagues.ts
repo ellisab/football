@@ -11,6 +11,18 @@ import {
 } from "./season";
 import type { LeagueKey, LeagueOption } from "./types";
 
+export const getLeagueConfig = (leagueKey: LeagueKey) => {
+  return LEAGUE_GROUPS.find((group) => group.key === leagueKey);
+};
+
+export const getLeagueLabel = (leagueKey: LeagueKey) => {
+  return getLeagueConfig(leagueKey)?.label ?? leagueKey.toUpperCase();
+};
+
+export const hasLeagueTable = (leagueKey: LeagueKey) => {
+  return leagueKey !== "dfb";
+};
+
 export const normalizeText = (value?: string) => (value ?? "").toLowerCase();
 
 export const isLeagueKey = (value: string): value is LeagueKey => {
@@ -174,7 +186,7 @@ export const buildLeagueOptions = ({
   seasonOverrides?: Partial<Record<LeagueKey, number>>;
 }): LeagueOption[] => {
   return availableGroupKeys.map((key) => {
-    const groupConfig = LEAGUE_GROUPS.find((group) => group.key === key);
+    const groupConfig = getLeagueConfig(key);
     const entries = groupedLeagues.get(key) ?? [];
     const seasons =
       seasonOverrides?.[key] !== undefined

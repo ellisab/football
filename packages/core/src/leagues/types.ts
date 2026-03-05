@@ -4,9 +4,7 @@ export type LeagueKey =
   | "fbl1"
   | "fbl2"
   | "dfb"
-  | "cl"
-  | "pl"
-  | "el";
+  | "cl";
 
 export type LeagueGroupConfig = {
   key: LeagueKey;

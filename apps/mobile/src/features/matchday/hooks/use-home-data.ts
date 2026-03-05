@@ -1,44 +1,20 @@
 import { useEffect, useState } from "react";
+import { createHomeState, getHomeSnapshot } from "@footballleagues/core/home";
+import type { LeagueKey } from "@footballleagues/core/leagues";
 import {
-  getDataShortcutForLeague,
-  getGroupShortcutForLeague,
-  type LeagueKey,
-} from "@footballleagues/core/leagues";
-import {
-  findNextGroup,
-  hasAnyMatchResult,
-  isKnockoutGroup,
-  sortGoals,
-} from "@footballleagues/core/matches";
-import {
-  getCurrentGroup,
-  getGroups,
-  getMatchdayResults,
-  getMatchesByGroup,
-  getTable,
-  type ApiGroup,
-  type ApiMatch,
-} from "@footballleagues/core/openligadb";
-import type { BracketRound, HomeDataState } from "../types";
+  createMobileHomeViewModel,
+  type MobileHomeViewModel,
+} from "../../home/presenter/home-view-model";
 
-const getStatusCode = (error: unknown) => {
-  const reason = error as { status?: number } | undefined;
-  return reason?.status;
-};
-
-const MAX_NEXT_GROUP_LOOKAHEAD = 8;
-const isKnockoutLeague = (leagueKey: LeagueKey) => {
-  return leagueKey === "dfb" || leagueKey === "cl";
+type HomeDataState = {
+  data: MobileHomeViewModel | null;
+  loading: boolean;
+  error: string;
 };
 
 export function useHomeData(activeLeague: LeagueKey, season: number) {
-  const [state, setState] = useState<Omit<HomeDataState, "activeLeague">>({
-    groupName: "Latest Matchday",
-    matches: [],
-    nextGroupName: "",
-    nextMatches: [],
-    table: [],
-    bracketMatches: [],
+  const [state, setState] = useState<HomeDataState>({
+    data: null,
     loading: true,
     error: "",
   });
@@ -54,244 +30,25 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
       }));
 
       try {
-        const dataShortcut = getDataShortcutForLeague(activeLeague);
-        const groupShortcut = getGroupShortcutForLeague(activeLeague);
-
-        const groupPromise = getCurrentGroup(dataShortcut);
-        const tablePromise =
-          activeLeague === "dfb"
-            ? Promise.resolve([])
-            : getTable(dataShortcut, season);
-        const groupsPromise =
-          activeLeague === "cl"
-            ? (async () => {
-                try {
-                  const groups = await getGroups(groupShortcut, season);
-                  return { groups, shortcut: groupShortcut };
-                } catch {
-                  const groups = await getGroups(dataShortcut, season);
-                  return { groups, shortcut: dataShortcut };
-                }
-              })()
-            : Promise.resolve({ groups: [], shortcut: dataShortcut });
-        const playoffPromise =
-          activeLeague === "cl"
-            ? getMatchdayResults(dataShortcut, season, 9)
-            : Promise.resolve([]);
-
-        const [groupResult, tableResult, groupsResult, playoffResult] = await Promise.allSettled([
-          groupPromise,
-          tablePromise,
-          groupsPromise,
-          playoffPromise,
-        ]);
+        const snapshot = await getHomeSnapshot(
+          { league: activeLeague, season: String(season) },
+          { fallbackYear: season }
+        );
+        const state = createHomeState(snapshot);
+        const data = createMobileHomeViewModel(state);
 
         if (!isMounted) return;
-
-        const groupName =
-          groupResult.status === "fulfilled"
-            ? groupResult.value?.groupName || "Latest Matchday"
-            : "Latest Matchday";
-        const hasPartialError = groupResult.status !== "fulfilled";
-
-        const table =
-          tableResult.status === "fulfilled" && Array.isArray(tableResult.value)
-            ? tableResult.value
-            : [];
-
-        let knockoutGroups: ApiGroup[] = [];
-        let knockoutShortcut = dataShortcut;
-
-        if (groupsResult.status === "fulfilled") {
-          const groups = Array.isArray(groupsResult.value?.groups)
-            ? groupsResult.value.groups
-            : [];
-          knockoutShortcut = groupsResult.value?.shortcut ?? dataShortcut;
-          knockoutGroups = groups.filter((group) => isKnockoutGroup(group?.groupName));
-        }
-
-        const bracket: BracketRound[] = [];
-
-        if (playoffResult.status === "fulfilled") {
-          const playoffMatches = Array.isArray(playoffResult.value)
-            ? playoffResult.value.map(sortGoals)
-            : [];
-
-          if (playoffMatches.length > 0) {
-            bracket.push({
-              group: { groupName: "Playoffs", groupID: 9 },
-              matches: playoffMatches,
-            });
-          }
-        }
-
-        const knockoutRoundResults = await Promise.allSettled(
-          knockoutGroups.map(async (group) => {
-            if (!group?.groupOrderID) return { group, matches: [] as ApiMatch[] };
-
-            const roundMatches = await getMatchesByGroup(
-              knockoutShortcut,
-              season,
-              group.groupOrderID
-            );
-
-            return {
-              group,
-              matches: Array.isArray(roundMatches)
-                ? roundMatches.map(sortGoals)
-                : [],
-            };
-          })
-        );
-
-        for (let index = 0; index < knockoutRoundResults.length; index += 1) {
-          const result = knockoutRoundResults[index];
-          const fallbackGroup = knockoutGroups[index] as ApiGroup;
-
-          if (result.status === "fulfilled") {
-            bracket.push(result.value);
-          } else {
-            bracket.push({ group: fallbackGroup, matches: [] });
-          }
-        }
-
-        const groupOrderID =
-          groupResult.status === "fulfilled"
-            ? groupResult.value?.groupOrderID
-            : undefined;
-
-        if (!groupOrderID) {
-          throw new Error("Missing group order");
-        }
-
-        const matchday = await getMatchdayResults(dataShortcut, season, groupOrderID);
-        if (!isMounted) return;
-
-        const currentRoundMatches = Array.isArray(matchday)
-          ? matchday.map(sortGoals)
-          : [];
-        let currentResultsGroupName = groupName;
-        let currentResultsMatches = currentRoundMatches;
-
-        let nextGroupName = "";
-        let nextMatches: ApiMatch[] = [];
-        let scheduleGroups =
-          groupsResult.status === "fulfilled" &&
-          Array.isArray(groupsResult.value?.groups)
-            ? groupsResult.value.groups
-            : [];
-
-        if (scheduleGroups.length === 0) {
-          try {
-            const fallbackGroups = await getGroups(dataShortcut, season);
-            scheduleGroups = Array.isArray(fallbackGroups) ? fallbackGroups : [];
-          } catch {
-            scheduleGroups = [];
-          }
-        }
-
-        const nextGroup = findNextGroup(scheduleGroups, groupOrderID);
-        const knownFutureGroupOrderIDs = scheduleGroups
-          .map((group) => group?.groupOrderID)
-          .filter(
-            (orderID): orderID is number =>
-              typeof orderID === "number" && orderID > groupOrderID
-          )
-          .sort((a, b) => a - b);
-        const fallbackFutureGroupOrderIDs = Array.from(
-          { length: MAX_NEXT_GROUP_LOOKAHEAD },
-          (_, index) => groupOrderID + index + 1
-        );
-        const candidateNextGroupOrderIDs = Array.from(
-          new Set([
-            ...(typeof nextGroup?.groupOrderID === "number"
-              ? [nextGroup.groupOrderID]
-              : []),
-            ...knownFutureGroupOrderIDs,
-            ...fallbackFutureGroupOrderIDs,
-          ])
-        );
-        let latestResultsGroupOrderID = hasAnyMatchResult(currentRoundMatches)
-          ? groupOrderID
-          : undefined;
-        let latestResultsGroupName = groupName;
-        let latestResultsMatches = currentRoundMatches;
-        const usesKnockoutLabels = isKnockoutLeague(activeLeague);
-
-        for (const candidateGroupOrderID of candidateNextGroupOrderIDs) {
-          try {
-            const nextRound = await getMatchdayResults(
-              dataShortcut,
-              season,
-              candidateGroupOrderID
-            );
-
-            if (!isMounted) return;
-
-            const normalizedNextMatches = Array.isArray(nextRound)
-              ? nextRound.map(sortGoals)
-              : [];
-
-            if (normalizedNextMatches.length === 0) {
-              continue;
-            }
-
-            const candidateGroup = scheduleGroups.find(
-              (group) => group?.groupOrderID === candidateGroupOrderID
-            );
-            const fallbackRoundLabel = usesKnockoutLabels
-              ? `Round ${candidateGroupOrderID}`
-              : `${candidateGroupOrderID}. Spieltag`;
-            const candidateGroupName =
-              candidateGroup?.groupName || fallbackRoundLabel;
-            const candidateNextRoundLabel = candidateGroup?.groupName
-              ? candidateGroup.groupName
-              : usesKnockoutLabels
-                ? "Next Round"
-                : fallbackRoundLabel;
-
-            if (hasAnyMatchResult(normalizedNextMatches)) {
-              latestResultsGroupOrderID = candidateGroupOrderID;
-              latestResultsGroupName = candidateGroupName;
-              latestResultsMatches = normalizedNextMatches;
-              continue;
-            }
-
-            nextGroupName = candidateNextRoundLabel;
-            nextMatches = normalizedNextMatches;
-            break;
-          } catch (error) {
-            if (getStatusCode(error) !== 404) {
-              // Ignore hard failure for next fixtures, keep the current payload.
-            }
-          }
-        }
-
-        if (latestResultsGroupOrderID) {
-          currentResultsGroupName = latestResultsGroupName;
-          currentResultsMatches = latestResultsMatches;
-        }
 
         setState({
-          groupName: currentResultsGroupName,
-          matches: currentResultsMatches,
-          nextGroupName,
-          nextMatches,
-          table,
-          bracketMatches: bracket,
+          data,
           loading: false,
-          error: hasPartialError ? "Some data failed to load. Pull to refresh." : "",
+          error: data.visibleErrors.length > 0 ? "Some data failed to load. Pull to refresh." : "",
         });
       } catch {
         if (!isMounted) return;
 
         setState({
-          groupName: "Latest Matchday",
-          matches: [],
-          nextGroupName: "",
-          nextMatches: [],
-          table: [],
-          bracketMatches: [],
+          data: null,
           loading: false,
           error: "Failed to load matches. Pull to refresh.",
         });

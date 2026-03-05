@@ -9,6 +9,7 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./home": "./src/home/index.ts",
     "./openligadb": "./src/openligadb.ts",
     "./leagues": "./src/leagues/index.ts",
     "./matches": "./src/matches/index.ts",
