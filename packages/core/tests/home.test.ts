@@ -291,12 +291,14 @@ test("createHomeState centralizes section shaping for Champions League playoff r
 
   const state = createHomeState(snapshot);
 
-  assert.equal(state.isChampionsLeaguePlayoffRound, true);
+  assert.equal(state.isChampionsLeaguePlayoffRound, false);
+  assert.equal(state.bracketMatches.length, 0);
   assert.deepEqual(
     state.sections.map((section) => section.key),
-    ["next-round", "table"]
+    ["next-round", "matchday", "table"]
   );
   assert.equal(state.sections[0]?.renderKind, "ties");
+  assert.equal(state.sections[1]?.renderKind, "ties");
   assert.deepEqual(state.errorKeys, ["table", "next matchday"]);
   assert.equal(state.usesKnockoutLabels, true);
 });

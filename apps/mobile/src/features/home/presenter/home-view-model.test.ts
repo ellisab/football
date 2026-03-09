@@ -51,16 +51,11 @@ const sampleState: HomeState = {
     ],
   },
   hasTable: true,
-  bracketMatches: [
-    {
-      group: { groupID: 9, groupName: "Playoffs", groupOrderID: 9 },
-      matches: [playoffMatch],
-    },
-  ],
+  bracketMatches: [],
   table: [{ teamInfoId: 7, teamName: "Club A", points: 9 }],
   errorKeys: ["table", "next matchday"],
   usesKnockoutLabels: true,
-  isChampionsLeaguePlayoffRound: true,
+  isChampionsLeaguePlayoffRound: false,
   sections: [
     {
       key: "next-round",
@@ -82,6 +77,16 @@ const sampleState: HomeState = {
       items: [playoffTie],
     },
     {
+      key: "matchday",
+      round: {
+        groupName: "Playoffs",
+        groupOrderID: 9,
+        matches: [playoffMatch],
+      },
+      renderKind: "ties",
+      items: [playoffTie],
+    },
+    {
       key: "table",
       renderKind: "table",
       items: [{ teamInfoId: 7, teamName: "Club A", points: 9 }],
@@ -98,7 +103,7 @@ test("createMobileHomeViewModel adds mobile copy to semantic home state", () => 
   assert.equal(viewModel.sections[0]?.subtitle, "Season 2025 · upcoming fixtures");
   assert.deepEqual(
     viewModel.sections.map((section) => section.key),
-    ["next-round", "table"]
+    ["next-round", "matchday", "table"]
   );
   assert.equal(viewModel.visibleErrors.join(", "), "table, next round matches");
 });

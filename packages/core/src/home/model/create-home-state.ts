@@ -1,4 +1,8 @@
-import { groupKnockoutMatchesByTie, isPlayoffRoundName } from "../../matches";
+import {
+  getKnockoutStageName,
+  groupKnockoutMatchesByTie,
+  isPlayoffRoundName,
+} from "../../matches";
 import type { HomeSnapshot } from "../types";
 import type { HomeRoundSectionState, HomeSectionState, HomeState } from "./types";
 
@@ -34,10 +38,23 @@ const buildRoundSectionState = ({
 
 export const createHomeState = (snapshot: HomeSnapshot): HomeState => {
   const usesKnockoutLabels = isKnockoutLeague(snapshot.resolvedLeague);
+  const currentStageName = getKnockoutStageName(snapshot.currentRound.groupName);
+  const nextStageName = getKnockoutStageName(snapshot.nextRound.groupName);
+  const bracketMatches =
+    snapshot.resolvedLeague === "cl"
+      ? snapshot.bracketMatches.filter((round) => {
+          const bracketStageName = getKnockoutStageName(round.group.groupName);
+
+          return (
+            bracketStageName !== currentStageName &&
+            bracketStageName !== nextStageName
+          );
+        })
+      : snapshot.bracketMatches;
   const isChampionsLeaguePlayoffRound =
     snapshot.resolvedLeague === "cl" &&
     isPlayoffRoundName(snapshot.currentRound.groupName) &&
-    snapshot.bracketMatches.some((round) => isPlayoffRoundName(round.group.groupName));
+    bracketMatches.some((round) => isPlayoffRoundName(round.group.groupName));
 
   const sections: HomeSectionState[] = [];
 
@@ -76,7 +93,7 @@ export const createHomeState = (snapshot: HomeSnapshot): HomeState => {
     currentRound: snapshot.currentRound,
     nextRound: snapshot.nextRound,
     hasTable: snapshot.hasTable,
-    bracketMatches: snapshot.bracketMatches,
+    bracketMatches,
     table: snapshot.table,
     errorKeys: snapshot.errorKeys,
     usesKnockoutLabels,
