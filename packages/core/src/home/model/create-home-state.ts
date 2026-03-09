@@ -81,7 +81,6 @@ export const createHomeState = (snapshot: HomeSnapshot): HomeState => {
     errorKeys: snapshot.errorKeys,
     usesKnockoutLabels,
     isChampionsLeaguePlayoffRound,
-    featuredMatch: snapshot.currentRound.matches[0] ?? snapshot.nextRound.matches[0],
     sections,
   };
 };

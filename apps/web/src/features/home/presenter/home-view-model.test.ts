@@ -41,14 +41,6 @@ const sampleState: HomeState = {
   errorKeys: ["table", "next matchday"],
   usesKnockoutLabels: false,
   isChampionsLeaguePlayoffRound: false,
-  featuredMatch: {
-    matchID: 11,
-    matchDateTimeUTC: "2026-03-01T20:00:00Z",
-    team1: { teamId: 1, teamName: "Team A" },
-    team2: { teamId: 2, teamName: "Team B" },
-    matchIsFinished: true,
-    matchResults: [{ resultTypeID: 2, pointsTeam1: 2, pointsTeam2: 1 }],
-  },
   sections: [
     {
       key: "next-round",
@@ -118,7 +110,6 @@ test("createWebHomeViewModel adds web copy to semantic home state", () => {
   const viewModel = createWebHomeViewModel(sampleState);
 
   assert.equal(viewModel.leagueLabel, "Bundesliga");
-  assert.equal(viewModel.heroKicker, "Live Matchday · 11. Spieltag");
   assert.deepEqual(
     viewModel.sections.map((section) => section.key),
     ["next-round", "matchday", "table"]

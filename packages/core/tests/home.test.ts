@@ -160,6 +160,100 @@ test("getHomeSnapshot reports structured error keys when table and future rounds
   }
 });
 
+test("getHomeSnapshot merges both Champions League legs into the current round and skips to the next stage", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = createFetchMock((path) => {
+    switch (path) {
+      case "/getavailableleagues":
+        return jsonResponse([
+          {
+            leagueShortcut: "ucl",
+            leagueName: "Champions League 2025/2026",
+            leagueSeason: 2025,
+            sport: { sportName: "Football" },
+          },
+        ]);
+      case "/getcurrentgroup/ucl":
+        return jsonResponse({
+          groupID: 10,
+          groupName: "Achtelfinale Hinspiele",
+          groupOrderID: 10,
+        });
+      case "/getgroups/cl/2025":
+        return jsonResponse({ message: "not found" }, 404);
+      case "/getgroups/ucl/2025":
+        return jsonResponse({ message: "not found" }, 404);
+      case "/getmatchdata/ucl/2025/9":
+        return jsonResponse([
+          {
+            ...createFinishedMatch(100, 5, "Club E", 6, "Club F"),
+            group: { groupName: "Playoffs", groupOrderID: 9, groupID: 9 },
+          },
+        ]);
+      case "/getmatchdata/ucl/2025/10":
+        return jsonResponse([
+          {
+            ...createUpcomingMatch(101, 1, "Club A", 2, "Club B"),
+            group: { groupName: "Achtelfinale Hinspiele", groupOrderID: 10, groupID: 10 },
+          },
+        ]);
+      case "/getmatchdata/ucl/2025/11":
+        return jsonResponse([
+          {
+            ...createUpcomingMatch(102, 2, "Club B", 1, "Club A"),
+            group: { groupName: "Achtelfinale Rückspiele", groupOrderID: 11, groupID: 11 },
+          },
+        ]);
+      case "/getmatchdata/ucl/2025/12":
+        return jsonResponse([
+          {
+            ...createUpcomingMatch(103, 3, "Club C", 4, "Club D"),
+            group: { groupName: "Viertelfinale Hinspiele", groupOrderID: 12, groupID: 12 },
+          },
+        ]);
+      case "/getmatchdata/ucl/2025/13":
+        return jsonResponse([
+          {
+            ...createUpcomingMatch(104, 4, "Club D", 3, "Club C"),
+            group: { groupName: "Viertelfinale Rückspiele", groupOrderID: 13, groupID: 13 },
+          },
+        ]);
+      case "/getbltable/ucl/2025":
+        return jsonResponse([]);
+      default:
+        return jsonResponse({ path }, 404);
+    }
+  });
+
+  try {
+    const snapshot = await getHomeSnapshot({ league: "cl", season: "2025" });
+
+    assert.equal(snapshot.currentRound.groupName, "Achtelfinale");
+    assert.equal(snapshot.currentRound.groupOrderID, 10);
+    assert.equal(snapshot.currentRound.matches.length, 2);
+    assert.deepEqual(
+      snapshot.currentRound.matches.map((match) => match.matchID),
+      [101, 102]
+    );
+    assert.equal(snapshot.nextRound.groupName, "Viertelfinale");
+    assert.equal(snapshot.nextRound.groupOrderID, 12);
+    assert.deepEqual(
+      snapshot.nextRound.matches.map((match) => match.matchID),
+      [103, 104]
+    );
+    assert.equal(snapshot.bracketMatches.length, 1);
+    assert.equal(snapshot.bracketMatches[0]?.group.groupName, "Achtelfinale");
+    assert.deepEqual(
+      snapshot.bracketMatches[0]?.matches.map((match) => match.matchID),
+      [101, 102]
+    );
+    assert.deepEqual(snapshot.errorKeys, []);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("createHomeState centralizes section shaping for Champions League playoff rounds", () => {
   const playoffMatches = [
     createFinishedMatch(201, 1, "Club A", 2, "Club B"),

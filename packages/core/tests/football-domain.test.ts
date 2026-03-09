@@ -3,6 +3,8 @@ import test from "node:test";
 import {
   buildLeagueEntriesByGroup,
   findNextGroup,
+  getKnockoutLeg,
+  getKnockoutStageName,
   getCurrentSeasonYear,
   getLeagueLabel,
   getStageLabel,
@@ -100,6 +102,11 @@ test("stage helpers normalize matchday and playoff labels", () => {
   assert.equal(getStageLabel("Quarter-finals"), "Quarter-finals");
   assert.equal(isPlayoffRoundName("Champions League Playoffs"), true);
   assert.equal(isPlayoffRoundName("Semi-finals"), false);
+  assert.equal(getKnockoutStageName("Achtelfinale Hinspiele"), "Achtelfinale");
+  assert.equal(getKnockoutStageName("Quarter-finals second legs"), "Quarter-finals");
+  assert.equal(getKnockoutLeg("Achtelfinale Hinspiele"), "first");
+  assert.equal(getKnockoutLeg("Achtelfinale Rückspiele"), "second");
+  assert.equal(getKnockoutLeg("Playoffs"), null);
 });
 
 test("normalizeIconUrl upgrades allowed http hosts to https", () => {

@@ -61,7 +61,6 @@ const sampleState: HomeState = {
   errorKeys: ["table", "next matchday"],
   usesKnockoutLabels: true,
   isChampionsLeaguePlayoffRound: true,
-  featuredMatch: playoffMatch,
   sections: [
     {
       key: "next-round",

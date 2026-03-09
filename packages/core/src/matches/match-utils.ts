@@ -9,6 +9,10 @@ const kickoffFormatter = new Intl.DateTimeFormat("en-US", {
 });
 const MATCHDAY_REGEX = /(\d{1,2})\.\s*spieltag/i;
 const PLAYOFF_REGEX = /playoffs?/i;
+const KNOCKOUT_FIRST_LEG_REGEX = /\b(hinspiele?|first legs?|first leg)\b/i;
+const KNOCKOUT_SECOND_LEG_REGEX = /\b(rueckspiele?|rückspiele?|second legs?|second leg)\b/i;
+const KNOCKOUT_STAGE_SUFFIX_REGEX =
+  /\b(hinspiele?|rueckspiele?|rückspiele?|first legs?|second legs?|first leg|second leg)\b/gi;
 
 export const formatKickoff = (value?: string) => {
   if (!value) return "TBD";
@@ -44,6 +48,45 @@ export const sortGoals = (match: ApiMatch) => {
       (a, b) => (a.matchMinute ?? 0) - (b.matchMinute ?? 0)
     ),
   };
+};
+
+const getMatchTime = (match: ApiMatch) => {
+  const timestamp = Date.parse(match.matchDateTimeUTC ?? match.matchDateTime ?? "");
+  return Number.isNaN(timestamp) ? Number.MAX_SAFE_INTEGER : timestamp;
+};
+
+export const sortMatchesByKickoff = (matches: ApiMatch[]) => {
+  return [...matches].sort((a, b) => {
+    const byTime = getMatchTime(a) - getMatchTime(b);
+    if (byTime !== 0) return byTime;
+
+    return (a.matchID ?? 0) - (b.matchID ?? 0);
+  });
+};
+
+export const getKnockoutStageName = (groupName?: string) => {
+  const normalized = (groupName ?? "").trim();
+  if (!normalized) return undefined;
+
+  const withoutLegLabel = normalized
+    .replace(KNOCKOUT_STAGE_SUFFIX_REGEX, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/[-–:\s]+$/g, "")
+    .trim();
+
+  return withoutLegLabel || normalized;
+};
+
+export const getKnockoutLeg = (groupName?: string): "first" | "second" | null => {
+  if (KNOCKOUT_FIRST_LEG_REGEX.test(groupName ?? "")) {
+    return "first";
+  }
+
+  if (KNOCKOUT_SECOND_LEG_REGEX.test(groupName ?? "")) {
+    return "second";
+  }
+
+  return null;
 };
 
 export const isKnockoutGroup = (name?: string) => {

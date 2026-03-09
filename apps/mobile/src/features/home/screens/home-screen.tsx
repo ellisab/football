@@ -28,15 +28,7 @@ export function HomeScreen() {
           <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : null}
-      <OverviewPanels
-        leagueLabel={data.leagueLabel}
-        season={data.resolvedSeason}
-        hasTable={data.hasTable}
-        heroKicker={data.heroKicker}
-        matchdayNumber={data.matchdayNumber}
-        stageLabel={data.stageLabel}
-        styles={styles}
-      />
+      <OverviewPanels hasTable={data.hasTable} styles={styles} />
     </View>
   ) : null;
 

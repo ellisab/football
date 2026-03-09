@@ -1,7 +1,6 @@
 import type { HomeErrorKey, HomeRoundSnapshot, HomeState } from "@footballleagues/core/home";
 import { getLeagueLabel } from "@footballleagues/core/leagues";
 import type { KnockoutTie } from "@footballleagues/core/matches";
-import { getMatchdayNumber, getStageLabel } from "@footballleagues/core/matches";
 import type { ApiMatch, ApiTableRow } from "@footballleagues/core/openligadb";
 
 const ERROR_LABEL_MAP: Record<HomeErrorKey, string> = {
@@ -73,10 +72,6 @@ export type MobileHomeViewModel = {
   resolvedSeason: number;
   leagueLabel: string;
   leagueOptions: HomeState["leagueOptions"];
-  matchdayNumber: string | null;
-  stageLabel: string;
-  heroKicker: string;
-  featuredMatch?: ApiMatch;
   hasTable: boolean;
   bracketMatches: HomeState["bracketMatches"];
   visibleErrors: string[];
@@ -139,15 +134,6 @@ const createMobileRoundSection = ({
 
 export const createMobileHomeViewModel = (state: HomeState): MobileHomeViewModel => {
   const leagueLabel = getLeagueLabel(state.resolvedLeague);
-  const currentRoundTitle = getRoundTitle(state.currentRound, {
-    usesKnockoutLabels: state.usesKnockoutLabels,
-    emptyFallback: "Latest Matchday",
-  });
-  const stageLabel = getStageLabel(currentRoundTitle);
-  const matchdayNumber = getMatchdayNumber(currentRoundTitle);
-  const heroKicker = matchdayNumber
-    ? `Live Matchday · ${matchdayNumber}. Spieltag`
-    : `Live ${stageLabel}`;
 
   const sections: MobileHomeSection[] = state.sections.map((section) => {
     if (section.renderKind === "table") {
@@ -186,10 +172,6 @@ export const createMobileHomeViewModel = (state: HomeState): MobileHomeViewModel
     resolvedSeason: state.resolvedSeason,
     leagueLabel,
     leagueOptions: state.leagueOptions,
-    matchdayNumber,
-    stageLabel,
-    heroKicker,
-    featuredMatch: state.featuredMatch,
     hasTable: state.hasTable,
     bracketMatches: state.bracketMatches,
     visibleErrors: state.errorKeys.map((key) => ERROR_LABEL_MAP[key]),

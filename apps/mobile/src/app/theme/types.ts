@@ -11,13 +11,6 @@ export type AppTheme = {
   primary: string;
   primarySoft: string;
   primaryGlow: string;
-  heroBase: string;
-  heroHighlight: string;
-  heroShade: string;
-  heroTagBorder: string;
-  heroTagBg: string;
-  heroText: string;
-  heroTextMuted: string;
   warningText: string;
   warningBorder: string;
   warningBg: string;

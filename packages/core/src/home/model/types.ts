@@ -42,6 +42,5 @@ export type HomeState = {
   errorKeys: HomeErrorKey[];
   usesKnockoutLabels: boolean;
   isChampionsLeaguePlayoffRound: boolean;
-  featuredMatch?: ApiMatch;
   sections: HomeSectionState[];
 };

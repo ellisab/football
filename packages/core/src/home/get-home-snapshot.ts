@@ -91,6 +91,9 @@ export const getHomeSnapshot = async (
         };
 
   const { bracketMatches, errorKeys: bracketErrorKeys } = await loadBracketMatches({
+    resolvedLeague,
+    currentRound,
+    nextRound,
     groups: primaryHomeData.groups,
     playoffMatches: primaryHomeData.playoffMatches,
     effectiveShortcut,
