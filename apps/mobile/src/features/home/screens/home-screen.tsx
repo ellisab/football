@@ -47,7 +47,7 @@ export function HomeScreen() {
       {loading || !data ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={theme.primary} />
-          <Text style={styles.loadingText}>Loading matches...</Text>
+          <Text style={styles.loadingText}>Spiele werden geladen...</Text>
         </View>
       ) : (
         <HomeSectionList

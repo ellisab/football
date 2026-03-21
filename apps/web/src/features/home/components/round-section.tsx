@@ -16,7 +16,7 @@ export function RoundSection({
   section: WebHomeRoundSection;
 }) {
   return (
-    <section id={section.key} className="grid gap-4">
+    <section id={section.key} className="grid gap-3">
       <SectionHeading
         kicker={section.kicker}
         title={section.title}

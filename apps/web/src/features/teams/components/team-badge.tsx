@@ -24,7 +24,7 @@ export function TeamBadge({
     return (
       <Image
         src={normalizedUrl}
-        alt={name ?? "Team crest"}
+        alt={name ?? "Vereinswappen"}
         width={size}
         height={size}
         className={`rounded-full object-contain ${baseClassName}`}

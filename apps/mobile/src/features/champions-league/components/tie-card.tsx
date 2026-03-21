@@ -49,7 +49,7 @@ export function TieCard({
         </View>
         {tie.aggregateScore ? (
           <Text style={styles.sectionSubtitle}>
-            {hasLiveLeg ? "Live aggregate" : "Aggregate"} {tie.aggregateScore.team1} -{" "}
+            {hasLiveLeg ? "Live-Gesamtstand" : "Gesamtstand"} {tie.aggregateScore.team1} -{" "}
             {tie.aggregateScore.team2}
           </Text>
         ) : null}
@@ -59,7 +59,7 @@ export function TieCard({
         <View key={match.matchID ?? `${tie.key}-${index}`}>
           {tie.matches.length > 1 ? (
             <View style={styles.section}>
-              <Text style={styles.sectionKicker}>Leg {index + 1}</Text>
+              <Text style={styles.sectionKicker}>Spiel {index + 1}</Text>
             </View>
           ) : null}
           <MatchCard match={match} styles={styles} />

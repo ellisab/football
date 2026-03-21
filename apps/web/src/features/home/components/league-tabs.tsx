@@ -3,6 +3,7 @@ import type { LeagueKey, LeagueOption } from "@footballleagues/core/leagues";
 import { getLeagueLabel } from "@footballleagues/core/leagues";
 import type { LucideIcon } from "lucide-react";
 import { Flag, Goal, Medal, Shirt, Shield, Trophy } from "lucide-react";
+import { SectionKicker } from "./section-kicker";
 
 const LEAGUE_ICONS: Record<LeagueKey, LucideIcon> = {
   bl1: Goal,
@@ -27,10 +28,8 @@ export function LeagueTabs({
   currentSeason: number;
 }) {
   return (
-    <section className="grid gap-4">
-      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#3dffa0]">
-        Categories
-      </div>
+    <section className="grid gap-3">
+      <SectionKicker>Wettbewerbe</SectionKicker>
       <div className="flex flex-wrap gap-3">
         {options.map((option) => {
           const isActive = option.shortcut === currentLeague;

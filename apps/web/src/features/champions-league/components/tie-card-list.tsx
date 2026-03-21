@@ -51,7 +51,9 @@ export function TieCardList({
         </div>
         {tie.aggregateScore ? (
           <div className="text-xs font-semibold uppercase tracking-[0.1em] text-[#3dffa0]">
-            {tie.matches.some((match) => match.matchIsFinished !== true) ? "Live Agg" : "Agg"}{" "}
+            {tie.matches.some((match) => match.matchIsFinished !== true)
+              ? "Live-Gesamtstand"
+              : "Gesamtstand"}{" "}
             {tie.aggregateScore.team1} - {tie.aggregateScore.team2}
           </div>
         ) : null}
@@ -62,7 +64,7 @@ export function TieCardList({
           <div key={getMatchKey(match, matchIndex)} className="grid gap-1">
             {tie.matches.length > 1 ? (
               <div className="px-1 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-[#9ca6ba]">
-                Leg {matchIndex + 1}
+                Spiel {matchIndex + 1}
               </div>
             ) : null}
             <MatchCard match={match} />

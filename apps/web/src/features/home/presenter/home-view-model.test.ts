@@ -114,7 +114,10 @@ test("createWebHomeViewModel adds web copy to semantic home state", () => {
     viewModel.sections.map((section) => section.key),
     ["next-round", "matchday", "table"]
   );
-  assert.equal(viewModel.sections[0]?.subtitle, "Bundesliga · Season 2025");
-  assert.equal(viewModel.sections[2]?.subtitle, "Updated standings for the selected season.");
-  assert.equal(viewModel.visibleErrors.join(", "), "table, next round matches");
+  assert.equal(viewModel.sections[0]?.subtitle, "Bundesliga · Saison 2025");
+  assert.equal(
+    viewModel.sections[2]?.subtitle,
+    "Aktualisierte Tabelle für die ausgewählte Saison."
+  );
+  assert.equal(viewModel.visibleErrors.join(", "), "Tabelle, Spiele der nächsten Runde");
 });

@@ -42,7 +42,10 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
         setState({
           data,
           loading: false,
-          error: data.visibleErrors.length > 0 ? "Some data failed to load. Pull to refresh." : "",
+          error:
+            data.visibleErrors.length > 0
+              ? "Einige Daten konnten nicht geladen werden. Zum Aktualisieren nach unten ziehen."
+              : "",
         });
       } catch {
         if (!isMounted) return;
@@ -50,7 +53,7 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
         setState({
           data: null,
           loading: false,
-          error: "Failed to load matches. Pull to refresh.",
+          error: "Spiele konnten nicht geladen werden. Zum Aktualisieren nach unten ziehen.",
         });
       }
     };

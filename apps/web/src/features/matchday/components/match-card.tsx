@@ -33,7 +33,7 @@ export function MatchCard({ match }: MatchCardProps) {
           }`}
         >
           <Goal className="h-3.5 w-3.5" />
-          {match.matchIsFinished ? "Final" : "Scheduled"}
+          {match.matchIsFinished ? "Beendet" : "Anstehend"}
         </span>
       </div>
 
@@ -46,7 +46,7 @@ export function MatchCard({ match }: MatchCardProps) {
               className="bg-[#1e2230]"
             />
             <span className="min-w-0 truncate leading-tight">
-              {match.team1?.teamName ?? "Home"}
+              {match.team1?.teamName ?? "Heim"}
             </span>
           </div>
           <span className="text-2xl leading-none tracking-tight font-[var(--font-stadium-heading)] text-[#3dffa0]">
@@ -61,7 +61,7 @@ export function MatchCard({ match }: MatchCardProps) {
             className="bg-[#1e2230]"
           />
           <span className="min-w-0 truncate leading-tight">
-            {match.team2?.teamName ?? "Away"}
+            {match.team2?.teamName ?? "Gast"}
           </span>
         </div>
       </div>
@@ -74,7 +74,7 @@ export function MatchCard({ match }: MatchCardProps) {
               className="inline-flex items-center gap-1.5"
             >
               <Goal className="h-3.5 w-3.5 text-[#3dffa0]" />
-              {goal.matchMinute ?? "-"}&apos; {goal.goalGetterName ?? "Goal"}
+              {goal.matchMinute ?? "-"}&apos; {goal.goalGetterName ?? "Tor"}
             </div>
           ))}
         </div>

@@ -57,7 +57,7 @@ export function TeamBadge({
                 ? { uri: normalizedUrl, headers: requestHeaders }
                 : { uri: normalizedUrl }
             }
-            accessibilityLabel={name ?? "Team crest"}
+            accessibilityLabel={name ?? "Vereinswappen"}
             resizeMode="contain"
             style={{ width: innerSize, height: innerSize }}
             onError={() => setFailed(true)}

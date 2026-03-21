@@ -100,10 +100,10 @@ test("createMobileHomeViewModel adds mobile copy to semantic home state", () => 
   assert.equal(viewModel.leagueLabel, "Champions League");
   assert.equal(viewModel.sections[0]?.key, "next-round");
   assert.equal(viewModel.sections[0]?.renderKind, "ties");
-  assert.equal(viewModel.sections[0]?.subtitle, "Season 2025 · upcoming fixtures");
+  assert.equal(viewModel.sections[0]?.subtitle, "Saison 2025 · kommende Spiele");
   assert.deepEqual(
     viewModel.sections.map((section) => section.key),
     ["next-round", "matchday", "table"]
   );
-  assert.equal(viewModel.visibleErrors.join(", "), "table, next round matches");
+  assert.equal(viewModel.visibleErrors.join(", "), "Tabelle, Spiele der nächsten Runde");
 });

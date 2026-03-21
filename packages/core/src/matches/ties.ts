@@ -129,10 +129,10 @@ export const groupKnockoutMatchesByTie = (matches: ApiMatch[]): KnockoutTie[] =>
     if (existing) {
       existing.matches.push(match);
       if (!existing.teamByIdentity.has(homeIdentity)) {
-        existing.teamByIdentity.set(homeIdentity, createTieTeam(match.team1, "Home"));
+        existing.teamByIdentity.set(homeIdentity, createTieTeam(match.team1, "Heim"));
       }
       if (!existing.teamByIdentity.has(awayIdentity)) {
-        existing.teamByIdentity.set(awayIdentity, createTieTeam(match.team2, "Away"));
+        existing.teamByIdentity.set(awayIdentity, createTieTeam(match.team2, "Gast"));
       }
       continue;
     }
@@ -142,8 +142,8 @@ export const groupKnockoutMatchesByTie = (matches: ApiMatch[]): KnockoutTie[] =>
       team1Identity,
       team2Identity,
       teamByIdentity: new Map<string, TieTeam>([
-        [homeIdentity, createTieTeam(match.team1, "Home")],
-        [awayIdentity, createTieTeam(match.team2, "Away")],
+        [homeIdentity, createTieTeam(match.team1, "Heim")],
+        [awayIdentity, createTieTeam(match.team2, "Gast")],
       ]),
       matches: [match],
     });

@@ -1,17 +1,17 @@
 import type { HomeErrorKey, HomeRoundSnapshot, HomeState } from "@footballleagues/core/home";
 import { getLeagueLabel } from "@footballleagues/core/leagues";
-import type { KnockoutTie } from "@footballleagues/core/matches";
+import { localizeGroupName, type KnockoutTie } from "@footballleagues/core/matches";
 import type { ApiMatch, ApiTableRow } from "@footballleagues/core/openligadb";
 
 const ERROR_LABEL_MAP: Record<HomeErrorKey, string> = {
-  "current group": "current group",
-  matchday: "matchday results",
-  table: "table",
-  groups: "groups",
-  playoffs: "playoff matches",
-  "next groups": "next round groups",
-  "next matchday": "next round matches",
-  "knockout rounds": "knockout rounds",
+  "current group": "aktuelle Runde",
+  matchday: "Spieltagsergebnisse",
+  table: "Tabelle",
+  groups: "Gruppen",
+  playoffs: "Playoff-Spiele",
+  "next groups": "nächste Runden",
+  "next matchday": "Spiele der nächsten Runde",
+  "knockout rounds": "K.-o.-Runden",
 };
 
 const getRoundTitle = (
@@ -24,11 +24,11 @@ const getRoundTitle = (
     emptyFallback: string;
   }
 ) => {
-  if (round.groupName?.trim()) return round.groupName;
+  if (round.groupName?.trim()) return localizeGroupName(round.groupName);
 
   if (typeof round.groupOrderID === "number") {
     return usesKnockoutLabels
-      ? `Round ${round.groupOrderID}`
+      ? `Runde ${round.groupOrderID}`
       : `${round.groupOrderID}. Spieltag`;
   }
 
@@ -38,7 +38,7 @@ const getRoundTitle = (
 export type WebHomeRoundSection =
   | {
       key: "next-round" | "matchday";
-      kicker: "Next Round" | "Matchday";
+      kicker: "Nächste Runde" | "Spieltag";
       title: string;
       subtitle: string;
       emptyText: string;
@@ -47,7 +47,7 @@ export type WebHomeRoundSection =
     }
   | {
       key: "next-round" | "matchday";
-      kicker: "Next Round" | "Matchday";
+      kicker: "Nächste Runde" | "Spieltag";
       title: string;
       subtitle: string;
       emptyText: string;
@@ -57,8 +57,8 @@ export type WebHomeRoundSection =
 
 export type WebHomeTableSection = {
   key: "table";
-  kicker: "Standings";
-  title: "Table";
+  kicker: "Tabelle";
+  title: "Tabelle";
   subtitle: string;
   emptyText: string;
   renderKind: "table";
@@ -98,7 +98,7 @@ const createWebRoundSection = ({
   items: KnockoutTie[];
 }): WebHomeRoundSection => {
   const isNextRound = key === "next-round";
-  const kicker: "Next Round" | "Matchday" = isNextRound ? "Next Round" : "Matchday";
+  const kicker: "Nächste Runde" | "Spieltag" = isNextRound ? "Nächste Runde" : "Spieltag";
   const baseSection = {
     key,
     kicker,
@@ -106,14 +106,14 @@ const createWebRoundSection = ({
       usesKnockoutLabels: state.usesKnockoutLabels,
       emptyFallback: isNextRound
         ? state.usesKnockoutLabels
-          ? "Next Round"
-          : "Next Matchday"
-        : "Latest Matchday",
+          ? "Nächste Runde"
+          : "Nächster Spieltag"
+        : "Aktueller Spieltag",
     }),
-    subtitle: `${getLeagueLabel(state.resolvedLeague)} · Season ${state.resolvedSeason}`,
+    subtitle: `${getLeagueLabel(state.resolvedLeague)} · Saison ${state.resolvedSeason}`,
     emptyText: isNextRound
-      ? "No upcoming fixtures available yet."
-      : "No match results available yet for this round.",
+      ? "Noch keine kommenden Spiele verfügbar."
+      : "Für diese Runde sind noch keine Ergebnisse verfügbar.",
   };
 
   if (renderKind === "matches") {
@@ -138,10 +138,10 @@ export const createWebHomeViewModel = (state: HomeState): WebHomeViewModel => {
     if (section.renderKind === "table") {
       return {
         key: "table",
-        kicker: "Standings",
-        title: "Table",
-        subtitle: "Updated standings for the selected season.",
-        emptyText: "Table data is not available yet.",
+        kicker: "Tabelle",
+        title: "Tabelle",
+        subtitle: "Aktualisierte Tabelle für die ausgewählte Saison.",
+        emptyText: "Tabellendaten sind noch nicht verfügbar.",
         renderKind: "table",
         items: section.items,
       };

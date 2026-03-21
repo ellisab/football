@@ -7,7 +7,7 @@ type LocalKickoffProps = {
   fallback?: string;
 };
 
-export function LocalKickoff({ value, fallback = "TBD" }: LocalKickoffProps) {
+export function LocalKickoff({ value, fallback = "Termin offen" }: LocalKickoffProps) {
   const isClient = typeof window !== "undefined";
   const label = isClient ? (value ? formatKickoff(value) : fallback) : fallback;
 

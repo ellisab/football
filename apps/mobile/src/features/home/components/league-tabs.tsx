@@ -14,7 +14,7 @@ export function LeagueTabs({
   return (
     <View style={styles.header}>
       <View style={styles.section}>
-        <Text style={styles.sectionKicker}>Categories</Text>
+        <Text style={styles.sectionKicker}>Wettbewerbe</Text>
       </View>
       <View style={styles.tabs}>
         {MOBILE_LEAGUES.map((league) => {

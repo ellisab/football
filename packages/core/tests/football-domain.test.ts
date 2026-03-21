@@ -99,7 +99,7 @@ test("findNextGroup returns the next higher group order", () => {
 
 test("stage helpers normalize matchday and playoff labels", () => {
   assert.equal(getStageLabel("14. Spieltag"), "14. Spieltag");
-  assert.equal(getStageLabel("Quarter-finals"), "Quarter-finals");
+  assert.equal(getStageLabel("Quarter-finals"), "Viertelfinale");
   assert.equal(isPlayoffRoundName("Champions League Playoffs"), true);
   assert.equal(isPlayoffRoundName("Semi-finals"), false);
   assert.equal(getKnockoutStageName("Achtelfinale Hinspiele"), "Achtelfinale");

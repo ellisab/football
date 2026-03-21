@@ -1,5 +1,5 @@
 import type { ApiTableRow } from "@footballleagues/core/openligadb";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@footballleagues/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@footballleagues/ui/card";
 import { Goal, Medal } from "lucide-react";
 import {
   Table,
@@ -28,7 +28,7 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
       mobileRow: "border-[#2d553f] bg-[#15261f]",
       positionBadge: "bg-[#3dffa0] text-[#0c0e12]",
       desktopRow: "bg-[#121f1a]",
-      zone: "Leaders",
+      zone: "Spitze",
     };
   }
 
@@ -37,7 +37,7 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
       mobileRow: "border-[#2a3441] bg-[#151a22]",
       positionBadge: "bg-[#1f2835] text-[#8aa0c0]",
       desktopRow: "bg-[#141a23]",
-      zone: "Europe",
+      zone: "Europa",
     };
   }
 
@@ -46,7 +46,7 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
       mobileRow: "border-[#46303a] bg-[#23171d]",
       positionBadge: "bg-[#3a2530] text-[#f2bdcb]",
       desktopRow: "bg-[#1f151a]",
-      zone: "Relegation",
+      zone: "Abstieg",
     };
   }
 
@@ -54,7 +54,7 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
     mobileRow: "border-[#232937] bg-[#131720]",
     positionBadge: "bg-[#1d2431] text-[#98a4bb]",
     desktopRow: "",
-    zone: "Midtable",
+    zone: "Mittelfeld",
   };
 };
 
@@ -65,12 +65,9 @@ export function StandingsCard({ table }: StandingsCardProps) {
         <CardTitle className="text-[1.85rem] leading-none font-[var(--font-stadium-heading)] uppercase text-[#ffffff] sm:text-[2.2rem]">
           <span className="inline-flex items-center gap-2">
             <Medal className="h-6 w-6 text-[#3dffa0]" />
-            Table
+            Tabelle
           </span>
         </CardTitle>
-        <CardDescription className="text-[#9ca6ba]">
-          Updated standings with qualification and relegation context.
-        </CardDescription>
       </CardHeader>
 
       <CardContent className="px-0 py-4 sm:px-6 sm:py-5">
@@ -102,7 +99,7 @@ export function StandingsCard({ table }: StandingsCardProps) {
                       {rankTone.zone}
                     </div>
                     <div className="text-base font-semibold text-[#3dffa0]">
-                      {row.points} pts
+                      {row.points} Pkt.
                     </div>
                   </div>
                 </div>
@@ -117,12 +114,12 @@ export function StandingsCard({ table }: StandingsCardProps) {
               <TableRow className="border-[#1f2330]">
                 <TableHead className="w-12 text-[#9ba4b9]">Pos</TableHead>
                 <TableHead className="text-[#9ba4b9]">Team</TableHead>
-                <TableHead className="text-[#9ba4b9]">MP</TableHead>
-                <TableHead className="text-[#9ba4b9]">W</TableHead>
-                <TableHead className="text-[#9ba4b9]">D</TableHead>
-                <TableHead className="text-[#9ba4b9]">L</TableHead>
-                <TableHead className="text-[#9ba4b9]">GD</TableHead>
-                <TableHead className="text-right text-[#9ba4b9]">Pts</TableHead>
+                <TableHead className="text-[#9ba4b9]">Sp</TableHead>
+                <TableHead className="text-[#9ba4b9]">S</TableHead>
+                <TableHead className="text-[#9ba4b9]">U</TableHead>
+                <TableHead className="text-[#9ba4b9]">N</TableHead>
+                <TableHead className="text-[#9ba4b9]">TD</TableHead>
+                <TableHead className="text-right text-[#9ba4b9]">Pkt.</TableHead>
               </TableRow>
             </TableHeader>
 

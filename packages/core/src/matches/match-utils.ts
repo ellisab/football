@@ -1,6 +1,6 @@
 import type { ApiGroup, ApiMatch } from "../openligadb/index";
 
-const kickoffFormatter = new Intl.DateTimeFormat("en-US", {
+const kickoffFormatter = new Intl.DateTimeFormat("de-DE", {
   weekday: "short",
   month: "short",
   day: "numeric",
@@ -13,11 +13,19 @@ const KNOCKOUT_FIRST_LEG_REGEX = /\b(hinspiele?|first legs?|first leg)\b/i;
 const KNOCKOUT_SECOND_LEG_REGEX = /\b(rueckspiele?|rückspiele?|second legs?|second leg)\b/i;
 const KNOCKOUT_STAGE_SUFFIX_REGEX =
   /\b(hinspiele?|rueckspiele?|rückspiele?|first legs?|second legs?|first leg|second leg)\b/gi;
+const LOCALIZED_KNOCKOUT_ROUND_NAMES: Array<[RegExp, string]> = [
+  [/^playoffs?$/i, "Playoffs"],
+  [/^round of 16$/i, "Achtelfinale"],
+  [/^quarter(?:-| )finals?$/i, "Viertelfinale"],
+  [/^semi(?:-| )finals?$/i, "Halbfinale"],
+  [/^final$/i, "Finale"],
+  [/^group stage$/i, "Gruppenphase"],
+];
 
 export const formatKickoff = (value?: string) => {
-  if (!value) return "TBD";
+  if (!value) return "Termin offen";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "TBD";
+  if (Number.isNaN(date.getTime())) return "Termin offen";
   return kickoffFormatter.format(date);
 };
 
@@ -27,12 +35,46 @@ export const getMatchdayNumber = (groupName: string) => {
 
 export const getStageLabel = (groupName: string) => {
   const normalized = groupName.trim();
-  if (!normalized) return "Matchday";
+  if (!normalized) return "Spieltag";
 
   const matchdayNumber = getMatchdayNumber(normalized);
   if (matchdayNumber) return `${matchdayNumber}. Spieltag`;
 
-  return normalized;
+  return localizeGroupName(normalized);
+};
+
+export const localizeGroupName = (groupName?: string) => {
+  const normalized = (groupName ?? "").trim();
+  if (!normalized) return "";
+
+  const matchdayNumber = getMatchdayNumber(normalized);
+  if (matchdayNumber) return `${matchdayNumber}. Spieltag`;
+
+  const hasFirstLeg = KNOCKOUT_FIRST_LEG_REGEX.test(normalized);
+  const hasSecondLeg = KNOCKOUT_SECOND_LEG_REGEX.test(normalized);
+  const stageBase = normalized
+    .replace(KNOCKOUT_STAGE_SUFFIX_REGEX, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/[-–:\s]+$/g, "")
+    .trim();
+
+  let localizedStage = stageBase || normalized;
+  for (const [pattern, replacement] of LOCALIZED_KNOCKOUT_ROUND_NAMES) {
+    if (pattern.test(localizedStage)) {
+      localizedStage = replacement;
+      break;
+    }
+  }
+
+  if (hasFirstLeg) {
+    return `${localizedStage} Hinspiele`;
+  }
+
+  if (hasSecondLeg) {
+    return `${localizedStage} Rückspiele`;
+  }
+
+  return localizedStage;
 };
 
 export const isPlayoffRoundName = (groupName?: string) => {

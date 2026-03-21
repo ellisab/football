@@ -1,4 +1,5 @@
 import { ArrowRight, Goal, Medal, ScanEye } from "lucide-react";
+import { SectionKicker } from "./section-kicker";
 
 export function QuickActions({
   hasTable,
@@ -13,26 +14,24 @@ export function QuickActions({
     {
       href: primaryHref,
       icon: Goal,
-      title: "Latest Results",
-      description: "Track every scoreline from first whistle to final.",
-      cta: "Jump to matches",
+      title: "Neueste Ergebnisse",
+      description: "Verfolge jeden Spielstand vom Anpfiff bis zum Abpfiff.",
+      cta: "Zu den Spielen",
     },
     {
       href: secondaryHref,
       icon: hasTable ? Medal : ScanEye,
-      title: hasTable ? "Standings" : "Match Insights",
+      title: hasTable ? "Tabelle" : "Spielüberblick",
       description: hasTable
-        ? "Jump straight to qualification and relegation pressure."
-        : "Scan upcoming ties and in-round momentum.",
-      cta: hasTable ? "Jump to table" : "Jump to insights",
+        ? "Sieh direkt, wer um Europa und gegen den Abstieg spielt."
+        : "Überblicke kommende Duelle und die Dynamik der Runde.",
+      cta: hasTable ? "Zur Tabelle" : "Zum Überblick",
     },
   ];
 
   return (
     <section className="grid gap-3">
-      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#3dffa0]">
-        Quick Actions
-      </div>
+      <SectionKicker>Schnellzugriff</SectionKicker>
       <div className="grid gap-3 md:grid-cols-2">
         {actions.map((action) => {
           const Icon = action.icon;

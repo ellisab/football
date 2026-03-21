@@ -25,8 +25,8 @@ const monoFont = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Matchday Atlas",
-  description: "Matchday results and tables for your favorite leagues.",
+  title: "Spieltag-Atlas",
+  description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
 };
 
 export default function RootLayout({
@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="de">
       <body
         className={`${stadiumHeadingFont.variable} ${stadiumBodyFont.variable} ${monoFont.variable} antialiased`}
       >

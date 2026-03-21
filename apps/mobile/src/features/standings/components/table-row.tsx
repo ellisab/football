@@ -19,12 +19,12 @@ export function TableRow({
   const isBottom = index >= Math.max(total - 3, 0);
 
   const zoneLabel = isLeader
-    ? "Leaders"
+    ? "Spitze"
     : isEurope
-      ? "Europe"
+      ? "Europa"
       : isBottom
-        ? "Relegation"
-        : "Midtable";
+        ? "Abstieg"
+        : "Mittelfeld";
 
   return (
     <View>
@@ -71,16 +71,16 @@ export function TableRow({
 
         <View style={styles.tableMeta}>
           <Text style={styles.tableZone}>{zoneLabel}</Text>
-          <Text style={styles.tableCellPts}>{row.points ?? 0} pts</Text>
+          <Text style={styles.tableCellPts}>{row.points ?? 0} Pkt.</Text>
         </View>
       </View>
 
       <View style={styles.tableStatsRow}>
-        <Text style={styles.tableStat}>MP {row.matches ?? 0}</Text>
-        <Text style={styles.tableStat}>W {row.won ?? 0}</Text>
-        <Text style={styles.tableStat}>D {row.draw ?? 0}</Text>
-        <Text style={styles.tableStat}>L {row.lost ?? 0}</Text>
-        <Text style={styles.tableStat}>GD {row.goalDiff ?? 0}</Text>
+        <Text style={styles.tableStat}>Sp {row.matches ?? 0}</Text>
+        <Text style={styles.tableStat}>S {row.won ?? 0}</Text>
+        <Text style={styles.tableStat}>U {row.draw ?? 0}</Text>
+        <Text style={styles.tableStat}>N {row.lost ?? 0}</Text>
+        <Text style={styles.tableStat}>TD {row.goalDiff ?? 0}</Text>
       </View>
     </View>
   );

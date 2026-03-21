@@ -5,6 +5,7 @@ import { ErrorBanner } from "./error-banner";
 import { LeagueTabs } from "./league-tabs";
 import { QuickActions } from "./quick-actions";
 import { RoundSection } from "./round-section";
+import { SectionKicker } from "./section-kicker";
 
 const getPrimaryActionHref = (data: WebHomeViewModel) => {
   if (data.sections.some((section) => section.key === "matchday")) {
@@ -43,16 +44,6 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_10%_0%,rgba(61,255,160,0.15)_0%,transparent_35%),linear-gradient(180deg,#0b0d12_0%,#11151e_100%)] text-[#f3f6fd]">
       <main className="mx-auto flex w-full max-w-[1220px] flex-col gap-10 px-3 pb-14 pt-5 sm:px-5 sm:pb-20">
-        <section className="grid gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 className="text-3xl font-[var(--font-stadium-heading)] uppercase tracking-[0.04em] sm:text-4xl">
-                Stadium Edition
-              </h1>
-            </div>
-          </div>
-        </section>
-
         <LeagueTabs
           options={data.leagueOptions}
           currentLeague={data.resolvedLeague}
@@ -67,10 +58,8 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
 
         {nextRoundSections.map((section) =>
           section.renderKind === "table" ? (
-            <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-4">
-              <div className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#3dffa0]">
-                {section.kicker}
-              </div>
+            <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-3">
+              <SectionKicker>{section.kicker}</SectionKicker>
               <StandingsCard table={section.items} />
             </section>
           ) : (
@@ -86,10 +75,8 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
 
         {remainingSections.map((section) =>
           section.renderKind === "table" ? (
-            <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-4">
-              <div className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[#3dffa0]">
-                {section.kicker}
-              </div>
+            <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-3">
+              <SectionKicker>{section.kicker}</SectionKicker>
               <StandingsCard table={section.items} />
             </section>
           ) : (
@@ -98,7 +85,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
         )}
 
         <footer className="mt-2 border-t border-[#1f2431] pt-4 text-xs text-[#8e97ab]">
-          Data source:{" "}
+          Datenquelle:{" "}
           <a
             href="https://www.openligadb.de/"
             target="_blank"
@@ -107,7 +94,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           >
             OpenLigaDB
           </a>
-          {" "}· License:{" "}
+          {" "}· Lizenz:{" "}
           <a
             href="https://www.openligadb.de/lizenz"
             target="_blank"

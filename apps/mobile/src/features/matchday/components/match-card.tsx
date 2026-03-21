@@ -44,7 +44,7 @@ export function MatchCard({
                 : styles.cardMetaStatusScheduledText,
             ]}
           >
-            {match.matchIsFinished ? "Final" : "Scheduled"}
+            {match.matchIsFinished ? "Beendet" : "Anstehend"}
           </Text>
         </View>
       </View>
@@ -57,7 +57,7 @@ export function MatchCard({
             styles={styles}
           />
           <Text style={styles.team} numberOfLines={1}>
-            {match.team1?.teamName || "Home"}
+            {match.team1?.teamName || "Heim"}
           </Text>
         </View>
         <Text style={styles.score}>{score}</Text>
@@ -70,7 +70,7 @@ export function MatchCard({
           styles={styles}
         />
         <Text style={styles.team} numberOfLines={1}>
-          {match.team2?.teamName || "Away"}
+          {match.team2?.teamName || "Gast"}
         </Text>
       </View>
 
@@ -81,7 +81,7 @@ export function MatchCard({
               key={goal.goalID ?? `${goal.goalGetterName}-${goal.matchMinute}-${index}`}
               style={styles.goalItem}
             >
-              {goal.matchMinute ?? "-"}' {goal.goalGetterName ?? "Goal"}
+              {goal.matchMinute ?? "-"}' {goal.goalGetterName ?? "Tor"}
             </Text>
           ))}
         </View>

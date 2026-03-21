@@ -10,23 +10,23 @@ export function OverviewPanels({
 }) {
   const actionCards = [
     {
-      label: "Latest",
-      title: "Latest Results",
-      description: "Track every scoreline from first whistle to final.",
+      label: "Aktuell",
+      title: "Neueste Ergebnisse",
+      description: "Verfolge jeden Spielstand vom Anpfiff bis zum Abpfiff.",
     },
     {
-      label: hasTable ? "Standings" : "Insights",
-      title: hasTable ? "Table Shift" : "Match Insights",
+      label: hasTable ? "Tabelle" : "Überblick",
+      title: hasTable ? "Tabellenlage" : "Spielüberblick",
       description: hasTable
-        ? "Jump straight to qualification and relegation pressure."
-        : "Scan upcoming ties and in-round momentum.",
+        ? "Sieh direkt, wer um Europa und gegen den Abstieg spielt."
+        : "Überblicke kommende Duelle und die Dynamik der Runde.",
     },
   ];
 
   return (
     <View style={styles.header}>
       <View style={styles.section}>
-        <Text style={styles.sectionKicker}>Quick Actions</Text>
+        <Text style={styles.sectionKicker}>Schnellzugriff</Text>
       </View>
       <View style={styles.quickActions}>
         {actionCards.map((action) => (
