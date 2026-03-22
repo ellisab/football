@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import type { ReactElement, RefObject } from "react";
 import { SectionList, Text, View } from "react-native";
 import type { KnockoutTie } from "@footballleagues/core/matches";
 import type { ApiMatch, ApiTableRow } from "@footballleagues/core/openligadb";
@@ -9,17 +9,26 @@ import { TableRow } from "../../standings/components/table-row";
 import type { MobileHomeSection } from "../presenter/home-view-model";
 
 type SectionItem = ApiMatch | ApiTableRow | KnockoutTie;
+export type HomeSectionListRef = SectionList<SectionItem, MobileHomeSection>;
 
 export function HomeSectionList({
   sections,
   styles,
   header,
   footer,
+  listRef,
+  onScrollToIndexFailed,
 }: {
   sections: MobileHomeSection[];
   styles: AppStyles;
   header?: ReactElement | null;
   footer?: ReactElement | null;
+  listRef?: RefObject<HomeSectionListRef | null>;
+  onScrollToIndexFailed?: (info: {
+    index: number;
+    highestMeasuredFrameIndex: number;
+    averageItemLength: number;
+  }) => void;
 }) {
   const renderSectionHeader = ({ section }: { section: MobileHomeSection }) => (
     <View style={styles.section}>
@@ -63,6 +72,7 @@ export function HomeSectionList({
 
   return (
     <SectionList<SectionItem, MobileHomeSection>
+      ref={listRef}
       sections={sections}
       keyExtractor={(item, index) =>
         (item as KnockoutTie).key ||
@@ -71,6 +81,7 @@ export function HomeSectionList({
         (item as ApiTableRow).teamName ||
         index.toString()
       }
+      onScrollToIndexFailed={onScrollToIndexFailed}
       renderItem={renderItem}
       renderSectionHeader={renderSectionHeader}
       stickySectionHeadersEnabled={false}

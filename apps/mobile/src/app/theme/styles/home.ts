@@ -83,6 +83,13 @@ export const createHomeStyles = (theme: AppTheme) => ({
     shadowOffset: { width: 0, height: 8 },
     elevation: 3,
   },
+  quickActionCardPressed: {
+    borderColor: theme.primary,
+    backgroundColor: theme.surfaceMuted,
+  },
+  quickActionCardDisabled: {
+    opacity: 0.7,
+  },
   quickActionLabel: {
     color: theme.primary,
     fontSize: 11,
