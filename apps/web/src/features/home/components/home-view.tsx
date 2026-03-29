@@ -2,8 +2,8 @@ import { BracketSection } from "@/features/champions-league/components/bracket-s
 import { StandingsCard } from "@/features/standings/components/standings-card";
 import type { WebHomeViewModel } from "../presenter/home-view-model";
 import { ErrorBanner } from "./error-banner";
+import { HomeHero } from "./home-hero";
 import { LeagueTabs } from "./league-tabs";
-import { QuickActions } from "./quick-actions";
 import { RoundSection } from "./round-section";
 import { SectionKicker } from "./section-kicker";
 
@@ -49,8 +49,11 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           currentLeague={data.resolvedLeague}
           currentSeason={data.resolvedSeason}
         />
-        <QuickActions
+        <HomeHero
+          leagueLabel={data.leagueLabel}
+          season={data.resolvedSeason}
           hasTable={data.hasTable}
+          hasBracket={data.bracketMatches.length > 0}
           primaryHref={primaryActionHref}
           secondaryHref={secondaryActionHref}
         />

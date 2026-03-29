@@ -173,9 +173,9 @@
     position: relative;
     isolation: isolate;
     background:
-      radial-gradient(circle at 14% -12%, rgba(255, 255, 255, 0.28), transparent 48%),
-      radial-gradient(circle at 90% -18%, rgba(17, 19, 23, 0.28), transparent 44%),
-      linear-gradient(112deg, #0f1116 0%, #b8001a 56%, #730010 100%);
+      radial-gradient(circle at 16% -12%, rgba(255, 255, 255, 0.14), transparent 46%),
+      radial-gradient(circle at 88% 8%, rgba(25, 77, 63, 0.34), transparent 42%),
+      linear-gradient(112deg, #0c1315 0%, #112421 52%, #0b1715 100%);
     box-shadow: 0 24px 52px rgba(15, 16, 21, 0.38);
     animation: stadiumPulse 16s ease-in-out infinite;
   }
