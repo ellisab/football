@@ -173,10 +173,10 @@
     position: relative;
     isolation: isolate;
     background:
-      radial-gradient(circle at 16% -12%, rgba(255, 255, 255, 0.14), transparent 46%),
-      radial-gradient(circle at 88% 8%, rgba(25, 77, 63, 0.34), transparent 42%),
-      linear-gradient(112deg, #0c1315 0%, #112421 52%, #0b1715 100%);
-    box-shadow: 0 24px 52px rgba(15, 16, 21, 0.38);
+      radial-gradient(circle at 18% -16%, rgba(255, 255, 255, 0.05), transparent 42%),
+      radial-gradient(circle at 84% 0%, rgba(31, 38, 51, 0.34), transparent 40%),
+      linear-gradient(180deg, #13161d 0%, #13161d 100%);
+    box-shadow: 0 20px 44px rgba(6, 8, 12, 0.34);
     animation: stadiumPulse 16s ease-in-out infinite;
   }
   .hero-panel::before {
@@ -186,19 +186,19 @@
     background:
       repeating-linear-gradient(
         90deg,
-        rgba(255, 255, 255, 0.11) 0,
-        rgba(255, 255, 255, 0.11) 1px,
+        rgba(255, 255, 255, 0.05) 0,
+        rgba(255, 255, 255, 0.05) 1px,
         transparent 1px,
         transparent 10%
       ),
       repeating-linear-gradient(
         0deg,
-        rgba(255, 255, 255, 0.09) 0,
-        rgba(255, 255, 255, 0.09) 1px,
+        rgba(255, 255, 255, 0.04) 0,
+        rgba(255, 255, 255, 0.04) 1px,
         transparent 1px,
         transparent 28%
       );
-    opacity: 0.22;
+    opacity: 0.12;
     pointer-events: none;
     transform: perspective(900px) rotateX(35deg);
     transform-origin: top center;

@@ -12,7 +12,7 @@ export const createHomeStyles = (theme: AppTheme) => ({
     borderRadius: 26,
     borderWidth: 1,
     borderColor: theme.border,
-    backgroundColor: "#10201d",
+    backgroundColor: theme.surface,
     overflow: "hidden" as const,
     shadowColor: "#05070b",
     shadowOpacity: 0.28,
@@ -27,7 +27,7 @@ export const createHomeStyles = (theme: AppTheme) => ({
     width: 240,
     height: 240,
     borderRadius: 120,
-    backgroundColor: "rgba(213, 0, 29, 0.22)",
+    backgroundColor: "rgba(31, 38, 51, 0.26)",
   },
   heroGrid: {
     paddingHorizontal: 18,
@@ -37,7 +37,6 @@ export const createHomeStyles = (theme: AppTheme) => ({
   },
   heroCopy: {
     gap: 10,
-    paddingRight: 8,
   },
   heroKicker: {
     color: "#ffd86b",
@@ -77,25 +76,6 @@ export const createHomeStyles = (theme: AppTheme) => ({
     color: theme.text,
     fontSize: 11,
     fontWeight: "700" as const,
-  },
-  heroMascotWrap: {
-    alignSelf: "flex-end" as const,
-    width: 150,
-    height: 220,
-    justifyContent: "flex-end" as const,
-    alignItems: "center" as const,
-  },
-  heroMascotShadow: {
-    position: "absolute" as const,
-    bottom: 8,
-    width: 86,
-    height: 16,
-    borderRadius: 999,
-    backgroundColor: "rgba(4, 6, 8, 0.68)",
-  },
-  heroMascot: {
-    width: 150,
-    height: 220,
   },
   section: {
     paddingHorizontal: 20,
