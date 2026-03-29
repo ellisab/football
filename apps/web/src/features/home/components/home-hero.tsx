@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays, Goal, Medal, Trophy } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const getHeroDescription = ({
   leagueLabel,
@@ -50,36 +50,14 @@ export function HomeHero({
       <div className="grid gap-5 px-5 py-6 sm:px-7 sm:py-8 lg:px-9">
         <div className="grid gap-5">
           <div className="grid gap-3">
-            <div className="text-[0.74rem] font-bold tracking-[0.24em] uppercase text-[#ffd86b]">
-              Matchday HQ
-            </div>
             <div className="grid gap-3">
               <h1 className="max-w-[12ch] text-[2.9rem] leading-[0.92] font-[var(--font-stadium-heading)] uppercase text-white sm:text-[3.6rem]">
-                Spieltag-Atlas
+                Spieltag
               </h1>
               <p className="max-w-[58ch] text-sm leading-6 text-[#e8ebf4] sm:text-[1rem]">
                 {description}
               </p>
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2.5">
-            <span className="score-pill inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-white">
-              <Trophy className="h-4 w-4 text-[#ffd86b]" />
-              {leagueLabel}
-            </span>
-            <span className="score-pill inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-white">
-              <CalendarDays className="h-4 w-4 text-[#72ffbc]" />
-              Saison {season}
-            </span>
-            <span className="score-pill inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-white">
-              {hasTable ? (
-                <Medal className="h-4 w-4 text-[#72ffbc]" />
-              ) : (
-                <Goal className="h-4 w-4 text-[#72ffbc]" />
-              )}
-              {hasTable ? "Tabelle live" : "Runde im Blick"}
-            </span>
           </div>
 
           <div className="flex flex-wrap gap-3">

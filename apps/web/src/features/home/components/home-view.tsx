@@ -49,43 +49,45 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           currentLeague={data.resolvedLeague}
           currentSeason={data.resolvedSeason}
         />
-        <HomeHero
-          leagueLabel={data.leagueLabel}
-          season={data.resolvedSeason}
-          hasTable={data.hasTable}
-          hasBracket={data.bracketMatches.length > 0}
-          primaryHref={primaryActionHref}
-          secondaryHref={secondaryActionHref}
-        />
-        <ErrorBanner errors={data.visibleErrors} />
+        <div className="grid gap-6">
+          <HomeHero
+            leagueLabel={data.leagueLabel}
+            season={data.resolvedSeason}
+            hasTable={data.hasTable}
+            hasBracket={data.bracketMatches.length > 0}
+            primaryHref={primaryActionHref}
+            secondaryHref={secondaryActionHref}
+          />
+          <ErrorBanner errors={data.visibleErrors} />
 
-        {nextRoundSections.map((section) =>
-          section.renderKind === "table" ? (
-            <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-3">
-              <SectionKicker>{section.kicker}</SectionKicker>
-              <StandingsCard table={section.items} />
+          {nextRoundSections.map((section) =>
+            section.renderKind === "table" ? (
+              <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-3">
+                <SectionKicker>{section.kicker}</SectionKicker>
+                <StandingsCard table={section.items} />
+              </section>
+            ) : (
+              <RoundSection key={section.key} section={section} />
+            )
+          )}
+
+          {data.resolvedLeague === "cl" ? (
+            <section id="bracket" className="grid gap-4">
+              <BracketSection rounds={data.bracketMatches} />
             </section>
-          ) : (
-            <RoundSection key={section.key} section={section} />
-          )
-        )}
+          ) : null}
 
-        {data.resolvedLeague === "cl" ? (
-          <section id="bracket" className="grid gap-4">
-            <BracketSection rounds={data.bracketMatches} />
-          </section>
-        ) : null}
-
-        {remainingSections.map((section) =>
-          section.renderKind === "table" ? (
-            <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-3">
-              <SectionKicker>{section.kicker}</SectionKicker>
-              <StandingsCard table={section.items} />
-            </section>
-          ) : (
-            <RoundSection key={section.key} section={section} />
-          )
-        )}
+          {remainingSections.map((section) =>
+            section.renderKind === "table" ? (
+              <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-3">
+                <SectionKicker>{section.kicker}</SectionKicker>
+                <StandingsCard table={section.items} />
+              </section>
+            ) : (
+              <RoundSection key={section.key} section={section} />
+            )
+          )}
+        </div>
 
         <footer className="mt-2 border-t border-[#1f2431] pt-4 text-xs text-[#8e97ab]">
           Datenquelle:{" "}

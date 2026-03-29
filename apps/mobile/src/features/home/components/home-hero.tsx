@@ -15,8 +15,7 @@ export function HomeHero({
       <View style={styles.heroGlow} />
       <View style={styles.heroGrid}>
         <View style={styles.heroCopy}>
-          <Text style={styles.heroKicker}>Matchday HQ</Text>
-          <Text style={styles.heroTitle}>Spieltag-Atlas</Text>
+          <Text style={styles.heroTitle}>Spieltag</Text>
           <Text style={styles.heroDescription}>
             {leagueLabel} {season} mit Spieltag, Tabelle und allen schnellen Einstiegen
             direkt auf dem Homescreen.
