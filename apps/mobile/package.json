@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@footballleagues/core": "workspace:*",
-    "expo": "~55.0.8",
+    "expo": "~55.0.9",
     "expo-status-bar": "~55.0.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
