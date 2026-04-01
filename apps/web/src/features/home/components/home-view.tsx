@@ -42,19 +42,22 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
   const remainingSections = data.sections.filter((section) => section.key !== "next-round");
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_10%_0%,rgba(61,255,160,0.15)_0%,transparent_35%),linear-gradient(180deg,#0b0d12_0%,#11151e_100%)] text-[#f3f6fd]">
-      <main className="mx-auto flex w-full max-w-[1220px] flex-col gap-10 px-3 pb-14 pt-5 sm:px-5 sm:pb-20">
+    <div className="poster-shell min-h-screen w-full overflow-x-hidden text-[#fff2fb]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[-10%] top-24 h-72 w-72 rounded-full bg-[#ff9953]/18 blur-3xl sm:h-96 sm:w-96" />
+        <div className="absolute right-[-12%] top-52 h-72 w-72 rounded-full bg-[#57ebff]/12 blur-3xl sm:h-[26rem] sm:w-[26rem]" />
+        <div className="absolute bottom-16 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#ff5c9a]/14 blur-3xl sm:h-96 sm:w-96" />
+      </div>
+
+      <main className="relative z-10 mx-auto flex w-full max-w-[1240px] flex-col gap-8 px-3 pb-14 pt-5 sm:px-5 sm:pb-20 sm:pt-6">
         <LeagueTabs
           options={data.leagueOptions}
           currentLeague={data.resolvedLeague}
           currentSeason={data.resolvedSeason}
         />
-        <div className="grid gap-6">
+        <div className="grid gap-6 lg:gap-7">
           <HomeHero
-            leagueLabel={data.leagueLabel}
-            season={data.resolvedSeason}
             hasTable={data.hasTable}
-            hasBracket={data.bracketMatches.length > 0}
             primaryHref={primaryActionHref}
             secondaryHref={secondaryActionHref}
           />
@@ -92,13 +95,13 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           )}
         </div>
 
-        <footer className="mt-2 border-t border-[#1f2431] pt-4 text-xs text-[#8e97ab]">
+        <footer className="poster-surface mt-2 rounded-[1.6rem] px-4 py-4 text-xs text-[#e3b7cf] sm:px-5">
           Datenquelle:{" "}
           <a
             href="https://www.openligadb.de/"
             target="_blank"
             rel="noreferrer"
-            className="font-semibold text-[#3dffa0] underline underline-offset-2 hover:text-[#72ffbc]"
+            className="font-semibold text-[#ffd66c] underline underline-offset-2 transition-colors hover:text-[#fff6d0]"
           >
             OpenLigaDB
           </a>
@@ -107,7 +110,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
             href="https://www.openligadb.de/lizenz"
             target="_blank"
             rel="noreferrer"
-            className="font-semibold text-[#3dffa0] underline underline-offset-2 hover:text-[#72ffbc]"
+            className="font-semibold text-[#57ebff] underline underline-offset-2 transition-colors hover:text-[#d9fbff]"
           >
             openligadb.de/lizenz
           </a>

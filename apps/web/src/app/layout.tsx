@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import {
-  Barlow,
-  Barlow_Condensed,
+  Bungee,
   JetBrains_Mono,
+  Space_Grotesk,
 } from "next/font/google";
 import "./globals.css";
 import { siteUrl } from "@/lib/site-config";
 
-const stadiumHeadingFont = Barlow_Condensed({
-  weight: ["600", "700", "800", "900"],
+const stadiumHeadingFont = Bungee({
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-stadium-heading",
 });
 
-const stadiumBodyFont = Barlow({
+const stadiumBodyFont = Space_Grotesk({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-stadium-body",

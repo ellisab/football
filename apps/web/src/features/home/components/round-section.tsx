@@ -24,7 +24,7 @@ export function RoundSection({
       />
       <div className="grid gap-4">
         {section.items.length === 0 ? (
-          <div className="rounded-2xl border border-[#1f2431] bg-[#131720] p-5 text-[#97a2b8]">
+          <div className="poster-empty rounded-[1.6rem] p-5 text-[#dbb7cb]">
             {section.emptyText}
           </div>
         ) : section.renderKind === "ties" ? (

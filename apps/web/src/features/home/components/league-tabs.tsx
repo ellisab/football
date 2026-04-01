@@ -28,7 +28,7 @@ export function LeagueTabs({
   currentSeason: number;
 }) {
   return (
-    <section className="grid gap-3">
+    <section className="poster-surface grid gap-3 rounded-[1.8rem] px-4 py-4 sm:px-5">
       <SectionKicker>Wettbewerbe</SectionKicker>
       <div className="flex flex-wrap gap-3">
         {options.map((option) => {
@@ -40,13 +40,15 @@ export function LeagueTabs({
             <Link
               key={option.shortcut}
               href={buildHref(option.shortcut, season)}
-              className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+              className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-semibold shadow-[0_10px_24px_rgba(7,3,13,0.18)] transition-all ${
                 isActive
-                  ? "border-[#3dffa0] bg-[#1a3a2a] text-[#3dffa0]"
-                  : "border-[#232937] bg-[#141922] text-[#a5aec2] hover:border-[#2f3645] hover:bg-[#19202b]"
+                  ? "border-[#ffd66c]/55 bg-[linear-gradient(135deg,rgba(255,153,83,0.28),rgba(255,92,154,0.24),rgba(87,235,255,0.22))] text-[#fff6d0]"
+                  : "border-white/10 bg-white/[0.05] text-[#efc9dd] hover:border-[#57ebff]/35 hover:bg-white/[0.08] hover:text-[#fff2fb]"
               }`}
             >
-              <Icon className="h-4 w-4" />
+              <Icon
+                className={`h-4 w-4 ${isActive ? "text-[#ffd66c]" : "text-[#57ebff]"}`}
+              />
               <span>{getLeagueLabel(option.shortcut)}</span>
             </Link>
           );

@@ -1,69 +1,31 @@
-import { ArrowRight } from "lucide-react";
-
-const getHeroDescription = ({
-  leagueLabel,
-  season,
-  hasTable,
-  hasBracket,
-}: {
-  leagueLabel: string;
-  season: number;
-  hasTable: boolean;
-  hasBracket: boolean;
-}) => {
-  if (hasBracket) {
-    return `${leagueLabel} ${season} mit Ergebnissen, K.-o.-Baum und den wichtigsten Duellen auf einer Seite.`;
-  }
-
-  if (hasTable) {
-    return `${leagueLabel} ${season} mit Spieltag, Tabellenlage und allen schnellen Einstiegen direkt im ersten Viewport.`;
-  }
-
-  return `${leagueLabel} ${season} mit den neuesten Spielen und dem kompakten Rundenueberblick an einem Ort.`;
-};
+import { ArrowRight, Sparkles } from "lucide-react";
 
 export function HomeHero({
-  leagueLabel,
-  season,
   hasTable,
-  hasBracket,
   primaryHref,
   secondaryHref,
 }: {
-  leagueLabel: string;
-  season: number;
   hasTable: boolean;
-  hasBracket: boolean;
   primaryHref: string;
   secondaryHref: string;
 }) {
-  const description = getHeroDescription({
-    leagueLabel,
-    season,
-    hasTable,
-    hasBracket,
-  });
   const showSecondaryAction = secondaryHref !== primaryHref;
 
   return (
-    <section className="hero-panel overflow-hidden rounded-[2rem] border border-[#222530]">
-      <div className="grid gap-5 px-5 py-6 sm:px-7 sm:py-8 lg:px-9">
-        <div className="grid gap-5">
-          <div className="grid gap-3">
-            <div className="grid gap-3">
-              <h1 className="max-w-[12ch] text-[2.9rem] leading-[0.92] font-[var(--font-stadium-heading)] uppercase text-white sm:text-[3.6rem]">
-                Spieltag
-              </h1>
-              <p className="max-w-[58ch] text-sm leading-6 text-[#e8ebf4] sm:text-[1rem]">
-                {description}
-              </p>
+    <section className="hero-panel overflow-hidden rounded-[2.3rem] border border-white/10">
+      <div className="grid gap-8 px-5 py-5 sm:px-7 sm:py-7 lg:px-8 lg:py-8">
+        <div className="grid gap-6">
+          <div className="grid gap-4">
+            <div className="inline-flex items-center gap-2 text-[0.72rem] uppercase tracking-[0.32em] text-[#ffe38c]">
+              <Sparkles className="h-4 w-4 text-[#ffd66c]" />
+              spieltag
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <a
               href={primaryHref}
-              className="inline-flex items-center gap-2 rounded-full bg-[#f3f6fd] px-5 py-3 text-sm font-semibold text-[#11151e] transition-transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(92deg,#fff6d0_0%,#ffd66c_38%,#ff9f63_100%)] px-5 py-3 text-sm font-semibold text-[#1b0915] shadow-[0_18px_34px_rgba(255,153,83,0.26)] transition-transform hover:-translate-y-0.5"
             >
               Zu den Spielen
               <ArrowRight className="h-4 w-4" />
@@ -71,7 +33,7 @@ export function HomeHero({
             {showSecondaryAction ? (
               <a
                 href={secondaryHref}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+                className="poster-surface inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-[#fff2fb] transition-colors hover:bg-white/10"
               >
                 {hasTable ? "Zur Tabelle" : "Zum Ueberblick"}
               </a>
