@@ -5,6 +5,7 @@ import {
   JetBrains_Mono,
 } from "next/font/google";
 import "./globals.css";
+import { siteUrl } from "@/lib/site-config";
 
 const stadiumHeadingFont = Barlow_Condensed({
   weight: ["600", "700", "800", "900"],
@@ -25,8 +26,32 @@ const monoFont = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Spieltag-Atlas",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Spieltag-Atlas",
+    template: "%s | Spieltag-Atlas",
+  },
   description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
+  applicationName: "Spieltag-Atlas",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "Spieltag-Atlas",
+    title: "Spieltag-Atlas",
+    description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Spieltag-Atlas",
+    description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

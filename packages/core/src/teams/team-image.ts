@@ -1,5 +1,5 @@
 import {
-  ALLOWED_IMAGE_HOSTS,
+  ALLOWED_IMAGE_HOST_SET,
   DEFAULT_WIKIMEDIA_THUMB_SIZE,
   WIKIMEDIA_HOST,
   WIKIMEDIA_IMAGE_HEADERS,
@@ -38,7 +38,7 @@ export const isAllowedImageHost = (iconUrl?: string) => {
 
   try {
     const { hostname } = new URL(iconUrl);
-    return ALLOWED_IMAGE_HOSTS.has(hostname);
+    return ALLOWED_IMAGE_HOST_SET.has(hostname);
   } catch {
     return false;
   }
@@ -58,7 +58,7 @@ export const normalizeIconUrl = (
   try {
     const url = new URL(iconUrl);
 
-    if (forceHttps && url.protocol === "http:" && ALLOWED_IMAGE_HOSTS.has(url.hostname)) {
+    if (forceHttps && url.protocol === "http:" && ALLOWED_IMAGE_HOST_SET.has(url.hostname)) {
       url.protocol = "https:";
     }
 

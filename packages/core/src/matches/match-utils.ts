@@ -9,6 +9,7 @@ const kickoffFormatter = new Intl.DateTimeFormat("de-DE", {
 });
 const MATCHDAY_REGEX = /(\d{1,2})\.\s*spieltag/i;
 const PLAYOFF_REGEX = /playoffs?/i;
+const GERMAN_KNOCKOUT_ROUND_REGEX = /\b\d+\.\s*runde\b/i;
 const KNOCKOUT_FIRST_LEG_REGEX = /\b(hinspiele?|first legs?|first leg)\b/i;
 const KNOCKOUT_SECOND_LEG_REGEX = /\b(rueckspiele?|rückspiele?|second legs?|second leg)\b/i;
 const KNOCKOUT_STAGE_SUFFIX_REGEX =
@@ -135,6 +136,7 @@ export const isKnockoutGroup = (name?: string) => {
   const value = (name ?? "").toLowerCase();
 
   return (
+    GERMAN_KNOCKOUT_ROUND_REGEX.test(value) ||
     value.includes("achtelfinale") ||
     value.includes("viertelfinale") ||
     value.includes("halbfinale") ||

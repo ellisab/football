@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import path from "path";
 import { fileURLToPath } from "url";
+import { ALLOWED_IMAGE_REMOTE_PATTERNS } from "../../packages/core/src/teams/allowed-image-hosts";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(projectRoot, "..", "..");
@@ -20,15 +21,7 @@ const nextConfig: NextConfig = {
     "localhost",
   ],
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "upload.wikimedia.org" },
-      { protocol: "https", hostname: "i.imgur.com" },
-      { protocol: "https", hostname: "www.bundesliga-reisefuehrer.de" },
-      { protocol: "https", hostname: "bundesliga-reisefuehrer.de" },
-      { protocol: "https", hostname: "www.bundesliga-logos.com" },
-      { protocol: "https", hostname: "www.bundesliga.com" },
-      { protocol: "https", hostname: "www.bundesliga.de" },
-    ],
+    remotePatterns: ALLOWED_IMAGE_REMOTE_PATTERNS,
   },
 };
 

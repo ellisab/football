@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "pnpm exec tsx --test src/**/*.test.ts",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && mkdir -p .next/types && touch .next/types/cache-life.d.ts && tsc --noEmit"
   },
   "dependencies": {
     "@footballleagues/core": "workspace:*",

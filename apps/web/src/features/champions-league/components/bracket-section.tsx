@@ -4,10 +4,11 @@ import type { BracketRound } from "@footballleagues/core/home";
 import { TieCardList } from "./tie-card-list";
 
 type BracketSectionProps = {
+  title: string;
   rounds: BracketRound[];
 };
 
-export function BracketSection({ rounds }: BracketSectionProps) {
+export function BracketSection({ title, rounds }: BracketSectionProps) {
   if (rounds.length === 0) return null;
 
   return (
@@ -16,7 +17,7 @@ export function BracketSection({ rounds }: BracketSectionProps) {
         <h2 className="text-[1.85rem] leading-none font-[var(--font-stadium-heading)] uppercase text-[#ffffff] sm:text-[2.2rem]">
           <span className="inline-flex items-center gap-2">
             <Trophy className="h-6 w-6 text-[#3dffa0]" />
-            Champions-League-Baum
+            {title}
           </span>
         </h2>
         <p className="text-sm text-[#9ca6ba]">

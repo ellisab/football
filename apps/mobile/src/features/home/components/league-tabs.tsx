@@ -1,14 +1,16 @@
 import { Pressable, Text, View } from "react-native";
-import { MOBILE_LEAGUES, type LeagueKey } from "@footballleagues/core/leagues";
+import { getLeagueLabel, type LeagueKey, type LeagueOption } from "@footballleagues/core/leagues";
 import type { AppStyles } from "../../../app/theme/styles";
 
 export function LeagueTabs({
+  options,
   activeLeague,
   onChange,
   styles,
 }: {
+  options: LeagueOption[];
   activeLeague: LeagueKey;
-  onChange: (league: LeagueKey) => void;
+  onChange: (option: LeagueOption) => void;
   styles: AppStyles;
 }) {
   return (
@@ -17,17 +19,17 @@ export function LeagueTabs({
         <Text style={styles.sectionKicker}>Wettbewerbe</Text>
       </View>
       <View style={styles.tabs}>
-        {MOBILE_LEAGUES.map((league) => {
-          const isActive = league.key === activeLeague;
+        {options.map((option) => {
+          const isActive = option.shortcut === activeLeague;
 
           return (
             <Pressable
-              key={league.key}
-              onPress={() => onChange(league.key)}
+              key={option.shortcut}
+              onPress={() => onChange(option)}
               style={[styles.tab, isActive && styles.tabActive]}
             >
               <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
-                {league.label}
+                {getLeagueLabel(option.shortcut)}
               </Text>
             </Pressable>
           );

@@ -14,7 +14,7 @@ const matchSections: MobileHomeSection[] = [
     subtitle: "Saison 2025 · kommende Spiele",
     emptyText: "Noch keine kommenden Spiele verfügbar.",
     renderKind: "matches",
-    data: [],
+    items: [],
   },
   {
     key: "matchday",
@@ -23,7 +23,7 @@ const matchSections: MobileHomeSection[] = [
     subtitle: "Saison 2025",
     emptyText: "Für diese Runde sind noch keine Ergebnisse verfügbar.",
     renderKind: "matches",
-    data: [],
+    items: [],
   },
   {
     key: "table",
@@ -32,7 +32,7 @@ const matchSections: MobileHomeSection[] = [
     subtitle: "Aktualisierte Tabelle für die ausgewählte Saison.",
     emptyText: "Tabellendaten sind noch nicht verfügbar.",
     renderKind: "table",
-    data: [],
+    items: [],
   },
 ];
 

@@ -6,9 +6,11 @@ import { TieCard } from "./tie-card";
 
 export function BracketSection({
   rounds,
+  title,
   styles,
 }: {
   rounds: BracketRound[];
+  title: string;
   styles: AppStyles;
 }) {
   if (rounds.length === 0) return null;
@@ -17,7 +19,7 @@ export function BracketSection({
     <View>
       <View style={styles.section}>
         <Text style={styles.sectionKicker}>K.-o.-Phase</Text>
-        <Text style={styles.sectionTitle}>Champions-League-Baum</Text>
+        <Text style={styles.sectionTitle}>{title}</Text>
         <Text style={styles.sectionSubtitle}>
           K.-o.-Runden auf Basis der neuesten Gruppendaten.
         </Text>
