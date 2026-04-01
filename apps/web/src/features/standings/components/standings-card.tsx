@@ -25,46 +25,46 @@ type RankTone = {
 const getRankTone = (index: number, totalRows: number): RankTone => {
   if (index === 0) {
     return {
-      mobileRow: "border-[#2d553f] bg-[#15261f]",
-      positionBadge: "bg-[#3dffa0] text-[#0c0e12]",
-      desktopRow: "bg-[#121f1a]",
-      zone: "Spitze",
+      mobileRow: "border-[#ffd66c]/35 bg-[linear-gradient(135deg,rgba(96,58,14,0.72),rgba(71,25,44,0.72))]",
+      positionBadge: "bg-[linear-gradient(135deg,#fff6d0_0%,#ffd66c_54%,#ff9f63_100%)] text-[#1b0915]",
+      desktopRow: "bg-[rgba(128,79,16,0.18)]",
+      zone: "Krone",
     };
   }
 
   if (index < 4) {
     return {
-      mobileRow: "border-[#2a3441] bg-[#151a22]",
-      positionBadge: "bg-[#1f2835] text-[#8aa0c0]",
-      desktopRow: "bg-[#141a23]",
-      zone: "Europa",
+      mobileRow: "border-[#57ebff]/25 bg-[linear-gradient(135deg,rgba(16,42,56,0.72),rgba(45,18,56,0.78))]",
+      positionBadge: "bg-[linear-gradient(135deg,rgba(87,235,255,0.24),rgba(157,104,255,0.34))] text-[#dffcff]",
+      desktopRow: "bg-[rgba(37,18,54,0.28)]",
+      zone: "Orbit",
     };
   }
 
   if (index >= Math.max(totalRows - 3, 0)) {
     return {
-      mobileRow: "border-[#46303a] bg-[#23171d]",
-      positionBadge: "bg-[#3a2530] text-[#f2bdcb]",
-      desktopRow: "bg-[#1f151a]",
-      zone: "Abstieg",
+      mobileRow: "border-[#ff7ca7]/28 bg-[linear-gradient(135deg,rgba(72,18,36,0.78),rgba(44,14,36,0.76))]",
+      positionBadge: "bg-[linear-gradient(135deg,rgba(255,92,154,0.28),rgba(255,153,83,0.32))] text-[#ffe1ee]",
+      desktopRow: "bg-[rgba(62,17,36,0.3)]",
+      zone: "Red zone",
     };
   }
 
   return {
-    mobileRow: "border-[#232937] bg-[#131720]",
-    positionBadge: "bg-[#1d2431] text-[#98a4bb]",
+    mobileRow: "border-white/10 bg-[linear-gradient(135deg,rgba(35,15,47,0.82),rgba(18,10,29,0.9))]",
+    positionBadge: "bg-white/10 text-[#f2d5e4]",
     desktopRow: "",
-    zone: "Mittelfeld",
+    zone: "Pulse",
   };
 };
 
 export function StandingsCard({ table }: StandingsCardProps) {
   return (
-    <Card className="gap-0 overflow-hidden border-[#222530] bg-[#12161f] py-0 shadow-none">
-      <CardHeader className="border-b border-[#1e2230] py-5">
-        <CardTitle className="text-[1.85rem] leading-none font-[var(--font-stadium-heading)] uppercase text-[#ffffff] sm:text-[2.2rem]">
+    <Card className="poster-surface gap-0 overflow-hidden border-white/10 bg-[linear-gradient(180deg,rgba(39,14,47,0.88),rgba(22,9,31,0.96))] py-0 shadow-none">
+      <CardHeader className="border-b border-white/10 py-5">
+        <CardTitle className="text-[1.85rem] leading-none font-[var(--font-stadium-heading)] uppercase text-[#fff6fd] sm:text-[2.2rem]">
           <span className="inline-flex items-center gap-2">
-            <Medal className="h-6 w-6 text-[#3dffa0]" />
+            <Medal className="h-6 w-6 text-[#ffd66c]" />
             Tabelle
           </span>
         </CardTitle>
@@ -79,7 +79,7 @@ export function StandingsCard({ table }: StandingsCardProps) {
               return (
                 <div
                   key={row.teamInfoId ?? row.teamName}
-                  className={`flex items-center w-full min-w-0 justify-between gap-3 rounded-2xl border px-3 py-3 text-sm text-[#d6dce8] sm:px-4 ${rankTone.mobileRow}`}
+                  className={`flex items-center w-full min-w-0 justify-between gap-3 rounded-[1.4rem] border px-3 py-3 text-sm text-[#ffeef7] sm:px-4 ${rankTone.mobileRow}`}
                 >
                   <div className="flex flex-1 min-w-0 items-center gap-2.5">
                     <span
@@ -90,15 +90,15 @@ export function StandingsCard({ table }: StandingsCardProps) {
                     <TeamBadge
                       name={row.teamName}
                       iconUrl={row.teamIconUrl}
-                      className="shrink-0 bg-[#1f2633]"
+                      className="shrink-0 bg-white/10 ring-1 ring-white/10"
                     />
                     <span className="truncate font-semibold">{row.teamName}</span>
                   </div>
                   <div className="shrink-0 text-right">
-                    <div className="text-[0.65rem] uppercase tracking-[0.08em] text-[#9aa4ba]">
+                    <div className="text-[0.65rem] uppercase tracking-[0.14em] text-[#efbfd5]">
                       {rankTone.zone}
                     </div>
-                    <div className="text-base font-semibold text-[#3dffa0]">
+                    <div className="text-base font-semibold text-[#ffd66c]">
                       {row.points} Pkt.
                     </div>
                   </div>
@@ -111,15 +111,15 @@ export function StandingsCard({ table }: StandingsCardProps) {
         <div className="hidden overflow-x-auto px-4 pb-2 sm:block sm:px-0">
           <Table className="min-w-[640px]">
             <TableHeader>
-              <TableRow className="border-[#1f2330]">
-                <TableHead className="w-12 text-[#9ba4b9]">Pos</TableHead>
-                <TableHead className="text-[#9ba4b9]">Team</TableHead>
-                <TableHead className="text-[#9ba4b9]">Sp</TableHead>
-                <TableHead className="text-[#9ba4b9]">S</TableHead>
-                <TableHead className="text-[#9ba4b9]">U</TableHead>
-                <TableHead className="text-[#9ba4b9]">N</TableHead>
-                <TableHead className="text-[#9ba4b9]">TD</TableHead>
-                <TableHead className="text-right text-[#9ba4b9]">Pkt.</TableHead>
+              <TableRow className="border-white/10">
+                <TableHead className="w-12 text-[#efbfd5]">Pos</TableHead>
+                <TableHead className="text-[#efbfd5]">Team</TableHead>
+                <TableHead className="text-[#efbfd5]">Sp</TableHead>
+                <TableHead className="text-[#efbfd5]">S</TableHead>
+                <TableHead className="text-[#efbfd5]">U</TableHead>
+                <TableHead className="text-[#efbfd5]">N</TableHead>
+                <TableHead className="text-[#efbfd5]">TD</TableHead>
+                <TableHead className="text-right text-[#efbfd5]">Pkt.</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -130,28 +130,28 @@ export function StandingsCard({ table }: StandingsCardProps) {
                 return (
                   <TableRow
                     key={row.teamInfoId ?? row.teamName}
-                    className={`border-[#1e2330] ${rankTone.desktopRow}`}
+                    className={`border-white/10 ${rankTone.desktopRow}`}
                   >
-                    <TableCell className="font-semibold text-[#9ba4b9]">{index + 1}</TableCell>
-                    <TableCell className="font-semibold text-[#f0f3f8]">
+                    <TableCell className="font-semibold text-[#efbfd5]">{index + 1}</TableCell>
+                    <TableCell className="font-semibold text-[#fff4fb]">
                       <div className="flex items-center gap-3">
                         <TeamBadge
                           name={row.teamName}
                           iconUrl={row.teamIconUrl}
-                          className="bg-[#1f2633]"
+                          className="bg-white/10 ring-1 ring-white/10"
                         />
                         <span>{row.teamName}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-[#9ba4b9]">{row.matches}</TableCell>
-                    <TableCell className="text-[#9ba4b9]">{row.won}</TableCell>
-                    <TableCell className="text-[#9ba4b9]">{row.draw}</TableCell>
-                    <TableCell className="text-[#9ba4b9]">{row.lost}</TableCell>
-                    <TableCell className="text-[#9ba4b9]">{row.goalDiff}</TableCell>
-                    <TableCell className="text-right font-semibold text-[#3dffa0]">
+                    <TableCell className="text-[#efbfd5]">{row.matches}</TableCell>
+                    <TableCell className="text-[#efbfd5]">{row.won}</TableCell>
+                    <TableCell className="text-[#efbfd5]">{row.draw}</TableCell>
+                    <TableCell className="text-[#efbfd5]">{row.lost}</TableCell>
+                    <TableCell className="text-[#efbfd5]">{row.goalDiff}</TableCell>
+                    <TableCell className="text-right font-semibold text-[#ffd66c]">
                       <span className="inline-flex items-center gap-1">
                         {row.points}
-                        <Goal className="h-3.5 w-3.5 text-[#3dffa0]" />
+                        <Goal className="h-3.5 w-3.5 text-[#57ebff]" />
                       </span>
                     </TableCell>
                   </TableRow>
