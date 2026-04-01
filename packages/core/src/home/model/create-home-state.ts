@@ -40,17 +40,16 @@ export const createHomeState = (snapshot: HomeSnapshot): HomeState => {
   const usesKnockoutLabels = isKnockoutLeague(snapshot.resolvedLeague);
   const currentStageName = getKnockoutStageName(snapshot.currentRound.groupName);
   const nextStageName = getKnockoutStageName(snapshot.nextRound.groupName);
-  const bracketMatches =
-    snapshot.resolvedLeague === "cl"
-      ? snapshot.bracketMatches.filter((round) => {
-          const bracketStageName = getKnockoutStageName(round.group.groupName);
+  const bracketMatches = usesKnockoutLabels
+    ? snapshot.bracketMatches.filter((round) => {
+        const bracketStageName = getKnockoutStageName(round.group.groupName);
 
-          return (
-            bracketStageName !== currentStageName &&
-            bracketStageName !== nextStageName
-          );
-        })
-      : snapshot.bracketMatches;
+        return (
+          bracketStageName !== currentStageName &&
+          bracketStageName !== nextStageName
+        );
+      })
+    : snapshot.bracketMatches;
   const isChampionsLeaguePlayoffRound =
     snapshot.resolvedLeague === "cl" &&
     isPlayoffRoundName(snapshot.currentRound.groupName) &&

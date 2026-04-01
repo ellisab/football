@@ -302,3 +302,50 @@ test("createHomeState centralizes section shaping for Champions League playoff r
   assert.deepEqual(state.errorKeys, ["table", "next matchday"]);
   assert.equal(state.usesKnockoutLabels, true);
 });
+
+test("createHomeState removes visible DFB knockout stages from the bracket to avoid duplicate UI sections", () => {
+  const snapshot: HomeSnapshot = {
+    resolvedLeague: "dfb",
+    resolvedSeason: 2025,
+    leagueOptions: [{ shortcut: "dfb", label: "DFB-Pokal 2025/2026", seasons: [2025] }],
+    currentRound: {
+      groupName: "Halbfinale",
+      groupOrderID: 5,
+      matches: [createFinishedMatch(301, 1, "Club A", 2, "Club B")],
+    },
+    nextRound: {
+      groupName: "Finale",
+      groupOrderID: 6,
+      matches: [createUpcomingMatch(302, 3, "Club C", 4, "Club D")],
+    },
+    hasTable: false,
+    bracketMatches: [
+      {
+        group: { groupID: 4, groupName: "Viertelfinale", groupOrderID: 4 },
+        matches: [createFinishedMatch(300, 10, "Club Q", 11, "Club R")],
+      },
+      {
+        group: { groupID: 5, groupName: "Halbfinale", groupOrderID: 5 },
+        matches: [createFinishedMatch(301, 1, "Club A", 2, "Club B")],
+      },
+      {
+        group: { groupID: 6, groupName: "Finale", groupOrderID: 6 },
+        matches: [createUpcomingMatch(302, 3, "Club C", 4, "Club D")],
+      },
+    ],
+    table: [],
+    errorKeys: [],
+  };
+
+  const state = createHomeState(snapshot);
+
+  assert.deepEqual(
+    state.bracketMatches.map((round) => round.group.groupName),
+    ["Viertelfinale"]
+  );
+  assert.deepEqual(
+    state.sections.map((section) => section.key),
+    ["next-round", "matchday"]
+  );
+  assert.equal(state.usesKnockoutLabels, true);
+});
