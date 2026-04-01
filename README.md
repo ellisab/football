@@ -18,6 +18,15 @@ Install dependencies:
 pnpm install
 ```
 
+Optional environment variables:
+```
+# Web canonical metadata / sitemap host
+SITE_URL=http://localhost:3000
+
+# Mobile app: use the web app as a first-party API/logo proxy
+EXPO_PUBLIC_WEB_BASE_URL=http://localhost:3000
+```
+
 Web (Next.js):
 ```
 pnpm run dev

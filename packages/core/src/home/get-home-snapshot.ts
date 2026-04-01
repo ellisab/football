@@ -9,7 +9,8 @@ import {
   resolveSeasonSelection,
 } from "../leagues";
 import { sortGoals } from "../matches";
-import { getMatchdayResults, type FetchOptions } from "../openligadb";
+import { openLigaDbDataSource } from "../openligadb";
+import type { FootballDataSource, HomeRequestOptions } from "./data-source";
 import { loadBracketMatches } from "./domain/load-bracket";
 import { loadPrimaryHomeData } from "./domain/load-primary-data";
 import { normalizeLeagueEntries } from "./domain/league-groups";
@@ -22,12 +23,14 @@ export const getHomeSnapshot = async (
     season?: string;
   },
   options?: {
-    fetchOptions?: FetchOptions;
+    dataSource?: FootballDataSource;
+    requestOptions?: HomeRequestOptions;
     fallbackYear?: number;
   }
 ): Promise<HomeSnapshot> => {
-  const fetchOptions = options?.fetchOptions;
-  const normalizedGroups = await normalizeLeagueEntries(fetchOptions);
+  const dataSource = options?.dataSource ?? openLigaDbDataSource;
+  const requestOptions = options?.requestOptions;
+  const normalizedGroups = await normalizeLeagueEntries(dataSource, requestOptions);
   const availableGroupKeys = getAvailableGroupKeys(normalizedGroups);
   const resolvedLeague = resolveLeagueSelection(params.league, availableGroupKeys);
 
@@ -45,19 +48,20 @@ export const getHomeSnapshot = async (
   );
 
   const primaryHomeData = await loadPrimaryHomeData({
+    dataSource,
     resolvedLeague,
     effectiveShortcut,
     resolvedSeason,
-    fetchOptions,
+    requestOptions,
   });
   const dataErrors = [...primaryHomeData.errorKeys];
 
   const matchdayPromise = primaryHomeData.currentGroup?.groupOrderID
-    ? getMatchdayResults(
+    ? dataSource.getMatchdayResults(
         effectiveShortcut,
         resolvedSeason,
         primaryHomeData.currentGroup.groupOrderID,
-        fetchOptions
+        requestOptions
       )
     : Promise.resolve([]);
 
@@ -76,13 +80,14 @@ export const getHomeSnapshot = async (
   const { currentRound, nextRound, errorKeys: roundErrorKeys } =
     primaryHomeData.currentGroup?.groupOrderID
       ? await resolveRoundSnapshots({
+          dataSource,
           currentGroup: primaryHomeData.currentGroup,
           currentRound: baseCurrentRound,
           groups: primaryHomeData.groups,
           resolvedLeague,
           effectiveShortcut,
           resolvedSeason,
-          fetchOptions,
+          requestOptions,
         })
       : {
           currentRound: baseCurrentRound,
@@ -91,6 +96,7 @@ export const getHomeSnapshot = async (
         };
 
   const { bracketMatches, errorKeys: bracketErrorKeys } = await loadBracketMatches({
+    dataSource,
     resolvedLeague,
     currentRound,
     nextRound,
@@ -98,7 +104,7 @@ export const getHomeSnapshot = async (
     playoffMatches: primaryHomeData.playoffMatches,
     effectiveShortcut,
     resolvedSeason,
-    fetchOptions,
+    requestOptions,
   });
 
   dataErrors.push(...roundErrorKeys, ...bracketErrorKeys);

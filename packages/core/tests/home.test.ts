@@ -153,7 +153,7 @@ test("getHomeSnapshot reports structured error keys when table and future rounds
     assert.equal(snapshot.nextRound.matches.length, 0);
     assert.deepEqual(
       [...snapshot.errorKeys].sort(),
-      ["next groups", "next matchday", "table"]
+      ["groups", "next groups", "next matchday", "table"]
     );
   } finally {
     globalThis.fetch = originalFetch;

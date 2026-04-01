@@ -9,7 +9,10 @@ import { TableRow } from "../../standings/components/table-row";
 import type { MobileHomeSection } from "../presenter/home-view-model";
 
 type SectionItem = ApiMatch | ApiTableRow | KnockoutTie;
-export type HomeSectionListRef = SectionList<SectionItem, MobileHomeSection>;
+type SectionListSection = MobileHomeSection & {
+  data: SectionItem[];
+};
+export type HomeSectionListRef = SectionList<SectionItem, SectionListSection>;
 
 export function HomeSectionList({
   sections,
@@ -30,7 +33,12 @@ export function HomeSectionList({
     averageItemLength: number;
   }) => void;
 }) {
-  const renderSectionHeader = ({ section }: { section: MobileHomeSection }) => (
+  const sectionData: SectionListSection[] = sections.map((section) => ({
+    ...section,
+    data: section.items as SectionItem[],
+  }));
+
+  const renderSectionHeader = ({ section }: { section: SectionListSection }) => (
     <View style={styles.section}>
       <Text style={styles.sectionKicker}>{section.kicker}</Text>
       <Text style={styles.sectionTitle}>{section.title}</Text>
@@ -50,7 +58,7 @@ export function HomeSectionList({
   }: {
     item: SectionItem;
     index: number;
-    section: MobileHomeSection;
+    section: SectionListSection;
   }) => {
     if (section.renderKind === "matches") {
       return <MatchCard match={item as ApiMatch} styles={styles} />;
@@ -71,9 +79,9 @@ export function HomeSectionList({
   };
 
   return (
-    <SectionList<SectionItem, MobileHomeSection>
+    <SectionList<SectionItem, SectionListSection>
       ref={listRef}
-      sections={sections}
+      sections={sectionData}
       keyExtractor={(item, index) =>
         (item as KnockoutTie).key ||
         (item as ApiMatch).matchID?.toString?.() ||

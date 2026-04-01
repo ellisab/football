@@ -1,15 +1,8 @@
-export const ALLOWED_IMAGE_HOSTS = new Set([
-  "upload.wikimedia.org",
-  "i.imgur.com",
-  "www.bundesliga-reisefuehrer.de",
-  "bundesliga-reisefuehrer.de",
-  "www.bundesliga-logos.com",
-  "bundesliga-logos.com",
-  "www.bundesliga.com",
-  "bundesliga.com",
-  "www.bundesliga.de",
-  "bundesliga.de",
-]);
+export {
+  ALLOWED_IMAGE_HOSTS,
+  ALLOWED_IMAGE_HOST_SET,
+  ALLOWED_IMAGE_REMOTE_PATTERNS,
+} from "./allowed-image-hosts";
 
 export const WIKIMEDIA_HOST = "upload.wikimedia.org";
 export const DEFAULT_WIKIMEDIA_THUMB_SIZE = 120;

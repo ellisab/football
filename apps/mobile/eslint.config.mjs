@@ -42,6 +42,12 @@ export default [
       },
       globals: {
         __DEV__: "readonly",
+        AbortController: "readonly",
+        AbortSignal: "readonly",
+        clearTimeout: "readonly",
+        fetch: "readonly",
+        process: "readonly",
+        setTimeout: "readonly",
         URL: "readonly",
       },
     },

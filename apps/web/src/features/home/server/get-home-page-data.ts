@@ -7,7 +7,7 @@ export const getHomePageData = async (params: {
   league?: string;
   season?: string;
 }) => {
-  const snapshot = await getHomeSnapshot(params, { fetchOptions: REVALIDATE });
+  const snapshot = await getHomeSnapshot(params, { requestOptions: REVALIDATE });
   const state = createHomeState(snapshot);
 
   return createWebHomeViewModel(state);

@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
-import { createHomeState, getHomeSnapshot } from "@footballleagues/core/home";
 import type { LeagueKey } from "@footballleagues/core/leagues";
-import {
-  createMobileHomeViewModel,
-  type MobileHomeViewModel,
-} from "../../home/presenter/home-view-model";
+import type { MobileHomeViewModel } from "../presenter/home-view-model";
+import { loadHomeData } from "../data/home-data-repository";
 
 type HomeDataState = {
   data: MobileHomeViewModel | null;
@@ -20,7 +17,7 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
   });
 
   useEffect(() => {
-    let isMounted = true;
+    const abortController = new AbortController();
 
     const load = async () => {
       setState((prev) => ({
@@ -30,25 +27,21 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
       }));
 
       try {
-        const snapshot = await getHomeSnapshot(
-          { league: activeLeague, season: String(season) },
-          { fallbackYear: season }
-        );
-        const state = createHomeState(snapshot);
-        const data = createMobileHomeViewModel(state);
-
-        if (!isMounted) return;
+        const result = await loadHomeData({
+          league: activeLeague,
+          season,
+          signal: abortController.signal,
+        });
 
         setState({
-          data,
+          data: result.data,
           loading: false,
-          error:
-            data.visibleErrors.length > 0
-              ? "Einige Daten konnten nicht geladen werden. Zum Aktualisieren nach unten ziehen."
-              : "",
+          error: result.error,
         });
-      } catch {
-        if (!isMounted) return;
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
 
         setState({
           data: null,
@@ -58,10 +51,10 @@ export function useHomeData(activeLeague: LeagueKey, season: number) {
       }
     };
 
-    load();
+    void load();
 
     return () => {
-      isMounted = false;
+      abortController.abort();
     };
   }, [activeLeague, season]);
 

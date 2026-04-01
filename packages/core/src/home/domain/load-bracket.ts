@@ -6,12 +6,8 @@ import {
   sortGoals,
   sortMatchesByKickoff,
 } from "../../matches";
-import {
-  getMatchesByGroup,
-  type ApiGroup,
-  type ApiMatch,
-  type FetchOptions,
-} from "../../openligadb";
+import type { ApiGroup, ApiMatch } from "../../openligadb";
+import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { BracketRound, HomeErrorKey, HomeRoundSnapshot } from "../types";
 
 const dedupeMatches = (matches: ApiMatch[]) => {
@@ -114,6 +110,7 @@ const snapshotToBracketRound = (round: HomeRoundSnapshot): BracketRound | null =
 };
 
 export const loadBracketMatches = async ({
+  dataSource,
   resolvedLeague,
   currentRound,
   nextRound,
@@ -121,8 +118,9 @@ export const loadBracketMatches = async ({
   playoffMatches,
   effectiveShortcut,
   resolvedSeason,
-  fetchOptions,
+  requestOptions,
 }: {
+  dataSource: FootballDataSource;
   resolvedLeague: LeagueKey;
   currentRound: HomeRoundSnapshot;
   nextRound: HomeRoundSnapshot;
@@ -130,7 +128,7 @@ export const loadBracketMatches = async ({
   playoffMatches: ApiMatch[];
   effectiveShortcut: string;
   resolvedSeason: number;
-  fetchOptions?: FetchOptions;
+  requestOptions?: HomeRequestOptions;
 }): Promise<{
   bracketMatches: BracketRound[];
   errorKeys: HomeErrorKey[];
@@ -143,11 +141,11 @@ export const loadBracketMatches = async ({
     knockoutGroups.map(async (group) => {
       if (!group.groupOrderID) return { group, matches: [] as ApiMatch[] };
 
-      const roundMatches = await getMatchesByGroup(
+      const roundMatches = await dataSource.getMatchesByGroup(
         effectiveShortcut,
         resolvedSeason,
         group.groupOrderID,
-        fetchOptions
+        requestOptions
       );
 
       return {

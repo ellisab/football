@@ -3,30 +3,25 @@ import {
   hasLeagueTable,
   type LeagueKey,
 } from "../../leagues";
-import {
-  getCurrentGroup,
-  getMatchdayResults,
-  getTable,
-  type ApiGroup,
-  type ApiMatch,
-  type ApiTableRow,
-  type FetchOptions,
-} from "../../openligadb";
+import type { ApiGroup, ApiMatch, ApiTableRow } from "../../openligadb";
 import { sortGoals } from "../../matches";
 import type { HomeErrorKey } from "../types";
+import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import { getGroupsWithFallback } from "./league-groups";
 import { getStatusCode } from "./shared";
 
 export const loadPrimaryHomeData = async ({
+  dataSource,
   resolvedLeague,
   effectiveShortcut,
   resolvedSeason,
-  fetchOptions,
+  requestOptions,
 }: {
+  dataSource: FootballDataSource;
   resolvedLeague: LeagueKey;
   effectiveShortcut: string;
   resolvedSeason: number;
-  fetchOptions?: FetchOptions;
+  requestOptions?: HomeRequestOptions;
 }): Promise<{
   currentGroup: ApiGroup | null;
   table: ApiTableRow[];
@@ -34,26 +29,27 @@ export const loadPrimaryHomeData = async ({
   playoffMatches: ApiMatch[];
   errorKeys: HomeErrorKey[];
 }> => {
-  const currentGroupPromise = getCurrentGroup(effectiveShortcut, fetchOptions);
+  const currentGroupPromise = dataSource.getCurrentGroup(
+    effectiveShortcut,
+    requestOptions
+  );
   const tablePromise = hasLeagueTable(resolvedLeague)
-    ? getTable(effectiveShortcut, resolvedSeason, fetchOptions)
+    ? dataSource.getTable(effectiveShortcut, resolvedSeason, requestOptions)
     : Promise.resolve([]);
-  const groupsPromise =
-    resolvedLeague === "cl"
-      ? getGroupsWithFallback(
-          resolvedLeague,
-          effectiveShortcut,
-          resolvedSeason,
-          fetchOptions
-        )
-      : Promise.resolve({ groups: [], shortcut: effectiveShortcut });
+  const groupsPromise = getGroupsWithFallback(
+    dataSource,
+    resolvedLeague,
+    effectiveShortcut,
+    resolvedSeason,
+    requestOptions
+  );
   const playoffMatchesPromise =
     resolvedLeague === "cl"
-      ? getMatchdayResults(
+      ? dataSource.getMatchdayResults(
           getDataShortcutForLeague(resolvedLeague),
           resolvedSeason,
           9,
-          fetchOptions
+          requestOptions
         )
       : Promise.resolve([]);
 

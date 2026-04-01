@@ -51,9 +51,3 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
     shortcutMatch: ["cl", "ucl"],
   },
 ];
-
-export const MOBILE_LEAGUES: Array<{ key: LeagueKey; label: string }> =
-  LEAGUE_GROUPS.map((group) => ({
-    key: group.key,
-    label: group.label,
-  }));

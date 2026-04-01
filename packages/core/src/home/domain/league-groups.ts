@@ -3,36 +3,40 @@ import {
   keepLatestSeasonOnly,
   type LeagueKey,
 } from "../../leagues";
-import { getAvailableLeagues, getGroups, type FetchOptions } from "../../openligadb";
+import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 
 export const getGroupsWithFallback = async (
+  dataSource: FootballDataSource,
   leagueKey: LeagueKey,
   leagueShortcut: string,
   season: number,
-  fetchOptions?: FetchOptions
+  requestOptions?: HomeRequestOptions
 ) => {
   if (leagueKey !== "cl") {
     return {
-      groups: await getGroups(leagueShortcut, season, fetchOptions),
+      groups: await dataSource.getGroups(leagueShortcut, season, requestOptions),
       shortcut: leagueShortcut,
     };
   }
 
   try {
     return {
-      groups: await getGroups("cl", season, fetchOptions),
+      groups: await dataSource.getGroups("cl", season, requestOptions),
       shortcut: "cl",
     };
   } catch {
     return {
-      groups: await getGroups(leagueShortcut, season, fetchOptions),
+      groups: await dataSource.getGroups(leagueShortcut, season, requestOptions),
       shortcut: leagueShortcut,
     };
   }
 };
 
-export const normalizeLeagueEntries = async (fetchOptions?: FetchOptions) => {
-  const availableLeagues = await getAvailableLeagues(fetchOptions);
+export const normalizeLeagueEntries = async (
+  dataSource: FootballDataSource,
+  requestOptions?: HomeRequestOptions
+) => {
+  const availableLeagues = await dataSource.getAvailableLeagues(requestOptions);
   const groupedLeagues = buildLeagueEntriesByGroup(availableLeagues);
 
   return new Map(

@@ -71,9 +71,12 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
             )
           )}
 
-          {data.resolvedLeague === "cl" ? (
+          {data.bracketMatches.length > 0 ? (
             <section id="bracket" className="grid gap-4">
-              <BracketSection rounds={data.bracketMatches} />
+              <BracketSection
+                title={`${data.leagueLabel} Baum`}
+                rounds={data.bracketMatches}
+              />
             </section>
           ) : null}
 
