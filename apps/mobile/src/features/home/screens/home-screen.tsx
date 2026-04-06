@@ -6,7 +6,6 @@ import { appStyles, appTheme } from "../../../app/theme";
 import { BracketSection } from "../../champions-league/components/bracket-section";
 import { useHomeData } from "../hooks/use-home-data";
 import { HomeSectionList } from "../components/home-section-list";
-import { HomeHero } from "../components/home-hero";
 import { LeagueTabs } from "../components/league-tabs";
 
 export function HomeScreen() {
@@ -27,26 +26,23 @@ export function HomeScreen() {
       return;
     }
 
-    if (
-      data.resolvedLeague === selection.league &&
-      data.resolvedSeason === selection.season
-    ) {
-      return;
-    }
+    setSelection((currentSelection) => {
+      if (
+        data.resolvedLeague === currentSelection.league &&
+        data.resolvedSeason === currentSelection.season
+      ) {
+        return currentSelection;
+      }
 
-    setSelection({
-      league: data.resolvedLeague,
-      season: data.resolvedSeason,
+      return {
+        league: data.resolvedLeague,
+        season: data.resolvedSeason,
+      };
     });
-  }, [data, selection.league, selection.season]);
+  }, [data]);
 
   const header = data ? (
     <View>
-      <HomeHero
-        leagueLabel={data.leagueLabel}
-        season={data.resolvedSeason}
-        styles={styles}
-      />
       <LeagueTabs
         options={data.leagueOptions}
         activeLeague={data.resolvedLeague}
@@ -81,6 +77,7 @@ export function HomeScreen() {
       <View pointerEvents="none" style={styles.backgroundLayer}>
         <View style={styles.backgroundOrbOne} />
         <View style={styles.backgroundOrbTwo} />
+        <View style={styles.backgroundOrbThree} />
       </View>
       {loading || !data ? (
         <View style={styles.center}>

@@ -1,5 +1,6 @@
 export type AppTheme = {
   background: string;
+  backgroundEnd: string;
   surface: string;
   surfaceMuted: string;
   surfaceSoft: string;
@@ -11,10 +12,22 @@ export type AppTheme = {
   primary: string;
   primarySoft: string;
   primaryGlow: string;
+  accent: string;
+  accentSoft: string;
+  accentWarm: string;
+  cream: string;
+  danger: string;
   warningText: string;
   warningBorder: string;
   warningBg: string;
   emptyBg: string;
   logoBg: string;
   logoBorder: string;
+  fonts: {
+    heading: string;
+    body: string;
+    bodyMedium: string;
+    bodySemibold: string;
+    bodyBold: string;
+  };
 };

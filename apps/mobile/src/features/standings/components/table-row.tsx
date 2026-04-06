@@ -19,12 +19,12 @@ export function TableRow({
   const isBottom = index >= Math.max(total - 3, 0);
 
   const zoneLabel = isLeader
-    ? "Spitze"
+    ? "Krone"
     : isEurope
-      ? "Europa"
+      ? "Orbit"
       : isBottom
-        ? "Abstieg"
-        : "Mittelfeld";
+        ? "Red zone"
+        : "Pulse";
 
   return (
     <View>

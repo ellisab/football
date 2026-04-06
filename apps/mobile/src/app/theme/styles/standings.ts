@@ -9,55 +9,53 @@ export const createStandingsStyles = (theme: AppTheme) => ({
     paddingHorizontal: 14,
     marginHorizontal: 20,
     marginVertical: 4,
-    borderRadius: 16,
+    borderRadius: 22,
     backgroundColor: theme.surface,
     borderWidth: 1,
     borderColor: theme.border,
     gap: 10,
+    overflow: "hidden" as const,
   },
   tableRowLeader: {
-    backgroundColor: "#15261f",
-    borderColor: "#2d553f",
+    borderColor: "rgba(255, 214, 108, 0.35)",
   },
   tableRowEurope: {
-    backgroundColor: "#151a22",
-    borderColor: "#2a3441",
+    borderColor: "rgba(87, 235, 255, 0.25)",
   },
   tableRowBottom: {
-    backgroundColor: "#23171d",
-    borderColor: "#46303a",
+    borderColor: "rgba(255, 124, 167, 0.28)",
   },
   tablePosBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    backgroundColor: "#1d2431",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     marginRight: 6,
   },
   tablePosLeader: {
     backgroundColor: theme.primary,
   },
   tablePosEurope: {
-    backgroundColor: "#1f2835",
+    backgroundColor: "rgba(87, 235, 255, 0.18)",
   },
   tablePosBottom: {
-    backgroundColor: "#3a2530",
+    backgroundColor: "rgba(255, 92, 154, 0.18)",
   },
   tablePosText: {
-    color: "#98a4bb",
+    color: theme.textSoft,
     fontSize: 12,
-    fontWeight: "800" as const,
+    fontFamily: theme.fonts.bodyBold,
   },
   tablePosTextLeader: {
-    color: "#ffffff",
+    color: "#1b0915",
   },
   tablePosTextEurope: {
-    color: "#8aa0c0",
+    color: "#dffcff",
   },
   tablePosTextBottom: {
-    color: "#f2bdcb",
+    color: "#ffe1ee",
   },
   tableMain: {
     flexDirection: "row" as const,
@@ -77,7 +75,7 @@ export const createStandingsStyles = (theme: AppTheme) => ({
     flexShrink: 1,
     color: theme.text,
     fontSize: 14,
-    fontWeight: "700" as const,
+    fontFamily: theme.fonts.bodyBold,
   },
   tableMeta: {
     alignItems: "flex-end" as const,
@@ -86,14 +84,14 @@ export const createStandingsStyles = (theme: AppTheme) => ({
   tableZone: {
     color: theme.textSoft,
     fontSize: 10,
-    fontWeight: "700" as const,
+    fontFamily: theme.fonts.bodyBold,
     textTransform: "uppercase" as const,
-    letterSpacing: 0.8,
+    letterSpacing: 1.2,
   },
   tableCellPts: {
     color: theme.primary,
     fontSize: 16,
-    fontWeight: "800" as const,
+    fontFamily: theme.fonts.bodyBold,
   },
   tableStatsRow: {
     marginHorizontal: 20,
@@ -106,7 +104,7 @@ export const createStandingsStyles = (theme: AppTheme) => ({
   tableStat: {
     color: theme.textSoft,
     fontSize: 11,
-    fontWeight: "700" as const,
+    fontFamily: theme.fonts.bodySemibold,
     letterSpacing: 0.2,
   },
 });

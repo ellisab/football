@@ -40,9 +40,14 @@ export function HomeSectionList({
 
   const renderSectionHeader = ({ section }: { section: SectionListSection }) => (
     <View style={styles.section}>
-      <Text style={styles.sectionKicker}>{section.kicker}</Text>
+      <View style={styles.sectionKickerRow}>
+        <View style={styles.sectionKickerDot} />
+        <Text style={styles.sectionKicker}>{section.kicker}</Text>
+      </View>
       <Text style={styles.sectionTitle}>{section.title}</Text>
-      <Text style={styles.sectionSubtitle}>{section.subtitle}</Text>
+      {section.subtitle ? (
+        <Text style={styles.sectionSubtitle}>{section.subtitle}</Text>
+      ) : null}
       {section.data.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>{section.emptyText}</Text>

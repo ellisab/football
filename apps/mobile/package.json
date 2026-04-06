@@ -18,10 +18,10 @@
     "@footballleagues/core": "workspace:*",
     "expo": "~55.0.11",
     "expo-status-bar": "~55.0.5",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-native": "0.84.1",
-    "react-native-svg": "^15.15.4",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.4",
+    "react-native-svg": "^15.15.3",
     "react-native-web": "^0.21.2"
   },
   "devDependencies": {
@@ -32,7 +32,7 @@
     "eslint": "^10.2.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "typescript": "^6.0.2"
+    "typescript": "^5.9.3"
   },
   "private": true
 }
