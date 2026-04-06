@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildLeagueEntriesByGroup,
   findNextGroup,
+  formatKickoff,
   getKnockoutLeg,
   getKnockoutStageName,
   getCurrentSeasonYear,
@@ -95,6 +96,10 @@ test("findNextGroup returns the next higher group order", () => {
 
   assert.equal(next?.groupOrderID, 2);
   assert.equal(next?.groupName, "Matchday 2");
+});
+
+test("formatKickoff renders UTC input in Europe/Berlin time", () => {
+  assert.equal(formatKickoff("2026-04-10T18:30:00Z"), "Fr., 10. Apr., 20:30");
 });
 
 test("stage helpers normalize matchday and playoff labels", () => {
