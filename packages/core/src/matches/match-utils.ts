@@ -6,6 +6,7 @@ const kickoffFormatter = new Intl.DateTimeFormat("de-DE", {
   day: "numeric",
   hour: "2-digit",
   minute: "2-digit",
+  timeZone: "Europe/Berlin",
 });
 const MATCHDAY_REGEX = /(\d{1,2})\.\s*spieltag/i;
 const PLAYOFF_REGEX = /playoffs?/i;

@@ -1,5 +1,3 @@
-"use client";
-
 import { formatKickoff } from "@footballleagues/core/matches";
 
 type LocalKickoffProps = {
@@ -8,8 +6,7 @@ type LocalKickoffProps = {
 };
 
 export function LocalKickoff({ value, fallback = "Termin offen" }: LocalKickoffProps) {
-  const isClient = typeof window !== "undefined";
-  const label = isClient ? (value ? formatKickoff(value) : fallback) : fallback;
+  const label = value ? formatKickoff(value) : fallback;
 
-  return <span suppressHydrationWarning>{label}</span>;
+  return <span>{label}</span>;
 }
