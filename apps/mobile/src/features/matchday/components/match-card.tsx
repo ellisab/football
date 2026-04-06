@@ -22,6 +22,7 @@ export function MatchCard({
       key={match.matchID ?? `${match.team1?.teamId}-${match.team2?.teamId}`}
       style={styles.card}
     >
+      <View style={styles.cardAccentLine} />
       <View style={styles.cardMetaRow}>
         <View style={styles.cardMetaChip}>
           <Text style={styles.cardMetaText}>
@@ -60,7 +61,9 @@ export function MatchCard({
             {match.team1?.teamName || "Heim"}
           </Text>
         </View>
-        <Text style={styles.score}>{score}</Text>
+        <View style={styles.scorePill}>
+          <Text style={styles.score}>{score}</Text>
+        </View>
       </View>
 
       <View style={[styles.teamLabelRow, styles.teamLabelRowSecondary]}>

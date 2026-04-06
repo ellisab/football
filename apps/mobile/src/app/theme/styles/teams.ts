@@ -18,6 +18,6 @@ export const createTeamStyles = (theme: AppTheme) => ({
   },
   teamLogoFallbackText: {
     color: theme.text,
-    fontWeight: "700" as const,
+    fontFamily: theme.fonts.bodyBold,
   },
 });

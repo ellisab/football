@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0b0d12"
+      "backgroundColor": "#130817"
     },
     "ios": {
       "supportsTablet": true,
@@ -19,7 +19,7 @@
       "package": "com.ellisab.footballleagues",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0b0d12"
+        "backgroundColor": "#130817"
       }
     },
     "extra": {

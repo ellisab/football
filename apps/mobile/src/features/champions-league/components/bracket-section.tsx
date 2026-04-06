@@ -18,7 +18,10 @@ export function BracketSection({
   return (
     <View>
       <View style={styles.section}>
-        <Text style={styles.sectionKicker}>K.-o.-Phase</Text>
+        <View style={styles.sectionKickerRow}>
+          <View style={styles.sectionKickerDot} />
+          <Text style={styles.sectionKicker}>K.-o.-Phase</Text>
+        </View>
         <Text style={styles.sectionTitle}>{title}</Text>
         <Text style={styles.sectionSubtitle}>
           K.-o.-Runden auf Basis der neuesten Gruppendaten.

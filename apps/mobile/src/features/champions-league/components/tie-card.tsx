@@ -11,16 +11,16 @@ export function TieCard({
   styles: AppStyles;
 }) {
   const winnerRowStyle = {
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(255, 120, 145, 0.45)",
-    backgroundColor: "rgba(170, 50, 80, 0.22)",
-    paddingHorizontal: 8,
+    borderColor: "rgba(255, 124, 167, 0.3)",
+    backgroundColor: "rgba(91, 24, 46, 0.72)",
+    paddingHorizontal: 10,
     paddingVertical: 4,
     alignSelf: "flex-start" as const,
   };
   const winnerTextStyle = {
-    color: "#ffb7c7",
+    color: "#ffe2ee",
   };
   const hasLiveLeg = tie.matches.some((match) => match.matchIsFinished !== true);
 

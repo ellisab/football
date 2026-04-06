@@ -16,7 +16,10 @@ export function LeagueTabs({
   return (
     <View style={styles.header}>
       <View style={styles.section}>
-        <Text style={styles.sectionKicker}>Wettbewerbe</Text>
+        <View style={styles.sectionKickerRow}>
+          <View style={styles.sectionKickerDot} />
+          <Text style={styles.sectionKicker}>Wettbewerbe</Text>
+        </View>
       </View>
       <View style={styles.tabs}>
         {options.map((option) => {
@@ -26,11 +29,13 @@ export function LeagueTabs({
             <Pressable
               key={option.shortcut}
               onPress={() => onChange(option)}
-              style={[styles.tab, isActive && styles.tabActive]}
+              style={({ pressed }) => [pressed && styles.tabPressed]}
             >
-              <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
-                {getLeagueLabel(option.shortcut)}
-              </Text>
+              <View style={[styles.tab, isActive && styles.tabActive]}>
+                <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+                  {getLeagueLabel(option.shortcut)}
+                </Text>
+              </View>
             </Pressable>
           );
         })}
