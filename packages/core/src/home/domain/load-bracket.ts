@@ -76,7 +76,12 @@ const mergeRoundsByStage = (rounds: BracketRound[]) => {
 
   return Array.from(mergedRounds.values())
     .sort((a, b) => a.minGroupOrderID - b.minGroupOrderID)
-    .map(({ minGroupOrderID: _minGroupOrderID, ...round }) => round);
+    .map((round) => {
+      const { minGroupOrderID, ...nextRound } = round;
+
+      void minGroupOrderID;
+      return nextRound;
+    });
 };
 
 const selectLatestChampionsLeagueRound = (rounds: BracketRound[]) => {

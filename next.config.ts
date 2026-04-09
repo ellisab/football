@@ -1,18 +1,9 @@
 import type { NextConfig } from "next";
-import path from "path";
-import { fileURLToPath } from "url";
-import { ALLOWED_IMAGE_REMOTE_PATTERNS } from "../../packages/core/src/teams/allowed-image-hosts";
-
-const projectRoot = path.dirname(fileURLToPath(import.meta.url));
-const workspaceRoot = path.resolve(projectRoot, "..", "..");
+import { ALLOWED_IMAGE_REMOTE_PATTERNS } from "./packages/core/src/teams/allowed-image-hosts";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: workspaceRoot,
-  },
   transpilePackages: ["@footballleagues/core", "@footballleagues/ui"],
   experimental: {
-    externalDir: true,
     optimizePackageImports: ["lucide-react"],
   },
   allowedDevOrigins: [
