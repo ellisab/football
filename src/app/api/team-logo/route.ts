@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getImageRequestHeaders,
   isAllowedImageHost,
+  isSvgUrl,
   normalizeIconUrl,
 } from "@footballleagues/core/teams";
 
@@ -20,6 +21,12 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  if (isSvgUrl(normalizedUrl)) {
+    return new NextResponse("Unsupported image type", {
+      status: 415,
+    });
+  }
+
   const upstreamResponse = await fetch(normalizedUrl, {
     headers: getImageRequestHeaders(normalizedUrl),
     next: {
@@ -33,12 +40,24 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  const upstreamContentType = upstreamResponse.headers.get("content-type");
+  const normalizedContentType = upstreamContentType?.toLowerCase() ?? "";
+
+  if (
+    normalizedContentType.includes("image/svg+xml") ||
+    normalizedContentType.includes("text/html") ||
+    normalizedContentType.includes("application/xhtml+xml")
+  ) {
+    return new NextResponse("Unsupported image type", {
+      status: 415,
+    });
+  }
+
   return new NextResponse(upstreamResponse.body, {
     status: 200,
     headers: {
       "Cache-Control": `public, max-age=0, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 7}`,
-      "Content-Type":
-        upstreamResponse.headers.get("content-type") ?? "application/octet-stream",
+      "Content-Type": upstreamContentType ?? "application/octet-stream",
       "X-Content-Type-Options": "nosniff",
     },
   });
