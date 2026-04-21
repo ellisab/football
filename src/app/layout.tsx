@@ -28,24 +28,24 @@ const monoFont = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Spieltag-Atlas",
-    template: "%s | Spieltag-Atlas",
+    default: "Spieltag",
+    template: "%s | Spieltag",
   },
   description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
-  applicationName: "Spieltag-Atlas",
+  applicationName: "Spieltag",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     url: "/",
-    siteName: "Spieltag-Atlas",
-    title: "Spieltag-Atlas",
+    siteName: "Spieltag",
+    title: "Spieltag",
     description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Spieltag-Atlas",
+    title: "Spieltag",
     description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
   },
   robots: {

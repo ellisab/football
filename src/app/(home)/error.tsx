@@ -15,39 +15,44 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="poster-shell min-h-screen w-full overflow-x-hidden text-[#fff2fb]">
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-[-10%] top-24 h-72 w-72 rounded-full bg-[#ff9953]/18 blur-3xl sm:h-96 sm:w-96" />
-        <div className="absolute right-[-12%] top-52 h-72 w-72 rounded-full bg-[#57ebff]/12 blur-3xl sm:h-[26rem] sm:w-[26rem]" />
-        <div className="absolute bottom-16 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#ff5c9a]/14 blur-3xl sm:h-96 sm:w-96" />
-      </div>
+    <div className="poster-shell min-h-screen w-full overflow-x-hidden text-[#edf6ef]">
+      <main className="relative z-10">
+        <section className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#071116_0%,#09181d_42%,#040a0d_100%)]">
+          <div
+            aria-hidden
+            className="atlas-hero-grid absolute inset-0 opacity-70"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[radial-gradient(circle_at_24%_34%,rgba(114,217,228,0.12),transparent_22%),radial-gradient(circle_at_72%_64%,rgba(220,188,110,0.14),transparent_18%),linear-gradient(90deg,rgba(4,12,16,0.92)_0%,rgba(4,12,16,0.74)_38%,rgba(4,12,16,0.52)_62%,rgba(4,12,16,0.9)_100%)]"
+          />
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1240px] flex-col px-3 pb-14 pt-5 sm:px-5 sm:pb-20 sm:pt-6">
-        <section className="hero-panel grid max-w-3xl gap-5 rounded-[2rem] border border-white/10 p-6 shadow-[0_30px_80px_rgba(7,3,13,0.55)] sm:p-8">
-          <span className="section-kicker">
-            Spieltag-Atlas
-          </span>
-          <h1 className="font-display text-4xl uppercase tracking-[0.08em] text-[#fff6d0] sm:text-5xl">
+          <div className="relative mx-auto flex min-h-screen w-full max-w-[1240px] items-center px-4 pb-14 pt-20 sm:px-6 sm:pb-20 lg:px-10">
+            <section className="grid max-w-3xl gap-5 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(7,27,32,0.72),rgba(8,17,22,0.9))] p-6 shadow-[0_24px_70px_rgba(2,9,12,0.26)] backdrop-blur-md sm:p-8">
+              <span className="section-kicker">Spieltag</span>
+              <h1 className="font-stadium-heading text-4xl uppercase tracking-[0.08em] text-[#f4efd6] sm:text-5xl">
             Hier lief etwas ins Abseits
-          </h1>
-          <p className="max-w-2xl text-[#e3b7cf]">
+              </h1>
+              <p className="max-w-2xl text-[#b4c8c0]">
             Die aktuellen Spieltagsdaten konnten gerade nicht geladen werden.
             Bitte versuche es in einem Moment erneut.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={reset}
-              className="bg-[#ffb14a] text-[#1b0915] hover:bg-[#ffd66c]"
-            >
-              Erneut versuchen
-            </Button>
-            <Button
-              variant="outline"
-              className="border-white/10 bg-white/5 text-[#fff2fb] hover:bg-white/10 hover:text-[#fff6d0]"
-              onClick={() => window.location.reload()}
-            >
-              Seite neu laden
-            </Button>
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={reset}
+                  className="bg-[linear-gradient(94deg,#f4efd6_0%,#dcbc6e_46%,#efaa57_100%)] text-[#081116] hover:brightness-105"
+                >
+                  Erneut versuchen
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-white/10 bg-white/5 text-[#edf6ef] hover:bg-white/10 hover:text-[#f4efd6]"
+                  onClick={() => window.location.reload()}
+                >
+                  Seite neu laden
+                </Button>
+              </div>
+            </section>
           </div>
         </section>
       </main>

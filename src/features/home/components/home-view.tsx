@@ -3,7 +3,6 @@ import { StandingsCard } from "@/features/standings/components/standings-card";
 import type { WebHomeViewModel } from "../presenter/home-view-model";
 import { ErrorBanner } from "./error-banner";
 import { HomeHero } from "./home-hero";
-import { LeagueTabs } from "./league-tabs";
 import { RoundSection } from "./round-section";
 import { SectionKicker } from "./section-kicker";
 
@@ -42,30 +41,30 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
   const remainingSections = data.sections.filter((section) => section.key !== "next-round");
 
   return (
-    <div className="poster-shell min-h-screen w-full overflow-x-hidden text-[#fff2fb]">
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-[-10%] top-24 h-72 w-72 rounded-full bg-[#ff9953]/18 blur-3xl sm:h-96 sm:w-96" />
-        <div className="absolute right-[-12%] top-52 h-72 w-72 rounded-full bg-[#57ebff]/12 blur-3xl sm:h-[26rem] sm:w-[26rem]" />
-        <div className="absolute bottom-16 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#ff5c9a]/14 blur-3xl sm:h-96 sm:w-96" />
-      </div>
-
-      <main className="relative z-10 mx-auto flex w-full max-w-[1240px] flex-col gap-8 px-3 pb-14 pt-5 sm:px-5 sm:pb-20 sm:pt-6">
-        <LeagueTabs
-          options={data.leagueOptions}
+    <div className="poster-shell min-h-screen w-full overflow-x-hidden text-[#edf6ef]">
+      <main className="relative z-10">
+        <HomeHero
+          hasTable={data.hasTable}
+          leagueLabel={data.leagueLabel}
+          leagueOptions={data.leagueOptions}
           currentLeague={data.resolvedLeague}
           currentSeason={data.resolvedSeason}
+          primaryHref={primaryActionHref}
+          season={data.resolvedSeason}
+          secondaryHref={secondaryActionHref}
         />
-        <div className="grid gap-6 lg:gap-7">
-          <HomeHero
-            hasTable={data.hasTable}
-            primaryHref={primaryActionHref}
-            secondaryHref={secondaryActionHref}
-          />
+
+        <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-8 px-4 pb-14 pt-8 sm:px-6 sm:pb-20 sm:pt-10 lg:gap-10 lg:px-10">
           <ErrorBanner errors={data.visibleErrors} />
 
+          <div className="grid gap-8 lg:gap-10">
           {nextRoundSections.map((section) =>
             section.renderKind === "table" ? (
-              <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-3">
+              <section
+                key={section.key}
+                id={section.key}
+                className="grid w-full min-w-0 scroll-mt-28 gap-3"
+              >
                 <SectionKicker>{section.kicker}</SectionKicker>
                 <StandingsCard table={section.items} />
               </section>
@@ -75,7 +74,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           )}
 
           {data.bracketMatches.length > 0 ? (
-            <section id="bracket" className="grid gap-4">
+            <section id="bracket" className="grid scroll-mt-28 gap-4">
               <BracketSection
                 title={`${data.leagueLabel} Baum`}
                 rounds={data.bracketMatches}
@@ -85,7 +84,11 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
 
           {remainingSections.map((section) =>
             section.renderKind === "table" ? (
-              <section key={section.key} id={section.key} className="grid w-full min-w-0 gap-3">
+              <section
+                key={section.key}
+                id={section.key}
+                className="grid w-full min-w-0 scroll-mt-28 gap-3"
+              >
                 <SectionKicker>{section.kicker}</SectionKicker>
                 <StandingsCard table={section.items} />
               </section>
@@ -93,28 +96,29 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
               <RoundSection key={section.key} section={section} />
             )
           )}
-        </div>
+          </div>
 
-        <footer className="poster-surface mt-2 rounded-[1.6rem] px-4 py-4 text-xs text-[#e3b7cf] sm:px-5">
-          Datenquelle:{" "}
-          <a
-            href="https://www.openligadb.de/"
-            target="_blank"
-            rel="noreferrer"
-            className="font-semibold text-[#ffd66c] underline underline-offset-2 transition-colors hover:text-[#fff6d0]"
-          >
-            OpenLigaDB
-          </a>
-          {" "}· Lizenz:{" "}
-          <a
-            href="https://www.openligadb.de/lizenz"
-            target="_blank"
-            rel="noreferrer"
-            className="font-semibold text-[#57ebff] underline underline-offset-2 transition-colors hover:text-[#d9fbff]"
-          >
-            openligadb.de/lizenz
-          </a>
-        </footer>
+          <footer className="mt-2 border-t border-white/10 px-1 pt-5 text-xs text-[#9eb4ab]">
+            Datenquelle:{" "}
+            <a
+              href="https://www.openligadb.de/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-[#dcbc6e] underline underline-offset-2 transition-colors hover:text-[#f4efd6]"
+            >
+              OpenLigaDB
+            </a>
+            {" "}· Lizenz:{" "}
+            <a
+              href="https://www.openligadb.de/lizenz"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-[#72d9e4] underline underline-offset-2 transition-colors hover:text-[#dff9fb]"
+            >
+              openligadb.de/lizenz
+            </a>
+          </footer>
+        </div>
       </main>
     </div>
   );

@@ -16,13 +16,13 @@ export function MatchCard({ match }: MatchCardProps) {
 
   return (
     <div
-      className="poster-surface relative grid min-h-[148px] w-full min-w-0 max-w-full gap-4 overflow-hidden rounded-[1.7rem] border-white/10 bg-[linear-gradient(180deg,rgba(42,14,52,0.88),rgba(26,10,35,0.96))] p-4 text-[#ffeef7]"
+      className="poster-surface relative grid min-h-[148px] w-full min-w-0 max-w-full gap-4 overflow-hidden rounded-[1.7rem] border-white/10 bg-[linear-gradient(180deg,rgba(7,27,32,0.92),rgba(8,17,22,0.98))] p-4 text-[#edf6ef]"
     >
-      <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,214,108,0.8),transparent)]" />
+      <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(220,188,110,0.85),rgba(114,217,228,0.75),transparent)]" />
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
         <span
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[#f5d6e6]"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[#d6e4de]"
         >
           <Clock3 className="h-3.5 w-3.5" />
           <LocalKickoff value={match.matchDateTimeUTC ?? match.matchDateTime} />
@@ -30,8 +30,8 @@ export function MatchCard({ match }: MatchCardProps) {
         <span
           className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${
             match.matchIsFinished
-              ? "border-[#ffd66c]/40 bg-[#4f3018]/60 text-[#fff0b2]"
-              : "border-[#57ebff]/30 bg-[#102838]/60 text-[#bcf7ff]"
+              ? "border-[#dcbc6e]/40 bg-[#463614]/60 text-[#f4ebc2]"
+              : "border-[#72d9e4]/30 bg-[#0c2f36]/60 text-[#c6f7fb]"
           }`}
         >
           <Goal className="h-3.5 w-3.5" />
@@ -69,13 +69,13 @@ export function MatchCard({ match }: MatchCardProps) {
       </div>
 
       {goals.length > 0 ? (
-        <div className="grid gap-1.5 text-xs text-[#f1d4e3]">
+        <div className="grid gap-1.5 text-xs text-[#c8d8d1]">
           {goals.map((goal, index) => (
             <div
               key={goal.goalID ?? `${goal.goalGetterName}-${goal.matchMinute}-${index}`}
               className="inline-flex items-center gap-1.5"
             >
-              <Goal className="h-3.5 w-3.5 text-[#ffd66c]" />
+              <Goal className="h-3.5 w-3.5 text-[#dcbc6e]" />
               {goal.matchMinute ?? "-"}&apos; {goal.goalGetterName ?? "Tor"}
             </div>
           ))}

@@ -25,34 +25,34 @@ type RankTone = {
 const getRankTone = (index: number, totalRows: number): RankTone => {
   if (index === 0) {
     return {
-      mobileRow: "border-[#ffd66c]/35 bg-[linear-gradient(135deg,rgba(96,58,14,0.72),rgba(71,25,44,0.72))]",
-      positionBadge: "bg-[linear-gradient(135deg,#fff6d0_0%,#ffd66c_54%,#ff9f63_100%)] text-[#1b0915]",
-      desktopRow: "bg-[rgba(128,79,16,0.18)]",
+      mobileRow: "border-[#dcbc6e]/35 bg-[linear-gradient(135deg,rgba(82,63,20,0.68),rgba(8,40,34,0.84))]",
+      positionBadge: "bg-[linear-gradient(135deg,#f4efd6_0%,#dcbc6e_54%,#efaa57_100%)] text-[#081116]",
+      desktopRow: "bg-[rgba(92,73,28,0.18)]",
       zone: "Krone",
     };
   }
 
   if (index < 4) {
     return {
-      mobileRow: "border-[#57ebff]/25 bg-[linear-gradient(135deg,rgba(16,42,56,0.72),rgba(45,18,56,0.78))]",
-      positionBadge: "bg-[linear-gradient(135deg,rgba(87,235,255,0.24),rgba(157,104,255,0.34))] text-[#dffcff]",
-      desktopRow: "bg-[rgba(37,18,54,0.28)]",
+      mobileRow: "border-[#72d9e4]/25 bg-[linear-gradient(135deg,rgba(9,46,49,0.72),rgba(9,31,29,0.86))]",
+      positionBadge: "bg-[linear-gradient(135deg,rgba(114,217,228,0.26),rgba(38,126,112,0.34))] text-[#e6feff]",
+      desktopRow: "bg-[rgba(8,42,45,0.22)]",
       zone: "Orbit",
     };
   }
 
   if (index >= Math.max(totalRows - 3, 0)) {
     return {
-      mobileRow: "border-[#ff7ca7]/28 bg-[linear-gradient(135deg,rgba(72,18,36,0.78),rgba(44,14,36,0.76))]",
-      positionBadge: "bg-[linear-gradient(135deg,rgba(255,92,154,0.28),rgba(255,153,83,0.32))] text-[#ffe1ee]",
-      desktopRow: "bg-[rgba(62,17,36,0.3)]",
+      mobileRow: "border-[#efaa57]/28 bg-[linear-gradient(135deg,rgba(70,36,15,0.78),rgba(34,22,16,0.82))]",
+      positionBadge: "bg-[linear-gradient(135deg,rgba(239,170,87,0.24),rgba(178,108,62,0.32))] text-[#fff1de]",
+      desktopRow: "bg-[rgba(70,39,18,0.24)]",
       zone: "Red zone",
     };
   }
 
   return {
-    mobileRow: "border-white/10 bg-[linear-gradient(135deg,rgba(35,15,47,0.82),rgba(18,10,29,0.9))]",
-    positionBadge: "bg-white/10 text-[#f2d5e4]",
+    mobileRow: "border-white/10 bg-[linear-gradient(135deg,rgba(8,26,31,0.82),rgba(7,16,21,0.92))]",
+    positionBadge: "bg-white/10 text-[#dbe8e1]",
     desktopRow: "",
     zone: "Pulse",
   };
@@ -60,11 +60,11 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
 
 export function StandingsCard({ table }: StandingsCardProps) {
   return (
-    <Card className="poster-surface gap-0 overflow-hidden border-white/10 bg-[linear-gradient(180deg,rgba(39,14,47,0.88),rgba(22,9,31,0.96))] py-0 shadow-none">
+    <Card className="poster-surface gap-0 overflow-hidden border-white/10 bg-[linear-gradient(180deg,rgba(7,27,32,0.92),rgba(8,17,22,0.98))] py-0 shadow-none">
       <CardHeader className="border-b border-white/10 py-5">
-        <CardTitle className="text-[1.85rem] leading-none font-[var(--font-stadium-heading)] uppercase text-[#fff6fd] sm:text-[2.2rem]">
+        <CardTitle className="text-[1.85rem] leading-none font-[var(--font-stadium-heading)] uppercase text-[#f4efd6] sm:text-[2.2rem]">
           <span className="inline-flex items-center gap-2">
-            <Medal className="h-6 w-6 text-[#ffd66c]" />
+            <Medal className="h-6 w-6 text-[#dcbc6e]" />
             Tabelle
           </span>
         </CardTitle>
@@ -79,7 +79,7 @@ export function StandingsCard({ table }: StandingsCardProps) {
               return (
                 <div
                   key={row.teamInfoId ?? row.teamName}
-                  className={`flex items-center w-full min-w-0 justify-between gap-3 rounded-[1.4rem] border px-3 py-3 text-sm text-[#ffeef7] sm:px-4 ${rankTone.mobileRow}`}
+                  className={`flex items-center w-full min-w-0 justify-between gap-3 rounded-[1.4rem] border px-3 py-3 text-sm text-[#edf6ef] sm:px-4 ${rankTone.mobileRow}`}
                 >
                   <div className="flex flex-1 min-w-0 items-center gap-2.5">
                     <span
@@ -95,10 +95,10 @@ export function StandingsCard({ table }: StandingsCardProps) {
                     <span className="truncate font-semibold">{row.teamName}</span>
                   </div>
                   <div className="shrink-0 text-right">
-                    <div className="text-[0.65rem] uppercase tracking-[0.14em] text-[#efbfd5]">
+                    <div className="text-[0.65rem] uppercase tracking-[0.14em] text-[#b6cbc2]">
                       {rankTone.zone}
                     </div>
-                    <div className="text-base font-semibold text-[#ffd66c]">
+                    <div className="text-base font-semibold text-[#dcbc6e]">
                       {row.points} Pkt.
                     </div>
                   </div>
@@ -112,14 +112,14 @@ export function StandingsCard({ table }: StandingsCardProps) {
           <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow className="border-white/10">
-                <TableHead className="w-12 text-[#efbfd5]">Pos</TableHead>
-                <TableHead className="text-[#efbfd5]">Team</TableHead>
-                <TableHead className="text-[#efbfd5]">Sp</TableHead>
-                <TableHead className="text-[#efbfd5]">S</TableHead>
-                <TableHead className="text-[#efbfd5]">U</TableHead>
-                <TableHead className="text-[#efbfd5]">N</TableHead>
-                <TableHead className="text-[#efbfd5]">TD</TableHead>
-                <TableHead className="text-right text-[#efbfd5]">Pkt.</TableHead>
+                <TableHead className="w-12 text-[#b6cbc2]">Pos</TableHead>
+                <TableHead className="text-[#b6cbc2]">Team</TableHead>
+                <TableHead className="text-[#b6cbc2]">Sp</TableHead>
+                <TableHead className="text-[#b6cbc2]">S</TableHead>
+                <TableHead className="text-[#b6cbc2]">U</TableHead>
+                <TableHead className="text-[#b6cbc2]">N</TableHead>
+                <TableHead className="text-[#b6cbc2]">TD</TableHead>
+                <TableHead className="text-right text-[#b6cbc2]">Pkt.</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -132,8 +132,8 @@ export function StandingsCard({ table }: StandingsCardProps) {
                     key={row.teamInfoId ?? row.teamName}
                     className={`border-white/10 ${rankTone.desktopRow}`}
                   >
-                    <TableCell className="font-semibold text-[#efbfd5]">{index + 1}</TableCell>
-                    <TableCell className="font-semibold text-[#fff4fb]">
+                    <TableCell className="font-semibold text-[#b6cbc2]">{index + 1}</TableCell>
+                    <TableCell className="font-semibold text-[#eef6ef]">
                       <div className="flex items-center gap-3">
                         <TeamBadge
                           name={row.teamName}
@@ -143,15 +143,15 @@ export function StandingsCard({ table }: StandingsCardProps) {
                         <span>{row.teamName}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-[#efbfd5]">{row.matches}</TableCell>
-                    <TableCell className="text-[#efbfd5]">{row.won}</TableCell>
-                    <TableCell className="text-[#efbfd5]">{row.draw}</TableCell>
-                    <TableCell className="text-[#efbfd5]">{row.lost}</TableCell>
-                    <TableCell className="text-[#efbfd5]">{row.goalDiff}</TableCell>
-                    <TableCell className="text-right font-semibold text-[#ffd66c]">
+                    <TableCell className="text-[#b6cbc2]">{row.matches}</TableCell>
+                    <TableCell className="text-[#b6cbc2]">{row.won}</TableCell>
+                    <TableCell className="text-[#b6cbc2]">{row.draw}</TableCell>
+                    <TableCell className="text-[#b6cbc2]">{row.lost}</TableCell>
+                    <TableCell className="text-[#b6cbc2]">{row.goalDiff}</TableCell>
+                    <TableCell className="text-right font-semibold text-[#dcbc6e]">
                       <span className="inline-flex items-center gap-1">
                         {row.points}
-                        <Goal className="h-3.5 w-3.5 text-[#57ebff]" />
+                        <Goal className="h-3.5 w-3.5 text-[#72d9e4]" />
                       </span>
                     </TableCell>
                   </TableRow>

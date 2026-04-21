@@ -22,15 +22,25 @@ export function LeagueTabs({
   options,
   currentLeague,
   currentSeason,
+  variant = "default",
 }: {
   options: LeagueOption[];
   currentLeague: LeagueKey;
   currentSeason: number;
+  variant?: "default" | "overlay";
 }) {
+  const isOverlay = variant === "overlay";
+
   return (
-    <section className="poster-surface grid gap-3 rounded-[1.8rem] px-4 py-4 sm:px-5">
+    <section className={`grid gap-4 ${isOverlay ? "w-full" : ""}`}>
       <SectionKicker>Wettbewerbe</SectionKicker>
-      <div className="flex flex-wrap gap-3">
+      <div
+        className={`flex gap-3 ${
+          isOverlay
+            ? "overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            : "flex-wrap"
+        }`}
+      >
         {options.map((option) => {
           const isActive = option.shortcut === currentLeague;
           const Icon = LEAGUE_ICONS[option.shortcut] ?? Medal;
@@ -40,14 +50,14 @@ export function LeagueTabs({
             <Link
               key={option.shortcut}
               href={buildHref(option.shortcut, season)}
-              className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-semibold shadow-[0_10px_24px_rgba(7,3,13,0.18)] transition-all ${
+              className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 isActive
-                  ? "border-[#ffd66c]/55 bg-[linear-gradient(135deg,rgba(255,153,83,0.28),rgba(255,92,154,0.24),rgba(87,235,255,0.22))] text-[#fff6d0]"
-                  : "border-white/10 bg-white/[0.05] text-[#efc9dd] hover:border-[#57ebff]/35 hover:bg-white/[0.08] hover:text-[#fff2fb]"
+                  ? "border-[#dcbc6e]/55 bg-[linear-gradient(135deg,rgba(10,44,38,0.74),rgba(21,49,54,0.62))] text-[#f4efd6] shadow-[0_18px_38px_rgba(4,15,20,0.22)]"
+                  : "border-white/12 bg-white/[0.04] text-[#c8d7d0] hover:border-[#72d9e4]/35 hover:bg-white/[0.08] hover:text-[#f7fbf8]"
               }`}
             >
               <Icon
-                className={`h-4 w-4 ${isActive ? "text-[#ffd66c]" : "text-[#57ebff]"}`}
+                className={`h-4 w-4 ${isActive ? "text-[#dcbc6e]" : "text-[#72d9e4]"}`}
               />
               <span>{getLeagueLabel(option.shortcut)}</span>
             </Link>

@@ -49,76 +49,76 @@
 
 :root {
   --radius: 1rem;
-  --background: #130817;
-  --foreground: #fff2fb;
-  --card: #1d0d25;
-  --card-foreground: #fff2fb;
-  --popover: #170a1f;
-  --popover-foreground: #fff2fb;
-  --primary: #ffb14a;
-  --primary-foreground: #1b0915;
-  --secondary: #251130;
-  --secondary-foreground: #ffe8f5;
-  --muted: #1b0d23;
-  --muted-foreground: #cfa7c0;
-  --accent: #58ebff;
-  --accent-foreground: #07131a;
-  --destructive: #ff6a92;
-  --border: rgba(255, 232, 244, 0.14);
-  --input: rgba(255, 232, 244, 0.1);
-  --ring: #ffb14a;
+  --background: #071116;
+  --foreground: #edf6ef;
+  --card: #0d1c21;
+  --card-foreground: #edf6ef;
+  --popover: #0a171c;
+  --popover-foreground: #edf6ef;
+  --primary: #dcbc6e;
+  --primary-foreground: #081116;
+  --secondary: #102127;
+  --secondary-foreground: #d7e5de;
+  --muted: #0c181d;
+  --muted-foreground: #9fb6ad;
+  --accent: #72d9e4;
+  --accent-foreground: #071317;
+  --destructive: #d98953;
+  --border: rgba(237, 246, 239, 0.12);
+  --input: rgba(237, 246, 239, 0.08);
+  --ring: #dcbc6e;
   --chart-1: oklch(0.78 0.17 69);
   --chart-2: oklch(0.72 0.2 23);
   --chart-3: oklch(0.81 0.15 217);
   --chart-4: oklch(0.67 0.19 336);
   --chart-5: oklch(0.62 0.16 295);
-  --sidebar: #170a1f;
-  --sidebar-foreground: #fff2fb;
-  --sidebar-primary: #ffb14a;
-  --sidebar-primary-foreground: #1b0915;
-  --sidebar-accent: #251130;
-  --sidebar-accent-foreground: #ffe8f5;
-  --sidebar-border: rgba(255, 232, 244, 0.14);
-  --sidebar-ring: #ffb14a;
-  --poster-gold: #ffd66c;
-  --poster-orange: #ff9953;
-  --poster-pink: #ff5c9a;
-  --poster-cyan: #57ebff;
-  --poster-violet: #9d68ff;
-  --poster-cream: #fff6d0;
-  --poster-shadow: rgba(7, 3, 13, 0.6);
+  --sidebar: #0a171c;
+  --sidebar-foreground: #edf6ef;
+  --sidebar-primary: #dcbc6e;
+  --sidebar-primary-foreground: #081116;
+  --sidebar-accent: #102127;
+  --sidebar-accent-foreground: #d7e5de;
+  --sidebar-border: rgba(237, 246, 239, 0.12);
+  --sidebar-ring: #dcbc6e;
+  --poster-gold: #dcbc6e;
+  --poster-orange: #efaa57;
+  --poster-pink: #b06f49;
+  --poster-cyan: #72d9e4;
+  --poster-violet: #2d6f67;
+  --poster-cream: #f4efd6;
+  --poster-shadow: rgba(2, 9, 12, 0.56);
 }
 
 .dark {
-  --background: #130817;
-  --foreground: #fff2fb;
-  --card: #1d0d25;
-  --card-foreground: #fff2fb;
-  --popover: #170a1f;
-  --popover-foreground: #fff2fb;
-  --primary: #ffb14a;
-  --primary-foreground: #1b0915;
-  --secondary: #251130;
-  --secondary-foreground: #ffe8f5;
-  --muted: #1b0d23;
-  --muted-foreground: #cfa7c0;
-  --accent: #58ebff;
-  --accent-foreground: #07131a;
-  --destructive: #ff6a92;
-  --border: rgba(255, 232, 244, 0.14);
-  --input: rgba(255, 232, 244, 0.1);
-  --ring: #ffb14a;
-  --sidebar: #170a1f;
-  --sidebar-foreground: #fff2fb;
-  --sidebar-primary: #ffb14a;
-  --sidebar-primary-foreground: #1b0915;
-  --sidebar-accent: #251130;
-  --sidebar-accent-foreground: #ffe8f5;
-  --sidebar-border: rgba(255, 232, 244, 0.14);
-  --sidebar-ring: #ffb14a;
+  --background: #071116;
+  --foreground: #edf6ef;
+  --card: #0d1c21;
+  --card-foreground: #edf6ef;
+  --popover: #0a171c;
+  --popover-foreground: #edf6ef;
+  --primary: #dcbc6e;
+  --primary-foreground: #081116;
+  --secondary: #102127;
+  --secondary-foreground: #d7e5de;
+  --muted: #0c181d;
+  --muted-foreground: #9fb6ad;
+  --accent: #72d9e4;
+  --accent-foreground: #071317;
+  --destructive: #d98953;
+  --border: rgba(237, 246, 239, 0.12);
+  --input: rgba(237, 246, 239, 0.08);
+  --ring: #dcbc6e;
+  --sidebar: #0a171c;
+  --sidebar-foreground: #edf6ef;
+  --sidebar-primary: #dcbc6e;
+  --sidebar-primary-foreground: #081116;
+  --sidebar-accent: #102127;
+  --sidebar-accent-foreground: #d7e5de;
+  --sidebar-border: rgba(237, 246, 239, 0.12);
+  --sidebar-ring: #dcbc6e;
 }
 
-@keyframes galaxyDrift {
+@keyframes atlasSkyDrift {
   0%,
   100% {
     background-position:
@@ -146,6 +146,25 @@
   }
 }
 
+@keyframes heroImageDrift {
+  0% {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.12) translate3d(-2%, 1.5%, 0);
+  }
+}
+
+@keyframes heroGlowPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
 @keyframes posterFloat {
   0%,
   100% {
@@ -168,15 +187,6 @@
   }
 }
 
-@keyframes titleShimmer {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 200% 50%;
-  }
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -188,13 +198,10 @@
     @apply bg-background text-foreground overflow-x-hidden;
     font-family: var(--font-stadium-body);
     background:
-      radial-gradient(circle at 16% 0%, rgba(255, 153, 83, 0.26), transparent 28%),
-      radial-gradient(circle at 88% 12%, rgba(87, 235, 255, 0.18), transparent 24%),
-      radial-gradient(circle at 48% 120%, rgba(255, 92, 154, 0.2), transparent 34%),
-      linear-gradient(180deg, #130817 0%, #180820 44%, #0c0510 100%);
-  }
-  .font-display {
-    font-family: var(--font-stadium-heading);
+      radial-gradient(circle at 16% 0%, rgba(239, 170, 87, 0.18), transparent 24%),
+      radial-gradient(circle at 88% 12%, rgba(114, 217, 228, 0.12), transparent 22%),
+      radial-gradient(circle at 48% 120%, rgba(38, 126, 112, 0.18), transparent 30%),
+      linear-gradient(180deg, #071116 0%, #09181d 44%, #040a0d 100%);
   }
   .font-stadium-heading {
     font-family: var(--font-stadium-heading);
@@ -206,10 +213,10 @@
     position: relative;
     isolation: isolate;
     background:
-      radial-gradient(circle at 18% 0%, rgba(255, 153, 83, 0.22), transparent 26%),
-      radial-gradient(circle at 84% 16%, rgba(87, 235, 255, 0.14), transparent 22%),
-      radial-gradient(circle at 50% 120%, rgba(255, 92, 154, 0.2), transparent 30%),
-      linear-gradient(180deg, #130817 0%, #180820 44%, #0c0510 100%);
+      radial-gradient(circle at 18% 0%, rgba(239, 170, 87, 0.18), transparent 24%),
+      radial-gradient(circle at 84% 16%, rgba(114, 217, 228, 0.12), transparent 20%),
+      radial-gradient(circle at 50% 120%, rgba(38, 126, 112, 0.16), transparent 26%),
+      linear-gradient(180deg, #071116 0%, #09181d 44%, #040a0d 100%);
   }
   .poster-shell::before {
     content: "";
@@ -217,15 +224,14 @@
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 11% 18%, rgba(255, 255, 255, 0.66) 0, rgba(255, 255, 255, 0.66) 1px, transparent 2px),
-      radial-gradient(circle at 24% 74%, rgba(255, 214, 108, 0.72) 0, rgba(255, 214, 108, 0.72) 1.3px, transparent 2.2px),
-      radial-gradient(circle at 38% 26%, rgba(87, 235, 255, 0.62) 0, rgba(87, 235, 255, 0.62) 1.2px, transparent 2.4px),
-      radial-gradient(circle at 52% 14%, rgba(255, 92, 154, 0.58) 0, rgba(255, 92, 154, 0.58) 1.1px, transparent 2.3px),
-      radial-gradient(circle at 68% 68%, rgba(255, 255, 255, 0.48) 0, rgba(255, 255, 255, 0.48) 1px, transparent 2px),
-      radial-gradient(circle at 79% 24%, rgba(255, 214, 108, 0.78) 0, rgba(255, 214, 108, 0.78) 1.1px, transparent 2.1px),
-      radial-gradient(circle at 86% 82%, rgba(87, 235, 255, 0.52) 0, rgba(87, 235, 255, 0.52) 1.2px, transparent 2.3px),
-      radial-gradient(circle at 92% 52%, rgba(255, 255, 255, 0.6) 0, rgba(255, 255, 255, 0.6) 1px, transparent 2px);
-    opacity: 0.6;
+      radial-gradient(circle at 11% 18%, rgba(255, 255, 255, 0.46) 0, rgba(255, 255, 255, 0.46) 1px, transparent 2px),
+      radial-gradient(circle at 24% 74%, rgba(220, 188, 110, 0.56) 0, rgba(220, 188, 110, 0.56) 1.3px, transparent 2.2px),
+      radial-gradient(circle at 38% 26%, rgba(114, 217, 228, 0.44) 0, rgba(114, 217, 228, 0.44) 1.2px, transparent 2.4px),
+      radial-gradient(circle at 68% 68%, rgba(255, 255, 255, 0.34) 0, rgba(255, 255, 255, 0.34) 1px, transparent 2px),
+      radial-gradient(circle at 79% 24%, rgba(220, 188, 110, 0.6) 0, rgba(220, 188, 110, 0.6) 1.1px, transparent 2.1px),
+      radial-gradient(circle at 86% 82%, rgba(114, 217, 228, 0.38) 0, rgba(114, 217, 228, 0.38) 1.2px, transparent 2.3px),
+      radial-gradient(circle at 92% 52%, rgba(255, 255, 255, 0.42) 0, rgba(255, 255, 255, 0.42) 1px, transparent 2px);
+    opacity: 0.42;
     animation: sparklePulse 8s ease-in-out infinite;
   }
   .poster-shell::after {
@@ -236,84 +242,71 @@
     width: min(80vw, 860px);
     aspect-ratio: 1;
     border-radius: 9999px;
-    border: 1px solid rgba(255, 214, 108, 0.3);
+    border: 1px solid rgba(220, 188, 110, 0.2);
     box-shadow:
-      0 0 0 6px rgba(255, 214, 108, 0.06),
-      0 0 80px rgba(255, 153, 83, 0.16),
-      inset 0 0 40px rgba(255, 214, 108, 0.12);
-    opacity: 0.34;
+      0 0 0 6px rgba(220, 188, 110, 0.03),
+      0 0 80px rgba(239, 170, 87, 0.08),
+      inset 0 0 40px rgba(220, 188, 110, 0.08);
+    opacity: 0.2;
     pointer-events: none;
     transform: translateX(-50%);
     animation: floatHalo 16s ease-in-out infinite;
   }
-  .hero-panel {
+  .atlas-hero {
     position: relative;
+    min-height: 100svh;
     isolation: isolate;
-    background:
-      linear-gradient(135deg, rgba(43, 14, 54, 0.95) 0%, rgba(30, 11, 40, 0.98) 36%, rgba(60, 18, 38, 0.96) 72%, rgba(20, 8, 26, 0.98) 100%);
-    box-shadow:
-      0 30px 80px rgba(7, 3, 13, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(16px);
+    overflow: clip;
+    background: #081116;
   }
-  .hero-panel::before {
-    content: "";
-    position: absolute;
-    inset: -18%;
-    background:
-      radial-gradient(circle at 22% 24%, rgba(255, 214, 108, 0.22), transparent 18%),
-      radial-gradient(circle at 78% 18%, rgba(87, 235, 255, 0.24), transparent 14%),
-      radial-gradient(circle at 80% 74%, rgba(255, 92, 154, 0.18), transparent 18%),
-      conic-gradient(from 180deg at 50% 50%, rgba(255, 153, 83, 0.12), rgba(255, 92, 154, 0.16), rgba(87, 235, 255, 0.15), rgba(255, 214, 108, 0.14), rgba(255, 153, 83, 0.12));
-    filter: blur(18px);
-    opacity: 0.92;
-    pointer-events: none;
-    animation: galaxyDrift 18s ease-in-out infinite;
-  }
-  .hero-panel::after {
+  .atlas-hero::before {
     content: "";
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(128deg, rgba(255, 255, 255, 0.12), transparent 28%, transparent 72%, rgba(255, 255, 255, 0.08)),
-      linear-gradient(180deg, rgba(255, 214, 108, 0.08), transparent 24%, transparent 76%, rgba(87, 235, 255, 0.05));
-    pointer-events: none;
-    opacity: 0.42;
-  }
-  .hero-panel > * {
-    position: relative;
     z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(4, 12, 16, 0.96) 0%, rgba(4, 12, 16, 0.78) 36%, rgba(4, 12, 16, 0.34) 60%, rgba(4, 12, 16, 0.76) 100%),
+      linear-gradient(180deg, rgba(4, 10, 14, 0.52) 0%, rgba(4, 10, 14, 0.16) 38%, rgba(4, 10, 14, 0.88) 100%);
+  }
+  .atlas-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 26% 42%, rgba(114, 217, 228, 0.16), transparent 26%),
+      radial-gradient(circle at 72% 66%, rgba(220, 188, 110, 0.18), transparent 18%);
+    mix-blend-mode: screen;
+    animation: heroGlowPulse 16s ease-in-out infinite;
+  }
+  .atlas-hero-image {
+    object-fit: cover;
+    object-position: 72% center;
+    filter: saturate(1.04) contrast(1.05) brightness(0.8);
+    animation: heroImageDrift 22s ease-in-out infinite alternate;
+  }
+  .atlas-hero-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 160px 160px;
+    mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.58) 44%, transparent 72%);
+    opacity: 0.16;
+    animation: atlasSkyDrift 22s ease-in-out infinite;
   }
   .poster-surface {
-    border: 1px solid rgba(255, 232, 244, 0.14);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(237, 246, 239, 0.12);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
     box-shadow:
-      0 18px 44px rgba(6, 3, 11, 0.24),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 18px 44px rgba(2, 9, 12, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(14px);
-  }
-  .poster-surface-soft {
-    border: 1px solid rgba(255, 232, 244, 0.1);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(12px);
-  }
-  .poster-chip {
-    border: 1px solid rgba(255, 232, 244, 0.14);
-    background: linear-gradient(135deg, rgba(255, 153, 83, 0.16), rgba(255, 92, 154, 0.12) 54%, rgba(87, 235, 255, 0.14));
-    box-shadow:
-      0 10px 22px rgba(7, 3, 13, 0.24),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(14px);
-  }
-  .title-sheen {
-    background-image: linear-gradient(94deg, var(--poster-cream) 0%, var(--poster-gold) 22%, #ffb2d0 48%, var(--poster-cyan) 72%, var(--poster-cream) 100%);
-    background-size: 200% auto;
-    color: transparent;
-    -webkit-background-clip: text;
-    background-clip: text;
-    text-shadow: 0 0 28px rgba(255, 214, 108, 0.18);
-    animation: titleShimmer 8s linear infinite;
   }
   .section-kicker {
     color: var(--poster-gold);
@@ -321,22 +314,39 @@
     font-weight: 700;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    text-shadow: 0 0 18px rgba(255, 214, 108, 0.32);
+    text-shadow: 0 0 16px rgba(220, 188, 110, 0.16);
   }
   .score-pill {
-    border: 1px solid rgba(255, 232, 244, 0.16);
-    background: linear-gradient(135deg, rgba(255, 214, 108, 0.18), rgba(255, 92, 154, 0.12) 48%, rgba(87, 235, 255, 0.18));
+    border: 1px solid rgba(237, 246, 239, 0.12);
+    background: linear-gradient(135deg, rgba(220, 188, 110, 0.2), rgba(239, 170, 87, 0.14) 48%, rgba(114, 217, 228, 0.16));
     box-shadow:
-      0 14px 28px rgba(7, 3, 13, 0.24),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 14px 28px rgba(2, 9, 12, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
     animation: posterFloat 9s ease-in-out infinite;
   }
   .poster-empty {
-    border: 1px solid rgba(255, 232, 244, 0.12);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(237, 246, 239, 0.1);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
     box-shadow:
-      0 18px 36px rgba(7, 3, 13, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 18px 36px rgba(2, 9, 12, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(12px);
+  }
+
+  @media (max-width: 768px) {
+    .atlas-hero::before {
+      background:
+        linear-gradient(180deg, rgba(4, 10, 14, 0.12) 0%, rgba(4, 10, 14, 0.46) 32%, rgba(4, 10, 14, 0.9) 100%),
+        linear-gradient(90deg, rgba(4, 10, 14, 0.9) 0%, rgba(4, 10, 14, 0.5) 58%, rgba(4, 10, 14, 0.3) 100%);
+    }
+
+    .atlas-hero-image {
+      object-position: 64% center;
+    }
+
+    .atlas-hero-grid {
+      background-size: 112px 112px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.9) 100%);
+    }
   }
 }
