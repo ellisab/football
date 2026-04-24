@@ -145,15 +145,6 @@
   }
 }
 
-@keyframes heroImageDrift {
-  0% {
-    transform: scale(1.05) translate3d(0, 0, 0);
-  }
-  100% {
-    transform: scale(1.12) translate3d(-2%, 1.5%, 0);
-  }
-}
-
 @keyframes heroGlowPulse {
   0%,
   100% {
@@ -253,12 +244,30 @@
   }
   .atlas-hero {
     position: relative;
-    min-height: 100svh;
+    min-height: 185svh;
+    --atlas-progress: 0;
+    --atlas-image-x: 0vw;
+    --atlas-image-y: 0svh;
+    --atlas-image-scale: 1.055;
+    --atlas-focus-x: 72%;
+    --atlas-focus-y: 38%;
+    --atlas-grid-x: 0vw;
+    --atlas-grid-y: 0svh;
     isolation: isolate;
-    overflow: clip;
     background: #081116;
   }
-  .atlas-hero::before {
+
+  .atlas-hero-sticky {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    min-height: 100svh;
+    overflow: clip;
+    isolation: isolate;
+    background: #081116;
+  }
+
+  .atlas-hero-sticky::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -268,7 +277,8 @@
       linear-gradient(90deg, rgba(4, 12, 16, 0.96) 0%, rgba(4, 12, 16, 0.78) 36%, rgba(4, 12, 16, 0.34) 60%, rgba(4, 12, 16, 0.76) 100%),
       linear-gradient(180deg, rgba(4, 10, 14, 0.52) 0%, rgba(4, 10, 14, 0.16) 38%, rgba(4, 10, 14, 0.88) 100%);
   }
-  .atlas-hero::after {
+
+  .atlas-hero-sticky::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -282,10 +292,13 @@
   }
   .atlas-hero-image {
     object-fit: cover;
-    object-position: 72% center;
+    object-position: var(--atlas-focus-x) var(--atlas-focus-y);
     filter: saturate(1.04) contrast(1.05) brightness(0.8);
-    animation: heroImageDrift 22s ease-in-out infinite alternate;
+    transform: translate3d(var(--atlas-image-x), var(--atlas-image-y), 0) scale(var(--atlas-image-scale));
+    transform-origin: 68% 50%;
+    will-change: transform, object-position;
   }
+
   .atlas-hero-grid {
     position: absolute;
     inset: 0;
@@ -297,7 +310,9 @@
     background-size: 160px 160px;
     mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.58) 44%, transparent 72%);
     opacity: 0.16;
+    transform: translate3d(var(--atlas-grid-x), var(--atlas-grid-y), 0);
     animation: atlasSkyDrift 22s ease-in-out infinite;
+    will-change: transform;
   }
   .poster-surface {
     border: 1px solid rgba(237, 246, 239, 0.12);
@@ -333,14 +348,19 @@
   }
 
   @media (max-width: 768px) {
-    .atlas-hero::before {
+    .atlas-hero {
+      min-height: 165svh;
+    }
+
+    .atlas-hero-sticky::before {
       background:
         linear-gradient(180deg, rgba(4, 10, 14, 0.12) 0%, rgba(4, 10, 14, 0.46) 32%, rgba(4, 10, 14, 0.9) 100%),
         linear-gradient(90deg, rgba(4, 10, 14, 0.9) 0%, rgba(4, 10, 14, 0.5) 58%, rgba(4, 10, 14, 0.3) 100%);
     }
 
     .atlas-hero-image {
-      object-position: 64% center;
+      object-position: min(var(--atlas-focus-x), 68%) var(--atlas-focus-y);
+      transform-origin: 64% 50%;
     }
 
     .atlas-hero-grid {

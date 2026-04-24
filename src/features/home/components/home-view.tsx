@@ -41,7 +41,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
   const remainingSections = data.sections.filter((section) => section.key !== "next-round");
 
   return (
-    <div className="poster-shell min-h-screen w-full overflow-x-hidden text-[#edf6ef]">
+    <div className="poster-shell min-h-screen w-full text-[#edf6ef]">
       <main className="relative z-10">
         <HomeHero
           hasTable={data.hasTable}
