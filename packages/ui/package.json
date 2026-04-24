@@ -6,18 +6,13 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./badge": "./src/components/badge.tsx",
     "./button": "./src/components/button.tsx",
     "./card": "./src/components/card.tsx",
-    "./select": "./src/components/select.tsx",
-    "./separator": "./src/components/separator.tsx",
     "./skeleton": "./src/components/skeleton.tsx",
     "./table": "./src/components/table.tsx",
     "./utils": "./src/utils.ts"
   },
   "dependencies": {
-    "@radix-ui/react-select": "^2.2.6",
-    "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
