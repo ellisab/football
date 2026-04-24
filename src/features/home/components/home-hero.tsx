@@ -52,10 +52,7 @@ export function HomeHero({
 
           <div className="flex flex-1 items-center pt-10 sm:pt-12">
             <div className="mx-auto max-w-[20rem] text-center sm:mx-0 sm:max-w-[38rem] sm:text-left">
-              <h1 className="font-stadium-heading text-[clamp(3.35rem,15.5vw,8.5rem)] uppercase leading-[0.84] tracking-[0.04em] text-[#f4efd6] [text-shadow:0_22px_54px_rgba(0,0,0,0.46)]">
-                Spieltag
-              </h1>
-              <p className="mt-5 max-w-[34rem] text-base leading-7 text-[#dce9e2] sm:text-[1.1rem] sm:leading-8">
+              <p className="max-w-[34rem] text-base leading-7 text-[#dce9e2] sm:text-[1.1rem] sm:leading-8">
                 {leagueLabel} · Saison {season}. Live-Ergebnisse, Tabellen und
                 K.-o.-Runden in einer klaren Ansicht vom ersten Anpfiff bis zum
                 letzten Tor.
