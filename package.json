@@ -14,7 +14,7 @@
   "dependencies": {
     "@footballleagues/core": "workspace:*",
     "@footballleagues/ui": "workspace:*",
-    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-slot": "^1.2.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.17.0",
