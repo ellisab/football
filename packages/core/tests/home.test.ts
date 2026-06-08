@@ -88,7 +88,7 @@ test("getHomeSnapshot promotes the latest completed future round and exposes the
         return jsonResponse(table);
       case "/getmatchdata/bl1/2025/10":
         return jsonResponse([createUpcomingMatch(10, 1, "Team A", 2, "Team B")]);
-      case "/getgroups/bl1/2025":
+      case "/getavailablegroups/bl1/2025":
         return jsonResponse([
           { groupID: 10, groupName: "10. Spieltag", groupOrderID: 10 },
           { groupID: 11, groupName: "11. Spieltag", groupOrderID: 11 },
@@ -134,7 +134,7 @@ test("getHomeSnapshot reports structured error keys when table and future rounds
         return jsonResponse({ message: "boom" }, 500);
       case "/getmatchdata/bl1/2025/5":
         return jsonResponse([createUpcomingMatch(50, 1, "Team A", 2, "Team B")]);
-      case "/getgroups/bl1/2025":
+      case "/getavailablegroups/bl1/2025":
         return jsonResponse({ message: "groups failed" }, 500);
       case "/getmatchdata/bl1/2025/6":
         return jsonResponse({ message: "future round failed" }, 500);
@@ -160,6 +160,167 @@ test("getHomeSnapshot reports structured error keys when table and future rounds
   }
 });
 
+test("getHomeSnapshot uses the first populated round for a future DFB season", async () => {
+  const originalFetch = globalThis.fetch;
+  const roundOneMatch = createUpcomingMatch(
+    401,
+    1,
+    "VSG Altglienicke Berlin",
+    2,
+    "VfL Wolfsburg"
+  );
+
+  globalThis.fetch = createFetchMock((path) => {
+    switch (path) {
+      case "/getavailableleagues":
+        return jsonResponse([
+          {
+            leagueShortcut: "dfb",
+            leagueName: "DFB Pokal 2026/2027",
+            leagueSeason: 2026,
+            sport: { sportName: "Fußball" },
+          },
+        ]);
+      case "/getcurrentgroup/dfb":
+        return jsonResponse({
+          groupID: 60,
+          groupName: "Endspiel",
+          groupOrderID: 6,
+        });
+      case "/getavailablegroups/dfb/2026":
+        return jsonResponse([
+          { groupID: 10, groupName: "1. Runde", groupOrderID: 1 },
+          { groupID: 60, groupName: "Endspiel", groupOrderID: 6 },
+        ]);
+      case "/getmatchdata/dfb/2026/1":
+        return jsonResponse([roundOneMatch]);
+      case "/getmatchdata/dfb/2026/6":
+        return jsonResponse([]);
+      default:
+        return jsonResponse({ path }, 404);
+    }
+  });
+
+  try {
+    const snapshot = await getHomeSnapshot(
+      { league: "dfb", season: "2026" },
+      { fallbackYear: 2025 }
+    );
+
+    assert.equal(snapshot.resolvedSeason, 2026);
+    assert.equal(snapshot.currentRound.groupOrderID, 1);
+    assert.equal(snapshot.currentRound.groupName, "1. Runde");
+    assert.deepEqual(
+      snapshot.currentRound.matches.map((match) => match.matchID),
+      [401]
+    );
+    assert.equal(snapshot.nextRound.matches.length, 0);
+    assert.deepEqual(snapshot.errorKeys, []);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("getHomeSnapshot keeps an empty first round shell for a future league season without fixtures", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = createFetchMock((path) => {
+    switch (path) {
+      case "/getavailableleagues":
+        return jsonResponse([
+          {
+            leagueShortcut: "bl1",
+            leagueName: "1. Fußball-Bundesliga 2026/2027",
+            leagueSeason: 2026,
+            sport: { sportName: "Fußball" },
+          },
+        ]);
+      case "/getcurrentgroup/bl1":
+        return jsonResponse({
+          groupID: 34,
+          groupName: "34. Spieltag",
+          groupOrderID: 34,
+        });
+      case "/getavailablegroups/bl1/2026":
+        return jsonResponse([
+          { groupID: 1, groupName: "1. Spieltag", groupOrderID: 1 },
+          { groupID: 2, groupName: "2. Spieltag", groupOrderID: 2 },
+          { groupID: 34, groupName: "34. Spieltag", groupOrderID: 34 },
+        ]);
+      case "/getbltable/bl1/2026":
+      case "/getmatchdata/bl1/2026/1":
+      case "/getmatchdata/bl1/2026/2":
+      case "/getmatchdata/bl1/2026/34":
+        return jsonResponse([]);
+      default:
+        return jsonResponse({ path }, 404);
+    }
+  });
+
+  try {
+    const snapshot = await getHomeSnapshot(
+      { league: "bl1", season: "2026" },
+      { fallbackYear: 2025 }
+    );
+
+    assert.equal(snapshot.resolvedSeason, 2026);
+    assert.equal(snapshot.currentRound.groupOrderID, 1);
+    assert.equal(snapshot.currentRound.groupName, "1. Spieltag");
+    assert.equal(snapshot.currentRound.matches.length, 0);
+    assert.equal(snapshot.nextRound.matches.length, 0);
+    assert.equal(snapshot.table.length, 0);
+    assert.deepEqual(snapshot.errorKeys, []);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("getHomeSnapshot falls back to the latest available women season when 2026 is missing", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = createFetchMock((path) => {
+    switch (path) {
+      case "/getavailableleagues":
+        return jsonResponse([
+          {
+            leagueShortcut: "fbl1",
+            leagueName: "1. Frauen-Bundesliga 2025",
+            leagueSeason: 2025,
+            sport: { sportName: "Frauenfußball" },
+          },
+        ]);
+      case "/getcurrentgroup/fbl1":
+        return jsonResponse({
+          groupID: 22,
+          groupName: "22. Spieltag",
+          groupOrderID: 22,
+        });
+      case "/getavailablegroups/fbl1/2025":
+        return jsonResponse([
+          { groupID: 22, groupName: "22. Spieltag", groupOrderID: 22 },
+        ]);
+      case "/getbltable/fbl1/2025":
+      case "/getmatchdata/fbl1/2025/22":
+        return jsonResponse([]);
+      default:
+        return jsonResponse({ path }, 404);
+    }
+  });
+
+  try {
+    const snapshot = await getHomeSnapshot(
+      { league: "fbl1", season: "2026" },
+      { fallbackYear: 2025 }
+    );
+
+    assert.equal(snapshot.resolvedLeague, "fbl1");
+    assert.equal(snapshot.resolvedSeason, 2025);
+    assert.deepEqual(snapshot.leagueOptions[0]?.seasons, [2025]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("getHomeSnapshot merges both Champions League legs into the current round and skips to the next stage", async () => {
   const originalFetch = globalThis.fetch;
 
@@ -180,9 +341,9 @@ test("getHomeSnapshot merges both Champions League legs into the current round a
           groupName: "Achtelfinale Hinspiele",
           groupOrderID: 10,
         });
-      case "/getgroups/cl/2025":
+      case "/getavailablegroups/cl/2025":
         return jsonResponse({ message: "not found" }, 404);
-      case "/getgroups/ucl/2025":
+      case "/getavailablegroups/ucl/2025":
         return jsonResponse({ message: "not found" }, 404);
       case "/getmatchdata/ucl/2025/9":
         return jsonResponse([
