@@ -33,7 +33,10 @@ export const getGroups = async (
   season: number,
   options?: FetchOptions
 ) => {
-  return fetchJson<ApiGroup[]>(`/getgroups/${leagueShortcut}/${season}`, options);
+  return fetchJson<ApiGroup[]>(
+    `/getavailablegroups/${leagueShortcut}/${season}`,
+    options
+  );
 };
 
 export const getCurrentGroup = async (
