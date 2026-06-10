@@ -29,7 +29,7 @@ export function HomeHero({
     <section id="spieltag-hero" className="atlas-hero">
       <div className="atlas-hero-frame">
         <Image
-          src="/images/world-cup-trophy-hero.png"
+          src="/images/world-cup-trophy-hero.webp"
           alt="Deutscher Fussballspieler mit dem WM-Pokal im Flutlichtstadion"
           fill
           priority
