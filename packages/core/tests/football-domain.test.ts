@@ -61,6 +61,13 @@ test("resolveLeagueSelection falls back for unsupported leagues", () => {
   assert.equal(resolveLeagueSelection("pl", [...available]), "bl1");
 });
 
+test("resolveLeagueSelection defaults to World Cup when it is available", () => {
+  const available = ["bl1", "cl", "wc"] as const;
+
+  assert.equal(resolveLeagueSelection(undefined, [...available]), "wc");
+  assert.equal(resolveLeagueSelection("pl", [...available]), "wc");
+});
+
 test("league labels and table support come from the canonical config", () => {
   assert.equal(getLeagueLabel("bl1"), "Bundesliga");
   assert.equal(getLeagueLabel("dfb"), "DFB-Pokal");

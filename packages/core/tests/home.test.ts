@@ -70,6 +70,29 @@ const LEAGUES_RESPONSE = [
   },
 ];
 
+test("getHomeSnapshot defaults to World Cup when no league is requested", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = createFetchMock((path) => {
+    switch (path) {
+      case "/getavailableleagues":
+        return jsonResponse(LEAGUES_RESPONSE);
+      default:
+        return jsonResponse({ path }, 404);
+    }
+  });
+
+  try {
+    const snapshot = await getHomeSnapshot({});
+
+    assert.equal(snapshot.resolvedLeague, "wc");
+    assert.equal(snapshot.resolvedSeason, 2026);
+    assert.equal(snapshot.hasTable, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("getHomeSnapshot promotes the latest completed future round and exposes the next round", async () => {
   const originalFetch = globalThis.fetch;
   const table: ApiTableRow[] = [{ teamInfoId: 1, teamName: "Team A", points: 20 }];

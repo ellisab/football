@@ -1,6 +1,6 @@
 import type { LeagueGroupConfig, LeagueKey } from "./types";
 
-export const DEFAULT_LEAGUE: LeagueKey = "bl1";
+export const DEFAULT_LEAGUE: LeagueKey = "wc";
 
 export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
   {

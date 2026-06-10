@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import type { LeagueKey, LeagueOption } from "@footballleagues/core/leagues";
 import { ArrowRight } from "lucide-react";
-import { HeroParallaxController } from "./hero-parallax-controller";
 import { LeagueTabs } from "./league-tabs";
 
 export function HomeHero({
@@ -28,8 +27,7 @@ export function HomeHero({
 
   return (
     <section id="spieltag-hero" className="atlas-hero">
-      <HeroParallaxController targetId="spieltag-hero" />
-      <div className="atlas-hero-sticky">
+      <div className="atlas-hero-frame">
         <Image
           src="/images/world-cup-trophy-hero.png"
           alt="Deutscher Fussballspieler mit dem WM-Pokal im Flutlichtstadion"

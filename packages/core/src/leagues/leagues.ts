@@ -144,7 +144,9 @@ export const resolveLeagueSelection = (
   requestedLeague: string | undefined,
   availableGroupKeys: LeagueKey[]
 ): LeagueKey => {
-  const fallbackLeague = availableGroupKeys[0] ?? DEFAULT_LEAGUE;
+  const fallbackLeague = availableGroupKeys.includes(DEFAULT_LEAGUE)
+    ? DEFAULT_LEAGUE
+    : availableGroupKeys[0] ?? DEFAULT_LEAGUE;
   if (!requestedLeague) return fallbackLeague;
   if (!isLeagueKey(requestedLeague)) return fallbackLeague;
   return availableGroupKeys.includes(requestedLeague)

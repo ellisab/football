@@ -244,30 +244,20 @@
   }
   .atlas-hero {
     position: relative;
-    min-height: 185svh;
-    --atlas-progress: 0;
-    --atlas-image-x: 0vw;
-    --atlas-image-y: 0svh;
-    --atlas-image-scale: 1.055;
-    --atlas-focus-x: 72%;
-    --atlas-focus-y: 38%;
-    --atlas-grid-x: 0vw;
-    --atlas-grid-y: 0svh;
+    min-height: 100svh;
     isolation: isolate;
     background: #081116;
   }
 
-  .atlas-hero-sticky {
-    position: sticky;
-    top: 0;
-    height: 100svh;
+  .atlas-hero-frame {
+    position: relative;
     min-height: 100svh;
     overflow: clip;
     isolation: isolate;
     background: #081116;
   }
 
-  .atlas-hero-sticky::before {
+  .atlas-hero-frame::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -278,7 +268,7 @@
       linear-gradient(180deg, rgba(4, 10, 14, 0.3) 0%, rgba(4, 10, 14, 0.06) 42%, rgba(4, 10, 14, 0.58) 100%);
   }
 
-  .atlas-hero-sticky::after {
+  .atlas-hero-frame::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -292,11 +282,10 @@
   }
   .atlas-hero-image {
     object-fit: cover;
-    object-position: var(--atlas-focus-x) var(--atlas-focus-y);
+    object-position: 72% 38%;
     filter: saturate(1.08) contrast(1.02) brightness(1.12);
-    transform: translate3d(var(--atlas-image-x), var(--atlas-image-y), 0) scale(var(--atlas-image-scale));
+    transform: scale(1.055);
     transform-origin: 68% 50%;
-    will-change: transform, object-position;
   }
 
   .atlas-hero-grid {
@@ -310,9 +299,7 @@
     background-size: 160px 160px;
     mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.58) 44%, transparent 72%);
     opacity: 0.16;
-    transform: translate3d(var(--atlas-grid-x), var(--atlas-grid-y), 0);
     animation: atlasSkyDrift 22s ease-in-out infinite;
-    will-change: transform;
   }
   .poster-surface {
     border: 1px solid rgba(237, 246, 239, 0.12);
@@ -348,18 +335,14 @@
   }
 
   @media (max-width: 768px) {
-    .atlas-hero {
-      min-height: 165svh;
-    }
-
-    .atlas-hero-sticky::before {
+    .atlas-hero-frame::before {
       background:
         linear-gradient(180deg, rgba(4, 10, 14, 0.06) 0%, rgba(4, 10, 14, 0.22) 38%, rgba(4, 10, 14, 0.68) 100%),
         linear-gradient(90deg, rgba(4, 10, 14, 0.74) 0%, rgba(4, 10, 14, 0.24) 58%, rgba(4, 10, 14, 0.08) 100%);
     }
 
     .atlas-hero-image {
-      object-position: min(var(--atlas-focus-x), 72%) var(--atlas-focus-y);
+      object-position: 72% 38%;
       transform-origin: 68% 50%;
     }
 
