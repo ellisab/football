@@ -71,7 +71,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           <ErrorBanner errors={data.visibleErrors} />
 
           {data.worldCup ? (
-            <WorldCupPanel data={data.worldCup} />
+            <WorldCupPanel data={data.worldCup} selectedGroup={data.worldCupGroup} />
           ) : (
             <div className="grid gap-8 lg:gap-10">
           {nextRoundSections.map((section) =>

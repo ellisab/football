@@ -13,6 +13,7 @@ export type WebHomeTableSection = HomeViewModelTableSection;
 export type WebHomeSection = HomeViewModelSection;
 export type WebHomeViewModel = HomeViewModel & {
   worldCup?: WorldCupSnapshot;
+  worldCupGroup?: string;
 };
 
 export const createWebHomeViewModel = (state: HomeState): WebHomeViewModel => {

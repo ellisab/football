@@ -6,6 +6,7 @@ const REVALIDATE = { next: { revalidate: 60 } };
 const NO_STORE = { cache: "no-store" as const };
 
 export const getHomePageData = async (params: {
+  group?: string;
   league?: string;
   season?: string;
 }) => {
@@ -22,5 +23,6 @@ export const getHomePageData = async (params: {
   return {
     ...createWebHomeViewModel(state),
     worldCup,
+    worldCupGroup: params.group,
   };
 };

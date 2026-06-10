@@ -4,7 +4,7 @@ import { HomeView } from "@/features/home/components/home-view";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ league?: string; season?: string }>;
+  searchParams: Promise<{ group?: string; league?: string; season?: string }>;
 }) {
   const params = await searchParams;
   const data = await getHomePageData(params);
