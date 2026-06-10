@@ -31,8 +31,8 @@ export function HomeHero({
       <HeroParallaxController targetId="spieltag-hero" />
       <div className="atlas-hero-sticky">
         <Image
-          src="/images/spieltag-atlas-hero.png"
-          alt="Flutlichtszene im Stadion mit einem Fussballspieler vor dem Schuss"
+          src="/images/world-cup-trophy-hero.png"
+          alt="Deutscher Fussballspieler mit dem WM-Pokal im Flutlichtstadion"
           fill
           priority
           sizes="100vw"

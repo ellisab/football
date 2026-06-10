@@ -1,8 +1,10 @@
 import type {
   ApiGroup,
+  ApiGroupTable,
   ApiLeague,
   ApiMatch,
   ApiTableRow,
+  ApiTeam,
   FetchOptions,
 } from "./types";
 
@@ -26,6 +28,13 @@ const fetchJson = async <T>(
 
 export const getAvailableLeagues = async (options?: FetchOptions) => {
   return fetchJson<ApiLeague[]>("/getavailableleagues", options);
+};
+
+export const getAvailableLeaguesBySeason = async (
+  season: number,
+  options?: FetchOptions
+) => {
+  return fetchJson<ApiLeague[]>(`/getavailableleagues/${season}`, options);
 };
 
 export const getGroups = async (
@@ -58,6 +67,14 @@ export const getMatchdayResults = async (
   );
 };
 
+export const getAllMatches = async (
+  leagueShortcut: string,
+  season: number,
+  options?: FetchOptions
+) => {
+  return fetchJson<ApiMatch[]>(`/getmatchdata/${leagueShortcut}/${season}`, options);
+};
+
 export const getMatchesByGroup = async (
   leagueShortcut: string,
   season: number,
@@ -88,9 +105,41 @@ export const getTable = async (
   );
 };
 
+export const getGroupTable = async (
+  leagueShortcut: string,
+  season: number,
+  options?: FetchOptions
+) => {
+  return fetchJson<ApiGroupTable[]>(
+    `/getgrouptable/${leagueShortcut}/${season}`,
+    options
+  );
+};
+
+export const getAvailableTeams = async (
+  leagueShortcut: string,
+  season: number,
+  options?: FetchOptions
+) => {
+  return fetchJson<ApiTeam[]>(
+    `/getavailableteams/${leagueShortcut}/${season}`,
+    options
+  );
+};
+
 export const getFinalResult = (match: ApiMatch) => {
   if (!match.matchResults || match.matchResults.length === 0) {
     return undefined;
+  }
+
+  const orderedResults = match.matchResults.filter(
+    (result) => typeof result.resultOrderID === "number"
+  );
+
+  if (orderedResults.length > 0) {
+    return [...orderedResults].sort(
+      (a, b) => (b.resultOrderID ?? 0) - (a.resultOrderID ?? 0)
+    )[0];
   }
 
   return (

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { LeagueKey, LeagueOption } from "@footballleagues/core/leagues";
 import { getLeagueLabel } from "@footballleagues/core/leagues";
 import type { LucideIcon } from "lucide-react";
-import { Flag, Goal, Medal, Shirt, Shield, Trophy } from "lucide-react";
+import { Flag, Goal, Globe2, Medal, Shirt, Shield, Trophy } from "lucide-react";
 import { SectionKicker } from "./section-kicker";
 
 const LEAGUE_ICONS: Record<LeagueKey, LucideIcon> = {
@@ -12,6 +12,7 @@ const LEAGUE_ICONS: Record<LeagueKey, LucideIcon> = {
   fbl2: Shirt,
   cl: Trophy,
   dfb: Flag,
+  wc: Globe2,
 };
 
 const buildHref = (league: LeagueKey, season: number) => {
@@ -30,18 +31,23 @@ export function LeagueTabs({
   variant?: "default" | "overlay";
 }) {
   const isOverlay = variant === "overlay";
+  const displayOptions = [...options].sort((a, b) => {
+    if (a.shortcut === "wc") return -1;
+    if (b.shortcut === "wc") return 1;
+    return 0;
+  });
 
   return (
-    <section className={`grid gap-4 ${isOverlay ? "w-full" : ""}`}>
+    <section className={`grid min-w-0 gap-4 ${isOverlay ? "w-full max-w-full" : ""}`}>
       <SectionKicker>Wettbewerbe</SectionKicker>
       <div
-        className={`flex gap-3 ${
+        className={`flex min-w-0 max-w-full gap-3 ${
           isOverlay
-            ? "overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            ? "overflow-x-auto overscroll-x-contain pb-2 pr-4 [scrollbar-width:none] lg:flex-wrap lg:overflow-x-visible lg:pr-0 [&::-webkit-scrollbar]:hidden"
             : "flex-wrap"
         }`}
       >
-        {options.map((option) => {
+        {displayOptions.map((option) => {
           const isActive = option.shortcut === currentLeague;
           const Icon = LEAGUE_ICONS[option.shortcut] ?? Medal;
           const season = option.seasons[0] ?? currentSeason;

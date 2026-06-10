@@ -1,5 +1,6 @@
 import { BracketSection } from "@/features/champions-league/components/bracket-section";
 import { StandingsCard } from "@/features/standings/components/standings-card";
+import { WorldCupPanel } from "@/features/world-cup/components/world-cup-panel";
 import type { WebHomeViewModel } from "../presenter/home-view-model";
 import { ErrorBanner } from "./error-banner";
 import { HomeHero } from "./home-hero";
@@ -7,6 +8,12 @@ import { RoundSection } from "./round-section";
 import { SectionKicker } from "./section-kicker";
 
 const getPrimaryActionHref = (data: WebHomeViewModel) => {
+  if (data.worldCup) {
+    return data.worldCup.groupSections.length > 0
+      ? "#world-cup-groups"
+      : "#world-cup";
+  }
+
   if (data.sections.some((section) => section.key === "matchday")) {
     return "#matchday";
   }
@@ -23,6 +30,12 @@ const getPrimaryActionHref = (data: WebHomeViewModel) => {
 };
 
 const getSecondaryActionHref = (data: WebHomeViewModel) => {
+  if (data.worldCup) {
+    return data.worldCup.knockoutRounds.length > 0
+      ? "#world-cup-knockout"
+      : getPrimaryActionHref(data);
+  }
+
   if (data.hasTable) {
     return "#table";
   }
@@ -57,7 +70,10 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
         <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-8 px-4 pb-14 pt-8 sm:px-6 sm:pb-20 sm:pt-10 lg:gap-10 lg:px-10">
           <ErrorBanner errors={data.visibleErrors} />
 
-          <div className="grid gap-8 lg:gap-10">
+          {data.worldCup ? (
+            <WorldCupPanel data={data.worldCup} />
+          ) : (
+            <div className="grid gap-8 lg:gap-10">
           {nextRoundSections.map((section) =>
             section.renderKind === "table" ? (
               <section
@@ -96,7 +112,8 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
               <RoundSection key={section.key} section={section} />
             )
           )}
-          </div>
+            </div>
+          )}
 
           <footer className="mt-2 border-t border-white/10 px-1 pt-5 text-xs text-[#9eb4ab]">
             Datenquelle:{" "}

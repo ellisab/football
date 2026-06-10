@@ -3,3 +3,4 @@ export * from "./leagues";
 export * from "./matches";
 export * from "./home";
 export * from "./teams";
+export * from "./world-cup";

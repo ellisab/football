@@ -1,7 +1,11 @@
 import type { FootballDataSource, HomeRequestOptions } from "../home/data-source";
 import {
   getAvailableLeagues,
+  getAvailableLeaguesBySeason,
+  getAllMatches,
+  getAvailableTeams,
   getCurrentGroup,
+  getGroupTable,
   getGroups,
   getMatchdayResults,
   getMatchesByGroup,
@@ -11,6 +15,9 @@ import {
 export const openLigaDbDataSource: FootballDataSource = {
   getAvailableLeagues(options?: HomeRequestOptions) {
     return getAvailableLeagues(options);
+  },
+  getAvailableLeaguesBySeason(season: number, options?: HomeRequestOptions) {
+    return getAvailableLeaguesBySeason(season, options);
   },
   getGroups(leagueShortcut: string, season: number, options?: HomeRequestOptions) {
     return getGroups(leagueShortcut, season, options);
@@ -26,6 +33,9 @@ export const openLigaDbDataSource: FootballDataSource = {
   ) {
     return getMatchdayResults(leagueShortcut, season, groupOrderId, options);
   },
+  getAllMatches(leagueShortcut: string, season: number, options?: HomeRequestOptions) {
+    return getAllMatches(leagueShortcut, season, options);
+  },
   getMatchesByGroup(
     leagueShortcut: string,
     season: number,
@@ -36,5 +46,19 @@ export const openLigaDbDataSource: FootballDataSource = {
   },
   getTable(leagueShortcut: string, season: number, options?: HomeRequestOptions) {
     return getTable(leagueShortcut, season, options);
+  },
+  getGroupTable(
+    leagueShortcut: string,
+    season: number,
+    options?: HomeRequestOptions
+  ) {
+    return getGroupTable(leagueShortcut, season, options);
+  },
+  getAvailableTeams(
+    leagueShortcut: string,
+    season: number,
+    options?: HomeRequestOptions
+  ) {
+    return getAvailableTeams(leagueShortcut, season, options);
   },
 };

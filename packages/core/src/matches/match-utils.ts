@@ -17,9 +17,11 @@ const KNOCKOUT_STAGE_SUFFIX_REGEX =
   /\b(hinspiele?|rueckspiele?|rückspiele?|first legs?|second legs?|first leg|second leg)\b/gi;
 const LOCALIZED_KNOCKOUT_ROUND_NAMES: Array<[RegExp, string]> = [
   [/^playoffs?$/i, "Playoffs"],
+  [/^round of 32$/i, "Runde der letzten 32"],
   [/^round of 16$/i, "Achtelfinale"],
   [/^quarter(?:-| )finals?$/i, "Viertelfinale"],
   [/^semi(?:-| )finals?$/i, "Halbfinale"],
+  [/^third(?:-| )place(?: match)?$/i, "Spiel um Platz 3"],
   [/^final$/i, "Finale"],
   [/^group stage$/i, "Gruppenphase"],
 ];
@@ -139,9 +141,16 @@ export const isKnockoutGroup = (name?: string) => {
   return (
     GERMAN_KNOCKOUT_ROUND_REGEX.test(value) ||
     value.includes("achtelfinale") ||
+    value.includes("sechzehntelfinale") ||
+    value.includes("runde der letzten 32") ||
     value.includes("viertelfinale") ||
     value.includes("halbfinale") ||
     value.includes("finale") ||
+    /\bfinals?\b/.test(value) ||
+    value.includes("spiel um platz") ||
+    value.includes("third-place") ||
+    value.includes("third place") ||
+    value.includes("round of 32") ||
     value.includes("round of 16") ||
     value.includes("quarter") ||
     value.includes("semi") ||

@@ -9,6 +9,7 @@ export type ApiTeam = {
   teamName?: string;
   shortName?: string;
   teamIconUrl?: string;
+  teamGroupName?: string;
 };
 
 export type ApiMatchResult = {
@@ -43,9 +44,16 @@ export type ApiMatch = {
   group?: ApiGroup;
   team1?: ApiTeam;
   team2?: ApiTeam;
+  timeZoneID?: string;
+  lastUpdateDateTime?: string;
   matchIsFinished?: boolean;
   matchResults?: ApiMatchResult[];
   goals?: ApiGoal[];
+  location?: {
+    locationID?: number;
+    locationCity?: string;
+    locationStadium?: string;
+  };
 };
 
 export type ApiLeague = {
@@ -64,6 +72,7 @@ export type ApiTableRow = {
   teamName?: string;
   shortName?: string;
   teamIconUrl?: string;
+  teamGroupName?: string;
   points?: number;
   opponentGoals?: number;
   goals?: number;
@@ -72,6 +81,12 @@ export type ApiTableRow = {
   lost?: number;
   draw?: number;
   goalDiff?: number;
+};
+
+export type ApiGroupTable = {
+  teamGroupId?: number;
+  teamGroupName?: string;
+  teams?: ApiTableRow[];
 };
 
 export type FetchOptions = RequestInit & {

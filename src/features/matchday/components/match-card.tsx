@@ -1,10 +1,22 @@
 import { getFinalResult, type ApiMatch } from "@footballleagues/core/openligadb";
-import { Clock3, Goal } from "lucide-react";
+import { Clock3, Goal, MapPin } from "lucide-react";
 import { TeamBadge } from "@/features/teams/components/team-badge";
 import { LocalKickoff } from "./local-kickoff";
 
 type MatchCardProps = {
   match: ApiMatch;
+};
+
+const getTeamLabel = (team: ApiMatch["team1"], fallback: string) => {
+  return team?.teamName ?? team?.shortName ?? fallback;
+};
+
+const getVenueLabel = (match: ApiMatch) => {
+  const stadium = match.location?.locationStadium;
+  const city = match.location?.locationCity;
+
+  if (stadium && city) return `${stadium}, ${city}`;
+  return stadium ?? city;
 };
 
 export function MatchCard({ match }: MatchCardProps) {
@@ -13,6 +25,7 @@ export function MatchCard({ match }: MatchCardProps) {
     ? `${finalResult.pointsTeam1 ?? 0} - ${finalResult.pointsTeam2 ?? 0}`
     : "- : -";
   const goals = match.goals ?? [];
+  const venue = getVenueLabel(match);
 
   return (
     <div
@@ -27,28 +40,36 @@ export function MatchCard({ match }: MatchCardProps) {
           <Clock3 className="h-3.5 w-3.5" />
           <LocalKickoff value={match.matchDateTimeUTC ?? match.matchDateTime} />
         </span>
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${
-            match.matchIsFinished
-              ? "border-[#dcbc6e]/40 bg-[#463614]/60 text-[#f4ebc2]"
-              : "border-[#72d9e4]/30 bg-[#0c2f36]/60 text-[#c6f7fb]"
-          }`}
-        >
-          <Goal className="h-3.5 w-3.5" />
-          {match.matchIsFinished ? "Beendet" : "Anstehend"}
-        </span>
+        <div className="flex flex-wrap justify-end gap-2">
+          {venue ? (
+            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[#c8d8d1]">
+              <MapPin className="h-3.5 w-3.5 text-[#72d9e4]" />
+              <span className="max-w-[22ch] truncate">{venue}</span>
+            </span>
+          ) : null}
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${
+              match.matchIsFinished
+                ? "border-[#dcbc6e]/40 bg-[#463614]/60 text-[#f4ebc2]"
+                : "border-[#72d9e4]/30 bg-[#0c2f36]/60 text-[#c6f7fb]"
+            }`}
+          >
+            <Goal className="h-3.5 w-3.5" />
+            {match.matchIsFinished ? "Beendet" : "Anstehend"}
+          </span>
+        </div>
       </div>
 
       <div className="grid gap-2 text-sm font-semibold">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
             <TeamBadge
-              name={match.team1?.teamName}
+              name={getTeamLabel(match.team1, "TBD")}
               iconUrl={match.team1?.teamIconUrl}
               className="bg-white/10 ring-1 ring-white/10"
             />
             <span className="min-w-0 truncate leading-tight">
-              {match.team1?.teamName ?? "Heim"}
+              {getTeamLabel(match.team1, "TBD")}
             </span>
           </div>
           <span className="score-pill rounded-full px-4 py-2 text-[1.45rem] leading-none tracking-[0.04em] font-[var(--font-stadium-heading)] text-[#fff6d0] [text-shadow:0_0_24px_rgba(255,214,108,0.32)]">
@@ -58,12 +79,12 @@ export function MatchCard({ match }: MatchCardProps) {
 
         <div className="flex min-w-0 items-center gap-2">
           <TeamBadge
-            name={match.team2?.teamName}
+            name={getTeamLabel(match.team2, "TBD")}
             iconUrl={match.team2?.teamIconUrl}
             className="bg-white/10 ring-1 ring-white/10"
           />
           <span className="min-w-0 truncate leading-tight">
-            {match.team2?.teamName ?? "Gast"}
+            {getTeamLabel(match.team2, "TBD")}
           </span>
         </div>
       </div>

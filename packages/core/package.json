@@ -13,6 +13,7 @@
     "./openligadb": "./src/openligadb.ts",
     "./leagues": "./src/leagues/index.ts",
     "./matches": "./src/matches/index.ts",
-    "./teams": "./src/teams/index.ts"
+    "./teams": "./src/teams/index.ts",
+    "./world-cup": "./src/world-cup/index.ts"
   }
 }

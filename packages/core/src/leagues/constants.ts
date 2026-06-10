@@ -50,4 +50,10 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
     nameMatch: ["champions league"],
     shortcutMatch: ["cl", "ucl"],
   },
+  {
+    key: "wc",
+    label: "World Cup",
+    nameMatch: ["world cup", "weltmeisterschaft", "fifa wm"],
+    shortcutMatch: ["wc", "wm", "fifa"],
+  },
 ];

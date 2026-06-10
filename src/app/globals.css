@@ -274,8 +274,8 @@
     z-index: 1;
     pointer-events: none;
     background:
-      linear-gradient(90deg, rgba(4, 12, 16, 0.96) 0%, rgba(4, 12, 16, 0.78) 36%, rgba(4, 12, 16, 0.34) 60%, rgba(4, 12, 16, 0.76) 100%),
-      linear-gradient(180deg, rgba(4, 10, 14, 0.52) 0%, rgba(4, 10, 14, 0.16) 38%, rgba(4, 10, 14, 0.88) 100%);
+      linear-gradient(90deg, rgba(4, 12, 16, 0.92) 0%, rgba(4, 12, 16, 0.68) 36%, rgba(4, 12, 16, 0.14) 60%, rgba(4, 12, 16, 0.18) 100%),
+      linear-gradient(180deg, rgba(4, 10, 14, 0.3) 0%, rgba(4, 10, 14, 0.06) 42%, rgba(4, 10, 14, 0.58) 100%);
   }
 
   .atlas-hero-sticky::after {
@@ -293,7 +293,7 @@
   .atlas-hero-image {
     object-fit: cover;
     object-position: var(--atlas-focus-x) var(--atlas-focus-y);
-    filter: saturate(1.04) contrast(1.05) brightness(0.8);
+    filter: saturate(1.08) contrast(1.02) brightness(1.12);
     transform: translate3d(var(--atlas-image-x), var(--atlas-image-y), 0) scale(var(--atlas-image-scale));
     transform-origin: 68% 50%;
     will-change: transform, object-position;
@@ -354,13 +354,13 @@
 
     .atlas-hero-sticky::before {
       background:
-        linear-gradient(180deg, rgba(4, 10, 14, 0.12) 0%, rgba(4, 10, 14, 0.46) 32%, rgba(4, 10, 14, 0.9) 100%),
-        linear-gradient(90deg, rgba(4, 10, 14, 0.9) 0%, rgba(4, 10, 14, 0.5) 58%, rgba(4, 10, 14, 0.3) 100%);
+        linear-gradient(180deg, rgba(4, 10, 14, 0.06) 0%, rgba(4, 10, 14, 0.22) 38%, rgba(4, 10, 14, 0.68) 100%),
+        linear-gradient(90deg, rgba(4, 10, 14, 0.74) 0%, rgba(4, 10, 14, 0.24) 58%, rgba(4, 10, 14, 0.08) 100%);
     }
 
     .atlas-hero-image {
-      object-position: min(var(--atlas-focus-x), 68%) var(--atlas-focus-y);
-      transform-origin: 64% 50%;
+      object-position: min(var(--atlas-focus-x), 72%) var(--atlas-focus-y);
+      transform-origin: 68% 50%;
     }
 
     .atlas-hero-grid {
