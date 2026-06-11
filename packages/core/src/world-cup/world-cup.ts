@@ -30,6 +30,8 @@ const WORLD_CUP_KEYWORD_REGEX =
   /\b(world\s*cup|weltmeisterschaft|wm|fifa|wc[-_\s]*\d{4})\b/i;
 const NOISY_LEAGUE_REGEX = /\b(dummy|test|freundschaft|friendly|tippspiel)\b/i;
 const WOMENS_LEAGUE_REGEX = /\b(frauen|women|women's|fwm)\b/i;
+const COMPLETE_WORLD_CUP_GROUP_COUNT = 12;
+const COMPLETE_WORLD_CUP_TEAM_COUNT = 48;
 
 type WorldCupLeagueCandidate = {
   league: ApiLeague;
@@ -106,6 +108,15 @@ const getGroupTableQuality = (groupTables: ApiGroupTable[]) => {
       return quality;
     },
     { groupCount: 0, teamCount: 0 }
+  );
+};
+
+const hasCompleteWorldCupGroupTable = (groupTables: ApiGroupTable[]) => {
+  const quality = getGroupTableQuality(groupTables);
+
+  return (
+    quality.groupCount >= COMPLETE_WORLD_CUP_GROUP_COUNT &&
+    quality.teamCount >= COMPLETE_WORLD_CUP_TEAM_COUNT
   );
 };
 
@@ -706,36 +717,44 @@ export const getWorldCupSnapshot = async ({
     });
   }
 
-  const leagueProbes = await Promise.all(
-    leagueCandidates.map(async (candidate): Promise<WorldCupLeagueProbe> => {
-      const leagueShortcut = candidate.league.leagueShortcut;
-      if (!leagueShortcut) {
-        return {
-          ...candidate,
-          groupTables: [],
-          tableLoaded: false,
-        };
-      }
+  const probeLeague = async (
+    candidate: WorldCupLeagueCandidate
+  ): Promise<WorldCupLeagueProbe> => {
+    const leagueShortcut = candidate.league.leagueShortcut;
+    if (!leagueShortcut) {
+      return {
+        ...candidate,
+        groupTables: [],
+        tableLoaded: false,
+      };
+    }
 
-      try {
-        return {
-          ...candidate,
-          groupTables: await dataSource.getGroupTable(
-            leagueShortcut,
-            season,
-            requestOptions
-          ),
-          tableLoaded: true,
-        };
-      } catch {
-        return {
-          ...candidate,
-          groupTables: [],
-          tableLoaded: false,
-        };
-      }
-    })
-  );
+    try {
+      return {
+        ...candidate,
+        groupTables: await dataSource.getGroupTable(
+          leagueShortcut,
+          season,
+          requestOptions
+        ),
+        tableLoaded: true,
+      };
+    } catch {
+      return {
+        ...candidate,
+        groupTables: [],
+        tableLoaded: false,
+      };
+    }
+  };
+
+  const firstProbe = await probeLeague(leagueCandidates[0]);
+  const leagueProbes = hasCompleteWorldCupGroupTable(firstProbe.groupTables)
+    ? [firstProbe]
+    : [
+        firstProbe,
+        ...(await Promise.all(leagueCandidates.slice(1).map(probeLeague))),
+      ];
   const selectedProbe = selectBestWorldCupLeagueProbe(leagueProbes);
   const league = selectedProbe?.league;
   if (!selectedProbe || !league?.leagueShortcut) {

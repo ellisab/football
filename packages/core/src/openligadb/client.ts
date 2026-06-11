@@ -9,13 +9,17 @@ import type {
 } from "./types";
 
 const API_BASE = "https://api.openligadb.de";
+const REQUEST_TIMEOUT_MS = 5_000;
 
 const fetchJson = async <T>(
   path: string,
   options?: FetchOptions,
   baseUrl: string = API_BASE
 ): Promise<T> => {
-  const response = await fetch(`${baseUrl}${path}`, options);
+  const response = await fetch(`${baseUrl}${path}`, {
+    ...options,
+    signal: options?.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
 
   if (!response.ok) {
     const error = new Error(`OpenLigaDB request failed (${response.status})`);

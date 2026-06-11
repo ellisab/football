@@ -301,6 +301,56 @@ test("getWorldCupSnapshot selects the duplicate league with complete group table
   ]);
 });
 
+test("getWorldCupSnapshot stops probing after finding a complete World Cup table", async () => {
+  const probedShortcuts: string[] = [];
+  const completeGroupTables = Array.from({ length: 12 }, (_, groupIndex) => ({
+    teamGroupId: groupIndex + 1,
+    teamGroupName: `Gruppe ${groupIndex + 1}`,
+    teams: Array.from({ length: 4 }, (_, teamIndex) => ({
+      teamInfoId: groupIndex * 4 + teamIndex + 1,
+      teamName: `Team ${groupIndex + 1}-${teamIndex + 1}`,
+    })),
+  }));
+  const dataSource: WorldCupDataSource = {
+    async getAvailableLeaguesBySeason() {
+      return [
+        {
+          leagueId: 100,
+          leagueShortcut: "complete-wm",
+          leagueName: "WM 2026",
+          leagueSeason: 2026,
+          sport: { sportName: "Fußball" },
+        },
+        {
+          leagueId: 200,
+          leagueShortcut: "duplicate-wm",
+          leagueName: "World Cup 2026",
+          leagueSeason: 2026,
+          sport: { sportName: "Football" },
+        },
+      ];
+    },
+    async getGroups() {
+      return [];
+    },
+    async getAllMatches() {
+      return [];
+    },
+    async getGroupTable(leagueShortcut) {
+      probedShortcuts.push(leagueShortcut);
+      return completeGroupTables;
+    },
+    async getAvailableTeams() {
+      return [];
+    },
+  };
+
+  const snapshot = await getWorldCupSnapshot({ dataSource, season: 2026 });
+
+  assert.equal(snapshot.leagueShortcut, "complete-wm");
+  assert.deepEqual(probedShortcuts, ["complete-wm"]);
+});
+
 test("getWorldCupSnapshot returns an empty state when OpenLigaDB has no 2026 World Cup league", async () => {
   const dataSource: WorldCupDataSource = {
     async getAvailableLeaguesBySeason() {
