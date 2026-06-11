@@ -123,18 +123,18 @@ export function StandingsCard({
               </div>
             </div>
 
-            <div className="hidden overflow-x-auto px-4 pb-2 sm:block sm:px-0">
-              <Table className="min-w-[640px]">
+            <div className="hidden px-4 pb-2 sm:block sm:px-0">
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow className="border-white/10">
-                    <TableHead className="w-12 text-[#b6cbc2]">Pos</TableHead>
+                    <TableHead className="w-10 text-[#b6cbc2]">Pos</TableHead>
                     <TableHead className="text-[#b6cbc2]">Team</TableHead>
-                    <TableHead className="text-[#b6cbc2]">Sp</TableHead>
-                    <TableHead className="text-[#b6cbc2]">S</TableHead>
-                    <TableHead className="text-[#b6cbc2]">U</TableHead>
-                    <TableHead className="text-[#b6cbc2]">N</TableHead>
-                    <TableHead className="text-[#b6cbc2]">TD</TableHead>
-                    <TableHead className="text-right text-[#b6cbc2]">Pkt.</TableHead>
+                    <TableHead className="w-10 text-center text-[#b6cbc2]">Sp</TableHead>
+                    <TableHead className="w-10 text-center text-[#b6cbc2]">S</TableHead>
+                    <TableHead className="w-10 text-center text-[#b6cbc2]">U</TableHead>
+                    <TableHead className="w-10 text-center text-[#b6cbc2]">N</TableHead>
+                    <TableHead className="w-10 text-center text-[#b6cbc2]">TD</TableHead>
+                    <TableHead className="w-14 text-right text-[#b6cbc2]">Pkt.</TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -150,21 +150,31 @@ export function StandingsCard({
                         <TableCell className="font-semibold text-[#b6cbc2]">
                           {index + 1}
                         </TableCell>
-                        <TableCell className="font-semibold text-[#eef6ef]">
-                          <div className="flex items-center gap-3">
+                        <TableCell className="min-w-0 font-semibold text-[#eef6ef]">
+                          <div className="flex min-w-0 items-center gap-2">
                             <TeamBadge
                               name={row.teamName}
                               iconUrl={row.teamIconUrl}
-                              className="bg-white/10 ring-1 ring-white/10"
+                              className="shrink-0 bg-white/10 ring-1 ring-white/10"
                             />
-                            <span>{row.teamName}</span>
+                            <span className="truncate">{row.teamName}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-[#b6cbc2]">{row.matches}</TableCell>
-                        <TableCell className="text-[#b6cbc2]">{row.won}</TableCell>
-                        <TableCell className="text-[#b6cbc2]">{row.draw}</TableCell>
-                        <TableCell className="text-[#b6cbc2]">{row.lost}</TableCell>
-                        <TableCell className="text-[#b6cbc2]">{row.goalDiff}</TableCell>
+                        <TableCell className="text-center text-[#b6cbc2]">
+                          {row.matches}
+                        </TableCell>
+                        <TableCell className="text-center text-[#b6cbc2]">
+                          {row.won}
+                        </TableCell>
+                        <TableCell className="text-center text-[#b6cbc2]">
+                          {row.draw}
+                        </TableCell>
+                        <TableCell className="text-center text-[#b6cbc2]">
+                          {row.lost}
+                        </TableCell>
+                        <TableCell className="text-center text-[#b6cbc2]">
+                          {row.goalDiff}
+                        </TableCell>
                         <TableCell className="text-right font-semibold text-[#dcbc6e]">
                           <span className="inline-flex items-center gap-1">
                             {row.points}
