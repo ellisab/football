@@ -41,7 +41,7 @@ export function HomeHero({
   season: number;
   secondaryHref: string;
 }) {
-  const showSecondaryAction = secondaryHref !== primaryHref;
+  const showSecondaryAction = hasTable && secondaryHref !== primaryHref;
 
   return (
     <section id="spieltag-hero" className="atlas-hero">
@@ -92,7 +92,7 @@ export function HomeHero({
                     href={secondaryHref}
                     className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-3 text-sm font-semibold text-[#eef6ef] backdrop-blur-md transition-colors duration-300 hover:bg-white/[0.11]"
                   >
-                    {hasTable ? "Zur Tabelle" : "Zum Ueberblick"}
+                    Zur Tabelle
                   </Link>
                 ) : null}
               </div>
