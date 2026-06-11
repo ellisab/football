@@ -56,6 +56,10 @@ export function LeagueTabs({
             <Link
               key={option.shortcut}
               href={buildHref(option.shortcut, season)}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={`${getLeagueLabel(option.shortcut)} ${
+                isActive ? "ausgewählt" : "öffnen"
+              }`}
               className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 isActive
                   ? "border-[#dcbc6e]/55 bg-[linear-gradient(135deg,rgba(10,44,38,0.74),rgba(21,49,54,0.62))] text-[#f4efd6] shadow-[0_18px_38px_rgba(4,15,20,0.22)]"

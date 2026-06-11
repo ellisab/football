@@ -12,6 +12,7 @@ import {
 import { TeamBadge } from "@/features/teams/components/team-badge";
 
 type StandingsCardProps = {
+  emptyText?: string;
   table: ApiTableRow[];
 };
 
@@ -58,7 +59,12 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
   };
 };
 
-export function StandingsCard({ table }: StandingsCardProps) {
+export function StandingsCard({
+  emptyText = "Tabellendaten sind noch nicht verfügbar.",
+  table,
+}: StandingsCardProps) {
+  const isEmpty = table.length === 0;
+
   return (
     <Card className="poster-surface gap-0 overflow-hidden border-white/10 bg-[linear-gradient(180deg,rgba(7,27,32,0.92),rgba(8,17,22,0.98))] py-0 shadow-none">
       <CardHeader className="border-b border-white/10 py-5">
@@ -71,95 +77,108 @@ export function StandingsCard({ table }: StandingsCardProps) {
       </CardHeader>
 
       <CardContent className="px-0 py-4 sm:px-6 sm:py-5">
-        <div className="sm:hidden w-full min-w-0">
-          <div className="flex w-full min-w-0 flex-col gap-2 px-4 pb-2">
-            {table.map((row, index) => {
-              const rankTone = getRankTone(index, table.length);
-
-              return (
-                <div
-                  key={row.teamInfoId ?? row.teamName}
-                  className={`flex items-center w-full min-w-0 justify-between gap-3 rounded-[1.4rem] border px-3 py-3 text-sm text-[#edf6ef] sm:px-4 ${rankTone.mobileRow}`}
-                >
-                  <div className="flex flex-1 min-w-0 items-center gap-2.5">
-                    <span
-                      className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${rankTone.positionBadge}`}
-                    >
-                      {index + 1}
-                    </span>
-                    <TeamBadge
-                      name={row.teamName}
-                      iconUrl={row.teamIconUrl}
-                      className="shrink-0 bg-white/10 ring-1 ring-white/10"
-                    />
-                    <span className="truncate font-semibold">{row.teamName}</span>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <div className="text-[0.65rem] uppercase tracking-[0.14em] text-[#b6cbc2]">
-                      {rankTone.zone}
-                    </div>
-                    <div className="text-base font-semibold text-[#dcbc6e]">
-                      {row.points} Pkt.
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+        {isEmpty ? (
+          <div
+            role="status"
+            className="mx-4 rounded-[1.2rem] border border-white/10 bg-white/[0.045] px-4 py-5 text-sm leading-6 text-[#a9c0b6] sm:mx-0"
+          >
+            {emptyText}
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="w-full min-w-0 sm:hidden">
+              <div className="flex w-full min-w-0 flex-col gap-2 px-4 pb-2">
+                {table.map((row, index) => {
+                  const rankTone = getRankTone(index, table.length);
 
-        <div className="hidden overflow-x-auto px-4 pb-2 sm:block sm:px-0">
-          <Table className="min-w-[640px]">
-            <TableHeader>
-              <TableRow className="border-white/10">
-                <TableHead className="w-12 text-[#b6cbc2]">Pos</TableHead>
-                <TableHead className="text-[#b6cbc2]">Team</TableHead>
-                <TableHead className="text-[#b6cbc2]">Sp</TableHead>
-                <TableHead className="text-[#b6cbc2]">S</TableHead>
-                <TableHead className="text-[#b6cbc2]">U</TableHead>
-                <TableHead className="text-[#b6cbc2]">N</TableHead>
-                <TableHead className="text-[#b6cbc2]">TD</TableHead>
-                <TableHead className="text-right text-[#b6cbc2]">Pkt.</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {table.map((row, index) => {
-                const rankTone = getRankTone(index, table.length);
-
-                return (
-                  <TableRow
-                    key={row.teamInfoId ?? row.teamName}
-                    className={`border-white/10 ${rankTone.desktopRow}`}
-                  >
-                    <TableCell className="font-semibold text-[#b6cbc2]">{index + 1}</TableCell>
-                    <TableCell className="font-semibold text-[#eef6ef]">
-                      <div className="flex items-center gap-3">
+                  return (
+                    <div
+                      key={row.teamInfoId ?? row.teamName}
+                      className={`flex w-full min-w-0 items-center justify-between gap-3 rounded-[1.4rem] border px-3 py-3 text-sm text-[#edf6ef] sm:px-4 ${rankTone.mobileRow}`}
+                    >
+                      <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                        <span
+                          className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${rankTone.positionBadge}`}
+                        >
+                          {index + 1}
+                        </span>
                         <TeamBadge
                           name={row.teamName}
                           iconUrl={row.teamIconUrl}
-                          className="bg-white/10 ring-1 ring-white/10"
+                          className="shrink-0 bg-white/10 ring-1 ring-white/10"
                         />
-                        <span>{row.teamName}</span>
+                        <span className="truncate font-semibold">{row.teamName}</span>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-[#b6cbc2]">{row.matches}</TableCell>
-                    <TableCell className="text-[#b6cbc2]">{row.won}</TableCell>
-                    <TableCell className="text-[#b6cbc2]">{row.draw}</TableCell>
-                    <TableCell className="text-[#b6cbc2]">{row.lost}</TableCell>
-                    <TableCell className="text-[#b6cbc2]">{row.goalDiff}</TableCell>
-                    <TableCell className="text-right font-semibold text-[#dcbc6e]">
-                      <span className="inline-flex items-center gap-1">
-                        {row.points}
-                        <Goal className="h-3.5 w-3.5 text-[#72d9e4]" />
-                      </span>
-                    </TableCell>
+                      <div className="shrink-0 text-right">
+                        <div className="text-[0.65rem] uppercase tracking-[0.14em] text-[#b6cbc2]">
+                          {rankTone.zone}
+                        </div>
+                        <div className="text-base font-semibold text-[#dcbc6e]">
+                          {row.points} Pkt.
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="hidden overflow-x-auto px-4 pb-2 sm:block sm:px-0">
+              <Table className="min-w-[640px]">
+                <TableHeader>
+                  <TableRow className="border-white/10">
+                    <TableHead className="w-12 text-[#b6cbc2]">Pos</TableHead>
+                    <TableHead className="text-[#b6cbc2]">Team</TableHead>
+                    <TableHead className="text-[#b6cbc2]">Sp</TableHead>
+                    <TableHead className="text-[#b6cbc2]">S</TableHead>
+                    <TableHead className="text-[#b6cbc2]">U</TableHead>
+                    <TableHead className="text-[#b6cbc2]">N</TableHead>
+                    <TableHead className="text-[#b6cbc2]">TD</TableHead>
+                    <TableHead className="text-right text-[#b6cbc2]">Pkt.</TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                </TableHeader>
+
+                <TableBody>
+                  {table.map((row, index) => {
+                    const rankTone = getRankTone(index, table.length);
+
+                    return (
+                      <TableRow
+                        key={row.teamInfoId ?? row.teamName}
+                        className={`border-white/10 ${rankTone.desktopRow}`}
+                      >
+                        <TableCell className="font-semibold text-[#b6cbc2]">
+                          {index + 1}
+                        </TableCell>
+                        <TableCell className="font-semibold text-[#eef6ef]">
+                          <div className="flex items-center gap-3">
+                            <TeamBadge
+                              name={row.teamName}
+                              iconUrl={row.teamIconUrl}
+                              className="bg-white/10 ring-1 ring-white/10"
+                            />
+                            <span>{row.teamName}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-[#b6cbc2]">{row.matches}</TableCell>
+                        <TableCell className="text-[#b6cbc2]">{row.won}</TableCell>
+                        <TableCell className="text-[#b6cbc2]">{row.draw}</TableCell>
+                        <TableCell className="text-[#b6cbc2]">{row.lost}</TableCell>
+                        <TableCell className="text-[#b6cbc2]">{row.goalDiff}</TableCell>
+                        <TableCell className="text-right font-semibold text-[#dcbc6e]">
+                          <span className="inline-flex items-center gap-1">
+                            {row.points}
+                            <Goal className="h-3.5 w-3.5 text-[#72d9e4]" />
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );

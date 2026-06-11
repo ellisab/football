@@ -288,6 +288,11 @@
     transform-origin: 68% 50%;
   }
 
+  .atlas-hero-image--league {
+    object-position: 64% 50%;
+    transform-origin: 66% 50%;
+  }
+
   .atlas-hero-grid {
     position: absolute;
     inset: 0;
@@ -344,6 +349,11 @@
     .atlas-hero-image {
       object-position: 72% 38%;
       transform-origin: 68% 50%;
+    }
+
+    .atlas-hero-image--league {
+      object-position: 66% 50%;
+      transform-origin: 66% 50%;
     }
 
     .atlas-hero-grid {

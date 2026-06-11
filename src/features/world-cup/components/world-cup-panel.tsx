@@ -260,16 +260,21 @@ function SelectorChip({
   isActive,
   label,
   meta,
+  metaLabel,
 }: {
   href: string;
   isActive: boolean;
   label: string;
   meta?: string | number;
+  metaLabel?: string;
 }) {
   return (
     <Link
       href={href}
       aria-current={isActive ? "page" : undefined}
+      aria-label={`${label}${meta !== undefined ? `, ${meta} ${metaLabel ?? ""}` : ""}${
+        isActive ? ", ausgewählt" : ""
+      }`}
       className={`inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors ${
         isActive
           ? "border-[#dcbc6e]/60 bg-[#223d35]/88 text-[#f4efd6] shadow-[0_14px_30px_rgba(4,15,20,0.24)]"
@@ -311,12 +316,14 @@ function WorldCupGroupSelector({
       key: "all",
       label: "Alle",
       meta: data.groupSections.length,
+      metaLabel: data.groupSections.length === 1 ? "Gruppe" : "Gruppen",
     },
     ...selections.map(({ section, slug }) => ({
       href: buildWorldCupHref(data.season, slug),
       key: slug,
       label: section.title,
       meta: section.matches.length,
+      metaLabel: section.matches.length === 1 ? "Spiel" : "Spiele",
     })),
     ...(data.knockoutRounds.length > 0
       ? [
@@ -325,6 +332,7 @@ function WorldCupGroupSelector({
             key: "knockout",
             label: "K.-o.",
             meta: knockoutMatchCount,
+            metaLabel: knockoutMatchCount === 1 ? "Spiel" : "Spiele",
           },
         ]
       : []),
@@ -333,13 +341,13 @@ function WorldCupGroupSelector({
   return (
     <section
       id="world-cup-groups"
-      className="sticky top-3 z-20 grid scroll-mt-28 gap-3 rounded-[1.35rem] border border-white/10 bg-[#081116]/88 p-3 shadow-[0_18px_42px_rgba(2,9,12,0.34)] backdrop-blur-xl"
+      className="sticky top-3 z-20 grid scroll-mt-40 gap-3 rounded-[1.35rem] border border-white/10 bg-[#081116]/88 p-3 shadow-[0_18px_42px_rgba(2,9,12,0.34)] backdrop-blur-xl sm:scroll-mt-44"
     >
       <div className="flex min-w-0 flex-col gap-3 md:grid md:grid-cols-[minmax(9.5rem,11rem)_minmax(0,1fr)] md:items-start">
         <div className="min-w-0 md:pt-1">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-[#dcbc6e]">
             <Layers3 className="h-3.5 w-3.5" />
-            Auswahl
+            Gruppe wählen
           </div>
           <div className="mt-1 hidden text-lg leading-tight font-semibold text-[#f4efd6] md:block">
             {activeTitle}
@@ -360,6 +368,7 @@ function WorldCupGroupSelector({
               isActive={selectedKey === option.key}
               label={option.label}
               meta={option.meta}
+              metaLabel={option.metaLabel}
             />
           ))}
         </div>
@@ -436,7 +445,7 @@ function WorldCupGroup({
   season: number;
 }) {
   return (
-    <section className="grid scroll-mt-28 gap-4">
+    <section className="grid scroll-mt-40 gap-4 sm:scroll-mt-44">
       <div className="poster-empty flex flex-wrap items-end justify-between gap-3 rounded-[1.5rem] p-4 sm:p-5">
         <div className="min-w-0">
           <SectionKicker>{kicker}</SectionKicker>
@@ -502,7 +511,7 @@ function WorldCupKnockout({ rounds }: { rounds: WorldCupKnockoutRound[] }) {
   if (rounds.length === 0) return null;
 
   return (
-    <section id="world-cup-knockout" className="grid scroll-mt-28 gap-5">
+    <section id="world-cup-knockout" className="grid scroll-mt-40 gap-5 sm:scroll-mt-44">
       <SectionHeading
         kicker="K.-o.-Phase"
         title="Weg ins Finale"
@@ -580,7 +589,7 @@ export function WorldCupPanel({
           />
 
           {selectedKey === "all" ? (
-            <section className="grid scroll-mt-28 gap-7">
+            <section className="grid scroll-mt-40 gap-7 sm:scroll-mt-44">
               <SectionHeading
                 kicker="Gruppenphase"
                 title="Alle Gruppen"
