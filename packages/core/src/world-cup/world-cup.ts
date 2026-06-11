@@ -31,6 +31,106 @@ const WORLD_CUP_KEYWORD_REGEX =
 const NOISY_LEAGUE_REGEX = /\b(dummy|test|freundschaft|friendly|tippspiel)\b/i;
 const WOMENS_LEAGUE_REGEX = /\b(frauen|women|women's|fwm)\b/i;
 
+type WorldCupLeagueCandidate = {
+  league: ApiLeague;
+  score: number;
+  sourceIndex: number;
+};
+
+type WorldCupLeagueProbe = WorldCupLeagueCandidate & {
+  groupTables: ApiGroupTable[];
+  tableLoaded: boolean;
+};
+
+const getWorldCupLeagueCandidates = (
+  leagues: ApiLeague[],
+  season: number
+): WorldCupLeagueCandidate[] => {
+  const matchingLeagues = leagues
+    .map((league, sourceIndex) => ({ league, sourceIndex }))
+    .filter(({ league }) => parseSeasonValue(league.leagueSeason) === season)
+    .filter(({ league }) => isFootballLeague(league))
+    .filter(({ league }) => {
+      const combined = `${league.leagueName ?? ""} ${league.leagueShortcut ?? ""}`;
+      return WORLD_CUP_KEYWORD_REGEX.test(combined);
+    });
+  const preferredLeagues = matchingLeagues.filter(({ league }) => {
+    const combined = `${league.leagueName ?? ""} ${league.leagueShortcut ?? ""}`;
+    return (
+      !WOMENS_LEAGUE_REGEX.test(combined) &&
+      !NOISY_LEAGUE_REGEX.test(combined)
+    );
+  });
+  const candidatePool =
+    preferredLeagues.length > 0 ? preferredLeagues : matchingLeagues;
+
+  return candidatePool
+    .map(({ league, sourceIndex }) => {
+      const combined = `${league.leagueName ?? ""} ${league.leagueShortcut ?? ""}`;
+      let score = 0;
+
+      if (
+        /\b(world\s*cup|weltmeisterschaft|wm)\b/i.test(combined)
+      ) {
+        score += 8;
+      }
+      if (new RegExp(String(season)).test(combined)) score += 3;
+
+      return { league, score, sourceIndex };
+    })
+    .sort((a, b) => {
+      const byScore = b.score - a.score;
+      if (byScore !== 0) return byScore;
+
+      const byLeagueId =
+        (a.league.leagueId ?? Number.MAX_SAFE_INTEGER) -
+        (b.league.leagueId ?? Number.MAX_SAFE_INTEGER);
+      if (byLeagueId !== 0) return byLeagueId;
+
+      const aShortcut = a.league.leagueShortcut ?? "";
+      const bShortcut = b.league.leagueShortcut ?? "";
+      return (
+        aShortcut.length - bShortcut.length ||
+        aShortcut.localeCompare(bShortcut) ||
+        a.sourceIndex - b.sourceIndex
+      );
+    });
+};
+
+const getGroupTableQuality = (groupTables: ApiGroupTable[]) => {
+  return groupTables.reduce(
+    (quality, groupTable) => {
+      const teamCount = groupTable.teams?.length ?? 0;
+      if (teamCount > 0) quality.groupCount += 1;
+      quality.teamCount += teamCount;
+      return quality;
+    },
+    { groupCount: 0, teamCount: 0 }
+  );
+};
+
+const selectBestWorldCupLeagueProbe = (probes: WorldCupLeagueProbe[]) => {
+  return [...probes].sort((a, b) => {
+    const aQuality = getGroupTableQuality(a.groupTables);
+    const bQuality = getGroupTableQuality(b.groupTables);
+    const byGroupCount = bQuality.groupCount - aQuality.groupCount;
+    if (byGroupCount !== 0) return byGroupCount;
+
+    const byTeamCount = bQuality.teamCount - aQuality.teamCount;
+    if (byTeamCount !== 0) return byTeamCount;
+
+    const byScore = b.score - a.score;
+    if (byScore !== 0) return byScore;
+
+    const byLeagueId =
+      (a.league.leagueId ?? Number.MAX_SAFE_INTEGER) -
+      (b.league.leagueId ?? Number.MAX_SAFE_INTEGER);
+    if (byLeagueId !== 0) return byLeagueId;
+
+    return a.sourceIndex - b.sourceIndex;
+  })[0];
+};
+
 const normalizeGroupComparable = (value?: string) => {
   return normalizeText(value)
     .normalize("NFD")
@@ -365,37 +465,7 @@ export const discoverWorldCupLeague = (
   leagues: ApiLeague[],
   season: number = WORLD_CUP_SEASON
 ) => {
-  const candidates = leagues
-    .filter((league) => parseSeasonValue(league.leagueSeason) === season)
-    .filter(isFootballLeague)
-    .filter((league) => {
-      const combined = `${league.leagueName ?? ""} ${league.leagueShortcut ?? ""}`;
-      return WORLD_CUP_KEYWORD_REGEX.test(combined);
-    })
-    .map((league) => {
-      const combined = `${league.leagueName ?? ""} ${league.leagueShortcut ?? ""}`;
-      let score = 0;
-
-      if (/world\s*cup/i.test(combined)) score += 8;
-      if (/weltmeisterschaft/i.test(combined)) score += 8;
-      if (/\bfifa\b/i.test(combined)) score += 5;
-      if (/\bwm\b/i.test(combined)) score += 4;
-      if (new RegExp(String(season)).test(combined)) score += 3;
-      if (WOMENS_LEAGUE_REGEX.test(combined)) score -= 5;
-      if (NOISY_LEAGUE_REGEX.test(combined)) score -= 8;
-
-      return { league, score };
-    })
-    .sort((a, b) => {
-      const byScore = b.score - a.score;
-      if (byScore !== 0) return byScore;
-
-      const aShortcut = a.league.leagueShortcut ?? "";
-      const bShortcut = b.league.leagueShortcut ?? "";
-      return aShortcut.length - bShortcut.length || aShortcut.localeCompare(bShortcut);
-    });
-
-  return candidates[0]?.league;
+  return getWorldCupLeagueCandidates(leagues, season)[0]?.league;
 };
 
 export const deriveGroupStandings = (
@@ -627,8 +697,8 @@ export const getWorldCupSnapshot = async ({
     });
   }
 
-  const league = discoverWorldCupLeague(leagues, season);
-  if (!league?.leagueShortcut) {
+  const leagueCandidates = getWorldCupLeagueCandidates(leagues, season);
+  if (leagueCandidates.length === 0) {
     return createEmptyWorldCupSnapshot({
       season,
       emptyReason:
@@ -636,7 +706,50 @@ export const getWorldCupSnapshot = async ({
     });
   }
 
-  const [groups, matches, teams, groupTables] = await Promise.all([
+  const leagueProbes = await Promise.all(
+    leagueCandidates.map(async (candidate): Promise<WorldCupLeagueProbe> => {
+      const leagueShortcut = candidate.league.leagueShortcut;
+      if (!leagueShortcut) {
+        return {
+          ...candidate,
+          groupTables: [],
+          tableLoaded: false,
+        };
+      }
+
+      try {
+        return {
+          ...candidate,
+          groupTables: await dataSource.getGroupTable(
+            leagueShortcut,
+            season,
+            requestOptions
+          ),
+          tableLoaded: true,
+        };
+      } catch {
+        return {
+          ...candidate,
+          groupTables: [],
+          tableLoaded: false,
+        };
+      }
+    })
+  );
+  const selectedProbe = selectBestWorldCupLeagueProbe(leagueProbes);
+  const league = selectedProbe?.league;
+  if (!selectedProbe || !league?.leagueShortcut) {
+    return createEmptyWorldCupSnapshot({
+      season,
+      emptyReason:
+        "OpenLigaDB hat fuer die Saison 2026 noch keine verwendbare World-Cup-Liga veroeffentlicht.",
+    });
+  }
+  if (!selectedProbe.tableLoaded) {
+    errors.push("table");
+  }
+
+  const [groups, matches, teams] = await Promise.all([
     capture(
       dataSource.getGroups(league.leagueShortcut, season, requestOptions),
       [],
@@ -655,12 +768,6 @@ export const getWorldCupSnapshot = async ({
       "teams",
       errors
     ),
-    capture(
-      dataSource.getGroupTable(league.leagueShortcut, season, requestOptions),
-      [],
-      "table",
-      errors
-    ),
   ]);
 
   const snapshot = createWorldCupSnapshot({
@@ -669,7 +776,7 @@ export const getWorldCupSnapshot = async ({
     groups,
     matches,
     teams,
-    groupTables,
+    groupTables: selectedProbe.groupTables,
     errors,
   });
 
