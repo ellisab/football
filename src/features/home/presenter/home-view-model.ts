@@ -11,9 +11,12 @@ import type { WorldCupSnapshot } from "@footballleagues/core/world-cup";
 export type WebHomeRoundSection = HomeViewModelRoundSection;
 export type WebHomeTableSection = HomeViewModelTableSection;
 export type WebHomeSection = HomeViewModelSection;
-export type WebHomeViewModel = HomeViewModel & {
+export type WebCompetitionViewModel = HomeViewModel & {
   worldCup?: WorldCupSnapshot;
-  worldCupGroup?: string;
+};
+export type WebHomeViewModel = WebCompetitionViewModel & {
+  competitions?: WebCompetitionViewModel[];
+  isOverview?: boolean;
 };
 
 export const createWebHomeViewModel = (state: HomeState): WebHomeViewModel => {

@@ -23,11 +23,13 @@ export function LeagueTabs({
   options,
   currentLeague,
   currentSeason,
+  getHref,
   variant = "default",
 }: {
   options: LeagueOption[];
-  currentLeague: LeagueKey;
+  currentLeague?: LeagueKey;
   currentSeason: number;
+  getHref?: (option: LeagueOption, season: number) => string;
   variant?: "default" | "overlay";
 }) {
   const isOverlay = variant === "overlay";
@@ -51,11 +53,12 @@ export function LeagueTabs({
           const isActive = option.shortcut === currentLeague;
           const Icon = LEAGUE_ICONS[option.shortcut] ?? Medal;
           const season = option.seasons[0] ?? currentSeason;
+          const href = getHref?.(option, season) ?? buildHref(option.shortcut, season);
 
           return (
             <Link
               key={option.shortcut}
-              href={buildHref(option.shortcut, season)}
+              href={href}
               aria-current={isActive ? "page" : undefined}
               aria-label={`${getLeagueLabel(option.shortcut)} ${
                 isActive ? "ausgewählt" : "öffnen"

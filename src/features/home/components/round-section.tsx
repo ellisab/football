@@ -1,4 +1,5 @@
 import type { ApiMatch } from "@footballleagues/core/openligadb";
+import { sortMatchesByUpcomingFirst } from "@footballleagues/core/matches";
 import type { WebHomeRoundSection } from "../presenter/home-view-model";
 import { TieCardList } from "@/features/champions-league/components/tie-card-list";
 import { MatchCard } from "@/features/matchday/components/match-card";
@@ -11,12 +12,22 @@ const getMatchKey = (match: ApiMatch, index: number) => {
 };
 
 export function RoundSection({
+  sectionId,
   section,
 }: {
+  sectionId?: string;
   section: WebHomeRoundSection;
 }) {
+  const matches =
+    section.renderKind === "matches"
+      ? sortMatchesByUpcomingFirst(section.items)
+      : [];
+
   return (
-    <section id={section.key} className="grid scroll-mt-40 gap-3 sm:scroll-mt-44">
+    <section
+      id={sectionId ?? section.key}
+      className="grid scroll-mt-40 gap-3 sm:scroll-mt-44"
+    >
       <SectionHeading
         kicker={section.kicker}
         title={section.title}
@@ -34,7 +45,7 @@ export function RoundSection({
             emptyText={section.emptyText}
           />
         ) : (
-          section.items.map((match, index) => (
+          matches.map((match, index) => (
             <MatchCard key={getMatchKey(match, index)} match={match} />
           ))
         )}

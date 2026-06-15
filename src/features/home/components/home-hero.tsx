@@ -24,6 +24,8 @@ export function HomeHero({
   leagueOptions,
   currentLeague,
   currentSeason,
+  description,
+  getLeagueHref,
   primaryHref,
   previewStats,
   season,
@@ -34,8 +36,10 @@ export function HomeHero({
   image: HomeHeroImage;
   leagueLabel: string;
   leagueOptions: LeagueOption[];
-  currentLeague: LeagueKey;
+  currentLeague?: LeagueKey;
   currentSeason: number;
+  description?: string;
+  getLeagueHref?: (option: LeagueOption, season: number) => string;
   primaryHref: string;
   previewStats: HomeHeroStat[];
   season: number;
@@ -64,6 +68,7 @@ export function HomeHero({
               options={leagueOptions}
               currentLeague={currentLeague}
               currentSeason={currentSeason}
+              getHref={getLeagueHref}
               variant="overlay"
             />
           </div>
@@ -74,9 +79,8 @@ export function HomeHero({
                 {headline}
               </h1>
               <p className="max-w-[34rem] text-sm leading-6 text-[#dce9e2] sm:text-base sm:leading-7">
-                {leagueLabel} · Saison {season}. Live-Ergebnisse, Tabellen und
-                K.-o.-Runden in einer klaren Ansicht vom ersten Anpfiff bis zum
-                letzten Tor.
+                {description ??
+                  `${leagueLabel} · Saison ${season}. Live-Ergebnisse, Tabellen und K.-o.-Runden in einer klaren Ansicht vom ersten Anpfiff bis zum letzten Tor.`}
               </p>
 
               <div className="flex flex-wrap justify-center gap-3 sm:justify-start">

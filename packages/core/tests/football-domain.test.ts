@@ -4,9 +4,11 @@ import {
   buildLeagueEntriesByGroup,
   findNextGroup,
   formatKickoff,
+  getBerlinDateKey,
   getKnockoutLeg,
   getKnockoutStageName,
   getCurrentSeasonYear,
+  getMatchBerlinDateKey,
   getLeagueLabel,
   getStageLabel,
   groupKnockoutMatchesByTie,
@@ -16,6 +18,7 @@ import {
   resolveLeagueSelection,
   resolveSeasonSelection,
   sortGoals,
+  sortMatchesByUpcomingFirst,
 } from "../src/index";
 
 test("getCurrentSeasonYear uses July as season cutoff", () => {
@@ -92,6 +95,31 @@ test("sortGoals returns goals in chronological order", () => {
   );
 });
 
+test("sortMatchesByUpcomingFirst puts incoming fixtures before results", () => {
+  const sorted = sortMatchesByUpcomingFirst([
+    {
+      matchID: 1,
+      matchDateTimeUTC: "2026-03-01T20:00:00Z",
+      matchIsFinished: true,
+    },
+    {
+      matchID: 2,
+      matchDateTimeUTC: "2026-03-08T20:00:00Z",
+      matchIsFinished: false,
+    },
+    {
+      matchID: 3,
+      matchDateTimeUTC: "2026-03-05T20:00:00Z",
+      matchIsFinished: false,
+    },
+  ]);
+
+  assert.deepEqual(
+    sorted.map((match) => match.matchID),
+    [3, 2, 1]
+  );
+});
+
 test("findNextGroup returns the next higher group order", () => {
   const groups = [
     { groupOrderID: 1, groupName: "Matchday 1" },
@@ -107,6 +135,16 @@ test("findNextGroup returns the next higher group order", () => {
 
 test("formatKickoff renders UTC input in Europe/Berlin time", () => {
   assert.equal(formatKickoff("2026-04-10T18:30:00Z"), "Fr., 10. Apr., 20:30");
+});
+
+test("Berlin date keys use the local matchday", () => {
+  assert.equal(getBerlinDateKey("2026-06-14T22:30:00Z"), "2026-06-15");
+  assert.equal(
+    getMatchBerlinDateKey({
+      matchDateTimeUTC: "2026-12-31T23:30:00Z",
+    }),
+    "2027-01-01"
+  );
 });
 
 test("stage helpers normalize matchday and playoff labels", () => {

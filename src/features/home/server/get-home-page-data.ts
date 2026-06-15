@@ -2,9 +2,16 @@ import { createHomeState, getHomeSnapshot } from "@footballleagues/core/home";
 import { getWorldCupSnapshot } from "@footballleagues/core/world-cup";
 import { unstable_cache } from "next/cache";
 import { createWebHomeViewModel } from "../presenter/home-view-model";
+import type { WebCompetitionViewModel } from "../presenter/home-view-model";
 
 const REVALIDATE_SECONDS = 60;
 const REVALIDATE = { next: { revalidate: REVALIDATE_SECONDS } };
+const getCachedHomeSnapshot = unstable_cache(
+  async (params: { league?: string; season?: string }) =>
+    getHomeSnapshot(params, { requestOptions: REVALIDATE }),
+  ["home-snapshot"],
+  { revalidate: REVALIDATE_SECONDS }
+);
 const getCachedWorldCupSnapshot = unstable_cache(
   async (season: number) =>
     getWorldCupSnapshot({
@@ -15,12 +22,13 @@ const getCachedWorldCupSnapshot = unstable_cache(
   { revalidate: REVALIDATE_SECONDS }
 );
 
-export const getHomePageData = async (params: {
-  group?: string;
-  league?: string;
-  season?: string;
-}) => {
-  const snapshot = await getHomeSnapshot(params, { requestOptions: REVALIDATE });
+const getCompetitionData = async (
+  params: {
+    league?: string;
+    season?: string;
+  }
+): Promise<WebCompetitionViewModel> => {
+  const snapshot = await getCachedHomeSnapshot(params);
   const state = createHomeState(snapshot);
   const worldCup =
     state.resolvedLeague === "wc"
@@ -30,6 +38,13 @@ export const getHomePageData = async (params: {
   return {
     ...createWebHomeViewModel(state),
     worldCup,
-    worldCupGroup: params.group,
   };
+};
+
+export const getHomePageData = async (params: {
+  group?: string;
+  league?: string;
+  season?: string;
+}) => {
+  return getCompetitionData(params);
 };

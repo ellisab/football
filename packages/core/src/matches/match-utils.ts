@@ -8,6 +8,12 @@ const kickoffFormatter = new Intl.DateTimeFormat("de-DE", {
   minute: "2-digit",
   timeZone: "Europe/Berlin",
 });
+const berlinDateKeyFormatter = new Intl.DateTimeFormat("de-DE", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "Europe/Berlin",
+});
 const MATCHDAY_REGEX = /(\d{1,2})\.\s*spieltag/i;
 const PLAYOFF_REGEX = /playoffs?/i;
 const GERMAN_KNOCKOUT_ROUND_REGEX = /\b\d+\.\s*runde\b/i;
@@ -31,6 +37,30 @@ export const formatKickoff = (value?: string) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Termin offen";
   return kickoffFormatter.format(date);
+};
+
+export const getBerlinDateKey = (value?: Date | string) => {
+  if (!value) return undefined;
+
+  const date = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return undefined;
+
+  const parts = berlinDateKeyFormatter.formatToParts(date);
+  const day = parts.find((part) => part.type === "day")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const year = parts.find((part) => part.type === "year")?.value;
+
+  if (!day || !month || !year) return undefined;
+
+  return `${year}-${month}-${day}`;
+};
+
+export const getMatchBerlinDateKey = (match: ApiMatch) => {
+  return getBerlinDateKey(match.matchDateTimeUTC ?? match.matchDateTime);
+};
+
+export const isMatchOnBerlinDate = (match: ApiMatch, dateKey: string) => {
+  return getMatchBerlinDateKey(match) === dateKey;
 };
 
 export const getMatchdayNumber = (groupName: string) => {
@@ -103,6 +133,19 @@ const getMatchTime = (match: ApiMatch) => {
 
 export const sortMatchesByKickoff = (matches: ApiMatch[]) => {
   return [...matches].sort((a, b) => {
+    const byTime = getMatchTime(a) - getMatchTime(b);
+    if (byTime !== 0) return byTime;
+
+    return (a.matchID ?? 0) - (b.matchID ?? 0);
+  });
+};
+
+export const sortMatchesByUpcomingFirst = (matches: ApiMatch[]) => {
+  return [...matches].sort((a, b) => {
+    const byStatus =
+      Number(a.matchIsFinished === true) - Number(b.matchIsFinished === true);
+    if (byStatus !== 0) return byStatus;
+
     const byTime = getMatchTime(a) - getMatchTime(b);
     if (byTime !== 0) return byTime;
 
