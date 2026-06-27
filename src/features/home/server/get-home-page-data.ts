@@ -13,7 +13,6 @@ import { createWebHomeViewModel } from "../presenter/home-view-model";
 import type { WebCompetitionViewModel } from "../presenter/home-view-model";
 
 const REVALIDATE_SECONDS = 60;
-const WORLD_CUP_TIMEOUT_MS = 4_000;
 const REVALIDATE = { next: { revalidate: REVALIDATE_SECONDS } };
 const getCachedHomeSnapshot = unstable_cache(
   async (params: { league?: string; season?: string }) => {
@@ -25,7 +24,7 @@ const getCachedHomeSnapshot = unstable_cache(
       return { data: undefined };
     }
   },
-  ["home-snapshot"],
+  ["home-snapshot", "results-v2"],
   { revalidate: REVALIDATE_SECONDS }
 );
 const getCachedWorldCupSnapshot = unstable_cache(
@@ -34,17 +33,14 @@ const getCachedWorldCupSnapshot = unstable_cache(
       return {
         data: await getWorldCupSnapshot({
           season,
-          requestOptions: {
-            ...REVALIDATE,
-            signal: AbortSignal.timeout(WORLD_CUP_TIMEOUT_MS),
-          },
+          requestOptions: REVALIDATE,
         }),
       };
     } catch {
       return { data: undefined };
     }
   },
-  ["world-cup-snapshot"],
+  ["world-cup-snapshot", "results-v2"],
   { revalidate: REVALIDATE_SECONDS }
 );
 
@@ -56,7 +52,16 @@ const getCompetitionData = async (
 ): Promise<WebCompetitionViewModel> => {
   const snapshotResult = await getCachedHomeSnapshot(params);
   if (!snapshotResult.data) {
-    return createFallbackCompetitionData(params);
+    const fallback = createFallbackCompetitionData(params);
+    const worldCupResult =
+      fallback.resolvedLeague === "wc"
+        ? await getCachedWorldCupSnapshot(fallback.resolvedSeason)
+        : undefined;
+
+    return {
+      ...fallback,
+      worldCup: worldCupResult?.data,
+    };
   }
 
   const state = createHomeState(snapshotResult.data);
