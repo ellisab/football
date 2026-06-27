@@ -12,7 +12,7 @@ import {
 
 export type CompetitionMeta = {
   accentClass: string;
-  category: "Men" | "Women" | "Global";
+  category: "Männer" | "Frauen" | "Global";
   href: string;
   icon: LucideIcon;
   label: string;
@@ -26,49 +26,49 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     category: "Global",
     href: "/competitions/world-cup",
     icon: Globe2,
-    label: "FIFA World Cup",
-    shortLabel: "World Cup",
+    label: "FIFA-Weltmeisterschaft",
+    shortLabel: "WM",
     slug: "world-cup",
   },
   bl1: {
     accentClass: "from-[#ef5f5f] via-[#dcbc6e] to-[#121820]",
-    category: "Men",
+    category: "Männer",
     href: "/competitions/bundesliga-1",
     icon: Goal,
-    label: "Bundesliga 1",
-    shortLabel: "Bundesliga 1",
+    label: "Bundesliga",
+    shortLabel: "Bundesliga",
     slug: "bundesliga-1",
   },
   bl2: {
     accentClass: "from-[#efaa57] via-[#f4efd6] to-[#43c886]",
-    category: "Men",
+    category: "Männer",
     href: "/competitions/bundesliga-2",
     icon: Shirt,
-    label: "Bundesliga 2",
-    shortLabel: "Bundesliga 2",
+    label: "2. Bundesliga",
+    shortLabel: "2. Bundesliga",
     slug: "bundesliga-2",
   },
   fbl1: {
     accentClass: "from-[#f072b6] via-[#72d9e4] to-[#43c886]",
-    category: "Women",
+    category: "Frauen",
     href: "/competitions/women",
     icon: Shield,
     label: "Frauen-Bundesliga",
-    shortLabel: "Women",
+    shortLabel: "Frauen",
     slug: "women",
   },
   fbl2: {
     accentClass: "from-[#b78cff] via-[#72d9e4] to-[#f4efd6]",
-    category: "Women",
+    category: "Frauen",
     href: "/competitions/women-2",
     icon: Shirt,
     label: "2. Frauen-Bundesliga",
-    shortLabel: "Women 2",
+    shortLabel: "Frauen 2",
     slug: "women-2",
   },
   dfb: {
     accentClass: "from-[#43c886] via-[#f4efd6] to-[#050a0d]",
-    category: "Men",
+    category: "Männer",
     href: "/competitions/dfb-pokal",
     icon: Flag,
     label: "DFB-Pokal",
@@ -77,7 +77,7 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
   },
   cl: {
     accentClass: "from-[#72d9e4] via-[#dcbc6e] to-[#8b8cff]",
-    category: "Men",
+    category: "Männer",
     href: "/competitions/champions-league",
     icon: Trophy,
     label: "Champions League",
@@ -115,12 +115,12 @@ export const getLeagueKeyFromSlug = (slug: string): LeagueKey | undefined => {
 };
 
 export const PRIMARY_NAV_ITEMS = [
-  { href: "/today", label: "Today" },
-  { href: "/competitions/world-cup", label: "World Cup" },
-  { href: "/competitions/bundesliga-1", label: "Bundesliga 1" },
-  { href: "/competitions/bundesliga-2", label: "Bundesliga 2" },
-  { href: "/competitions/women", label: "Women" },
-  { href: "/competitions/men", label: "Men" },
-  { href: "/tables", label: "Tables" },
+  { href: "/today", label: "Heute" },
+  { href: "/competitions/world-cup", label: "WM" },
+  { href: "/competitions/bundesliga-1", label: "Bundesliga" },
+  { href: "/competitions/bundesliga-2", label: "2. Bundesliga" },
+  { href: "/competitions/women", label: "Frauen" },
+  { href: "/competitions/men", label: "Männer" },
+  { href: "/tables", label: "Tabellen" },
   { href: "/teams", label: "Teams" },
 ] as const;

@@ -23,7 +23,7 @@ export function RouteFrame({
             className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-sm font-semibold text-[#edf6ef] transition-colors hover:border-[#dcbc6e]/40 hover:bg-white/[0.09]"
           >
             <ArrowLeft className="h-4 w-4 text-[#72d9e4]" />
-            Home
+            Start
           </Link>
           <nav
             aria-label="Hauptnavigation"
@@ -41,7 +41,7 @@ export function RouteFrame({
           </nav>
           <span className="hidden items-center gap-1.5 rounded-full border border-[#72d9e4]/25 bg-[#0c2f36]/55 px-3 py-2 text-xs font-bold text-[#c6f7fb] sm:inline-flex">
             <Radio className="h-3.5 w-3.5" />
-            Orbit
+            Live
           </span>
         </div>
       </header>

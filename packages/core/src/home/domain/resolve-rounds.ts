@@ -149,7 +149,7 @@ const buildChampionsLeagueStageSnapshot = async ({
   });
 
   if (companionRounds.some((round) => round.failed)) {
-    throw new Error("Failed to load Champions League companion rounds");
+    throw new Error("Champions-League-Begleitrunden konnten nicht geladen werden");
   }
 
   for (const companionRound of companionRounds) {

@@ -22,7 +22,7 @@ const fetchJson = async <T>(
   });
 
   if (!response.ok) {
-    const error = new Error(`OpenLigaDB request failed (${response.status})`);
+    const error = new Error(`OpenLigaDB-Anfrage fehlgeschlagen (${response.status})`);
     (error as Error & { status?: number }).status = response.status;
     throw error;
   }

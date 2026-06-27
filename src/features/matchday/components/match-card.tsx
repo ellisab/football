@@ -62,12 +62,12 @@ export function MatchCard({ match }: MatchCardProps) {
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
             <TeamBadge
-              name={getTeamLabel(match.team1, "TBD")}
+              name={getTeamLabel(match.team1, "Offen")}
               iconUrl={match.team1?.teamIconUrl}
               className="bg-white/10 ring-1 ring-white/10"
             />
             <span className="min-w-0 truncate leading-tight">
-              {getTeamLabel(match.team1, "TBD")}
+              {getTeamLabel(match.team1, "Offen")}
             </span>
           </div>
           <span className="score-pill rounded-full px-4 py-2 text-[1.45rem] leading-none tracking-[0.04em] font-[var(--font-stadium-heading)] text-[#fff6d0] [text-shadow:0_0_24px_rgba(255,214,108,0.32)]">
@@ -77,12 +77,12 @@ export function MatchCard({ match }: MatchCardProps) {
 
         <div className="flex min-w-0 items-center gap-2">
           <TeamBadge
-            name={getTeamLabel(match.team2, "TBD")}
+            name={getTeamLabel(match.team2, "Offen")}
             iconUrl={match.team2?.teamIconUrl}
             className="bg-white/10 ring-1 ring-white/10"
           />
           <span className="min-w-0 truncate leading-tight">
-            {getTeamLabel(match.team2, "TBD")}
+            {getTeamLabel(match.team2, "Offen")}
           </span>
         </div>
       </div>

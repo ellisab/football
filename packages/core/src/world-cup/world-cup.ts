@@ -209,8 +209,8 @@ const getTeamKey = (team?: ApiTeam) => {
 const createEmptyStandingRow = (team: ApiTeam): Required<ApiTableRow> => {
   return {
     teamInfoId: team.teamId ?? 0,
-    teamName: team.teamName ?? team.shortName ?? "TBD",
-    shortName: team.shortName ?? team.teamName ?? "TBD",
+    teamName: team.teamName ?? team.shortName ?? "Offen",
+    shortName: team.shortName ?? team.teamName ?? "Offen",
     teamIconUrl: team.teamIconUrl ?? "",
     teamGroupName: team.teamGroupName ?? "",
     points: 0,
@@ -637,7 +637,7 @@ export const createWorldCupSnapshot = ({
   return {
     status: "ready",
     season,
-    leagueName: league.leagueName ?? "World Cup",
+    leagueName: league.leagueName ?? "Weltmeisterschaft",
     leagueShortcut: league.leagueShortcut,
     groups: resolvedGroups,
     groupSections,
@@ -658,7 +658,7 @@ const createEmptyWorldCupSnapshot = ({
   return {
     status: errors.includes("discovery") ? "error" : "empty",
     season,
-    leagueName: "World Cup",
+    leagueName: "Weltmeisterschaft",
     groups: [],
     groupSections: [],
     knockoutRounds: [],
@@ -704,7 +704,7 @@ export const getWorldCupSnapshot = async ({
     return createEmptyWorldCupSnapshot({
       season,
       errors,
-      emptyReason: "Die World-Cup-Liga konnte bei OpenLigaDB gerade nicht gesucht werden.",
+      emptyReason: "Die WM-Liga konnte bei OpenLigaDB gerade nicht gesucht werden.",
     });
   }
 
@@ -713,7 +713,7 @@ export const getWorldCupSnapshot = async ({
     return createEmptyWorldCupSnapshot({
       season,
       emptyReason:
-        "OpenLigaDB hat fuer die Saison 2026 noch keine World-Cup-Liga veroeffentlicht.",
+        "OpenLigaDB hat für die Saison 2026 noch keine WM-Liga veröffentlicht.",
     });
   }
 
@@ -761,7 +761,7 @@ export const getWorldCupSnapshot = async ({
     return createEmptyWorldCupSnapshot({
       season,
       emptyReason:
-        "OpenLigaDB hat fuer die Saison 2026 noch keine verwendbare World-Cup-Liga veroeffentlicht.",
+        "OpenLigaDB hat für die Saison 2026 noch keine verwendbare WM-Liga veröffentlicht.",
     });
   }
   if (!selectedProbe.tableLoaded) {
@@ -803,7 +803,7 @@ export const getWorldCupSnapshot = async ({
     return {
       ...snapshot,
       status: "error",
-      emptyReason: "Die World-Cup-Spiele konnten gerade nicht geladen werden.",
+      emptyReason: "Die WM-Spiele konnten gerade nicht geladen werden.",
     };
   }
 

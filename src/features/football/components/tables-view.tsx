@@ -16,14 +16,14 @@ export function TablesView({
 
   return (
     <RouteFrame
-      eyebrow="Tables"
-      title="League Race Lens"
-      description="All available standings in one high-readability view, with qualification, promotion, and danger zones designed for fast scanning."
+      eyebrow="Tabellen"
+      title="Liga-Rennen"
+      description="Alle verfügbaren Tabellen in einer besonders lesbaren Ansicht, mit Qualifikation, Aufstieg und Gefahrenzone für schnelles Erfassen."
     >
       <div className="grid gap-8">
         {tableCompetitions.length === 0 ? (
           <section className="poster-empty rounded-[1.25rem] p-5 text-sm leading-6 text-[#a9c0b6]">
-            No table data is available yet. Fixtures and match pages remain visible.
+            Noch sind keine Tabellendaten verfügbar. Spielpläne und Matchseiten bleiben sichtbar.
           </section>
         ) : (
           tableCompetitions.map((competition) => {
@@ -41,7 +41,7 @@ export function TablesView({
                   <div className="poster-empty rounded-[1.25rem] p-4">
                     <div className="section-kicker">{meta.label}</div>
                     <h2 className="mt-2 text-3xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6]">
-                      World Cup groups
+                      WM-Gruppen
                     </h2>
                   </div>
                   <WorldCupPanel data={competition.worldCup} />

@@ -20,13 +20,13 @@ function Timeline({ item }: { item: CompetitionMatch }) {
   if (goals.length === 0) {
     return (
       <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
-        <div className="section-kicker">Timeline</div>
+        <div className="section-kicker">Spielverlauf</div>
         <p className="mt-3 text-sm leading-6 text-[#a9c0b6]">
           {status === "upcoming"
-            ? "Timeline starts at kickoff."
+            ? "Der Spielverlauf startet mit dem Anstoß."
             : status === "live"
-              ? "Match is live. Events will appear here when the feed provides them."
-              : "No detailed event feed is available for this match."}
+              ? "Das Spiel läuft. Ereignisse erscheinen hier, sobald der Feed sie liefert."
+              : "Für dieses Spiel ist kein detaillierter Ereignisfeed verfügbar."}
         </p>
       </section>
     );
@@ -34,7 +34,7 @@ function Timeline({ item }: { item: CompetitionMatch }) {
 
   return (
     <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
-      <div className="section-kicker">Timeline</div>
+      <div className="section-kicker">Spielverlauf</div>
       <ol className="mt-5 grid gap-3">
         {goals.map((goal, index) => (
           <li
@@ -45,9 +45,9 @@ function Timeline({ item }: { item: CompetitionMatch }) {
               {goal.matchMinute ?? "-"}'
             </span>
             <span className="min-w-0 truncate text-sm font-semibold text-[#edf6ef]">
-              {goal.goalGetterName ?? "Goal"}
-              {goal.isPenalty ? " · Penalty" : ""}
-              {goal.isOwnGoal ? " · Own goal" : ""}
+              {goal.goalGetterName ?? "Tor"}
+              {goal.isPenalty ? " · Elfmeter" : ""}
+              {goal.isOwnGoal ? " · Eigentor" : ""}
             </span>
             <span className="rounded-full border border-[#dcbc6e]/25 bg-[#463614]/45 px-3 py-1 font-mono text-sm font-bold text-[#f4efd6]">
               {goal.scoreTeam1 ?? "-"}:{goal.scoreTeam2 ?? "-"}
@@ -84,8 +84,8 @@ export function MatchDetailView({ item }: { item: CompetitionMatch }) {
   return (
     <RouteFrame
       eyebrow={meta.label}
-      title={`${getTeamLabel(match.team1, "TBD")} vs ${getTeamLabel(match.team2, "TBD")}`}
-      description="A cinematic match control room with score, status, venue, timeline, stats, and table impact."
+      title={`${getTeamLabel(match.team1, "Offen")} gegen ${getTeamLabel(match.team2, "Offen")}`}
+      description="Eine cineastische Matchzentrale mit Ergebnis, Status, Ort, Spielverlauf, Statistiken und Tabellenwirkung."
     >
       <section className="poster-surface relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#071416]/88 p-5 sm:p-7">
         <div
@@ -114,17 +114,17 @@ export function MatchDetailView({ item }: { item: CompetitionMatch }) {
         <div className="grid items-center gap-6 md:grid-cols-[1fr_auto_1fr]">
           <div className="grid justify-items-center gap-3 text-center md:justify-items-start md:text-left">
             <TeamBadge
-              name={getTeamLabel(match.team1, "TBD")}
+              name={getTeamLabel(match.team1, "Offen")}
               iconUrl={match.team1?.teamIconUrl}
               size={76}
               className="bg-white/10 ring-1 ring-white/10"
             />
             <h2 className="text-2xl font-bold text-[#edf6ef]">
-              {getTeamLabel(match.team1, "TBD")}
+              {getTeamLabel(match.team1, "Offen")}
             </h2>
             {team1Row ? (
               <p className="text-sm text-[#a9c0b6]">
-                #{tableRows.indexOf(team1Row) + 1} · {team1Row.points ?? 0} pts
+                #{tableRows.indexOf(team1Row) + 1} · {team1Row.points ?? 0} Pkt.
               </p>
             ) : null}
           </div>
@@ -134,24 +134,24 @@ export function MatchDetailView({ item }: { item: CompetitionMatch }) {
               {status === "upcoming" ? formatMatchTime(match) : score}
             </span>
             <p className="text-center text-sm text-[#a9c0b6]">
-              {match.group?.groupName ?? "Round open"}
+              {match.group?.groupName ?? "Runde offen"}
               {venue ? ` · ${venue}` : ""}
             </p>
           </div>
 
           <div className="grid justify-items-center gap-3 text-center md:justify-items-end md:text-right">
             <TeamBadge
-              name={getTeamLabel(match.team2, "TBD")}
+              name={getTeamLabel(match.team2, "Offen")}
               iconUrl={match.team2?.teamIconUrl}
               size={76}
               className="bg-white/10 ring-1 ring-white/10"
             />
             <h2 className="text-2xl font-bold text-[#edf6ef]">
-              {getTeamLabel(match.team2, "TBD")}
+              {getTeamLabel(match.team2, "Offen")}
             </h2>
             {team2Row ? (
               <p className="text-sm text-[#a9c0b6]">
-                #{tableRows.indexOf(team2Row) + 1} · {team2Row.points ?? 0} pts
+                #{tableRows.indexOf(team2Row) + 1} · {team2Row.points ?? 0} Pkt.
               </p>
             ) : null}
           </div>
@@ -163,28 +163,28 @@ export function MatchDetailView({ item }: { item: CompetitionMatch }) {
 
         <aside className="grid gap-4">
           <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
-            <div className="section-kicker">Match Facts</div>
+            <div className="section-kicker">Spieldaten</div>
             <div className="mt-4 grid gap-3 text-sm">
               <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
                 <span className="inline-flex items-center gap-2 text-[#a9c0b6]">
                   <CalendarDays className="h-4 w-4 text-[#72d9e4]" />
-                  Kickoff
+                  Anstoß
                 </span>
                 <span className="font-semibold text-[#edf6ef]">{formatMatchTime(match)}</span>
               </div>
               <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
                 <span className="inline-flex items-center gap-2 text-[#a9c0b6]">
                   <MapPin className="h-4 w-4 text-[#72d9e4]" />
-                  Venue
+                  Ort
                 </span>
                 <span className="max-w-[14rem] truncate text-right font-semibold text-[#edf6ef]">
-                  {venue ?? "Open"}
+                  {venue ?? "Offen"}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-3">
                 <span className="inline-flex items-center gap-2 text-[#a9c0b6]">
                   <Goal className="h-4 w-4 text-[#dcbc6e]" />
-                  Goals
+                  Tore
                 </span>
                 <span className="font-semibold text-[#edf6ef]">
                   {match.goals?.length ?? 0}
@@ -194,31 +194,31 @@ export function MatchDetailView({ item }: { item: CompetitionMatch }) {
           </section>
 
           <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
-            <div className="section-kicker">Impact</div>
+            <div className="section-kicker">Tabellenwirkung</div>
             <div className="mt-4 grid gap-3">
               <p className="text-sm leading-6 text-[#a9c0b6]">
                 {tableRows.length > 0
-                  ? "Table context is available for both teams when they appear in the standings."
-                  : "Table impact will appear when standings are available for this competition."}
+                  ? "Tabellenkontext ist für beide Teams verfügbar, sobald sie in der Tabelle erscheinen."
+                  : "Die Tabellenwirkung erscheint, sobald für diesen Wettbewerb Tabellen verfügbar sind."}
               </p>
               <Link
                 href="/tables"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-[#dcbc6e]/25 bg-[#463614]/35 px-4 py-2 text-sm font-bold text-[#f4efd6] transition-colors hover:bg-[#59451b]/45"
               >
                 <Table2 className="h-4 w-4" />
-                Open tables
+                Tabellen öffnen
               </Link>
             </div>
           </section>
 
           <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
-            <div className="section-kicker">Stats</div>
+            <div className="section-kicker">Statistiken</div>
             <div className="mt-4 grid gap-3">
-              {["Possession", "Shots", "Corners"].map((label) => (
+              {["Ballbesitz", "Schüsse", "Ecken"].map((label) => (
                 <div key={label}>
                   <div className="mb-1 flex justify-between text-xs font-semibold text-[#a9c0b6]">
                     <span>{label}</span>
-                    <span>Feed pending</span>
+                    <span>Feed ausstehend</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-white/10">
                     <div className="h-full w-1/2 rounded-full bg-[linear-gradient(90deg,#72d9e4,#dcbc6e)] opacity-45" />

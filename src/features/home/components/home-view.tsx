@@ -123,7 +123,7 @@ const getSecondaryActionHref = (data: WebHomeViewModel) => {
 
 const getHeroHeadline = (data: WebHomeViewModel) => {
   if (data.isOverview) {
-    return "Today in Football";
+    return "Heute im Fußball";
   }
 
   if (data.worldCup) {
@@ -238,7 +238,7 @@ function OrbitNavigation({
         <Link
           href="/"
           className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-sm font-semibold text-[#edf6ef] transition-colors hover:border-[#dcbc6e]/40 hover:bg-white/[0.09]"
-          aria-label="Spieltag Orbit Home"
+          aria-label="Spieltag Orbit Startseite"
         >
           <span className="grid h-7 w-7 place-items-center rounded-full bg-[linear-gradient(135deg,#f4efd6,#dcbc6e_48%,#72d9e4)] text-xs font-black text-[#050a0d]">
             SO
@@ -274,7 +274,7 @@ function OrbitNavigation({
             }`}
           >
             <Radio className="h-3.5 w-3.5" />
-            {liveCount} Live
+            {liveCount} läuft
           </span>
         </div>
 
@@ -299,12 +299,12 @@ function OrbitContextBar({
 }) {
   const meta = getCompetitionMeta(data.resolvedLeague);
   const Icon = meta.icon;
-  const label = data.isOverview ? "Today in Football" : meta.label;
+  const label = data.isOverview ? "Heute im Fußball" : meta.label;
   const category = data.isOverview ? "Global" : meta.category;
   const round = data.isOverview
-    ? "Daily dashboard"
+    ? "Tageszentrale"
     : data.sections.find((section) => section.renderKind !== "table")?.title ??
-      "Round open";
+      "Runde offen";
 
   return (
     <div className="sticky top-16 z-40 border-b border-white/10 bg-[#071416]/78 backdrop-blur-xl">
@@ -326,13 +326,13 @@ function OrbitContextBar({
           {round}
         </span>
         <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#72d9e4]/25 bg-[#0c2f36]/45 px-3 py-1.5 font-bold text-[#c6f7fb]">
-          {statusCounts.live} Live
+          {statusCounts.live} läuft
         </span>
         <span className="inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
-          {statusCounts.upcoming} Upcoming
+          {statusCounts.upcoming} anstehend
         </span>
         <span className="inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
-          {statusCounts.finished} Finished
+          {statusCounts.finished} beendet
         </span>
       </div>
     </div>
@@ -345,9 +345,9 @@ function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
       <section className="poster-surface relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#071416]/88 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <SectionKicker>Live Rail</SectionKicker>
+            <SectionKicker>Live-Leiste</SectionKicker>
             <p className="mt-2 text-sm text-[#a9c0b6]">
-              No live or upcoming matches are visible in the current data.
+              In den aktuellen Daten sind keine laufenden oder kommenden Spiele sichtbar.
             </p>
           </div>
           <Clock3 className="h-5 w-5 text-[#72d9e4]" />
@@ -367,15 +367,15 @@ function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
             <Radio className="h-4 w-4" />
           </span>
           <div>
-            <SectionKicker>Now / Next / Final</SectionKicker>
-            <p className="mt-1 text-xs text-[#8da49b]">Swipe the match rail</p>
+            <SectionKicker>Jetzt / Gleich / Ende</SectionKicker>
+            <p className="mt-1 text-xs text-[#8da49b]">Spiel-Leiste wischen</p>
           </div>
         </div>
         <Link
           href="/today"
           className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 text-xs font-bold text-[#edf6ef] transition-colors hover:border-[#72d9e4]/30 hover:bg-white/[0.08]"
         >
-          All today
+          Alles heute
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -417,13 +417,13 @@ function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-2">
                     <TeamBadge
-                      name={getTeamLabel(match.team1, "TBD")}
+                      name={getTeamLabel(match.team1, "Offen")}
                       iconUrl={match.team1?.teamIconUrl}
                       size={26}
                       className="bg-white/10 ring-1 ring-white/10"
                     />
                     <span className="truncate text-sm font-semibold text-[#edf6ef]">
-                      {getTeamLabel(match.team1, "TBD")}
+                      {getTeamLabel(match.team1, "Offen")}
                     </span>
                   </div>
                   <span className="font-mono text-lg font-bold text-[#f4efd6]">
@@ -433,13 +433,13 @@ function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-2">
                     <TeamBadge
-                      name={getTeamLabel(match.team2, "TBD")}
+                      name={getTeamLabel(match.team2, "Offen")}
                       iconUrl={match.team2?.teamIconUrl}
                       size={26}
                       className="bg-white/10 ring-1 ring-white/10"
                     />
                     <span className="truncate text-sm font-semibold text-[#edf6ef]">
-                      {getTeamLabel(match.team2, "TBD")}
+                      {getTeamLabel(match.team2, "Offen")}
                     </span>
                   </div>
                   <span className="font-mono text-lg font-bold text-[#f4efd6]">
@@ -466,9 +466,9 @@ function CompetitionCapsulesSection({
     <section id="competitions" className="grid scroll-mt-44 gap-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <SectionKicker>Competitions</SectionKicker>
+          <SectionKicker>Wettbewerbe</SectionKicker>
           <h2 className="mt-2 text-[2rem] leading-[0.9] font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6] sm:text-[2.65rem]">
-            Quick access
+            Schnellzugriff
           </h2>
         </div>
         <Link
@@ -476,7 +476,7 @@ function CompetitionCapsulesSection({
           className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-bold text-[#edf6ef] transition-colors hover:border-[#dcbc6e]/35 hover:bg-white/[0.08]"
         >
           <Table2 className="h-4 w-4 text-[#dcbc6e]" />
-          Tables
+          Tabellen
         </Link>
       </div>
 
@@ -525,7 +525,7 @@ function CompetitionCapsulesSection({
                   </h3>
                   <p className="mt-2 text-sm text-[#a9c0b6]">
                     Saison {competition.resolvedSeason}
-                    {leader ? ` · Leader: ${leader}` : ""}
+                    {leader ? ` · Spitzenreiter: ${leader}` : ""}
                   </p>
                 </div>
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-[#dcbc6e]">
@@ -536,7 +536,7 @@ function CompetitionCapsulesSection({
               <div className="mt-5 grid grid-cols-3 gap-2">
                 <div className="rounded-[0.8rem] border border-[#72d9e4]/20 bg-[#0c2f36]/45 p-2">
                   <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#8fdfe7]">
-                    Live
+                    Läuft
                   </div>
                   <div className="mt-1 font-mono text-xl font-bold text-[#c6f7fb]">
                     {counts.live}
@@ -544,7 +544,7 @@ function CompetitionCapsulesSection({
                 </div>
                 <div className="rounded-[0.8rem] border border-white/10 bg-white/[0.045] p-2">
                   <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#9fb6ad]">
-                    Next
+                    Nächstes
                   </div>
                   <div className="mt-1 truncate font-mono text-sm font-bold text-[#f4efd6]">
                     {typeof nextKickoff === "number"
@@ -558,10 +558,10 @@ function CompetitionCapsulesSection({
                 </div>
                 <div className="rounded-[0.8rem] border border-[#dcbc6e]/20 bg-[#463614]/35 p-2">
                   <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#dcbc6e]">
-                    Table
+                    Tabelle
                   </div>
                   <div className="mt-1 font-mono text-xl font-bold text-[#f4efd6]">
-                    {hasCompetitionTable(competition) ? "On" : "-"}
+                    {hasCompetitionTable(competition) ? "Ja" : "-"}
                   </div>
                 </div>
               </div>
@@ -601,14 +601,14 @@ function TodayMatchRow({
             <Icon className="h-3.5 w-3.5" />
             {meta.shortLabel}
           </span>
-          <span>{status === "live" ? "Live" : status === "finished" ? "Beendet" : "Anstehend"}</span>
+          <span>{status === "live" ? "Läuft" : status === "finished" ? "Beendet" : "Anstehend"}</span>
         </div>
         <div className="mt-1 grid min-w-0 gap-1 text-base font-semibold text-[#edf6ef] sm:text-lg">
           <span className="min-w-0 truncate">
-            {getTeamLabel(match.team1, "TBD")}
+            {getTeamLabel(match.team1, "Offen")}
           </span>
           <span className="min-w-0 truncate">
-            {getTeamLabel(match.team2, "TBD")}
+            {getTeamLabel(match.team2, "Offen")}
           </span>
         </div>
       </div>
@@ -813,7 +813,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
     <div className="poster-shell min-h-screen w-full text-[#edf6ef]">
       <main className="relative z-10">
         <OrbitNavigation
-          currentLabel={data.isOverview ? "Today" : data.leagueLabel}
+          currentLabel={data.isOverview ? "Heute" : data.leagueLabel}
           liveCount={statusCounts.live}
         />
         <OrbitContextBar data={data} statusCounts={statusCounts} />

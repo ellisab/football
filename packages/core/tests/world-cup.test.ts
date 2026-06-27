@@ -351,7 +351,7 @@ test("getWorldCupSnapshot stops probing after finding a complete World Cup table
   assert.deepEqual(probedShortcuts, ["complete-wm"]);
 });
 
-test("getWorldCupSnapshot returns an empty state when OpenLigaDB has no 2026 World Cup league", async () => {
+test("getWorldCupSnapshot returns an empty state when OpenLigaDB has no 2026 WM league", async () => {
   const dataSource: WorldCupDataSource = {
     async getAvailableLeaguesBySeason() {
       return [];
@@ -374,7 +374,7 @@ test("getWorldCupSnapshot returns an empty state when OpenLigaDB has no 2026 Wor
 
   assert.equal(snapshot.status, "empty");
   assert.equal(snapshot.groupSections.length, 0);
-  assert.match(snapshot.emptyReason ?? "", /noch keine World-Cup-Liga/);
+  assert.match(snapshot.emptyReason ?? "", /noch keine WM-Liga/);
 });
 
 test("getWorldCupSnapshot records when fresh World Cup data finished loading", async () => {

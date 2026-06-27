@@ -41,32 +41,32 @@ function TeamCard({ team }: { team: TeamSummary }) {
         <div className="rounded-[0.9rem] border border-white/10 bg-white/[0.045] p-3">
           <div className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#9fb6ad]">
             <CalendarDays className="h-3.5 w-3.5 text-[#72d9e4]" />
-            Next match
+            Nächstes Spiel
           </div>
           <p className="mt-2 truncate text-sm font-semibold text-[#edf6ef]">
             {next
-              ? `${getTeamLabel(next.match.team1, "TBD")} vs ${getTeamLabel(next.match.team2, "TBD")} · ${formatMatchTime(next.match)}`
-              : "No upcoming match visible"}
+              ? `${getTeamLabel(next.match.team1, "Offen")} gegen ${getTeamLabel(next.match.team2, "Offen")} · ${formatMatchTime(next.match)}`
+              : "Kein kommendes Spiel sichtbar"}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-[0.9rem] border border-[#dcbc6e]/20 bg-[#463614]/35 p-3">
             <div className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#dcbc6e]">
-              Table
+              Tabelle
             </div>
             <p className="mt-1 text-sm font-bold text-[#f4efd6]">
               {team.tablePosition
-                ? `#${team.tablePosition.position} · ${team.tablePosition.points ?? 0} pts`
-                : "Open"}
+                ? `#${team.tablePosition.position} · ${team.tablePosition.points ?? 0} Pkt.`
+                : "Offen"}
             </p>
           </div>
           <div className="rounded-[0.9rem] border border-white/10 bg-white/[0.045] p-3">
             <div className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#9fb6ad]">
-              Recent
+              Zuletzt
             </div>
             <p className="mt-1 text-sm font-bold text-[#f4efd6]">
-              {recent ? getMatchScore(recent.match) : "No result"}
+              {recent ? getMatchScore(recent.match) : "Kein Ergebnis"}
             </p>
           </div>
         </div>
@@ -79,12 +79,12 @@ export function TeamsView({ teams }: { teams: TeamSummary[] }) {
   return (
     <RouteFrame
       eyebrow="Teams"
-      title="Club Identity Grid"
-      description="Every team visible in the current football data, organized for quick access to table position, recent results, and the next match."
+      title="Team-Identitäten"
+      description="Alle Teams aus den aktuellen Fußball-Daten, sortiert für schnellen Zugriff auf Tabellenplatz, letzte Ergebnisse und das nächste Spiel."
     >
       {teams.length === 0 ? (
         <section className="poster-empty rounded-[1.25rem] p-5 text-sm leading-6 text-[#a9c0b6]">
-          No team data is visible yet.
+          Noch sind keine Teamdaten sichtbar.
         </section>
       ) : (
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -106,7 +106,7 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
     <RouteFrame
       eyebrow={team.competitions[0]?.label ?? "Team"}
       title={team.name}
-      description="Team identity, upcoming matches, recent results, table context, and a prepared squad surface for future player data."
+      description="Teamidentität, kommende Spiele, letzte Ergebnisse, Tabellenkontext und eine vorbereitete Kaderfläche für künftige Spielerdaten."
     >
       <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="poster-surface relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#071416]/88 p-5">
@@ -119,7 +119,7 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
               className="bg-white/10 ring-1 ring-white/10"
             />
             <div>
-              <div className="section-kicker">Team Identity</div>
+              <div className="section-kicker">Teamidentität</div>
               <h2 className="mt-2 text-3xl font-bold text-[#f4efd6]">{team.name}</h2>
               <p className="mt-1 text-sm text-[#a9c0b6]">
                 {team.competitions.map((entry) => entry.label).join(" · ")}
@@ -131,16 +131,16 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
             <div className="rounded-[1rem] border border-[#dcbc6e]/20 bg-[#463614]/35 p-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#dcbc6e]">
                 <Table2 className="h-4 w-4" />
-                Table position
+                Tabellenplatz
               </div>
               <p className="mt-2 text-2xl font-bold text-[#f4efd6]">
                 {team.tablePosition
                   ? `#${team.tablePosition.position}`
-                  : "Not available"}
+                  : "Nicht verfügbar"}
               </p>
               {team.tablePosition ? (
                 <p className="mt-1 text-sm text-[#a9c0b6]">
-                  {team.tablePosition.points ?? 0} points ·{" "}
+                  {team.tablePosition.points ?? 0} Punkte ·{" "}
                   {team.tablePosition.competitionLabel}
                 </p>
               ) : null}
@@ -148,10 +148,10 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
             <div className="rounded-[1rem] border border-white/10 bg-white/[0.045] p-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#9fb6ad]">
                 <Shirt className="h-4 w-4 text-[#72d9e4]" />
-                Squad
+                Kader
               </div>
               <p className="mt-2 text-sm leading-6 text-[#a9c0b6]">
-                Squad data is ready for a future player feed.
+                Kaderdaten sind für einen künftigen Spielerfeed vorbereitet.
               </p>
             </div>
           </div>
@@ -159,26 +159,26 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
 
         <div className="grid gap-4">
           <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
-            <div className="section-kicker">Next Match</div>
+            <div className="section-kicker">Nächstes Spiel</div>
             <h2 className="mt-2 text-2xl font-bold text-[#f4efd6]">
               {next
-                ? `${getTeamLabel(next.match.team1, "TBD")} vs ${getTeamLabel(next.match.team2, "TBD")}`
-                : "No upcoming match visible"}
+                ? `${getTeamLabel(next.match.team1, "Offen")} gegen ${getTeamLabel(next.match.team2, "Offen")}`
+                : "Kein kommendes Spiel sichtbar"}
             </h2>
             {next ? (
               <p className="mt-2 text-sm text-[#a9c0b6]">
                 {next.competition.leagueLabel} · {formatMatchTime(next.match)} ·{" "}
-                {status === "live" ? "Live now" : "Upcoming"}
+                {status === "live" ? "Läuft jetzt" : "Anstehend"}
               </p>
             ) : null}
           </section>
 
           <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
-            <div className="section-kicker">Recent Result</div>
+            <div className="section-kicker">Letztes Ergebnis</div>
             <h2 className="mt-2 text-2xl font-bold text-[#f4efd6]">
               {recent
-                ? `${getTeamLabel(recent.match.team1, "TBD")} ${getMatchScore(recent.match)} ${getTeamLabel(recent.match.team2, "TBD")}`
-                : "No finished result visible"}
+                ? `${getTeamLabel(recent.match.team1, "Offen")} ${getMatchScore(recent.match)} ${getTeamLabel(recent.match.team2, "Offen")}`
+                : "Kein beendetes Ergebnis sichtbar"}
             </h2>
             {recent ? (
               <p className="mt-2 text-sm text-[#a9c0b6]">

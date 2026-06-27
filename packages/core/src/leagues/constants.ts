@@ -52,7 +52,7 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
   },
   {
     key: "wc",
-    label: "World Cup",
+    label: "Weltmeisterschaft",
     nameMatch: ["world cup", "weltmeisterschaft", "fifa wm"],
     shortcutMatch: ["wc", "wm", "fifa"],
   },

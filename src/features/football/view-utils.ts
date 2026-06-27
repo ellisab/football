@@ -118,8 +118,8 @@ export const getMatchStatus = (
 export const getMatchStatusLabel = (match: ApiMatch, now?: Date) => {
   const status = getMatchStatus(match, now);
 
-  if (status === "finished") return "FT";
-  if (status === "live") return "Live";
+  if (status === "finished") return "Ende";
+  if (status === "live") return "Läuft";
   return formatMatchTime(match);
 };
 

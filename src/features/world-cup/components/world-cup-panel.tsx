@@ -105,7 +105,7 @@ function WorldCupHeader({ data }: { data: WorldCupSnapshot }) {
       <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(220,188,110,0.85),rgba(114,217,228,0.75),transparent)]" />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)] lg:items-end">
         <div className="grid gap-3">
-          <SectionKicker>World Cup</SectionKicker>
+          <SectionKicker>Weltmeisterschaft</SectionKicker>
           <h2 className="max-w-[13ch] text-[2.8rem] leading-[0.86] font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6] sm:text-[4.4rem]">
             {data.leagueName}
           </h2>
@@ -151,7 +151,7 @@ function WorldCupIssueBanner({ data }: { data: WorldCupSnapshot }) {
     <div className="poster-empty flex flex-wrap items-center justify-between gap-3 rounded-[1.4rem] border border-[#efaa57]/20 bg-[#2b1d13]/70 p-4 text-sm text-[#f8e4cf]">
       <span className="inline-flex items-center gap-2">
         <ShieldAlert className="h-4 w-4 text-[#efaa57]" />
-        OpenLigaDB konnte nicht alle World-Cup-Daten laden:{" "}
+        OpenLigaDB konnte nicht alle WM-Daten laden:{" "}
         {data.errors.map((error) => errorLabels[error]).join(", ")}
       </span>
       <Button
@@ -175,11 +175,11 @@ function WorldCupEmptyState({ data }: { data: WorldCupSnapshot }) {
         <Trophy className="mt-1 h-5 w-5 shrink-0 text-[#dcbc6e]" />
         <div className="grid gap-2">
           <h3 className="text-xl font-semibold text-[#f4efd6]">
-            World-Cup-Daten noch nicht verfuegbar
+            WM-Daten noch nicht verfügbar
           </h3>
           <p className="max-w-[68ch] text-sm leading-6 text-[#a9c0b6]">
             {data.emptyReason ??
-              "OpenLigaDB liefert fuer diese Saison noch keine Gruppen oder Spiele."}
+              "OpenLigaDB liefert für diese Saison noch keine Gruppen oder Spiele."}
           </p>
         </div>
       </div>
@@ -223,7 +223,7 @@ function WorldCupGroup({
           <StandingsCard table={section.table} />
         ) : (
           <div className="poster-empty rounded-[1.6rem] p-5 text-sm text-[#a9c0b6]">
-            Fuer diese Gruppe ist noch keine Tabelle verfuegbar.
+            Für diese Gruppe ist noch keine Tabelle verfügbar.
           </div>
         )}
         <div className="grid min-w-0 gap-4">
@@ -233,7 +233,7 @@ function WorldCupGroup({
             ))
           ) : (
             <div className="poster-empty rounded-[1.6rem] p-5 text-sm text-[#a9c0b6]">
-              Fuer diese Gruppe sind noch keine Spiele verfuegbar.
+              Für diese Gruppe sind noch keine Spiele verfügbar.
             </div>
           )}
         </div>
@@ -265,7 +265,7 @@ function WorldCupKnockout({ rounds }: { rounds: WorldCupKnockoutRound[] }) {
                 ))
               ) : (
                 <div className="poster-empty rounded-[1.6rem] p-5 text-sm text-[#a9c0b6] md:col-span-2">
-                  Fuer diese Runde sind noch keine Spiele verfuegbar.
+                  Für diese Runde sind noch keine Spiele verfügbar.
                 </div>
               )}
             </div>

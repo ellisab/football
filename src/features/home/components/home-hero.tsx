@@ -77,14 +77,14 @@ export function HomeHero({
             <div className="mx-auto grid max-w-[22rem] gap-4 text-center sm:mx-0 sm:max-w-[45rem] sm:text-left">
               <div className="mx-auto inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-[#071116]/62 px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#dcbc6e] backdrop-blur-md sm:mx-0">
                 <Radio className="h-3.5 w-3.5 text-[#72d9e4]" />
-                Daily Kickoff
+                Tagesanstoß
               </div>
               <h1 className="text-[2.75rem] leading-[0.86] font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6] [text-shadow:0_0_30px_rgba(2,9,12,0.36)] sm:max-w-[12ch] sm:text-[4.4rem] lg:text-[5.4rem]">
                 {headline}
               </h1>
               <p className="max-w-[38rem] text-sm leading-6 text-[#dce9e2] sm:text-base sm:leading-7">
                 {description ??
-                  `${leagueLabel} · Saison ${season}. Scores first, tables close, every match state visible from first kickoff to full time.`}
+                  `${leagueLabel} · Saison ${season}. Ergebnisse zuerst, Tabellen direkt daneben und jeder Spielstatus vom Anstoß bis zum Abpfiff sichtbar.`}
               </p>
 
               <div className="flex flex-wrap justify-center gap-3 sm:justify-start">
@@ -113,7 +113,7 @@ export function HomeHero({
               <div className="flex items-center gap-2 px-2 py-1 sm:col-span-3 lg:col-span-1">
                 <Trophy className="h-4 w-4 text-[#dcbc6e]" />
                 <span className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#9eb4ab]">
-                  Matchday OS
+                  Spieltag-Zentrale
                 </span>
               </div>
               {previewStats.map((stat) => (

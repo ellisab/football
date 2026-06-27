@@ -16,13 +16,13 @@ export async function GET(request: NextRequest) {
   });
 
   if (!normalizedUrl || !isAllowedImageHost(normalizedUrl)) {
-    return new NextResponse("Unsupported image host", {
+    return new NextResponse("Bildquelle wird nicht unterstützt", {
       status: 404,
     });
   }
 
   if (isSvgUrl(normalizedUrl)) {
-    return new NextResponse("Unsupported image type", {
+    return new NextResponse("Bildtyp wird nicht unterstützt", {
       status: 415,
     });
   }
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
   });
 
   if (!upstreamResponse.ok) {
-    return new NextResponse("Image upstream failed", {
+    return new NextResponse("Bildquelle konnte nicht geladen werden", {
       status: upstreamResponse.status === 404 ? 404 : 502,
     });
   }
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     normalizedContentType.includes("text/html") ||
     normalizedContentType.includes("application/xhtml+xml")
   ) {
-    return new NextResponse("Unsupported image type", {
+    return new NextResponse("Bildtyp wird nicht unterstützt", {
       status: 415,
     });
   }

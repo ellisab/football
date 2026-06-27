@@ -40,7 +40,7 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
       mobileRow: "border-[#72d9e4]/25 bg-[linear-gradient(135deg,rgba(9,46,49,0.72),rgba(9,31,29,0.86))]",
       positionBadge: "bg-[linear-gradient(135deg,rgba(114,217,228,0.26),rgba(38,126,112,0.34))] text-[#e6feff]",
       desktopRow: "bg-[rgba(8,42,45,0.22)]",
-      zone: "Orbit",
+      zone: "Quali",
     };
   }
 
@@ -49,7 +49,7 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
       mobileRow: "border-[#efaa57]/28 bg-[linear-gradient(135deg,rgba(70,36,15,0.78),rgba(34,22,16,0.82))]",
       positionBadge: "bg-[linear-gradient(135deg,rgba(239,170,87,0.24),rgba(178,108,62,0.32))] text-[#fff1de]",
       desktopRow: "bg-[rgba(70,39,18,0.24)]",
-      zone: "Red zone",
+      zone: "Gefahr",
     };
   }
 
@@ -57,7 +57,7 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
     mobileRow: "border-white/10 bg-[linear-gradient(135deg,rgba(8,26,31,0.82),rgba(7,16,21,0.92))]",
     positionBadge: "bg-white/10 text-[#dbe8e1]",
     desktopRow: "",
-    zone: "Pulse",
+    zone: "Mitte",
   };
 };
 
