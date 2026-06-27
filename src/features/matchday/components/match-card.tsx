@@ -1,4 +1,12 @@
-import { getFinalResult, type ApiMatch } from "@footballleagues/core/openligadb";
+import Link from "next/link";
+import type { ApiMatch } from "@footballleagues/core/openligadb";
+import {
+  getMatchScore,
+  getMatchStatus,
+  getMatchStatusLabel,
+  getTeamLabel,
+  getVenueLabel,
+} from "@/features/football/view-utils";
 import { Clock3, Goal, MapPin } from "lucide-react";
 import { TeamBadge } from "@/features/teams/components/team-badge";
 import { LocalKickoff } from "./local-kickoff";
@@ -7,29 +15,17 @@ type MatchCardProps = {
   match: ApiMatch;
 };
 
-const getTeamLabel = (team: ApiMatch["team1"], fallback: string) => {
-  return team?.teamName ?? team?.shortName ?? fallback;
-};
-
-const getVenueLabel = (match: ApiMatch) => {
-  const stadium = match.location?.locationStadium;
-  const city = match.location?.locationCity;
-
-  if (stadium && city) return `${stadium}, ${city}`;
-  return stadium ?? city;
-};
-
 export function MatchCard({ match }: MatchCardProps) {
-  const finalResult = getFinalResult(match);
-  const score = finalResult
-    ? `${finalResult.pointsTeam1 ?? 0} - ${finalResult.pointsTeam2 ?? 0}`
-    : "- : -";
+  const status = getMatchStatus(match);
+  const score = getMatchScore(match).replace(":", " - ");
   const goals = match.goals ?? [];
   const venue = getVenueLabel(match);
+  const href = match.matchID ? `/matches/${match.matchID}` : "#";
 
   return (
-    <div
-      className="poster-surface relative grid min-h-[148px] w-full min-w-0 max-w-full gap-4 overflow-hidden rounded-[1.7rem] border-white/10 bg-[linear-gradient(180deg,rgba(7,27,32,0.92),rgba(8,17,22,0.98))] p-4 text-[#edf6ef]"
+    <Link
+      href={href}
+      className="poster-surface group relative grid min-h-[148px] w-full min-w-0 max-w-full gap-4 overflow-hidden rounded-[1.35rem] border-white/10 bg-[linear-gradient(180deg,rgba(7,27,32,0.92),rgba(8,17,22,0.98))] p-4 text-[#edf6ef] transition-all hover:-translate-y-0.5 hover:border-[#72d9e4]/35 hover:bg-white/[0.055]"
     >
       <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(220,188,110,0.85),rgba(114,217,228,0.75),transparent)]" />
 
@@ -49,13 +45,15 @@ export function MatchCard({ match }: MatchCardProps) {
           ) : null}
           <span
             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${
-              match.matchIsFinished
+              status === "finished"
                 ? "border-[#dcbc6e]/40 bg-[#463614]/60 text-[#f4ebc2]"
+                : status === "live"
+                  ? "live-chip border-[#72d9e4]/35 bg-[#0c2f36]/70 text-[#c6f7fb]"
                 : "border-[#72d9e4]/30 bg-[#0c2f36]/60 text-[#c6f7fb]"
             }`}
           >
             <Goal className="h-3.5 w-3.5" />
-            {match.matchIsFinished ? "Beendet" : "Anstehend"}
+            {getMatchStatusLabel(match)}
           </span>
         </div>
       </div>
@@ -102,6 +100,6 @@ export function MatchCard({ match }: MatchCardProps) {
           ))}
         </div>
       ) : null}
-    </div>
+    </Link>
   );
 }

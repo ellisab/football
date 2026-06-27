@@ -1,22 +1,15 @@
 import Link from "next/link";
 import type { LeagueKey, LeagueOption } from "@footballleagues/core/leagues";
 import { getLeagueLabel } from "@footballleagues/core/leagues";
-import type { LucideIcon } from "lucide-react";
-import { Flag, Goal, Globe2, Medal, Shirt, Shield, Trophy } from "lucide-react";
+import { Activity, Medal } from "lucide-react";
+import {
+  getCompetitionHref,
+  getCompetitionMeta,
+} from "@/features/football/competition-meta";
 import { SectionKicker } from "./section-kicker";
 
-const LEAGUE_ICONS: Record<LeagueKey, LucideIcon> = {
-  bl1: Goal,
-  bl2: Shirt,
-  fbl1: Shield,
-  fbl2: Shirt,
-  cl: Trophy,
-  dfb: Flag,
-  wc: Globe2,
-};
-
 const buildHref = (league: LeagueKey, season: number) => {
-  return `/?league=${league}&season=${season}`;
+  return getCompetitionHref({ shortcut: league, seasons: [season] }, season);
 };
 
 export function LeagueTabs({
@@ -51,9 +44,11 @@ export function LeagueTabs({
       >
         {displayOptions.map((option) => {
           const isActive = option.shortcut === currentLeague;
-          const Icon = LEAGUE_ICONS[option.shortcut] ?? Medal;
+          const meta = getCompetitionMeta(option.shortcut);
+          const Icon = meta.icon ?? Medal;
           const season = option.seasons[0] ?? currentSeason;
           const href = getHref?.(option, season) ?? buildHref(option.shortcut, season);
+          const label = meta.shortLabel || getLeagueLabel(option.shortcut);
 
           return (
             <Link
@@ -65,14 +60,18 @@ export function LeagueTabs({
               }`}
               className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 isActive
-                  ? "border-[#dcbc6e]/55 bg-[linear-gradient(135deg,rgba(10,44,38,0.74),rgba(21,49,54,0.62))] text-[#f4efd6] shadow-[0_18px_38px_rgba(4,15,20,0.22)]"
-                  : "border-white/12 bg-white/[0.04] text-[#c8d7d0] hover:border-[#72d9e4]/35 hover:bg-white/[0.08] hover:text-[#f7fbf8]"
+                  ? "border-[#dcbc6e]/55 bg-[linear-gradient(135deg,rgba(10,44,38,0.78),rgba(21,49,54,0.68))] text-[#f4efd6] shadow-[0_18px_38px_rgba(4,15,20,0.22)]"
+                  : "border-white/12 bg-white/[0.045] text-[#c8d7d0] hover:border-[#72d9e4]/35 hover:bg-white/[0.08] hover:text-[#f7fbf8]"
               }`}
             >
               <Icon
                 className={`h-4 w-4 ${isActive ? "text-[#dcbc6e]" : "text-[#72d9e4]"}`}
               />
-              <span>{getLeagueLabel(option.shortcut)}</span>
+              <span>{label}</span>
+              <span className="hidden items-center gap-1 rounded-full bg-white/[0.07] px-2 py-0.5 text-[0.66rem] uppercase tracking-[0.12em] text-[#9fb6ad] sm:inline-flex">
+                <Activity className="h-3 w-3" />
+                {meta.category}
+              </span>
             </Link>
           );
         })}

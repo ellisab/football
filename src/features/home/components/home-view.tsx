@@ -1,12 +1,43 @@
+import Link from "next/link";
 import { BracketSection } from "@/features/champions-league/components/bracket-section";
+import {
+  getCompetitionHref,
+  getCompetitionMeta,
+  PRIMARY_NAV_ITEMS,
+} from "@/features/football/competition-meta";
+import {
+  formatMatchTime,
+  formatTodayLabel,
+  getAllCompetitionMatches,
+  getCompetitionMatches,
+  getCompetitionNextKickoff,
+  getMatchIdentity,
+  getMatchScore,
+  getMatchStatus,
+  getMatchStatusLabel,
+  getStatusCounts,
+  getTeamLabel,
+  getTodayCompetitionMatches,
+  getUpcomingCompetitionMatchCount,
+  hasCompetitionTable,
+  sortOverviewCompetitions,
+  type CompetitionMatch,
+} from "@/features/football/view-utils";
 import { StandingsCard } from "@/features/standings/components/standings-card";
+import { TeamBadge } from "@/features/teams/components/team-badge";
 import { WorldCupPanel } from "@/features/world-cup/components/world-cup-panel";
 import {
-  getBerlinDateKey,
-  isMatchOnBerlinDate,
-} from "@footballleagues/core/matches";
-import { getFinalResult, type ApiMatch } from "@footballleagues/core/openligadb";
-import { Clock3, Goal, Trophy } from "lucide-react";
+  Activity,
+  ArrowRight,
+  CalendarDays,
+  Clock3,
+  Goal,
+  Radio,
+  Search,
+  ShieldCheck,
+  Table2,
+  Trophy,
+} from "lucide-react";
 import type {
   WebCompetitionViewModel,
   WebHomeSection,
@@ -33,153 +64,6 @@ const getSectionAnchorId = (
   section: WebHomeSection
 ) => {
   return `${getLeagueAnchorId(competition)}-${section.key}`;
-};
-
-type TodayMatch = {
-  competition: WebCompetitionViewModel;
-  match: ApiMatch;
-};
-
-const timeFormatter = new Intl.DateTimeFormat("de-DE", {
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Europe/Berlin",
-});
-
-const todayLabelFormatter = new Intl.DateTimeFormat("de-DE", {
-  day: "numeric",
-  month: "long",
-  timeZone: "Europe/Berlin",
-  weekday: "long",
-});
-
-const getMatchTime = (match: ApiMatch) => {
-  const timestamp = Date.parse(match.matchDateTimeUTC ?? match.matchDateTime ?? "");
-  return Number.isNaN(timestamp) ? Number.MAX_SAFE_INTEGER : timestamp;
-};
-
-const getMatchIdentity = (match: ApiMatch) => {
-  return [
-    match.matchID,
-    match.matchDateTimeUTC ?? match.matchDateTime,
-    match.team1?.teamId ?? match.team1?.teamName,
-    match.team2?.teamId ?? match.team2?.teamName,
-  ]
-    .filter(Boolean)
-    .join("-");
-};
-
-const getTeamLabel = (team: ApiMatch["team1"], fallback: string) => {
-  return team?.teamName ?? team?.shortName ?? fallback;
-};
-
-const formatMatchTime = (match: ApiMatch) => {
-  const value = match.matchDateTimeUTC ?? match.matchDateTime;
-  if (!value) return "offen";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "offen";
-
-  return timeFormatter.format(date);
-};
-
-const formatTodayLabel = (date: Date) => {
-  return todayLabelFormatter.format(date);
-};
-
-const getCompetitionMatches = (competition: WebCompetitionViewModel): ApiMatch[] => {
-  const sectionMatches = competition.sections.flatMap((section) => {
-    if (section.renderKind === "matches") return section.items;
-    if (section.renderKind === "ties") {
-      return section.items.flatMap((tie) => tie.matches);
-    }
-
-    return [];
-  });
-  const bracketMatches = competition.bracketMatches.flatMap((round) => round.matches);
-  const worldCupMatches = competition.worldCup
-    ? [
-        ...competition.worldCup.groupSections.flatMap((section) => section.matches),
-        ...competition.worldCup.knockoutRounds.flatMap((round) => round.matches),
-      ]
-    : [];
-
-  return [...sectionMatches, ...bracketMatches, ...worldCupMatches];
-};
-
-const getTodayMatches = ({
-  competitions,
-  dateKey,
-}: {
-  competitions: WebCompetitionViewModel[];
-  dateKey: string;
-}) => {
-  const seen = new Set<string>();
-  const matches: TodayMatch[] = [];
-
-  for (const competition of competitions) {
-    for (const match of getCompetitionMatches(competition)) {
-      if (!isMatchOnBerlinDate(match, dateKey)) continue;
-
-      const identity = `${competition.resolvedLeague}-${getMatchIdentity(match)}`;
-      if (seen.has(identity)) continue;
-
-      seen.add(identity);
-      matches.push({ competition, match });
-    }
-  }
-
-  return [...matches].sort((a, b) => {
-    const byTime = getMatchTime(a.match) - getMatchTime(b.match);
-    if (byTime !== 0) return byTime;
-
-    return a.competition.leagueLabel.localeCompare(b.competition.leagueLabel);
-  });
-};
-
-const getUpcomingCompetitionMatchCount = (competition: WebCompetitionViewModel) => {
-  return getCompetitionMatches(competition).filter(
-    (match) => match.matchIsFinished !== true
-  ).length;
-};
-
-const getCompetitionNextKickoff = (competition: WebCompetitionViewModel) => {
-  return getCompetitionMatches(competition)
-    .filter((match) => match.matchIsFinished !== true)
-    .map(getMatchTime)
-    .sort((a, b) => a - b)[0];
-};
-
-const hasCompetitionTable = (competition: WebCompetitionViewModel) => {
-  if (competition.hasTable) return true;
-
-  return (
-    competition.worldCup?.groupSections.some((section) => section.table.length > 0) ??
-    false
-  );
-};
-
-const sortOverviewCompetitions = (competitions: WebCompetitionViewModel[]) => {
-  return competitions
-    .map((competition, index) => ({
-      competition,
-      index,
-      nextKickoff: getCompetitionNextKickoff(competition),
-    }))
-    .sort((a, b) => {
-      const aHasUpcoming = typeof a.nextKickoff === "number";
-      const bHasUpcoming = typeof b.nextKickoff === "number";
-
-      if (aHasUpcoming && bHasUpcoming) {
-        const byKickoff = (a.nextKickoff as number) - (b.nextKickoff as number);
-        if (byKickoff !== 0) return byKickoff;
-      }
-
-      if (aHasUpcoming !== bHasUpcoming) return aHasUpcoming ? -1 : 1;
-
-      return a.index - b.index;
-    })
-    .map(({ competition }) => competition);
 };
 
 const getPrimaryActionHref = (
@@ -239,7 +123,7 @@ const getSecondaryActionHref = (data: WebHomeViewModel) => {
 
 const getHeroHeadline = (data: WebHomeViewModel) => {
   if (data.isOverview) {
-    return "Alle Spiele & Tabellen";
+    return "Today in Football";
   }
 
   if (data.worldCup) {
@@ -255,7 +139,7 @@ const getHeroImage = (data: WebHomeViewModel): HomeHeroImage => {
   if (!data.isOverview && data.resolvedLeague === "wc") {
     return {
       alt: "Deutscher Fussballspieler mit dem WM-Pokal im Flutlichtstadion",
-      src: "/images/world-cup-trophy-hero.webp",
+      src: "/images/spieltag-atlas-hero.png",
       variant: "world-cup",
     };
   }
@@ -341,22 +225,372 @@ const getHeroPreviewStats = (
   ];
 };
 
+function OrbitNavigation({
+  currentLabel,
+  liveCount,
+}: {
+  currentLabel: string;
+  liveCount: number;
+}) {
+  return (
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050a0d]/82 backdrop-blur-xl">
+      <div className="mx-auto flex min-h-16 w-full max-w-[1240px] items-center gap-3 px-4 sm:px-6 lg:px-10">
+        <Link
+          href="/"
+          className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-sm font-semibold text-[#edf6ef] transition-colors hover:border-[#dcbc6e]/40 hover:bg-white/[0.09]"
+          aria-label="Spieltag Orbit Home"
+        >
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-[linear-gradient(135deg,#f4efd6,#dcbc6e_48%,#72d9e4)] text-xs font-black text-[#050a0d]">
+            SO
+          </span>
+          <span className="hidden sm:inline">Spieltag Orbit</span>
+        </Link>
+
+        <nav
+          aria-label="Hauptnavigation"
+          className="flex min-w-0 flex-1 gap-2 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {PRIMARY_NAV_ITEMS.map((item) => (
+            <Link
+              key={`${item.href}-${item.label}`}
+              href={item.href}
+              className="inline-flex shrink-0 items-center rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-[#a9c0b6] transition-colors hover:border-white/10 hover:bg-white/[0.06] hover:text-[#edf6ef]"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="hidden items-center gap-2 lg:flex">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-[#a9c0b6]">
+            <CalendarDays className="h-3.5 w-3.5 text-[#72d9e4]" />
+            {currentLabel}
+          </span>
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-bold ${
+              liveCount > 0
+                ? "live-chip border-[#72d9e4]/35 bg-[#0c2f36]/70 text-[#c6f7fb]"
+                : "border-white/10 bg-white/[0.045] text-[#a9c0b6]"
+            }`}
+          >
+            <Radio className="h-3.5 w-3.5" />
+            {liveCount} Live
+          </span>
+        </div>
+
+        <Link
+          href="/teams"
+          aria-label="Teams suchen"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.055] text-[#c8d7d0] transition-colors hover:border-[#72d9e4]/35 hover:text-[#edf6ef]"
+        >
+          <Search className="h-4 w-4" />
+        </Link>
+      </div>
+    </header>
+  );
+}
+
+function OrbitContextBar({
+  data,
+  statusCounts,
+}: {
+  data: WebHomeViewModel;
+  statusCounts: Record<"finished" | "live" | "upcoming", number>;
+}) {
+  const meta = getCompetitionMeta(data.resolvedLeague);
+  const Icon = meta.icon;
+  const label = data.isOverview ? "Today in Football" : meta.label;
+  const category = data.isOverview ? "Global" : meta.category;
+  const round = data.isOverview
+    ? "Daily dashboard"
+    : data.sections.find((section) => section.renderKind !== "table")?.title ??
+      "Round open";
+
+  return (
+    <div className="sticky top-16 z-40 border-b border-white/10 bg-[#071416]/78 backdrop-blur-xl">
+      <div className="mx-auto flex w-full max-w-[1240px] gap-2 overflow-x-auto px-4 py-2 text-xs [scrollbar-width:none] sm:px-6 lg:px-10 [&::-webkit-scrollbar]:hidden">
+        <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-1.5 font-bold text-[#edf6ef]">
+          <Icon className="h-3.5 w-3.5 text-[#dcbc6e]" />
+          {label}
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#72d9e4]" />
+          {category}
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
+          <Trophy className="h-3.5 w-3.5 text-[#dcbc6e]" />
+          Saison {data.resolvedSeason}
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
+          <Activity className="h-3.5 w-3.5 text-[#43c886]" />
+          {round}
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#72d9e4]/25 bg-[#0c2f36]/45 px-3 py-1.5 font-bold text-[#c6f7fb]">
+          {statusCounts.live} Live
+        </span>
+        <span className="inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
+          {statusCounts.upcoming} Upcoming
+        </span>
+        <span className="inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
+          {statusCounts.finished} Finished
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
+  if (matches.length === 0) {
+    return (
+      <section className="poster-surface relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#071416]/88 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <SectionKicker>Live Rail</SectionKicker>
+            <p className="mt-2 text-sm text-[#a9c0b6]">
+              No live or upcoming matches are visible in the current data.
+            </p>
+          </div>
+          <Clock3 className="h-5 w-5 text-[#72d9e4]" />
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      aria-label="Live und kommende Spiele"
+      className="poster-surface live-rail relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#071416]/88 p-3"
+    >
+      <div className="mb-3 flex items-center justify-between gap-3 px-1">
+        <div className="flex items-center gap-2">
+          <span className="grid h-8 w-8 place-items-center rounded-full border border-[#72d9e4]/30 bg-[#0c2f36]/70 text-[#c6f7fb]">
+            <Radio className="h-4 w-4" />
+          </span>
+          <div>
+            <SectionKicker>Now / Next / Final</SectionKicker>
+            <p className="mt-1 text-xs text-[#8da49b]">Swipe the match rail</p>
+          </div>
+        </div>
+        <Link
+          href="/today"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 text-xs font-bold text-[#edf6ef] transition-colors hover:border-[#72d9e4]/30 hover:bg-white/[0.08]"
+        >
+          All today
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+
+      <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {matches.slice(0, 14).map((item, index) => {
+          const { competition, match } = item;
+          const status = getMatchStatus(match);
+          const meta = getCompetitionMeta(competition.resolvedLeague);
+          const Icon = meta.icon;
+          const score = getMatchScore(match);
+          const href = match.matchID ? `/matches/${match.matchID}` : "#today";
+
+          return (
+            <Link
+              key={`${competition.resolvedLeague}-${getMatchIdentity(match)}-${index}`}
+              href={href}
+              className="group grid min-h-[9rem] w-[17.5rem] shrink-0 content-between overflow-hidden rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-3 transition-all hover:-translate-y-0.5 hover:border-[#72d9e4]/35 hover:bg-white/[0.08]"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#dcbc6e]">
+                  <Icon className="h-3 w-3" />
+                  <span className="truncate">{meta.shortLabel}</span>
+                </span>
+                <span
+                  className={`inline-flex items-center rounded-full px-2 py-1 text-[0.68rem] font-bold uppercase tracking-[0.12em] ${
+                    status === "live"
+                      ? "live-chip border border-[#72d9e4]/35 bg-[#0c2f36]/70 text-[#c6f7fb]"
+                      : status === "finished"
+                        ? "border border-[#dcbc6e]/25 bg-[#463614]/46 text-[#f4ebc2]"
+                        : "border border-white/10 bg-white/[0.045] text-[#a9c0b6]"
+                  }`}
+                >
+                  {getMatchStatusLabel(match)}
+                </span>
+              </div>
+
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <TeamBadge
+                      name={getTeamLabel(match.team1, "TBD")}
+                      iconUrl={match.team1?.teamIconUrl}
+                      size={26}
+                      className="bg-white/10 ring-1 ring-white/10"
+                    />
+                    <span className="truncate text-sm font-semibold text-[#edf6ef]">
+                      {getTeamLabel(match.team1, "TBD")}
+                    </span>
+                  </div>
+                  <span className="font-mono text-lg font-bold text-[#f4efd6]">
+                    {score.split(":")[0] ?? "-"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <TeamBadge
+                      name={getTeamLabel(match.team2, "TBD")}
+                      iconUrl={match.team2?.teamIconUrl}
+                      size={26}
+                      className="bg-white/10 ring-1 ring-white/10"
+                    />
+                    <span className="truncate text-sm font-semibold text-[#edf6ef]">
+                      {getTeamLabel(match.team2, "TBD")}
+                    </span>
+                  </div>
+                  <span className="font-mono text-lg font-bold text-[#f4efd6]">
+                    {score.split(":")[1] ?? "-"}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function CompetitionCapsulesSection({
+  competitions,
+}: {
+  competitions: WebCompetitionViewModel[];
+}) {
+  if (competitions.length === 0) return null;
+
+  return (
+    <section id="competitions" className="grid scroll-mt-44 gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <SectionKicker>Competitions</SectionKicker>
+          <h2 className="mt-2 text-[2rem] leading-[0.9] font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6] sm:text-[2.65rem]">
+            Quick access
+          </h2>
+        </div>
+        <Link
+          href="/tables"
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-bold text-[#edf6ef] transition-colors hover:border-[#dcbc6e]/35 hover:bg-white/[0.08]"
+        >
+          <Table2 className="h-4 w-4 text-[#dcbc6e]" />
+          Tables
+        </Link>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {competitions.map((competition) => {
+          const meta = getCompetitionMeta(competition.resolvedLeague);
+          const Icon = meta.icon;
+          const matches = getCompetitionMatches(competition).map((match) => ({
+            competition,
+            match,
+          }));
+          const counts = getStatusCounts(matches);
+          const nextKickoff = getCompetitionNextKickoff(competition);
+          const tableSection = competition.sections.find(
+            (section) => section.renderKind === "table"
+          );
+          const leader =
+            tableSection?.renderKind === "table"
+              ? tableSection.items[0]?.teamName
+              : competition.worldCup?.groupSections[0]?.table[0]?.teamName;
+
+          return (
+            <Link
+              key={`${competition.resolvedLeague}-${competition.resolvedSeason}`}
+              href={getCompetitionHref(
+                {
+                  seasons: [competition.resolvedSeason],
+                  shortcut: competition.resolvedLeague,
+                },
+                competition.resolvedSeason
+              )}
+              className="poster-surface group relative grid min-h-[12rem] overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-4 transition-all hover:-translate-y-0.5 hover:border-[#72d9e4]/35"
+            >
+              <div
+                aria-hidden
+                className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${meta.accentClass}`}
+              />
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#a9c0b6]">
+                    <ShieldCheck className="h-3.5 w-3.5 text-[#72d9e4]" />
+                    {meta.category}
+                  </span>
+                  <h3 className="mt-3 text-2xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6]">
+                    {meta.label}
+                  </h3>
+                  <p className="mt-2 text-sm text-[#a9c0b6]">
+                    Saison {competition.resolvedSeason}
+                    {leader ? ` · Leader: ${leader}` : ""}
+                  </p>
+                </div>
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-[#dcbc6e]">
+                  <Icon className="h-5 w-5" />
+                </span>
+              </div>
+
+              <div className="mt-5 grid grid-cols-3 gap-2">
+                <div className="rounded-[0.8rem] border border-[#72d9e4]/20 bg-[#0c2f36]/45 p-2">
+                  <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#8fdfe7]">
+                    Live
+                  </div>
+                  <div className="mt-1 font-mono text-xl font-bold text-[#c6f7fb]">
+                    {counts.live}
+                  </div>
+                </div>
+                <div className="rounded-[0.8rem] border border-white/10 bg-white/[0.045] p-2">
+                  <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#9fb6ad]">
+                    Next
+                  </div>
+                  <div className="mt-1 truncate font-mono text-sm font-bold text-[#f4efd6]">
+                    {typeof nextKickoff === "number"
+                      ? new Intl.DateTimeFormat("de-DE", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          timeZone: "Europe/Berlin",
+                        }).format(new Date(nextKickoff))
+                      : "offen"}
+                  </div>
+                </div>
+                <div className="rounded-[0.8rem] border border-[#dcbc6e]/20 bg-[#463614]/35 p-2">
+                  <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#dcbc6e]">
+                    Table
+                  </div>
+                  <div className="mt-1 font-mono text-xl font-bold text-[#f4efd6]">
+                    {hasCompetitionTable(competition) ? "On" : "-"}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function TodayMatchRow({
   item,
 }: {
-  item: TodayMatch;
+  item: CompetitionMatch;
 }) {
   const { competition, match } = item;
-  const finalResult = getFinalResult(match);
-  const score = finalResult
-    ? `${finalResult.pointsTeam1 ?? 0}:${finalResult.pointsTeam2 ?? 0}`
-    : "-:-";
-  const status = match.matchIsFinished ? "Beendet" : "Anstehend";
+  const score = getMatchScore(match);
+  const status = getMatchStatus(match);
+  const meta = getCompetitionMeta(competition.resolvedLeague);
+  const Icon = meta.icon;
+  const href = match.matchID ? `/matches/${match.matchID}` : "#today";
 
   return (
-    <li
-      className="grid min-w-0 gap-3 border-t border-white/10 px-4 py-3 first:border-t-0 sm:grid-cols-[7.5rem_minmax(0,1fr)_auto] sm:items-center sm:px-5"
-    >
+    <li className="border-t border-white/10 first:border-t-0">
+      <Link
+        href={href}
+        className="grid min-w-0 gap-3 px-4 py-3 transition-colors hover:bg-white/[0.04] sm:grid-cols-[7.5rem_minmax(0,1fr)_auto] sm:items-center sm:px-5"
+      >
       <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-[#f4efd6]">
         <Clock3 className="h-4 w-4 shrink-0 text-[#72d9e4]" />
         <span>{formatMatchTime(match)}</span>
@@ -364,10 +598,10 @@ function TodayMatchRow({
       <div className="min-w-0">
         <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-[#9eb4ab]">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#dcbc6e]">
-            <Trophy className="h-3.5 w-3.5" />
-            {competition.leagueLabel}
+            <Icon className="h-3.5 w-3.5" />
+            {meta.shortLabel}
           </span>
-          <span>{status}</span>
+          <span>{status === "live" ? "Live" : status === "finished" ? "Beendet" : "Anstehend"}</span>
         </div>
         <div className="mt-1 grid min-w-0 gap-1 text-base font-semibold text-[#edf6ef] sm:text-lg">
           <span className="min-w-0 truncate">
@@ -384,6 +618,7 @@ function TodayMatchRow({
           {score}
         </span>
       </div>
+      </Link>
     </li>
   );
 }
@@ -394,7 +629,7 @@ function TodayMatchesSection({
   todayLabel,
 }: {
   leagueLabel: string;
-  matches: TodayMatch[];
+  matches: CompetitionMatch[];
   todayLabel: string;
 }) {
   return (
@@ -552,13 +787,16 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
       ? overviewCompetitions
       : [data];
   const today = new Date();
-  const todayDateKey = getBerlinDateKey(today) ?? "";
-  const todayMatches = todayDateKey
-    ? getTodayMatches({
-        competitions: visibleCompetitions,
-        dateKey: todayDateKey,
-      })
-    : [];
+  const todayMatches = getTodayCompetitionMatches({
+    competitions: visibleCompetitions,
+    date: today,
+  });
+  const allMatches = getAllCompetitionMatches(visibleCompetitions);
+  const statusCounts = getStatusCounts(allMatches);
+  const tickerMatches =
+    todayMatches.length > 0
+      ? todayMatches
+      : allMatches.filter((item) => getMatchStatus(item.match) !== "finished");
   const primaryActionHref = getPrimaryActionHref(data, todayMatches.length > 0);
   const secondaryActionHref = getSecondaryActionHref(data);
   const heroHeadline = getHeroHeadline(data);
@@ -574,6 +812,11 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
   return (
     <div className="poster-shell min-h-screen w-full text-[#edf6ef]">
       <main className="relative z-10">
+        <OrbitNavigation
+          currentLabel={data.isOverview ? "Today" : data.leagueLabel}
+          liveCount={statusCounts.live}
+        />
+        <OrbitContextBar data={data} statusCounts={statusCounts} />
         <HomeHero
           hasTable={hasVisibleTable}
           headline={heroHeadline}
@@ -589,7 +832,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           }
           getLeagueHref={
             data.isOverview
-              ? (option) => `#league-${option.shortcut}`
+              ? (option, season) => getCompetitionHref(option, season)
               : undefined
           }
           primaryHref={primaryActionHref}
@@ -598,10 +841,16 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           secondaryHref={secondaryActionHref}
         />
 
-        <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-8 px-4 pb-14 pt-8 sm:px-6 sm:pb-20 sm:pt-10 lg:gap-10 lg:px-10">
+        <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-8 px-4 pb-14 pt-6 sm:px-6 sm:pb-20 sm:pt-8 lg:gap-10 lg:px-10">
+          <div className="-mt-16 sm:-mt-20">
+            <MatchTicker matches={tickerMatches} />
+          </div>
           <ErrorBanner errors={data.visibleErrors} />
+          {data.isOverview ? (
+            <CompetitionCapsulesSection competitions={overviewCompetitions} />
+          ) : null}
           <TodayMatchesSection
-            leagueLabel={data.leagueLabel}
+            leagueLabel={data.isOverview ? "Alle Wettbewerbe" : data.leagueLabel}
             matches={todayMatches}
             todayLabel={todayLabel}
           />

@@ -1,6 +1,8 @@
+import Link from "next/link";
 import type { ApiTableRow } from "@footballleagues/core/openligadb";
 import { Card, CardContent, CardHeader, CardTitle } from "@footballleagues/ui/card";
 import { Goal, Medal } from "lucide-react";
+import { getTeamId } from "@/features/football/view-utils";
 import {
   Table,
   TableBody,
@@ -59,6 +61,51 @@ const getRankTone = (index: number, totalRows: number): RankTone => {
   };
 };
 
+const getRecordDots = (row: ApiTableRow) => {
+  const wins = Math.max(row.won ?? 0, 0);
+  const draws = Math.max(row.draw ?? 0, 0);
+  const losses = Math.max(row.lost ?? 0, 0);
+  const total = wins + draws + losses;
+
+  if (total === 0) return ["empty", "empty", "empty", "empty", "empty"] as const;
+
+  const values = [
+    ...Array.from({ length: Math.min(wins, 5) }, () => "win"),
+    ...Array.from({ length: Math.min(draws, 5) }, () => "draw"),
+    ...Array.from({ length: Math.min(losses, 5) }, () => "loss"),
+  ].slice(0, 5);
+
+  return values.length === 5
+    ? values
+    : [...values, ...Array.from({ length: 5 - values.length }, () => "empty")];
+};
+
+function RecordDots({ row }: { row: ApiTableRow }) {
+  const dots = getRecordDots(row);
+
+  return (
+    <span
+      className="inline-flex items-center gap-1"
+      aria-label={`Saisonbilanz: ${row.won ?? 0} Siege, ${row.draw ?? 0} Unentschieden, ${row.lost ?? 0} Niederlagen`}
+    >
+      {dots.map((dot, index) => (
+        <span
+          key={`${dot}-${index}`}
+          className={`h-2 w-2 rounded-full ${
+            dot === "win"
+              ? "bg-[#43c886]"
+              : dot === "draw"
+                ? "bg-[#dcbc6e]"
+                : dot === "loss"
+                  ? "bg-[#ef5f5f]"
+                  : "bg-white/14"
+          }`}
+        />
+      ))}
+    </span>
+  );
+}
+
 export function StandingsCard({
   emptyText = "Tabellendaten sind noch nicht verfügbar.",
   table,
@@ -92,7 +139,8 @@ export function StandingsCard({
                   const rankTone = getRankTone(index, table.length);
 
                   return (
-                    <div
+                    <Link
+                      href={`/teams/${getTeamId(row)}`}
                       key={row.teamInfoId ?? row.teamName}
                       className={`flex w-full min-w-0 items-center justify-between gap-3 rounded-[1.4rem] border px-3 py-3 text-sm text-[#edf6ef] sm:px-4 ${rankTone.mobileRow}`}
                     >
@@ -113,11 +161,14 @@ export function StandingsCard({
                         <div className="text-[0.65rem] uppercase tracking-[0.14em] text-[#b6cbc2]">
                           {rankTone.zone}
                         </div>
+                        <div className="mt-1 flex justify-end">
+                          <RecordDots row={row} />
+                        </div>
                         <div className="text-base font-semibold text-[#dcbc6e]">
                           {row.points} Pkt.
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
@@ -134,6 +185,7 @@ export function StandingsCard({
                     <TableHead className="w-10 text-center text-[#b6cbc2]">U</TableHead>
                     <TableHead className="w-10 text-center text-[#b6cbc2]">N</TableHead>
                     <TableHead className="w-10 text-center text-[#b6cbc2]">TD</TableHead>
+                    <TableHead className="w-24 text-center text-[#b6cbc2]">Form</TableHead>
                     <TableHead className="w-14 text-right text-[#b6cbc2]">Pkt.</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -151,14 +203,17 @@ export function StandingsCard({
                           {index + 1}
                         </TableCell>
                         <TableCell className="min-w-0 font-semibold text-[#eef6ef]">
-                          <div className="flex min-w-0 items-center gap-2">
+                          <Link
+                            href={`/teams/${getTeamId(row)}`}
+                            className="flex min-w-0 items-center gap-2 transition-colors hover:text-[#dcbc6e]"
+                          >
                             <TeamBadge
                               name={row.teamName}
                               iconUrl={row.teamIconUrl}
                               className="shrink-0 bg-white/10 ring-1 ring-white/10"
                             />
                             <span className="truncate">{row.teamName}</span>
-                          </div>
+                          </Link>
                         </TableCell>
                         <TableCell className="text-center text-[#b6cbc2]">
                           {row.matches}
@@ -174,6 +229,9 @@ export function StandingsCard({
                         </TableCell>
                         <TableCell className="text-center text-[#b6cbc2]">
                           {row.goalDiff}
+                        </TableCell>
+                        <TableCell className="text-center text-[#b6cbc2]">
+                          <RecordDots row={row} />
                         </TableCell>
                         <TableCell className="text-right font-semibold text-[#dcbc6e]">
                           <span className="inline-flex items-center gap-1">
