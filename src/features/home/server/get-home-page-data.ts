@@ -13,6 +13,7 @@ import { createWebHomeViewModel } from "../presenter/home-view-model";
 import type { WebCompetitionViewModel } from "../presenter/home-view-model";
 
 const REVALIDATE_SECONDS = 60;
+const WORLD_CUP_TIMEOUT_MS = 4_000;
 const REVALIDATE = { next: { revalidate: REVALIDATE_SECONDS } };
 const getCachedHomeSnapshot = unstable_cache(
   async (params: { league?: string; season?: string }) => {
@@ -33,7 +34,10 @@ const getCachedWorldCupSnapshot = unstable_cache(
       return {
         data: await getWorldCupSnapshot({
           season,
-          requestOptions: REVALIDATE,
+          requestOptions: {
+            ...REVALIDATE,
+            signal: AbortSignal.timeout(WORLD_CUP_TIMEOUT_MS),
+          },
         }),
       };
     } catch {

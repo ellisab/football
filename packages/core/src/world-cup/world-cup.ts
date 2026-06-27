@@ -32,6 +32,7 @@ const NOISY_LEAGUE_REGEX = /\b(dummy|test|freundschaft|friendly|tippspiel)\b/i;
 const WOMENS_LEAGUE_REGEX = /\b(frauen|women|women's|fwm)\b/i;
 const COMPLETE_WORLD_CUP_GROUP_COUNT = 12;
 const COMPLETE_WORLD_CUP_TEAM_COUNT = 48;
+const MAX_WORLD_CUP_PROBE_CANDIDATES = 6;
 
 type WorldCupLeagueCandidate = {
   league: ApiLeague;
@@ -748,12 +749,13 @@ export const getWorldCupSnapshot = async ({
     }
   };
 
-  const firstProbe = await probeLeague(leagueCandidates[0]);
+  const probeCandidates = leagueCandidates.slice(0, MAX_WORLD_CUP_PROBE_CANDIDATES);
+  const firstProbe = await probeLeague(probeCandidates[0]);
   const leagueProbes = hasCompleteWorldCupGroupTable(firstProbe.groupTables)
     ? [firstProbe]
     : [
         firstProbe,
-        ...(await Promise.all(leagueCandidates.slice(1).map(probeLeague))),
+        ...(await Promise.all(probeCandidates.slice(1).map(probeLeague))),
       ];
   const selectedProbe = selectBestWorldCupLeagueProbe(leagueProbes);
   const league = selectedProbe?.league;
