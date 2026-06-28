@@ -49,9 +49,9 @@ import { RoundSection } from "./round-section";
 import { SectionKicker } from "./section-kicker";
 
 const getWorldCupMatchCount = (data: NonNullable<WebHomeViewModel["worldCup"]>) => {
-  return (
-    data.groupSections.reduce((total, section) => total + section.matches.length, 0) +
-    data.knockoutRounds.reduce((total, round) => total + round.matches.length, 0)
+  return data.knockoutRounds.reduce(
+    (total, round) => total + round.matches.length,
+    0
   );
 };
 
@@ -79,8 +79,8 @@ const getPrimaryActionHref = (
   }
 
   if (data.worldCup) {
-    return data.worldCup.groupSections.length > 0
-      ? "#world-cup-groups"
+    return data.worldCup.knockoutRounds.length > 0
+      ? "#world-cup-knockout"
       : "#world-cup";
   }
 
@@ -127,7 +127,7 @@ const getHeroHeadline = (data: WebHomeViewModel) => {
   }
 
   if (data.worldCup) {
-    return `${data.worldCup.leagueName} Spielplan & Tabellen`;
+    return `${data.worldCup.leagueName} K.-o.-Phase`;
   }
 
   return data.hasTable
@@ -196,7 +196,7 @@ const getHeroPreviewStats = (
         value: String(data.worldCup.season),
       },
       {
-        detail: "OpenLigaDB",
+        detail: "K.-o.-Phase",
         label: "Spiele",
         value: String(matchCount),
       },
@@ -496,7 +496,7 @@ function CompetitionCapsulesSection({
           const leader =
             tableSection?.renderKind === "table"
               ? tableSection.items[0]?.teamName
-              : competition.worldCup?.groupSections[0]?.table[0]?.teamName;
+              : undefined;
 
           return (
             <Link
@@ -828,6 +828,8 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           description={
             data.isOverview
               ? "Alle verfügbaren Wettbewerbe auf einer Seite: kommende Spiele zuerst, danach Ergebnisse, Tabellen und K.-o.-Runden ohne Umwege."
+              : data.worldCup
+                ? `${data.worldCup.leagueName} · Saison ${data.worldCup.season}. K.-o.-Spiele, Status und Finalweg in einer schnellen Turnieransicht.`
               : undefined
           }
           getLeagueHref={

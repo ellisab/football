@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type {
-  WorldCupGroupSection,
   WorldCupKnockoutRound,
   WorldCupSnapshot,
 } from "@footballleagues/core/world-cup";
@@ -15,16 +14,24 @@ import {
   Trophy,
 } from "lucide-react";
 import { MatchCard } from "@/features/matchday/components/match-card";
-import { StandingsCard } from "@/features/standings/components/standings-card";
 import { SectionHeading } from "@/features/home/components/section-heading";
 import { SectionKicker } from "@/features/home/components/section-kicker";
 
-const errorLabels: Record<WorldCupSnapshot["errors"][number], string> = {
+type VisibleWorldCupError = Exclude<
+  WorldCupSnapshot["errors"][number],
+  "table" | "teams"
+>;
+
+const errorLabels: Record<VisibleWorldCupError, string> = {
   discovery: "Liga-Suche",
-  groups: "Gruppen",
+  groups: "Runden",
   matches: "Spiele",
-  table: "Tabellen",
-  teams: "Teams",
+};
+
+const isVisibleWorldCupError = (
+  error: WorldCupSnapshot["errors"][number]
+): error is VisibleWorldCupError => {
+  return error in errorLabels;
 };
 
 const lastUpdatedFormatter = new Intl.DateTimeFormat("de-DE", {
@@ -47,7 +54,7 @@ const formatLastUpdated = (value?: string) => {
 };
 
 const getMatchKey = (
-  match: WorldCupGroupSection["matches"][number],
+  match: WorldCupKnockoutRound["matches"][number],
   index: number
 ) => {
   return (
@@ -59,7 +66,7 @@ const getMatchKey = (
 };
 
 const getRoundKey = (
-  round: WorldCupGroupSection | WorldCupKnockoutRound,
+  round: WorldCupKnockoutRound,
   index: number
 ) => {
   return (
@@ -69,33 +76,11 @@ const getRoundKey = (
   );
 };
 
-const getTeamCount = (section: WorldCupGroupSection) => {
-  if (section.table.length > 0) return section.table.length;
-
-  const teams = new Set<string>();
-  for (const match of section.matches) {
-    const team1 = match.team1?.teamId ?? match.team1?.teamName ?? match.team1?.shortName;
-    const team2 = match.team2?.teamId ?? match.team2?.teamName ?? match.team2?.shortName;
-
-    if (team1) teams.add(String(team1));
-    if (team2) teams.add(String(team2));
-  }
-
-  return teams.size;
-};
-
-const getGroupSummary = (section: WorldCupGroupSection) => {
-  const teamCount = getTeamCount(section);
-  const teamLabel = teamCount === 1 ? "Team" : "Teams";
-  const matchLabel = section.matches.length === 1 ? "Spiel" : "Spiele";
-
-  return `${teamCount} ${teamLabel} · ${section.matches.length} ${matchLabel}`;
-};
-
 function WorldCupHeader({ data }: { data: WorldCupSnapshot }) {
-  const matchCount =
-    data.groupSections.reduce((total, section) => total + section.matches.length, 0) +
-    data.knockoutRounds.reduce((total, round) => total + round.matches.length, 0);
+  const matchCount = data.knockoutRounds.reduce(
+    (total, round) => total + round.matches.length,
+    0
+  );
 
   return (
     <section
@@ -110,7 +95,7 @@ function WorldCupHeader({ data }: { data: WorldCupSnapshot }) {
             {data.leagueName}
           </h2>
           <p className="max-w-[62ch] text-sm leading-6 text-[#a9c0b6] sm:text-base">
-            Saison {data.season}. Gruppen, K.-o.-Runden und Finale aus OpenLigaDB.
+            Saison {data.season}. K.-o.-Runden und Finale aus OpenLigaDB.
           </p>
         </div>
 
@@ -125,7 +110,7 @@ function WorldCupHeader({ data }: { data: WorldCupSnapshot }) {
           <div className="rounded-[1rem] border border-white/10 bg-white/[0.04] p-3">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[#9eb4ab]">
               <Rows3 className="h-3.5 w-3.5 text-[#72d9e4]" />
-              Spiele
+              K.-o.-Spiele
             </div>
             <div className="mt-1 text-xl font-semibold text-[#f4efd6]">{matchCount}</div>
           </div>
@@ -145,14 +130,15 @@ function WorldCupHeader({ data }: { data: WorldCupSnapshot }) {
 }
 
 function WorldCupIssueBanner({ data }: { data: WorldCupSnapshot }) {
-  if (data.errors.length === 0) return null;
+  const relevantErrors = data.errors.filter(isVisibleWorldCupError);
+  if (relevantErrors.length === 0) return null;
 
   return (
     <div className="poster-empty flex flex-wrap items-center justify-between gap-3 rounded-[1.4rem] border border-[#efaa57]/20 bg-[#2b1d13]/70 p-4 text-sm text-[#f8e4cf]">
       <span className="inline-flex items-center gap-2">
         <ShieldAlert className="h-4 w-4 text-[#efaa57]" />
         OpenLigaDB konnte nicht alle WM-Daten laden:{" "}
-        {data.errors.map((error) => errorLabels[error]).join(", ")}
+        {relevantErrors.map((error) => errorLabels[error]).join(", ")}
       </span>
       <Button
         asChild
@@ -179,7 +165,7 @@ function WorldCupEmptyState({ data }: { data: WorldCupSnapshot }) {
           </h3>
           <p className="max-w-[68ch] text-sm leading-6 text-[#a9c0b6]">
             {data.emptyReason ??
-              "OpenLigaDB liefert für diese Saison noch keine Gruppen oder Spiele."}
+              "OpenLigaDB liefert für diese Saison noch keine K.-o.-Spiele."}
           </p>
         </div>
       </div>
@@ -198,50 +184,6 @@ function WorldCupEmptyState({ data }: { data: WorldCupSnapshot }) {
   );
 }
 
-function WorldCupGroup({
-  kicker = "Gruppe",
-  section,
-}: {
-  kicker?: "Gruppe";
-  section: WorldCupGroupSection;
-}) {
-  const matches = sortMatchesByUpcomingFirst(section.matches);
-
-  return (
-    <section className="grid scroll-mt-40 gap-4 sm:scroll-mt-44">
-      <div className="poster-empty flex flex-wrap items-end justify-between gap-3 rounded-[1.5rem] p-4 sm:p-5">
-        <div className="min-w-0">
-          <SectionKicker>{kicker}</SectionKicker>
-          <h3 className="mt-2 text-3xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6] sm:text-4xl">
-            {section.title}
-          </h3>
-          <p className="mt-2 text-sm text-[#a9c0b6]">{getGroupSummary(section)}</p>
-        </div>
-      </div>
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start">
-        {section.table.length > 0 ? (
-          <StandingsCard table={section.table} />
-        ) : (
-          <div className="poster-empty rounded-[1.6rem] p-5 text-sm text-[#a9c0b6]">
-            Für diese Gruppe ist noch keine Tabelle verfügbar.
-          </div>
-        )}
-        <div className="grid min-w-0 gap-4">
-          {matches.length > 0 ? (
-            matches.map((match, index) => (
-              <MatchCard key={getMatchKey(match, index)} match={match} />
-            ))
-          ) : (
-            <div className="poster-empty rounded-[1.6rem] p-5 text-sm text-[#a9c0b6]">
-              Für diese Gruppe sind noch keine Spiele verfügbar.
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function WorldCupKnockout({ rounds }: { rounds: WorldCupKnockoutRound[] }) {
   if (rounds.length === 0) return null;
 
@@ -250,7 +192,7 @@ function WorldCupKnockout({ rounds }: { rounds: WorldCupKnockoutRound[] }) {
       <SectionHeading
         kicker="K.-o.-Phase"
         title="Weg ins Finale"
-        subtitle="Alle OpenLigaDB-Runden in API-Reihenfolge."
+        subtitle="Achtelfinale, Viertelfinale, Halbfinale und Finale im Fokus."
       />
       <div className="grid gap-6">
         {rounds.map((round, roundIndex) => (
@@ -277,8 +219,7 @@ function WorldCupKnockout({ rounds }: { rounds: WorldCupKnockoutRound[] }) {
 }
 
 export function WorldCupPanel({ data }: { data: WorldCupSnapshot }) {
-  const hasTournamentContent =
-    data.groupSections.length > 0 || data.knockoutRounds.length > 0;
+  const hasTournamentContent = data.knockoutRounds.length > 0;
 
   return (
     <div className="grid gap-8 lg:gap-10">
@@ -288,30 +229,7 @@ export function WorldCupPanel({ data }: { data: WorldCupSnapshot }) {
       {!hasTournamentContent ? (
         <WorldCupEmptyState data={data} />
       ) : (
-        <>
-          {data.groupSections.length > 0 ? (
-            <section
-              id="world-cup-groups"
-              className="grid scroll-mt-40 gap-7 sm:scroll-mt-44"
-            >
-              <SectionHeading
-                kicker="Gruppenphase"
-                title="Alle Gruppen"
-                subtitle="Jede von OpenLigaDB gelieferte Gruppe mit Tabelle und Spielen."
-              />
-              <div className="grid gap-9">
-                {data.groupSections.map((section, index) => (
-                  <WorldCupGroup
-                    key={getRoundKey(section, index)}
-                    kicker="Gruppe"
-                    section={section}
-                  />
-                ))}
-              </div>
-            </section>
-          ) : null}
-          <WorldCupKnockout rounds={data.knockoutRounds} />
-        </>
+        <WorldCupKnockout rounds={data.knockoutRounds} />
       )}
     </div>
   );

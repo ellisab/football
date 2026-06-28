@@ -84,7 +84,9 @@ export function HomeHero({
               </h1>
               <p className="max-w-[38rem] text-sm leading-6 text-[#dce9e2] sm:text-base sm:leading-7">
                 {description ??
-                  `${leagueLabel} · Saison ${season}. Ergebnisse zuerst, Tabellen direkt daneben und jeder Spielstatus vom Anstoß bis zum Abpfiff sichtbar.`}
+                  (hasTable
+                    ? `${leagueLabel} · Saison ${season}. Ergebnisse zuerst, Tabellen direkt daneben und jeder Spielstatus vom Anstoß bis zum Abpfiff sichtbar.`
+                    : `${leagueLabel} · Saison ${season}. Ergebnisse, kommende Spiele und jeder Status vom Anstoß bis zum Abpfiff sichtbar.`)}
               </p>
 
               <div className="flex flex-wrap justify-center gap-3 sm:justify-start">

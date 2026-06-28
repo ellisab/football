@@ -136,10 +136,7 @@ export const getCompetitionMatches = (
   });
   const bracketMatches = competition.bracketMatches.flatMap((round) => round.matches);
   const worldCupMatches = competition.worldCup
-    ? [
-        ...competition.worldCup.groupSections.flatMap((section) => section.matches),
-        ...competition.worldCup.knockoutRounds.flatMap((round) => round.matches),
-      ]
+    ? competition.worldCup.knockoutRounds.flatMap((round) => round.matches)
     : [];
 
   return [...sectionMatches, ...bracketMatches, ...worldCupMatches];
@@ -251,12 +248,7 @@ export const getCompetitionNextKickoff = (
 };
 
 export const hasCompetitionTable = (competition: WebCompetitionViewModel) => {
-  if (competition.hasTable) return true;
-
-  return (
-    competition.worldCup?.groupSections.some((section) => section.table.length > 0) ??
-    false
-  );
+  return competition.hasTable;
 };
 
 export const sortOverviewCompetitions = (
