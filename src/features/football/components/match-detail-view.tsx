@@ -80,12 +80,17 @@ export function MatchDetailView({ item }: { item: CompetitionMatch }) {
       row.teamInfoId === match.team2?.teamId ||
       row.teamName === match.team2?.teamName
   );
+  const showTableImpact = competition.hasTable || tableRows.length > 0;
 
   return (
     <RouteFrame
       eyebrow={meta.label}
       title={`${getTeamLabel(match.team1, "Offen")} gegen ${getTeamLabel(match.team2, "Offen")}`}
-      description="Eine cineastische Matchzentrale mit Ergebnis, Status, Ort, Spielverlauf, Statistiken und Tabellenwirkung."
+      description={
+        showTableImpact
+          ? "Eine cineastische Matchzentrale mit Ergebnis, Status, Ort, Spielverlauf, Statistiken und Tabellenwirkung."
+          : "Eine cineastische Matchzentrale mit Ergebnis, Status, Ort, Spielverlauf und Statistiken."
+      }
     >
       <section className="poster-surface relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#071416]/88 p-5 sm:p-7">
         <div
@@ -193,23 +198,25 @@ export function MatchDetailView({ item }: { item: CompetitionMatch }) {
             </div>
           </section>
 
-          <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
-            <div className="section-kicker">Tabellenwirkung</div>
-            <div className="mt-4 grid gap-3">
-              <p className="text-sm leading-6 text-[#a9c0b6]">
-                {tableRows.length > 0
-                  ? "Tabellenkontext ist für beide Teams verfügbar, sobald sie in der Tabelle erscheinen."
-                  : "Die Tabellenwirkung erscheint, sobald für diesen Wettbewerb Tabellen verfügbar sind."}
-              </p>
-              <Link
-                href="/tables"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#dcbc6e]/25 bg-[#463614]/35 px-4 py-2 text-sm font-bold text-[#f4efd6] transition-colors hover:bg-[#59451b]/45"
-              >
-                <Table2 className="h-4 w-4" />
-                Tabellen öffnen
-              </Link>
-            </div>
-          </section>
+          {showTableImpact ? (
+            <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
+              <div className="section-kicker">Tabellenwirkung</div>
+              <div className="mt-4 grid gap-3">
+                <p className="text-sm leading-6 text-[#a9c0b6]">
+                  {tableRows.length > 0
+                    ? "Tabellenkontext ist für beide Teams verfügbar, sobald sie in der Tabelle erscheinen."
+                    : "Die Tabellenwirkung erscheint, sobald für diesen Wettbewerb Tabellen verfügbar sind."}
+                </p>
+                <Link
+                  href="/tables"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#dcbc6e]/25 bg-[#463614]/35 px-4 py-2 text-sm font-bold text-[#f4efd6] transition-colors hover:bg-[#59451b]/45"
+                >
+                  <Table2 className="h-4 w-4" />
+                  Tabellen öffnen
+                </Link>
+              </div>
+            </section>
+          ) : null}
 
           <section className="poster-surface rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-5">
             <div className="section-kicker">Statistiken</div>
