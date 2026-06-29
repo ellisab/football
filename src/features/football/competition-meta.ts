@@ -22,7 +22,7 @@ export type CompetitionMeta = {
 
 export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
   wc: {
-    accentClass: "from-[#f4efd6] via-[#dcbc6e] to-[#72d9e4]",
+    accentClass: "from-[#f5edc9] via-[#d8b86a] to-[#6eeaf2]",
     category: "Global",
     href: "/competitions/world-cup",
     icon: Globe2,
@@ -31,7 +31,7 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     slug: "world-cup",
   },
   bl1: {
-    accentClass: "from-[#ef5f5f] via-[#dcbc6e] to-[#121820]",
+    accentClass: "from-[#f45f63] via-[#d8b86a] to-[#030708]",
     category: "Männer",
     href: "/competitions/bundesliga-1",
     icon: Goal,
@@ -40,7 +40,7 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     slug: "bundesliga-1",
   },
   bl2: {
-    accentClass: "from-[#efaa57] via-[#f4efd6] to-[#43c886]",
+    accentClass: "from-[#ffb45f] via-[#f5edc9] to-[#43c886]",
     category: "Männer",
     href: "/competitions/bundesliga-2",
     icon: Shirt,
@@ -49,7 +49,7 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     slug: "bundesliga-2",
   },
   fbl1: {
-    accentClass: "from-[#f072b6] via-[#72d9e4] to-[#43c886]",
+    accentClass: "from-[#f06fb4] via-[#6eeaf2] to-[#43c886]",
     category: "Frauen",
     href: "/competitions/women",
     icon: Shield,
@@ -58,7 +58,7 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     slug: "women",
   },
   fbl2: {
-    accentClass: "from-[#b78cff] via-[#72d9e4] to-[#f4efd6]",
+    accentClass: "from-[#b890ff] via-[#6eeaf2] to-[#f5edc9]",
     category: "Frauen",
     href: "/competitions/women-2",
     icon: Shirt,
@@ -67,7 +67,7 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     slug: "women-2",
   },
   dfb: {
-    accentClass: "from-[#43c886] via-[#f4efd6] to-[#050a0d]",
+    accentClass: "from-[#43c886] via-[#f5edc9] to-[#030708]",
     category: "Männer",
     href: "/competitions/dfb-pokal",
     icon: Flag,
@@ -76,7 +76,7 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     slug: "dfb-pokal",
   },
   cl: {
-    accentClass: "from-[#72d9e4] via-[#dcbc6e] to-[#8b8cff]",
+    accentClass: "from-[#6eeaf2] via-[#d8b86a] to-[#8c8cff]",
     category: "Männer",
     href: "/competitions/champions-league",
     icon: Trophy,
@@ -88,7 +88,7 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
 
 export const getCompetitionMeta = (league: LeagueKey): CompetitionMeta => {
   return COMPETITION_META[league] ?? {
-    accentClass: "from-[#dcbc6e] via-[#72d9e4] to-[#43c886]",
+    accentClass: "from-[#d8b86a] via-[#6eeaf2] to-[#43c886]",
     category: "Global",
     href: "/",
     icon: Medal,

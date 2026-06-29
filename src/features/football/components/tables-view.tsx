@@ -21,7 +21,7 @@ export function TablesView({
     >
       <div className="grid gap-8">
         {tableCompetitions.length === 0 ? (
-          <section className="poster-empty rounded-[1.25rem] p-5 text-sm leading-6 text-[#a9c0b6]">
+          <section className="poster-empty rounded-[1.25rem] p-5 text-sm leading-6 text-[#a8bbb2]">
             Noch sind keine Tabellendaten verfügbar. Spielpläne und Matchseiten bleiben sichtbar.
           </section>
         ) : (
@@ -41,10 +41,10 @@ export function TablesView({
                 <div className="poster-empty flex flex-wrap items-end justify-between gap-3 rounded-[1.25rem] p-4">
                   <div>
                     <div className="section-kicker">{meta.category}</div>
-                    <h2 className="mt-2 text-3xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6]">
+                    <h2 className="mt-2 text-3xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f5edc9]">
                       {meta.label}
                     </h2>
-                    <p className="mt-2 text-sm text-[#a9c0b6]">
+                    <p className="mt-2 text-sm text-[#a8bbb2]">
                       Saison {competition.resolvedSeason}
                     </p>
                   </div>

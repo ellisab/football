@@ -3,20 +3,20 @@ import { Skeleton } from "@footballleagues/ui/skeleton";
 
 export default function Loading() {
   return (
-    <div className="poster-shell min-h-screen w-full overflow-x-hidden text-[#edf6ef]">
+    <div className="poster-shell min-h-screen w-full overflow-x-hidden text-[#f2f7f2]">
       <main className="relative z-10">
-        <section className="relative min-h-[100svh] overflow-hidden bg-[linear-gradient(180deg,#071116_0%,#09181d_42%,#040a0d_100%)]">
+        <section className="relative min-h-[100svh] overflow-hidden bg-[linear-gradient(180deg,#061512_0%,#071a17_42%,#030708_100%)]">
           <div
             aria-hidden
             className="atlas-hero-grid absolute inset-0 opacity-70"
           />
           <div
             aria-hidden
-            className="absolute inset-0 bg-[radial-gradient(circle_at_24%_36%,rgba(114,217,228,0.12),transparent_24%),radial-gradient(circle_at_72%_64%,rgba(220,188,110,0.14),transparent_18%),linear-gradient(90deg,rgba(4,12,16,0.94)_0%,rgba(4,12,16,0.76)_38%,rgba(4,12,16,0.42)_64%,rgba(4,12,16,0.9)_100%)]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_24%_36%,rgba(110, 234, 242,0.12),transparent_24%),radial-gradient(circle_at_72%_64%,rgba(216, 184, 106,0.14),transparent_18%),linear-gradient(90deg,rgba(4,12,16,0.94)_0%,rgba(4,12,16,0.76)_38%,rgba(4,12,16,0.42)_64%,rgba(4,12,16,0.9)_100%)]"
           />
           <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1240px] flex-col px-4 pb-14 pt-8 sm:px-6 sm:pb-16 sm:pt-10 lg:px-10">
             <div className="w-full">
-              <Skeleton className="mb-4 h-4 w-32 bg-[#dcbc6e]/16" />
+              <Skeleton className="mb-4 h-4 w-32 bg-[#d8b86a]/16" />
               <div className="flex gap-3 overflow-hidden pb-2">
                 <Skeleton className="h-11 w-44 shrink-0 rounded-full bg-white/10" />
                 <Skeleton className="h-11 w-56 shrink-0 rounded-full bg-white/8" />

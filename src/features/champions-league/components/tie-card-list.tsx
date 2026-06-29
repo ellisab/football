@@ -19,7 +19,7 @@ export function TieCardList({
 }) {
   if (ties.length === 0) {
     return (
-      <div className="poster-empty rounded-[1.6rem] p-5 text-[#a9c0b6]">
+      <div className="poster-empty rounded-[1.6rem] p-5 text-[#a8bbb2]">
         {emptyText}
       </div>
     );
@@ -34,8 +34,8 @@ export function TieCardList({
         <div
           className={`inline-flex items-center rounded-xl border px-2 py-1 text-sm font-semibold ${
             tie.aggregateScore?.leader === "team1"
-              ? "border-[#dcbc6e]/30 bg-[rgba(57,45,15,0.72)] text-[#f4efd6]"
-              : "border-white/10 bg-white/[0.06] text-[#edf6ef]"
+              ? "border-[#d8b86a]/30 bg-[rgba(57,45,15,0.72)] text-[#f5edc9]"
+              : "border-white/10 bg-white/[0.06] text-[#f2f7f2]"
           }`}
         >
           {tie.team1.teamName ?? "Team 1"}
@@ -43,14 +43,14 @@ export function TieCardList({
         <div
           className={`inline-flex items-center rounded-xl border px-2 py-1 text-sm font-semibold ${
             tie.aggregateScore?.leader === "team2"
-              ? "border-[#dcbc6e]/30 bg-[rgba(57,45,15,0.72)] text-[#f4efd6]"
-              : "border-white/10 bg-white/[0.06] text-[#edf6ef]"
+              ? "border-[#d8b86a]/30 bg-[rgba(57,45,15,0.72)] text-[#f5edc9]"
+              : "border-white/10 bg-white/[0.06] text-[#f2f7f2]"
           }`}
         >
           {tie.team2.teamName ?? "Team 2"}
         </div>
         {tie.aggregateScore ? (
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#dcbc6e]">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#d8b86a]">
             {tie.matches.some((match) => match.matchIsFinished !== true)
               ? "Live-Gesamtstand"
               : "Gesamtstand"}{" "}
@@ -63,7 +63,7 @@ export function TieCardList({
         {tie.matches.map((match, matchIndex) => (
           <div key={getMatchKey(match, matchIndex)} className="grid gap-1">
             {tie.matches.length > 1 ? (
-              <div className="px-1 text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-[#a9c0b6]">
+              <div className="px-1 text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-[#a8bbb2]">
                 Spiel {matchIndex + 1}
               </div>
             ) : null}

@@ -60,15 +60,15 @@ export function LeagueTabs({
               }`}
               className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 isActive
-                  ? "border-[#dcbc6e]/55 bg-[linear-gradient(135deg,rgba(10,44,38,0.78),rgba(21,49,54,0.68))] text-[#f4efd6] shadow-[0_18px_38px_rgba(4,15,20,0.22)]"
-                  : "border-white/12 bg-white/[0.045] text-[#c8d7d0] hover:border-[#72d9e4]/35 hover:bg-white/[0.08] hover:text-[#f7fbf8]"
+                  ? "border-[#d8b86a]/55 bg-[linear-gradient(135deg,rgba(10,44,38,0.78),rgba(21,49,54,0.68))] text-[#f5edc9] shadow-[0_18px_38px_rgba(4,15,20,0.22)]"
+                  : "border-white/12 bg-white/[0.045] text-[#c7d7d0] hover:border-[#6eeaf2]/35 hover:bg-white/[0.08] hover:text-[#f7fbf8]"
               }`}
             >
               <Icon
-                className={`h-4 w-4 ${isActive ? "text-[#dcbc6e]" : "text-[#72d9e4]"}`}
+                className={`h-4 w-4 ${isActive ? "text-[#d8b86a]" : "text-[#6eeaf2]"}`}
               />
               <span>{label}</span>
-              <span className="hidden items-center gap-1 rounded-full bg-white/[0.07] px-2 py-0.5 text-[0.66rem] uppercase tracking-[0.12em] text-[#9fb6ad] sm:inline-flex">
+              <span className="hidden items-center gap-1 rounded-full bg-white/[0.07] px-2 py-0.5 text-[0.66rem] uppercase tracking-[0.12em] text-[#8fa59c] sm:inline-flex">
                 <Activity className="h-3 w-3" />
                 {meta.category}
               </span>

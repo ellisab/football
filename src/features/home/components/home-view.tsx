@@ -127,7 +127,7 @@ const getHeroHeadline = (data: WebHomeViewModel) => {
   }
 
   if (data.worldCup) {
-    return `${data.worldCup.leagueName} K.-o.-Phase`;
+    return `${data.worldCup.leagueName} Finalrunde`;
   }
 
   return data.hasTable
@@ -196,7 +196,7 @@ const getHeroPreviewStats = (
         value: String(data.worldCup.season),
       },
       {
-        detail: "K.-o.-Phase",
+        detail: "Finalrunde",
         label: "Spiele",
         value: String(matchCount),
       },
@@ -233,14 +233,14 @@ function OrbitNavigation({
   liveCount: number;
 }) {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050a0d]/82 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#030708]/82 backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 w-full max-w-[1240px] items-center gap-3 px-4 sm:px-6 lg:px-10">
         <Link
           href="/"
-          className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-sm font-semibold text-[#edf6ef] transition-colors hover:border-[#dcbc6e]/40 hover:bg-white/[0.09]"
+          className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-2 text-sm font-semibold text-[#f2f7f2] transition-colors hover:border-[#d8b86a]/40 hover:bg-white/[0.09]"
           aria-label="Spieltag Orbit Startseite"
         >
-          <span className="grid h-7 w-7 place-items-center rounded-full bg-[linear-gradient(135deg,#f4efd6,#dcbc6e_48%,#72d9e4)] text-xs font-black text-[#050a0d]">
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-[linear-gradient(135deg,#f5edc9,#d8b86a_48%,#6eeaf2)] text-xs font-black text-[#030708]">
             SO
           </span>
           <span className="hidden sm:inline">Spieltag Orbit</span>
@@ -254,7 +254,7 @@ function OrbitNavigation({
             <Link
               key={`${item.href}-${item.label}`}
               href={item.href}
-              className="inline-flex shrink-0 items-center rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-[#a9c0b6] transition-colors hover:border-white/10 hover:bg-white/[0.06] hover:text-[#edf6ef]"
+              className="inline-flex shrink-0 items-center rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-[#a8bbb2] transition-colors hover:border-white/10 hover:bg-white/[0.06] hover:text-[#f2f7f2]"
             >
               {item.label}
             </Link>
@@ -262,15 +262,15 @@ function OrbitNavigation({
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-[#a9c0b6]">
-            <CalendarDays className="h-3.5 w-3.5 text-[#72d9e4]" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-[#a8bbb2]">
+            <CalendarDays className="h-3.5 w-3.5 text-[#6eeaf2]" />
             {currentLabel}
           </span>
           <span
             className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-bold ${
               liveCount > 0
-                ? "live-chip border-[#72d9e4]/35 bg-[#0c2f36]/70 text-[#c6f7fb]"
-                : "border-white/10 bg-white/[0.045] text-[#a9c0b6]"
+                ? "live-chip border-[#6eeaf2]/35 bg-[#07363a]/70 text-[#ddfbff]"
+                : "border-white/10 bg-white/[0.045] text-[#a8bbb2]"
             }`}
           >
             <Radio className="h-3.5 w-3.5" />
@@ -281,7 +281,7 @@ function OrbitNavigation({
         <Link
           href="/teams"
           aria-label="Teams suchen"
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.055] text-[#c8d7d0] transition-colors hover:border-[#72d9e4]/35 hover:text-[#edf6ef]"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.055] text-[#c7d7d0] transition-colors hover:border-[#6eeaf2]/35 hover:text-[#f2f7f2]"
         >
           <Search className="h-4 w-4" />
         </Link>
@@ -307,31 +307,31 @@ function OrbitContextBar({
       "Runde offen";
 
   return (
-    <div className="sticky top-16 z-40 border-b border-white/10 bg-[#071416]/78 backdrop-blur-xl">
+    <div className="sticky top-16 z-40 border-b border-white/10 bg-[#061512]/78 backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-[1240px] gap-2 overflow-x-auto px-4 py-2 text-xs [scrollbar-width:none] sm:px-6 lg:px-10 [&::-webkit-scrollbar]:hidden">
-        <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-1.5 font-bold text-[#edf6ef]">
-          <Icon className="h-3.5 w-3.5 text-[#dcbc6e]" />
+        <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.055] px-3 py-1.5 font-bold text-[#f2f7f2]">
+          <Icon className="h-3.5 w-3.5 text-[#d8b86a]" />
           {label}
         </span>
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
-          <ShieldCheck className="h-3.5 w-3.5 text-[#72d9e4]" />
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a8bbb2]">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#6eeaf2]" />
           {category}
         </span>
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
-          <Trophy className="h-3.5 w-3.5 text-[#dcbc6e]" />
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a8bbb2]">
+          <Trophy className="h-3.5 w-3.5 text-[#d8b86a]" />
           Saison {data.resolvedSeason}
         </span>
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a8bbb2]">
           <Activity className="h-3.5 w-3.5 text-[#43c886]" />
           {round}
         </span>
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#72d9e4]/25 bg-[#0c2f36]/45 px-3 py-1.5 font-bold text-[#c6f7fb]">
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#6eeaf2]/25 bg-[#07363a]/45 px-3 py-1.5 font-bold text-[#ddfbff]">
           {statusCounts.live} läuft
         </span>
-        <span className="inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
+        <span className="inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a8bbb2]">
           {statusCounts.upcoming} anstehend
         </span>
-        <span className="inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a9c0b6]">
+        <span className="inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 font-semibold text-[#a8bbb2]">
           {statusCounts.finished} beendet
         </span>
       </div>
@@ -342,15 +342,15 @@ function OrbitContextBar({
 function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
   if (matches.length === 0) {
     return (
-      <section className="poster-surface relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#071416]/88 p-4">
+      <section className="poster-surface relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#061512]/88 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
             <SectionKicker>Live-Leiste</SectionKicker>
-            <p className="mt-2 text-sm text-[#a9c0b6]">
+            <p className="mt-2 text-sm text-[#a8bbb2]">
               In den aktuellen Daten sind keine laufenden oder kommenden Spiele sichtbar.
             </p>
           </div>
-          <Clock3 className="h-5 w-5 text-[#72d9e4]" />
+          <Clock3 className="h-5 w-5 text-[#6eeaf2]" />
         </div>
       </section>
     );
@@ -359,11 +359,11 @@ function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
   return (
     <section
       aria-label="Live und kommende Spiele"
-      className="poster-surface live-rail relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#071416]/88 p-3"
+      className="poster-surface live-rail relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#061512]/88 p-3"
     >
       <div className="mb-3 flex items-center justify-between gap-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-full border border-[#72d9e4]/30 bg-[#0c2f36]/70 text-[#c6f7fb]">
+          <span className="grid h-8 w-8 place-items-center rounded-full border border-[#6eeaf2]/30 bg-[#07363a]/70 text-[#ddfbff]">
             <Radio className="h-4 w-4" />
           </span>
           <div>
@@ -373,7 +373,7 @@ function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
         </div>
         <Link
           href="/today"
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 text-xs font-bold text-[#edf6ef] transition-colors hover:border-[#72d9e4]/30 hover:bg-white/[0.08]"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 text-xs font-bold text-[#f2f7f2] transition-colors hover:border-[#6eeaf2]/30 hover:bg-white/[0.08]"
         >
           Alles heute
           <ArrowRight className="h-3.5 w-3.5" />
@@ -393,20 +393,20 @@ function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
             <Link
               key={`${competition.resolvedLeague}-${getMatchIdentity(match)}-${index}`}
               href={href}
-              className="group grid min-h-[9rem] w-[17.5rem] shrink-0 content-between overflow-hidden rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-3 transition-all hover:-translate-y-0.5 hover:border-[#72d9e4]/35 hover:bg-white/[0.08]"
+              className="group grid min-h-[9rem] w-[17.5rem] shrink-0 content-between overflow-hidden rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-3 transition-all hover:-translate-y-0.5 hover:border-[#6eeaf2]/35 hover:bg-white/[0.08]"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#dcbc6e]">
+                <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#d8b86a]">
                   <Icon className="h-3 w-3" />
                   <span className="truncate">{meta.shortLabel}</span>
                 </span>
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-1 text-[0.68rem] font-bold uppercase tracking-[0.12em] ${
                     status === "live"
-                      ? "live-chip border border-[#72d9e4]/35 bg-[#0c2f36]/70 text-[#c6f7fb]"
+                      ? "live-chip border border-[#6eeaf2]/35 bg-[#07363a]/70 text-[#ddfbff]"
                       : status === "finished"
-                        ? "border border-[#dcbc6e]/25 bg-[#463614]/46 text-[#f4ebc2]"
-                        : "border border-white/10 bg-white/[0.045] text-[#a9c0b6]"
+                        ? "border border-[#d8b86a]/25 bg-[#273021]/46 text-[#f5edc9]"
+                        : "border border-white/10 bg-white/[0.045] text-[#a8bbb2]"
                   }`}
                 >
                   {getMatchStatusLabel(match)}
@@ -422,11 +422,11 @@ function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
                       size={26}
                       className="bg-white/10 ring-1 ring-white/10"
                     />
-                    <span className="truncate text-sm font-semibold text-[#edf6ef]">
+                    <span className="truncate text-sm font-semibold text-[#f2f7f2]">
                       {getTeamLabel(match.team1, "Offen")}
                     </span>
                   </div>
-                  <span className="font-mono text-lg font-bold text-[#f4efd6]">
+                  <span className="font-mono text-lg font-bold text-[#f5edc9]">
                     {score.split(":")[0] ?? "-"}
                   </span>
                 </div>
@@ -438,11 +438,11 @@ function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
                       size={26}
                       className="bg-white/10 ring-1 ring-white/10"
                     />
-                    <span className="truncate text-sm font-semibold text-[#edf6ef]">
+                    <span className="truncate text-sm font-semibold text-[#f2f7f2]">
                       {getTeamLabel(match.team2, "Offen")}
                     </span>
                   </div>
-                  <span className="font-mono text-lg font-bold text-[#f4efd6]">
+                  <span className="font-mono text-lg font-bold text-[#f5edc9]">
                     {score.split(":")[1] ?? "-"}
                   </span>
                 </div>
@@ -467,15 +467,15 @@ function CompetitionCapsulesSection({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <SectionKicker>Wettbewerbe</SectionKicker>
-          <h2 className="mt-2 text-[2rem] leading-[0.9] font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6] sm:text-[2.65rem]">
+          <h2 className="mt-2 text-[2rem] leading-[0.9] font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f5edc9] sm:text-[2.65rem]">
             Schnellzugriff
           </h2>
         </div>
         <Link
           href="/tables"
-          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-bold text-[#edf6ef] transition-colors hover:border-[#dcbc6e]/35 hover:bg-white/[0.08]"
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-bold text-[#f2f7f2] transition-colors hover:border-[#d8b86a]/35 hover:bg-white/[0.08]"
         >
-          <Table2 className="h-4 w-4 text-[#dcbc6e]" />
+          <Table2 className="h-4 w-4 text-[#d8b86a]" />
           Tabellen
         </Link>
       </div>
@@ -508,7 +508,7 @@ function CompetitionCapsulesSection({
                 },
                 competition.resolvedSeason
               )}
-              className="poster-surface group relative grid min-h-[12rem] overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#071416]/86 p-4 transition-all hover:-translate-y-0.5 hover:border-[#72d9e4]/35"
+              className="poster-surface group relative grid min-h-[12rem] overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#061512]/86 p-4 transition-all hover:-translate-y-0.5 hover:border-[#6eeaf2]/35"
             >
               <div
                 aria-hidden
@@ -516,37 +516,37 @@ function CompetitionCapsulesSection({
               />
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#a9c0b6]">
-                    <ShieldCheck className="h-3.5 w-3.5 text-[#72d9e4]" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#a8bbb2]">
+                    <ShieldCheck className="h-3.5 w-3.5 text-[#6eeaf2]" />
                     {meta.category}
                   </span>
-                  <h3 className="mt-3 text-2xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6]">
+                  <h3 className="mt-3 text-2xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f5edc9]">
                     {meta.label}
                   </h3>
-                  <p className="mt-2 text-sm text-[#a9c0b6]">
+                  <p className="mt-2 text-sm text-[#a8bbb2]">
                     Saison {competition.resolvedSeason}
                     {leader ? ` · Spitzenreiter: ${leader}` : ""}
                   </p>
                 </div>
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-[#dcbc6e]">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-[#d8b86a]">
                   <Icon className="h-5 w-5" />
                 </span>
               </div>
 
               <div className="mt-5 grid grid-cols-3 gap-2">
-                <div className="rounded-[0.8rem] border border-[#72d9e4]/20 bg-[#0c2f36]/45 p-2">
-                  <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#8fdfe7]">
+                <div className="rounded-[0.8rem] border border-[#6eeaf2]/20 bg-[#07363a]/45 p-2">
+                  <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#9af3f8]">
                     Läuft
                   </div>
-                  <div className="mt-1 font-mono text-xl font-bold text-[#c6f7fb]">
+                  <div className="mt-1 font-mono text-xl font-bold text-[#ddfbff]">
                     {counts.live}
                   </div>
                 </div>
                 <div className="rounded-[0.8rem] border border-white/10 bg-white/[0.045] p-2">
-                  <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#9fb6ad]">
+                  <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#8fa59c]">
                     Nächstes
                   </div>
-                  <div className="mt-1 truncate font-mono text-sm font-bold text-[#f4efd6]">
+                  <div className="mt-1 truncate font-mono text-sm font-bold text-[#f5edc9]">
                     {typeof nextKickoff === "number"
                       ? new Intl.DateTimeFormat("de-DE", {
                           hour: "2-digit",
@@ -556,11 +556,11 @@ function CompetitionCapsulesSection({
                       : "offen"}
                   </div>
                 </div>
-                <div className="rounded-[0.8rem] border border-[#dcbc6e]/20 bg-[#463614]/35 p-2">
-                  <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#dcbc6e]">
+                <div className="rounded-[0.8rem] border border-[#d8b86a]/20 bg-[#273021]/35 p-2">
+                  <div className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#d8b86a]">
                     Tabelle
                   </div>
-                  <div className="mt-1 font-mono text-xl font-bold text-[#f4efd6]">
+                  <div className="mt-1 font-mono text-xl font-bold text-[#f5edc9]">
                     {hasCompetitionTable(competition) ? "Ja" : "-"}
                   </div>
                 </div>
@@ -591,19 +591,19 @@ function TodayMatchRow({
         href={href}
         className="grid min-w-0 gap-3 px-4 py-3 transition-colors hover:bg-white/[0.04] sm:grid-cols-[7.5rem_minmax(0,1fr)_auto] sm:items-center sm:px-5"
       >
-      <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-[#f4efd6]">
-        <Clock3 className="h-4 w-4 shrink-0 text-[#72d9e4]" />
+      <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-[#f5edc9]">
+        <Clock3 className="h-4 w-4 shrink-0 text-[#6eeaf2]" />
         <span>{formatMatchTime(match)}</span>
       </div>
       <div className="min-w-0">
-        <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-[#9eb4ab]">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#dcbc6e]">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-[#8fa59c]">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-[#d8b86a]">
             <Icon className="h-3.5 w-3.5" />
             {meta.shortLabel}
           </span>
           <span>{status === "live" ? "Läuft" : status === "finished" ? "Beendet" : "Anstehend"}</span>
         </div>
-        <div className="mt-1 grid min-w-0 gap-1 text-base font-semibold text-[#edf6ef] sm:text-lg">
+        <div className="mt-1 grid min-w-0 gap-1 text-base font-semibold text-[#f2f7f2] sm:text-lg">
           <span className="min-w-0 truncate">
             {getTeamLabel(match.team1, "Offen")}
           </span>
@@ -613,8 +613,8 @@ function TodayMatchRow({
         </div>
       </div>
       <div className="flex items-center justify-between gap-3 sm:justify-end">
-        <span className="text-xs text-[#9eb4ab] sm:hidden">Stand</span>
-        <span className="score-pill inline-flex min-w-[4.25rem] justify-center rounded-full px-4 py-2 text-[1.35rem] leading-none tracking-[0.04em] font-[var(--font-stadium-heading)] text-[#fff6d0] [text-shadow:0_0_24px_rgba(255,214,108,0.32)]">
+        <span className="text-xs text-[#8fa59c] sm:hidden">Stand</span>
+        <span className="score-pill inline-flex min-w-[4.25rem] justify-center rounded-full px-4 py-2 text-[1.35rem] leading-none tracking-[0.04em] font-[var(--font-stadium-heading)] text-[#fff4c2] [text-shadow:0_0_24px_rgba(255,214,108,0.32)]">
           {score}
         </span>
       </div>
@@ -636,18 +636,18 @@ function TodayMatchesSection({
     <section id="today" className="grid scroll-mt-40 gap-3 sm:scroll-mt-44">
       <SectionKicker>Heute</SectionKicker>
       <div className="poster-surface relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(7,27,32,0.92),rgba(8,17,22,0.98))]">
-        <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(220,188,110,0.85),rgba(114,217,228,0.75),transparent)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(216, 184, 106,0.85),rgba(110, 234, 242,0.75),transparent)]" />
         <div className="flex flex-wrap items-end justify-between gap-3 p-4 sm:p-5">
           <div>
-            <h2 className="text-[2rem] leading-[0.9] font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6] sm:text-[2.65rem]">
+            <h2 className="text-[2rem] leading-[0.9] font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f5edc9] sm:text-[2.65rem]">
               Spiele heute
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[#a9c0b6]">
+            <p className="mt-2 text-sm leading-6 text-[#a8bbb2]">
               {todayLabel} · {matches.length}{" "}
               {matches.length === 1 ? "Spiel" : "Spiele"} in {leagueLabel}.
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#72d9e4]/30 bg-[#0c2f36]/60 px-3 py-1.5 text-sm font-semibold text-[#c6f7fb]">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#6eeaf2]/30 bg-[#07363a]/60 px-3 py-1.5 text-sm font-semibold text-[#ddfbff]">
             <Goal className="h-4 w-4" />
             Schnellansicht
           </span>
@@ -663,7 +663,7 @@ function TodayMatchesSection({
             ))}
           </ol>
         ) : (
-          <div className="border-t border-white/10 p-4 text-sm leading-6 text-[#a9c0b6] sm:p-5">
+          <div className="border-t border-white/10 p-4 text-sm leading-6 text-[#a8bbb2] sm:p-5">
             Heute sind in {leagueLabel} keine Spiele angesetzt.
           </div>
         )}
@@ -734,10 +734,10 @@ function LeagueCompetitionBlock({
       <div className="poster-empty flex flex-wrap items-end justify-between gap-4 rounded-[1.5rem] p-4 sm:p-5">
         <div className="min-w-0">
           <SectionKicker>{competition.leagueLabel}</SectionKicker>
-          <h2 className="mt-2 text-3xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f4efd6] sm:text-4xl">
+          <h2 className="mt-2 text-3xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f5edc9] sm:text-4xl">
             {competition.leagueLabel}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-[#a9c0b6]">
+          <p className="mt-2 text-sm leading-6 text-[#a8bbb2]">
             Saison {competition.resolvedSeason} · {upcomingCount} anstehend ·{" "}
             {matchCount} Spiele
           </p>
@@ -810,7 +810,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
     : data.hasTable;
 
   return (
-    <div className="poster-shell min-h-screen w-full text-[#edf6ef]">
+    <div className="poster-shell min-h-screen w-full text-[#f2f7f2]">
       <main className="relative z-10">
         <OrbitNavigation
           currentLabel={data.isOverview ? "Heute" : data.leagueLabel}
@@ -827,9 +827,9 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           currentSeason={data.resolvedSeason}
           description={
             data.isOverview
-              ? "Alle verfügbaren Wettbewerbe auf einer Seite: kommende Spiele zuerst, danach Ergebnisse, Tabellen und K.-o.-Runden ohne Umwege."
+              ? "Alle verfügbaren Wettbewerbe auf einer Seite: kommende Spiele zuerst, danach Ergebnisse, Tabellen und Finalrunden ohne Umwege."
               : data.worldCup
-                ? `${data.worldCup.leagueName} · Saison ${data.worldCup.season}. K.-o.-Spiele, Status und Finalweg in einer schnellen Turnieransicht.`
+                ? `${data.worldCup.leagueName} · Saison ${data.worldCup.season}. Finalrundenspiele, Status und Finalweg in einer schnellen Turnieransicht.`
               : undefined
           }
           getLeagueHref={
@@ -889,13 +889,13 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
             </div>
           )}
 
-          <footer className="mt-2 border-t border-white/10 px-1 pt-5 text-xs text-[#9eb4ab]">
+          <footer className="mt-2 border-t border-white/10 px-1 pt-5 text-xs text-[#8fa59c]">
             Datenquelle:{" "}
             <a
               href="https://www.openligadb.de/"
               target="_blank"
               rel="noreferrer"
-              className="font-semibold text-[#dcbc6e] underline underline-offset-2 transition-colors hover:text-[#f4efd6]"
+              className="font-semibold text-[#d8b86a] underline underline-offset-2 transition-colors hover:text-[#f5edc9]"
             >
               OpenLigaDB
             </a>
@@ -904,7 +904,7 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
               href="https://www.openligadb.de/lizenz"
               target="_blank"
               rel="noreferrer"
-              className="font-semibold text-[#72d9e4] underline underline-offset-2 transition-colors hover:text-[#dff9fb]"
+              className="font-semibold text-[#6eeaf2] underline underline-offset-2 transition-colors hover:text-[#ddfbff]"
             >
               openligadb.de/lizenz
             </a>
