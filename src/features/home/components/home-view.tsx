@@ -822,19 +822,11 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
           headline={heroHeadline}
           image={heroImage}
           leagueLabel={data.isOverview ? "Alle Wettbewerbe" : data.leagueLabel}
-          leagueOptions={data.leagueOptions}
-          currentLeague={data.isOverview ? undefined : data.resolvedLeague}
-          currentSeason={data.resolvedSeason}
           description={
             data.isOverview
               ? "Alle verfügbaren Wettbewerbe auf einer Seite: kommende Spiele zuerst, danach Ergebnisse, Tabellen und Finalrunden ohne Umwege."
               : data.worldCup
                 ? `${data.worldCup.leagueName} · Saison ${data.worldCup.season}. Finalrundenspiele, Status und Finalweg in einer schnellen Turnieransicht.`
-              : undefined
-          }
-          getLeagueHref={
-            data.isOverview
-              ? (option, season) => getCompetitionHref(option, season)
               : undefined
           }
           primaryHref={primaryActionHref}

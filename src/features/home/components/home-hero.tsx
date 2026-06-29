@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { LeagueKey, LeagueOption } from "@footballleagues/core/leagues";
 import { ArrowRight, Radio, Trophy } from "lucide-react";
-import { LeagueTabs } from "./league-tabs";
 
 export type HomeHeroImage = {
   alt: string;
@@ -21,11 +19,7 @@ export function HomeHero({
   headline,
   image,
   leagueLabel,
-  leagueOptions,
-  currentLeague,
-  currentSeason,
   description,
-  getLeagueHref,
   primaryHref,
   previewStats,
   season,
@@ -35,11 +29,7 @@ export function HomeHero({
   headline: string;
   image: HomeHeroImage;
   leagueLabel: string;
-  leagueOptions: LeagueOption[];
-  currentLeague?: LeagueKey;
-  currentSeason: number;
   description?: string;
-  getLeagueHref?: (option: LeagueOption, season: number) => string;
   primaryHref: string;
   previewStats: HomeHeroStat[];
   season: number;
@@ -63,17 +53,7 @@ export function HomeHero({
         <div aria-hidden className="atlas-hero-grid" />
 
         <div className="relative z-10 mx-auto flex min-h-[calc(100svh-6.5rem)] w-full max-w-[1240px] flex-col px-4 pb-20 pt-8 sm:px-6 sm:pb-24 sm:pt-10 lg:px-10">
-          <div className="w-full">
-            <LeagueTabs
-              options={leagueOptions}
-              currentLeague={currentLeague}
-              currentSeason={currentSeason}
-              getHref={getLeagueHref}
-              variant="overlay"
-            />
-          </div>
-
-          <div className="grid flex-1 items-center gap-8 pt-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:pt-12">
+          <div className="grid flex-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div className="mx-auto grid max-w-[22rem] gap-4 text-center sm:mx-0 sm:max-w-[45rem] sm:text-left">
               <div className="mx-auto inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-[#061512]/62 px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#d8b86a] backdrop-blur-md sm:mx-0">
                 <Radio className="h-3.5 w-3.5 text-[#6eeaf2]" />
