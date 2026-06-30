@@ -4,12 +4,10 @@ import {
   type HomeViewModel,
   type HomeViewModelRoundSection,
   type HomeViewModelSection,
-  type HomeViewModelTableSection,
 } from "@footballleagues/core/home";
 import type { WorldCupSnapshot } from "@footballleagues/core/world-cup";
 
 export type WebHomeRoundSection = HomeViewModelRoundSection;
-export type WebHomeTableSection = HomeViewModelTableSection;
 export type WebHomeSection = HomeViewModelSection;
 export type WebCompetitionViewModel = HomeViewModel & {
   worldCup?: WorldCupSnapshot;

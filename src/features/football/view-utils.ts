@@ -10,7 +10,6 @@ import {
   type ApiTeam,
 } from "@footballleagues/core/openligadb";
 import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
-import { getCompetitionMeta } from "./competition-meta";
 
 export type CompetitionMatch = {
   competition: WebCompetitionViewModel;
@@ -298,11 +297,6 @@ export const getTeamId = (team?: ApiTeam | ApiTableRow) => {
   return "team";
 };
 
-export const teamMatchesId = (team: ApiTeam | ApiTableRow | undefined, id: string) => {
-  if (!team) return false;
-  return getTeamId(team) === id || normalizeTeamId(team.teamName ?? "") === id;
-};
-
 export const findMatchById = (
   competitions: WebCompetitionViewModel[],
   matchId: string
@@ -417,8 +411,4 @@ export const collectTeams = (
 
     return a.name.localeCompare(b.name);
   });
-};
-
-export const getCompetitionAccentClass = (competition: WebCompetitionViewModel) => {
-  return getCompetitionMeta(competition.resolvedLeague).accentClass;
 };
