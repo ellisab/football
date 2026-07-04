@@ -55,6 +55,17 @@ const createOpenLigaDbError = (status: number) => {
   return error;
 };
 
+const getShorterRevalidate = (
+  options: FetchOptions | undefined,
+  defaultRevalidate: number
+) => {
+  const requestedRevalidate = options?.next?.revalidate;
+
+  return typeof requestedRevalidate === "number"
+    ? Math.min(requestedRevalidate, defaultRevalidate)
+    : defaultRevalidate;
+};
+
 const logRetry = ({
   attempts,
   path,
@@ -205,7 +216,17 @@ export const getAllMatches = async (
 ) => {
   return fetchJson<ApiMatch[]>(
     `/getmatchdata/${leagueShortcut}/${season}`,
-    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.seasonMatches)
+    withOpenLigaDbCache(
+      options,
+      getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.seasonMatches)
+    )
+  );
+};
+
+export const getMatchById = async (matchId: number, options?: FetchOptions) => {
+  return fetchJson<ApiMatch>(
+    `/getmatchdata/${matchId}`,
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.liveMatchday)
   );
 };
 

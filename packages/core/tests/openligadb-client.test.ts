@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   getAvailableLeagues,
+  getAllMatches,
   getCurrentGroup,
   getGroups,
+  getMatchById,
   OPENLIGADB_CACHE_SECONDS,
 } from "../src/openligadb";
 
@@ -77,6 +79,55 @@ test("OpenLigaDB client retries transient 5xx responses", async () => {
 
     assert.equal(attempts, 2);
     assert.equal(groups[0]?.groupOrderID, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("OpenLigaDB client loads a single match with the live TTL", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ input: RequestInfo | URL; init?: RequestInit }> = [];
+
+  globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    requests.push({ input, init });
+    return jsonResponse({
+      matchID: 82127,
+      matchResults: [{ pointsTeam1: 0, pointsTeam2: 1 }],
+    });
+  };
+
+  try {
+    const match = await getMatchById(82127);
+
+    assert.equal(String(requests[0]?.input), "https://api.openligadb.de/getmatchdata/82127");
+    assert.equal(
+      requests[0]?.init?.next?.revalidate,
+      OPENLIGADB_CACHE_SECONDS.liveMatchday
+    );
+    assert.equal(match.matchResults?.[0]?.pointsTeam2, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("OpenLigaDB all-season matches can use a shorter caller TTL", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: RequestInit[] = [];
+
+  globalThis.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
+    requests.push(init ?? {});
+    return jsonResponse([]);
+  };
+
+  try {
+    await getAllMatches("wm26", 2026, {
+      next: { revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday },
+    });
+
+    assert.equal(
+      requests[0]?.next?.revalidate,
+      OPENLIGADB_CACHE_SECONDS.liveMatchday
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }

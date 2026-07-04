@@ -64,7 +64,7 @@ const getCachedWorldCupSnapshot = unstable_cache(
     }
   },
   ["world-cup-snapshot", HOME_DATA_CACHE_VERSION],
-  { revalidate: OPENLIGADB_CACHE_SECONDS.seasonMatches }
+  { revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday }
 );
 
 const getCompetitionData = async (
