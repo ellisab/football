@@ -1,5 +1,6 @@
-import type { LeagueKey } from "../../leagues";
+import { isBundesligaMatchdayLeague, type LeagueKey } from "../../leagues";
 import {
+  areAllMatchesFinished,
   findNextGroup,
   getKnockoutLeg,
   getKnockoutStageName,
@@ -360,6 +361,17 @@ export const resolveRoundSnapshots = async ({
     });
   }
 
+  if (
+    isBundesligaMatchdayLeague(resolvedLeague) &&
+    !areAllMatchesFinished(currentRound.matches)
+  ) {
+    return {
+      currentRound,
+      nextRound: { matches: [] },
+      errorKeys: [],
+    };
+  }
+
   let latestResultsRound = hasAnyMatchResult(currentRound.matches)
     ? currentRound
     : undefined;
@@ -430,6 +442,24 @@ export const resolveRoundSnapshots = async ({
 
     if (candidateRound.matches.length === 0) {
       continue;
+    }
+
+    if (isBundesligaMatchdayLeague(resolvedLeague)) {
+      if (areAllMatchesFinished(candidateRound.matches)) {
+        latestResultsRound = {
+          groupName: candidateRound.groupName,
+          groupOrderID: candidateRound.groupOrderID,
+          matches: candidateRound.matches,
+        };
+        continue;
+      }
+
+      nextRound = {
+        groupName: candidateRound.groupName,
+        groupOrderID: candidateRound.groupOrderID,
+        matches: candidateRound.matches,
+      };
+      break;
     }
 
     if (hasAnyMatchResult(candidateRound.matches)) {

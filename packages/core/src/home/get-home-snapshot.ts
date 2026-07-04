@@ -3,12 +3,19 @@ import {
   getAvailableGroupKeys,
   getCurrentSeasonYear,
   hasLeagueTable,
+  isBundesligaMatchdayLeague,
   pickLeagueEntryForSeason,
   resolveEffectiveLeagueShortcut,
   resolveLeagueSelection,
   resolveSeasonSelection,
+  type LeagueKey,
 } from "../leagues";
-import { sortGoals, sortMatchesByKickoff } from "../matches";
+import {
+  areAllMatchesFinished,
+  hasAnyMatchResult,
+  sortGoals,
+  sortMatchesByKickoff,
+} from "../matches";
 import { openLigaDbDataSource, type ApiGroup } from "../openligadb";
 import { WORLD_CUP_LEAGUE_KEY, WORLD_CUP_SEASON } from "../world-cup";
 import type { FootballDataSource, HomeRequestOptions } from "./data-source";
@@ -100,6 +107,7 @@ const loadRoundSnapshot = async ({
 
 const resolvePrimaryRoundSnapshot = async ({
   dataSource,
+  resolvedLeague,
   currentGroup,
   groups,
   effectiveShortcut,
@@ -108,6 +116,7 @@ const resolvePrimaryRoundSnapshot = async ({
   requestOptions,
 }: {
   dataSource: FootballDataSource;
+  resolvedLeague: LeagueKey;
   currentGroup: ApiGroup | null;
   groups: ApiGroup[];
   effectiveShortcut: string;
@@ -130,6 +139,83 @@ const resolvePrimaryRoundSnapshot = async ({
         requestOptions,
       })
     : undefined;
+
+  if (isBundesligaMatchdayLeague(resolvedLeague) && orderedGroups.length > 0) {
+    let firstSeasonGroupResult:
+      | {
+          group: ApiGroup;
+          round: HomeRoundSnapshot;
+        }
+      | undefined;
+    let latestFinishedGroupResult:
+      | {
+          group: ApiGroup;
+          round: HomeRoundSnapshot;
+        }
+      | undefined;
+    let matchdayFailed = false;
+
+    for (const group of orderedGroups) {
+      const roundResult =
+        currentGroup?.groupOrderID === group.groupOrderID && currentRoundResult
+          ? currentRoundResult
+          : await loadRoundSnapshot({
+              dataSource,
+              group,
+              groups: orderedGroups,
+              effectiveShortcut,
+              resolvedSeason,
+              requestOptions,
+            });
+
+      matchdayFailed = matchdayFailed || roundResult.failed;
+
+      firstSeasonGroupResult ??= {
+        group,
+        round: roundResult.round,
+      };
+
+      if (roundResult.round.matches.length === 0) {
+        continue;
+      }
+
+      if (areAllMatchesFinished(roundResult.round.matches)) {
+        latestFinishedGroupResult = {
+          group,
+          round: roundResult.round,
+        };
+        continue;
+      }
+
+      if (
+        hasAnyMatchResult(roundResult.round.matches) ||
+        !latestFinishedGroupResult
+      ) {
+        return {
+          currentGroup: group,
+          currentRound: roundResult.round,
+          errorKeys: matchdayFailed ? ["matchday"] : [],
+        };
+      }
+
+      return {
+        currentGroup: latestFinishedGroupResult.group,
+        currentRound: latestFinishedGroupResult.round,
+        errorKeys: matchdayFailed ? ["matchday"] : [],
+      };
+    }
+
+    const fallbackGroupResult =
+      latestFinishedGroupResult ?? firstSeasonGroupResult;
+
+    return {
+      currentGroup: fallbackGroupResult?.group ?? currentGroup,
+      currentRound:
+        fallbackGroupResult?.round ?? currentRoundResult?.round ?? { matches: [] },
+      errorKeys: matchdayFailed ? ["matchday"] : [],
+    };
+  }
+
   const shouldUseCurrentGroup =
     resolvedSeason === referenceSeason &&
     (currentRoundResult?.round.matches.length ?? 0) > 0;
@@ -250,6 +336,7 @@ export const getHomeSnapshot = async (
   const dataErrors = [...primaryHomeData.errorKeys];
   const primaryRoundData = await resolvePrimaryRoundSnapshot({
     dataSource,
+    resolvedLeague,
     currentGroup: primaryHomeData.currentGroup,
     groups: primaryHomeData.groups,
     effectiveShortcut,

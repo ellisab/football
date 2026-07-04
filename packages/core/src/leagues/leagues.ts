@@ -23,6 +23,18 @@ export const hasLeagueTable = (leagueKey: LeagueKey) => {
   return leagueKey !== "dfb";
 };
 
+const BUNDESLIGA_MATCHDAY_LEAGUES = new Set<LeagueKey>([
+  "bl1",
+  "bl2",
+  "fbl1",
+]);
+
+export const isBundesligaMatchdayLeague = (leagueKey: LeagueKey) => {
+  return BUNDESLIGA_MATCHDAY_LEAGUES.has(leagueKey);
+};
+
+const UNSUPPORTED_LEAGUE_REGEX = /\b(2\.?\s*frauen[- ]bundesliga|fbl2|bl2f)\b/i;
+
 export const normalizeText = (value?: string) => (value ?? "").toLowerCase();
 
 export const isLeagueKey = (value: string): value is LeagueKey => {
@@ -68,6 +80,12 @@ export const matchesLeagueGroup = (league: ApiLeague, groupKey: LeagueKey) => {
 
   const leagueName = normalizeText(league.leagueName);
   const leagueShortcut = normalizeText(league.leagueShortcut);
+  const combined = `${leagueShortcut} ${leagueName}`;
+
+  if (UNSUPPORTED_LEAGUE_REGEX.test(combined)) {
+    return false;
+  }
+
   const shortcutGroup = resolveGroupByShortcut(leagueShortcut);
 
   if (shortcutGroup) {
@@ -81,6 +99,11 @@ export const matchesLeagueGroup = (league: ApiLeague, groupKey: LeagueKey) => {
 const resolveGroupKeyForLeague = (league: ApiLeague): LeagueKey | undefined => {
   const leagueShortcut = normalizeText(league.leagueShortcut);
   const leagueName = normalizeText(league.leagueName);
+  const combined = `${leagueShortcut} ${leagueName}`;
+
+  if (UNSUPPORTED_LEAGUE_REGEX.test(combined)) {
+    return undefined;
+  }
 
   const shortcutMatch = resolveGroupByShortcut(leagueShortcut);
   if (shortcutMatch) return shortcutMatch;

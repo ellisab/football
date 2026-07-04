@@ -12,11 +12,6 @@ export default async function CompetitionPage({
 }) {
   const [{ slug }, query] = await Promise.all([params, searchParams]);
 
-  if (slug === "men") {
-    const data = await getHomePageData({ league: "bl1", season: query.season });
-    return <HomeView data={data} />;
-  }
-
   const league = getLeagueKeyFromSlug(slug);
   if (!league) notFound();
 

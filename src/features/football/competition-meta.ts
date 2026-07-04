@@ -54,17 +54,8 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     href: "/competitions/women",
     icon: Shield,
     label: "Frauen-Bundesliga",
-    shortLabel: "Frauen",
+    shortLabel: "Frauen-Bundesliga",
     slug: "women",
-  },
-  fbl2: {
-    accentClass: "from-[#b890ff] via-[#6eeaf2] to-[#f5edc9]",
-    category: "Frauen",
-    href: "/competitions/women-2",
-    icon: Shirt,
-    label: "2. Frauen-Bundesliga",
-    shortLabel: "Frauen 2",
-    slug: "women-2",
   },
   dfb: {
     accentClass: "from-[#43c886] via-[#f5edc9] to-[#030708]",
@@ -119,8 +110,7 @@ export const PRIMARY_NAV_ITEMS = [
   { href: "/competitions/world-cup", label: "WM" },
   { href: "/competitions/bundesliga-1", label: "Bundesliga" },
   { href: "/competitions/bundesliga-2", label: "2. Bundesliga" },
-  { href: "/competitions/women", label: "Frauen" },
-  { href: "/competitions/men", label: "Männer" },
+  { href: "/competitions/women", label: "Frauen-Bundesliga" },
   { href: "/tables", label: "Tabellen" },
   { href: "/teams", label: "Teams" },
 ] as const;

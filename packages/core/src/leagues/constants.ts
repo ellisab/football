@@ -33,12 +33,6 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
     shortcutMatch: ["fbl1", "bl1f", "dbl1", "frbu"],
   },
   {
-    key: "fbl2",
-    label: "2. Frauen-Bundesliga",
-    nameMatch: ["2. frauen-bundesliga", "2. frauen bundesliga"],
-    shortcutMatch: ["fbl2", "bl2f"],
-  },
-  {
     key: "dfb",
     label: "DFB-Pokal",
     nameMatch: ["dfb-pokal", "dfb pokal"],

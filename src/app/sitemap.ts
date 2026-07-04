@@ -10,7 +10,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/competitions/bundesliga-1", priority: 0.9 },
     { path: "/competitions/bundesliga-2", priority: 0.88 },
     { path: "/competitions/women", priority: 0.86 },
-    { path: "/competitions/men", priority: 0.84 },
     { path: "/tables", priority: 0.82 },
     { path: "/teams", priority: 0.8 },
   ];

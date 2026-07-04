@@ -2,7 +2,6 @@ export type LeagueKey =
   | "bl1"
   | "bl2"
   | "fbl1"
-  | "fbl2"
   | "dfb"
   | "cl"
   | "wc";

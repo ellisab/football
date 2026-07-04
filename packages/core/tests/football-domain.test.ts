@@ -209,11 +209,13 @@ test("buildLeagueEntriesByGroup maps women Bundesliga shortcuts to dedicated gro
 
   assert.equal(grouped.get("fbl1")?.length, 1);
   assert.equal(grouped.get("fbl1")?.[0]?.leagueShortcut, "fbl1");
-  assert.equal(grouped.get("fbl2")?.length, 1);
-  assert.equal(grouped.get("fbl2")?.[0]?.leagueShortcut, "fbl2");
+  assert.equal(
+    grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "fbl2"),
+    false
+  );
 });
 
-test("buildLeagueEntriesByGroup resolves bl1f/bl2f by most specific shortcut match", () => {
+test("buildLeagueEntriesByGroup resolves bl1f specifically and ignores bl2f", () => {
   const leagues = [
     {
       leagueShortcut: "bl1f",
@@ -249,8 +251,14 @@ test("buildLeagueEntriesByGroup resolves bl1f/bl2f by most specific shortcut mat
     grouped.get("fbl1")?.some((entry) => entry.leagueShortcut === "bl1fan"),
     false
   );
-  assert.equal(grouped.get("fbl2")?.length, 1);
-  assert.equal(grouped.get("fbl2")?.[0]?.leagueShortcut, "bl2f");
+  assert.equal(
+    grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "bl2f"),
+    false
+  );
+  assert.equal(
+    grouped.get("bl2")?.some((entry) => entry.leagueShortcut === "bl2f"),
+    false
+  );
   assert.equal(grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "bl1/arena"), true);
   assert.equal(grouped.get("bl2")?.length, 0);
 });
