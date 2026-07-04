@@ -141,6 +141,25 @@ const resolvePrimaryRoundSnapshot = async ({
     : undefined;
 
   if (isBundesligaMatchdayLeague(resolvedLeague) && orderedGroups.length > 0) {
+    if (currentGroup && currentRoundResult) {
+      const currentGroupOrderID = currentGroup.groupOrderID;
+      const firstGroupOrderID = orderedGroups[0]?.groupOrderID;
+      const currentRoundMatches = currentRoundResult.round.matches;
+      const shouldTrustCurrentGroup =
+        currentRoundMatches.length > 0 &&
+        (areAllMatchesFinished(currentRoundMatches) ||
+          hasAnyMatchResult(currentRoundMatches) ||
+          currentGroupOrderID === firstGroupOrderID);
+
+      if (shouldTrustCurrentGroup) {
+        return {
+          currentGroup,
+          currentRound: currentRoundResult.round,
+          errorKeys: currentRoundResult.failed ? ["matchday"] : [],
+        };
+      }
+    }
+
     let firstSeasonGroupResult:
       | {
           group: ApiGroup;

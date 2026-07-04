@@ -48,12 +48,14 @@ test("loadMatchdayResults reuses cached matches when lastChanged is unchanged", 
   const first = await loadMatchdayResults({
     dataSource,
     groupOrderId: 1,
+    lastChangeStrategy: "always",
     leagueShortcut: "bl1",
     season: 2026,
   });
   const second = await loadMatchdayResults({
     dataSource,
     groupOrderId: 1,
+    lastChangeStrategy: "always",
     leagueShortcut: "bl1",
     season: 2026,
   });
@@ -80,6 +82,7 @@ test("loadMatchdayResults refetches matches when lastChanged changes", async () 
   await loadMatchdayResults({
     dataSource,
     groupOrderId: 2,
+    lastChangeStrategy: "always",
     leagueShortcut: "bl1",
     season: 2026,
   });
@@ -89,6 +92,7 @@ test("loadMatchdayResults refetches matches when lastChanged changes", async () 
   const updated = await loadMatchdayResults({
     dataSource,
     groupOrderId: 2,
+    lastChangeStrategy: "always",
     leagueShortcut: "bl1",
     season: 2026,
   });
@@ -96,4 +100,34 @@ test("loadMatchdayResults refetches matches when lastChanged changes", async () 
   assert.equal(updated.cacheStatus, "stale");
   assert.equal(matchdayCalls, 2);
   assert.equal(updated.matches[0]?.matchID, 2);
+});
+
+test("loadMatchdayResults skips last-change preflight on a cold default load", async () => {
+  clearMatchdayCache();
+
+  let lastChangeCalls = 0;
+  let matchdayCalls = 0;
+  const dataSource = createDataSource({
+    getLastChangeDate: async () => {
+      lastChangeCalls += 1;
+      return "2026-07-04T18:00:00";
+    },
+    getMatchdayResults: async () => {
+      matchdayCalls += 1;
+      return [createMatch(3)];
+    },
+  });
+
+  const result = await loadMatchdayResults({
+    dataSource,
+    groupOrderId: 3,
+    leagueShortcut: "fbl1",
+    season: 2025,
+  });
+
+  assert.equal(result.cacheStatus, "miss");
+  assert.equal(result.lastChanged, undefined);
+  assert.equal(result.matches[0]?.matchID, 3);
+  assert.equal(lastChangeCalls, 0);
+  assert.equal(matchdayCalls, 1);
 });

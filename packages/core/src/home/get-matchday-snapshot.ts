@@ -121,6 +121,7 @@ export const getMatchdaySnapshot = async (
   const matchdayResult = await loadMatchdayResults({
     dataSource,
     groupOrderId,
+    lastChangeStrategy: "always",
     leagueShortcut: effectiveShortcut,
     requestOptions,
     season: resolvedSeason,

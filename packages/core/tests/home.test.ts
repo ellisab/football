@@ -178,6 +178,49 @@ test("getHomeSnapshot exposes the next Bundesliga matchday after the current one
   }
 });
 
+test("getHomeSnapshot does not rescan previous Bundesliga groups when the current group is finished", async () => {
+  const originalFetch = globalThis.fetch;
+  const paths: string[] = [];
+
+  globalThis.fetch = createFetchMock((path) => {
+    paths.push(path);
+
+    switch (path) {
+      case "/getavailableleagues":
+        return jsonResponse(LEAGUES_RESPONSE);
+      case "/getcurrentgroup/bl1":
+        return jsonResponse({
+          groupID: 3,
+          groupName: "3. Spieltag",
+          groupOrderID: 3,
+        });
+      case "/getbltable/bl1/2025":
+        return jsonResponse([]);
+      case "/getavailablegroups/bl1/2025":
+        return jsonResponse([
+          { groupID: 1, groupName: "1. Spieltag", groupOrderID: 1 },
+          { groupID: 2, groupName: "2. Spieltag", groupOrderID: 2 },
+          { groupID: 3, groupName: "3. Spieltag", groupOrderID: 3 },
+        ]);
+      case "/getmatchdata/bl1/2025/3":
+        return jsonResponse([createFinishedMatch(3, 1, "Team A", 2, "Team B")]);
+      default:
+        return jsonResponse({ path }, 404);
+    }
+  });
+
+  try {
+    const snapshot = await getHomeSnapshot({ league: "bl1", season: "2025" });
+
+    assert.equal(snapshot.currentRound.groupOrderID, 3);
+    assert.equal(snapshot.currentRound.groupName, "3. Spieltag");
+    assert.equal(paths.includes("/getmatchdata/bl1/2025/1"), false);
+    assert.equal(paths.includes("/getmatchdata/bl1/2025/2"), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 const BUNDESLIGA_FAMILY_CASES = [
   {
     league: "bl1",
@@ -448,6 +491,70 @@ test("getHomeSnapshot falls back to the latest available women season when 2026 
     assert.equal(snapshot.resolvedLeague, "fbl1");
     assert.equal(snapshot.resolvedSeason, 2025);
     assert.deepEqual(snapshot.leagueOptions[0]?.seasons, [2025]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("getHomeSnapshot skips Champions League future-round probing when the first scheduled group is empty", async () => {
+  const originalFetch = globalThis.fetch;
+  const paths: string[] = [];
+
+  globalThis.fetch = createFetchMock((path) => {
+    paths.push(path);
+
+    switch (path) {
+      case "/getavailableleagues":
+        return jsonResponse([
+          {
+            leagueShortcut: "ucl",
+            leagueName: "UEFA Champions League 2026/2027",
+            leagueSeason: 2026,
+            sport: { sportName: "Football" },
+          },
+        ]);
+      case "/getcurrentgroup/ucl":
+        return jsonResponse({
+          groupID: 1,
+          groupName: "1. Spieltag",
+          groupOrderID: 1,
+        });
+      case "/getbltable/ucl/2026":
+        return jsonResponse([]);
+      case "/getavailablegroups/cl/2026":
+        return jsonResponse({ path }, 404);
+      case "/getavailablegroups/ucl/2026":
+        return jsonResponse([
+          { groupID: 1, groupName: "1. Spieltag", groupOrderID: 1 },
+          { groupID: 2, groupName: "2. Spieltag", groupOrderID: 2 },
+          { groupID: 3, groupName: "3. Spieltag", groupOrderID: 3 },
+        ]);
+      case "/getmatchdata/ucl/2026/1":
+      case "/getmatchdata/ucl/2026/2":
+      case "/getmatchdata/ucl/2026/3":
+      case "/getmatchdata/ucl/2026/9":
+        return jsonResponse([]);
+      default:
+        return jsonResponse({ path }, 404);
+    }
+  });
+
+  try {
+    const snapshot = await getHomeSnapshot(
+      { league: "cl", season: "2026" },
+      { fallbackYear: 2026 }
+    );
+
+    assert.equal(snapshot.currentRound.groupOrderID, 1);
+    assert.equal(snapshot.nextRound.matches.length, 0);
+    assert.equal(
+      paths.filter((path) => path === "/getmatchdata/ucl/2026/2").length,
+      1
+    );
+    assert.equal(
+      paths.filter((path) => path === "/getmatchdata/ucl/2026/3").length,
+      1
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }

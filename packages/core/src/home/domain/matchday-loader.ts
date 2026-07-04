@@ -22,6 +22,8 @@ export type MatchdayLoadResult = {
   matches: ApiMatch[];
 };
 
+export type LastChangeStrategy = "always" | "when-cached" | "never";
+
 const MATCHDAY_CACHE_MAX_AGE_MS =
   OPENLIGADB_CACHE_SECONDS.seasonMatches * 1_000;
 
@@ -64,12 +66,14 @@ export const clearMatchdayCache = () => {
 export const loadMatchdayResults = async ({
   dataSource,
   groupOrderId,
+  lastChangeStrategy = "when-cached",
   leagueShortcut,
   requestOptions,
   season,
 }: {
   dataSource: FootballDataSource;
   groupOrderId: number;
+  lastChangeStrategy?: LastChangeStrategy;
   leagueShortcut: string;
   requestOptions?: HomeRequestOptions;
   season: number;
@@ -79,24 +83,29 @@ export const loadMatchdayResults = async ({
   const now = Date.now();
   let lastChanged: string | undefined;
   let lastChangeUnavailable = false;
+  const shouldCheckLastChanged =
+    lastChangeStrategy === "always" ||
+    (lastChangeStrategy === "when-cached" && cached !== undefined);
 
-  try {
-    lastChanged = await dataSource.getLastChangeDate(
-      leagueShortcut,
-      season,
-      groupOrderId,
-      requestOptions
-    );
-  } catch (error) {
-    lastChangeUnavailable = true;
-
-    if (getStatusCode(error) !== 404 && shouldLogDiagnostics()) {
-      console.warn("[OpenLigaDB] last-change check failed", {
-        groupOrderId,
+  if (shouldCheckLastChanged) {
+    try {
+      lastChanged = await dataSource.getLastChangeDate(
         leagueShortcut,
         season,
-        status: getStatusCode(error),
-      });
+        groupOrderId,
+        requestOptions
+      );
+    } catch (error) {
+      lastChangeUnavailable = true;
+
+      if (getStatusCode(error) !== 404 && shouldLogDiagnostics()) {
+        console.warn("[OpenLigaDB] last-change check failed", {
+          groupOrderId,
+          leagueShortcut,
+          season,
+          status: getStatusCode(error),
+        });
+      }
     }
   }
 
@@ -119,7 +128,11 @@ export const loadMatchdayResults = async ({
     requestOptions
   );
 
-  const cacheStatus = lastChangeUnavailable
+  const cacheStatus = !shouldCheckLastChanged
+    ? cached
+      ? "bypass"
+      : "miss"
+    : lastChangeUnavailable
     ? "unchecked"
     : cached
       ? "stale"

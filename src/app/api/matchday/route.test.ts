@@ -81,6 +81,10 @@ test("/api/matchday loads only the requested matchday", async () => {
       paths.filter((path) => path.startsWith("/getmatchdata")),
       ["/getmatchdata/bl1/2025/10"]
     );
+    assert.deepEqual(
+      paths.filter((path) => path.startsWith("/getlastchangedate")),
+      ["/getlastchangedate/bl1/2025/10"]
+    );
     assert.equal(paths.includes("/getmatchdata/bl2/2025/10"), false);
     assert.equal(paths.includes("/getcurrentgroup/bl1"), false);
     assert.equal(paths.includes("/getbltable/bl1/2025"), false);

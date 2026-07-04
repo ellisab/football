@@ -17,6 +17,26 @@ const REVALIDATE = {
   next: { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot },
 };
 const HOME_DATA_CACHE_VERSION = "results-v3";
+const HOME_SNAPSHOT_TIMEOUT_MS = 3_500;
+
+const withTimeout = <T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  getFallback: () => T
+): Promise<T> => {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timeout = setTimeout(() => resolve(getFallback()), timeoutMs);
+  });
+
+  return Promise.race([
+    promise.finally(() => {
+      if (timeout) clearTimeout(timeout);
+    }),
+    timeoutPromise,
+  ]);
+};
+
 const getCachedHomeSnapshot = unstable_cache(
   async (params: { league?: string; season?: string }) => {
     try {
@@ -53,12 +73,20 @@ const getCompetitionData = async (
     season?: string;
   }
 ): Promise<WebCompetitionViewModel> => {
-  const snapshotResult = await getCachedHomeSnapshot(params);
+  const snapshotResult = await withTimeout(
+    getCachedHomeSnapshot(params),
+    HOME_SNAPSHOT_TIMEOUT_MS,
+    () => ({ data: undefined })
+  );
   if (!snapshotResult.data) {
     const fallback = createFallbackCompetitionData(params);
     const worldCupResult =
       fallback.resolvedLeague === "wc"
-        ? await getCachedWorldCupSnapshot(fallback.resolvedSeason)
+        ? await withTimeout(
+            getCachedWorldCupSnapshot(fallback.resolvedSeason),
+            HOME_SNAPSHOT_TIMEOUT_MS,
+            () => ({ data: undefined })
+          )
         : undefined;
 
     return {
@@ -70,7 +98,11 @@ const getCompetitionData = async (
   const state = createHomeState(snapshotResult.data);
   const worldCupResult =
     state.resolvedLeague === "wc"
-      ? await getCachedWorldCupSnapshot(state.resolvedSeason)
+      ? await withTimeout(
+          getCachedWorldCupSnapshot(state.resolvedSeason),
+          HOME_SNAPSHOT_TIMEOUT_MS,
+          () => ({ data: undefined })
+        )
       : undefined;
 
   return {

@@ -28,7 +28,7 @@ export function LiveMatchdayRefresher({
     if (targets.length === 0) return;
 
     let disposed = false;
-    const initialLastChanged = new Map(
+    const knownLastChanged = new Map(
       targets.map((target) => [getTargetKey(target), target.lastChanged])
     );
 
@@ -60,8 +60,14 @@ export function LiveMatchdayRefresher({
           return false;
         }
 
-        const previous = initialLastChanged.get(result.value.key);
-        return previous !== undefined && previous !== result.value.payload.lastChanged;
+        const previous = knownLastChanged.get(result.value.key);
+
+        if (previous === undefined) {
+          knownLastChanged.set(result.value.key, result.value.payload.lastChanged);
+          return false;
+        }
+
+        return previous !== result.value.payload.lastChanged;
       });
 
       if (changed) {

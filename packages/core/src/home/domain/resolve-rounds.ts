@@ -361,6 +361,26 @@ export const resolveRoundSnapshots = async ({
     });
   }
 
+  const orderedGroupOrderIDs = groups
+    .map((group) => group?.groupOrderID)
+    .filter(
+      (groupOrderID): groupOrderID is number =>
+        typeof groupOrderID === "number"
+    )
+    .sort((a, b) => a - b);
+  const initialGroupOrderID = currentGroup.groupOrderID as number | undefined;
+
+  if (
+    currentRound.matches.length === 0 &&
+    initialGroupOrderID === orderedGroupOrderIDs[0]
+  ) {
+    return {
+      currentRound,
+      nextRound: { matches: [] },
+      errorKeys: [],
+    };
+  }
+
   if (
     isBundesligaMatchdayLeague(resolvedLeague) &&
     !areAllMatchesFinished(currentRound.matches)
