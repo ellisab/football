@@ -14,7 +14,6 @@ import {
   getMatchIdentity,
   getMatchScore,
   getMatchStatus,
-  getMatchStatusLabel,
   getStatusCounts,
   getTeamLabel,
   getTodayCompetitionMatches,
@@ -24,11 +23,9 @@ import {
   type CompetitionMatch,
 } from "@/features/football/view-utils";
 import { StandingsCard } from "@/features/standings/components/standings-card";
-import { TeamBadge } from "@/features/teams/components/team-badge";
 import { WorldCupPanel } from "@/features/world-cup/components/world-cup-panel";
 import {
   Activity,
-  ArrowRight,
   CalendarDays,
   Clock3,
   Goal,
@@ -49,6 +46,7 @@ import {
   LiveMatchdayRefresher,
   type LiveMatchdayPollTarget,
 } from "./live-matchday-refresher";
+import { MatchTicker } from "./match-ticker";
 import { RoundSection } from "./round-section";
 import { SectionKicker } from "./section-kicker";
 
@@ -375,122 +373,6 @@ function OrbitContextBar({
         </span>
       </div>
     </div>
-  );
-}
-
-function MatchTicker({ matches }: { matches: CompetitionMatch[] }) {
-  if (matches.length === 0) {
-    return (
-      <section className="poster-surface relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#061512]/88 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <SectionKicker>Live-Leiste</SectionKicker>
-            <p className="mt-2 text-sm text-[#a8bbb2]">
-              In den aktuellen Daten sind keine laufenden oder kommenden Spiele sichtbar.
-            </p>
-          </div>
-          <Clock3 className="h-5 w-5 text-[#6eeaf2]" />
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section
-      aria-label="Live und kommende Spiele"
-      className="poster-surface live-rail relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#061512]/88 p-3"
-    >
-      <div className="mb-3 flex items-center justify-between gap-3 px-1">
-        <div className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-full border border-[#6eeaf2]/30 bg-[#07363a]/70 text-[#ddfbff]">
-            <Radio className="h-4 w-4" />
-          </span>
-          <div>
-            <SectionKicker>Jetzt / Gleich / Ende</SectionKicker>
-            <p className="mt-1 text-xs text-[#8da49b]">Spiel-Leiste wischen</p>
-          </div>
-        </div>
-        <Link
-          href="/today"
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 text-xs font-bold text-[#f2f7f2] transition-colors hover:border-[#6eeaf2]/30 hover:bg-white/[0.08]"
-        >
-          Alles heute
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      </div>
-
-      <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {matches.slice(0, 14).map((item, index) => {
-          const { competition, match } = item;
-          const status = getMatchStatus(match);
-          const meta = getCompetitionMeta(competition.resolvedLeague);
-          const Icon = meta.icon;
-          const score = getMatchScore(match);
-          const href = match.matchID ? `/matches/${match.matchID}` : "#today";
-
-          return (
-            <Link
-              key={`${competition.resolvedLeague}-${getMatchIdentity(match)}-${index}`}
-              href={href}
-              className="group grid min-h-[9rem] w-[17.5rem] shrink-0 content-between overflow-hidden rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-3 transition-all hover:-translate-y-0.5 hover:border-[#6eeaf2]/35 hover:bg-white/[0.08]"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#d8b86a]">
-                  <Icon className="h-3 w-3" />
-                  <span className="truncate">{meta.shortLabel}</span>
-                </span>
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-1 text-[0.68rem] font-bold uppercase tracking-[0.12em] ${
-                    status === "live"
-                      ? "live-chip border border-[#6eeaf2]/35 bg-[#07363a]/70 text-[#ddfbff]"
-                      : status === "finished"
-                        ? "border border-[#d8b86a]/25 bg-[#273021]/46 text-[#f5edc9]"
-                        : "border border-white/10 bg-white/[0.045] text-[#a8bbb2]"
-                  }`}
-                >
-                  {getMatchStatusLabel(match)}
-                </span>
-              </div>
-
-              <div className="grid gap-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <TeamBadge
-                      name={getTeamLabel(match.team1, "Offen")}
-                      iconUrl={match.team1?.teamIconUrl}
-                      size={26}
-                      className="bg-white/10 ring-1 ring-white/10"
-                    />
-                    <span className="truncate text-sm font-semibold text-[#f2f7f2]">
-                      {getTeamLabel(match.team1, "Offen")}
-                    </span>
-                  </div>
-                  <span className="font-mono text-lg font-bold text-[#f5edc9]">
-                    {score.split(":")[0] ?? "-"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <TeamBadge
-                      name={getTeamLabel(match.team2, "Offen")}
-                      iconUrl={match.team2?.teamIconUrl}
-                      size={26}
-                      className="bg-white/10 ring-1 ring-white/10"
-                    />
-                    <span className="truncate text-sm font-semibold text-[#f2f7f2]">
-                      {getTeamLabel(match.team2, "Offen")}
-                    </span>
-                  </div>
-                  <span className="font-mono text-lg font-bold text-[#f5edc9]">
-                    {score.split(":")[1] ?? "-"}
-                  </span>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
   );
 }
 
@@ -878,7 +760,12 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
 
         <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-8 px-4 pb-14 pt-6 sm:px-6 sm:pb-20 sm:pt-8 lg:gap-10 lg:px-10">
           <div className="-mt-16 sm:-mt-20">
-            <MatchTicker matches={tickerMatches} />
+            <MatchTicker
+              items={tickerMatches.map(({ competition, match }) => ({
+                league: competition.resolvedLeague,
+                match,
+              }))}
+            />
           </div>
           <ErrorBanner errors={data.visibleErrors} />
           {data.isOverview ? (
