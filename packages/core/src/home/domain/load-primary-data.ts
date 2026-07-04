@@ -8,6 +8,7 @@ import { sortGoals } from "../../matches";
 import type { HomeErrorKey } from "../types";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import { getGroupsWithFallback } from "./league-groups";
+import { loadMatchdayResults } from "./matchday-loader";
 import { getStatusCode } from "./shared";
 
 export const loadPrimaryHomeData = async ({
@@ -45,12 +46,13 @@ export const loadPrimaryHomeData = async ({
   );
   const playoffMatchesPromise =
     resolvedLeague === "cl"
-      ? dataSource.getMatchdayResults(
-          getDataShortcutForLeague(resolvedLeague),
-          resolvedSeason,
-          9,
-          requestOptions
-        )
+      ? loadMatchdayResults({
+          dataSource,
+          groupOrderId: 9,
+          leagueShortcut: getDataShortcutForLeague(resolvedLeague),
+          requestOptions,
+          season: resolvedSeason,
+        }).then((result) => result.matches)
       : Promise.resolve([]);
 
   const [currentGroupResult, tableResult, groupsResult, playoffResult] =

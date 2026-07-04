@@ -7,38 +7,150 @@ import type {
   ApiTeam,
   FetchOptions,
 } from "./types";
+import {
+  OPENLIGADB_CACHE_SECONDS,
+  withOpenLigaDbCache,
+} from "./cache-policy";
 
 const API_BASE = "https://api.openligadb.de";
 const REQUEST_TIMEOUT_MS = 5_000;
+const RETRY_DELAYS_MS = [300, 900] as const;
+
+const getStatusCode = (error: unknown) => {
+  return (error as { status?: number } | undefined)?.status;
+};
+
+const isRetryableStatus = (status: number | undefined) => {
+  return status === 429 || (typeof status === "number" && status >= 500);
+};
+
+const parseRetryAfterMs = (value: string | null) => {
+  if (!value) return undefined;
+
+  const seconds = Number.parseFloat(value);
+  if (!Number.isNaN(seconds)) return Math.max(0, seconds * 1_000);
+
+  const retryAt = Date.parse(value);
+  if (Number.isNaN(retryAt)) return undefined;
+
+  return Math.max(0, retryAt - Date.now());
+};
+
+const wait = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+const getRetryDelayMs = (response: Response | undefined, retryIndex: number) => {
+  const retryAfterMs = parseRetryAfterMs(response?.headers.get("retry-after") ?? null);
+  if (retryAfterMs !== undefined) return retryAfterMs;
+
+  const baseDelay = RETRY_DELAYS_MS[retryIndex] ?? RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1];
+  const jitter = Math.floor(Math.random() * 200);
+  return baseDelay + jitter;
+};
+
+const createOpenLigaDbError = (status: number) => {
+  const error = new Error(`OpenLigaDB-Anfrage fehlgeschlagen (${status})`);
+  (error as Error & { status?: number }).status = status;
+  return error;
+};
+
+const logRetry = ({
+  attempts,
+  path,
+  status,
+  final,
+}: {
+  attempts: number;
+  path: string;
+  status?: number;
+  final: boolean;
+}) => {
+  if (process.env.OPENLIGADB_DIAGNOSTICS !== "1") return;
+  if (attempts <= 1) return;
+
+  const payload = { attempts, path, status };
+
+  if (final) {
+    console.warn("[OpenLigaDB] request failed after retries", payload);
+    return;
+  }
+
+  console.warn("[OpenLigaDB] request recovered after retry", payload);
+};
 
 const fetchJson = async <T>(
   path: string,
   options?: FetchOptions,
   baseUrl: string = API_BASE
 ): Promise<T> => {
-  const response = await fetch(`${baseUrl}${path}`, {
-    ...options,
-    signal: options?.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-  });
+  let lastError: unknown;
+  let lastStatus: number | undefined;
+  let attemptsMade = 0;
 
-  if (!response.ok) {
-    const error = new Error(`OpenLigaDB-Anfrage fehlgeschlagen (${response.status})`);
-    (error as Error & { status?: number }).status = response.status;
-    throw error;
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
+    attemptsMade = attempt + 1;
+    let response: Response | undefined;
+
+    try {
+      response = await fetch(`${baseUrl}${path}`, {
+        ...options,
+        signal: options?.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+
+      if (response.ok) {
+        logRetry({
+          attempts: attempt + 1,
+          path,
+          status: response.status,
+          final: false,
+        });
+        return response.json() as Promise<T>;
+      }
+
+      lastStatus = response.status;
+      lastError = createOpenLigaDbError(response.status);
+
+      if (!isRetryableStatus(response.status) || attempt === RETRY_DELAYS_MS.length) {
+        break;
+      }
+    } catch (error) {
+      lastError = error;
+      lastStatus = getStatusCode(error);
+
+      if (!isRetryableStatus(lastStatus) || attempt === RETRY_DELAYS_MS.length) {
+        break;
+      }
+    }
+
+    await wait(getRetryDelayMs(response, attempt));
   }
 
-  return response.json() as Promise<T>;
+  logRetry({
+    attempts: attemptsMade,
+    path,
+    status: lastStatus,
+    final: true,
+  });
+
+  throw lastError;
 };
 
 export const getAvailableLeagues = async (options?: FetchOptions) => {
-  return fetchJson<ApiLeague[]>("/getavailableleagues", options);
+  return fetchJson<ApiLeague[]>(
+    "/getavailableleagues",
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.availableLeagues)
+  );
 };
 
 export const getAvailableLeaguesBySeason = async (
   season: number,
   options?: FetchOptions
 ) => {
-  return fetchJson<ApiLeague[]>(`/getavailableleagues/${season}`, options);
+  return fetchJson<ApiLeague[]>(
+    `/getavailableleagues/${season}`,
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.availableLeagues)
+  );
 };
 
 export const getGroups = async (
@@ -48,7 +160,7 @@ export const getGroups = async (
 ) => {
   return fetchJson<ApiGroup[]>(
     `/getavailablegroups/${leagueShortcut}/${season}`,
-    options
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.groups)
   );
 };
 
@@ -56,7 +168,22 @@ export const getCurrentGroup = async (
   leagueShortcut: string,
   options?: FetchOptions
 ) => {
-  return fetchJson<ApiGroup>(`/getcurrentgroup/${leagueShortcut}`, options);
+  return fetchJson<ApiGroup>(
+    `/getcurrentgroup/${leagueShortcut}`,
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.currentGroup)
+  );
+};
+
+export const getLastChangeDate = async (
+  leagueShortcut: string,
+  season: number,
+  groupOrderId: number,
+  options?: FetchOptions
+) => {
+  return fetchJson<string>(
+    `/getlastchangedate/${leagueShortcut}/${season}/${groupOrderId}`,
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.liveMatchday)
+  );
 };
 
 export const getMatchdayResults = async (
@@ -67,7 +194,7 @@ export const getMatchdayResults = async (
 ) => {
   return fetchJson<ApiMatch[]>(
     `/getmatchdata/${leagueShortcut}/${season}/${groupOrderId}`,
-    options
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.matchday)
   );
 };
 
@@ -76,7 +203,10 @@ export const getAllMatches = async (
   season: number,
   options?: FetchOptions
 ) => {
-  return fetchJson<ApiMatch[]>(`/getmatchdata/${leagueShortcut}/${season}`, options);
+  return fetchJson<ApiMatch[]>(
+    `/getmatchdata/${leagueShortcut}/${season}`,
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.seasonMatches)
+  );
 };
 
 export const getMatchesByGroup = async (
@@ -88,12 +218,12 @@ export const getMatchesByGroup = async (
   try {
     return await fetchJson<ApiMatch[]>(
       `/getmatchbygroup/${leagueShortcut}/${groupOrderId}/${season}`,
-      options
+      withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.matchday)
     );
   } catch {
     return fetchJson<ApiMatch[]>(
       `/getmatchdata/${leagueShortcut}/${season}/${groupOrderId}`,
-      options
+      withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.matchday)
     );
   }
 };
@@ -105,7 +235,7 @@ export const getTable = async (
 ) => {
   return fetchJson<ApiTableRow[]>(
     `/getbltable/${leagueShortcut}/${season}`,
-    options
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.table)
   );
 };
 
@@ -116,7 +246,7 @@ export const getGroupTable = async (
 ) => {
   return fetchJson<ApiGroupTable[]>(
     `/getgrouptable/${leagueShortcut}/${season}`,
-    options
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.table)
   );
 };
 
@@ -127,7 +257,7 @@ export const getAvailableTeams = async (
 ) => {
   return fetchJson<ApiTeam[]>(
     `/getavailableteams/${leagueShortcut}/${season}`,
-    options
+    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.teams)
   );
 };
 

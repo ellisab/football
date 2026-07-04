@@ -45,6 +45,8 @@ export type HomeViewModelRoundSection =
       title: string;
       subtitle: string;
       emptyText: string;
+      groupOrderID?: number;
+      lastChanged?: string;
       renderKind: "matches";
       items: ApiMatch[];
     }
@@ -54,6 +56,8 @@ export type HomeViewModelRoundSection =
       title: string;
       subtitle: string;
       emptyText: string;
+      groupOrderID?: number;
+      lastChanged?: string;
       renderKind: "ties";
       items: KnockoutTie[];
     };
@@ -137,6 +141,8 @@ export const createHomeViewModel = (
       emptyText: isNextRound
         ? "Noch keine kommenden Spiele verfügbar."
         : "Für diese Runde sind noch keine Ergebnisse verfügbar.",
+      groupOrderID: section.round.groupOrderID,
+      lastChanged: section.round.lastChanged,
     };
 
     if (section.renderKind === "matches") {

@@ -7,6 +7,7 @@ import {
   getCurrentGroup,
   getGroupTable,
   getGroups,
+  getLastChangeDate,
   getMatchdayResults,
   getMatchesByGroup,
   getTable,
@@ -24,6 +25,14 @@ export const openLigaDbDataSource: FootballDataSource = {
   },
   getCurrentGroup(leagueShortcut: string, options?: HomeRequestOptions) {
     return getCurrentGroup(leagueShortcut, options);
+  },
+  getLastChangeDate(
+    leagueShortcut: string,
+    season: number,
+    groupOrderId: number,
+    options?: HomeRequestOptions
+  ) {
+    return getLastChangeDate(leagueShortcut, season, groupOrderId, options);
   },
   getMatchdayResults(
     leagueShortcut: string,

@@ -20,6 +20,7 @@ import { openLigaDbDataSource, type ApiGroup } from "../openligadb";
 import { WORLD_CUP_LEAGUE_KEY, WORLD_CUP_SEASON } from "../world-cup";
 import type { FootballDataSource, HomeRequestOptions } from "./data-source";
 import { loadBracketMatches } from "./domain/load-bracket";
+import { loadMatchdayResults } from "./domain/matchday-loader";
 import { loadPrimaryHomeData } from "./domain/load-primary-data";
 import { normalizeLeagueEntries } from "./domain/league-groups";
 import { resolveRoundSnapshots } from "./domain/resolve-rounds";
@@ -74,21 +75,20 @@ const loadRoundSnapshot = async ({
   }
 
   try {
-    const matches = sortMatchesByKickoff(
-      (
-        await dataSource.getMatchdayResults(
-          effectiveShortcut,
-          resolvedSeason,
-          groupOrderID,
-          requestOptions
-        )
-      ).map(sortGoals)
-    );
+    const matchdayResult = await loadMatchdayResults({
+      dataSource,
+      groupOrderId: groupOrderID,
+      leagueShortcut: effectiveShortcut,
+      requestOptions,
+      season: resolvedSeason,
+    });
+    const matches = sortMatchesByKickoff(matchdayResult.matches.map(sortGoals));
 
     return {
       round: {
         groupName: getGroupName(groupOrderID, groups, group.groupName),
         groupOrderID,
+        lastChanged: matchdayResult.lastChanged,
         matches,
       },
       failed: false,

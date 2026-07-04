@@ -19,6 +19,7 @@ export type HomeErrorKey =
 export type HomeRoundSnapshot = {
   groupName?: string;
   groupOrderID?: number;
+  lastChanged?: string;
   matches: ApiMatch[];
 };
 

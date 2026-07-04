@@ -1,6 +1,8 @@
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 import { HomeView } from "@/features/home/components/home-view";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home({
   searchParams,
 }: {

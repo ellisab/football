@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getHomeSnapshot } from "@footballleagues/core/home";
-
-const REVALIDATE_SECONDS = 60;
+import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
 
 export async function GET(request: NextRequest) {
   const league = request.nextUrl.searchParams.get("league") ?? undefined;
@@ -14,7 +13,7 @@ export async function GET(request: NextRequest) {
     {
       requestOptions: {
         next: {
-          revalidate: REVALIDATE_SECONDS,
+          revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot,
         },
       },
     }
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json(snapshot, {
     headers: {
-      "Cache-Control": `public, max-age=0, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=300`,
+      "Cache-Control": `public, max-age=0, s-maxage=${OPENLIGADB_CACHE_SECONDS.homeSnapshot}, stale-while-revalidate=${OPENLIGADB_CACHE_SECONDS.staleWhileRevalidate}`,
     },
   });
 }

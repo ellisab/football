@@ -92,5 +92,6 @@ export type ApiGroupTable = {
 export type FetchOptions = RequestInit & {
   next?: {
     revalidate?: number;
+    tags?: string[];
   };
 };

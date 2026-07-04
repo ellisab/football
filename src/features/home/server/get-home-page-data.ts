@@ -7,13 +7,16 @@ import {
   type LeagueKey,
 } from "@footballleagues/core/leagues";
 import { createHomeState, getHomeSnapshot } from "@footballleagues/core/home";
+import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
 import { getWorldCupSnapshot } from "@footballleagues/core/world-cup";
 import { unstable_cache } from "next/cache";
 import { createWebHomeViewModel } from "../presenter/home-view-model";
 import type { WebCompetitionViewModel } from "../presenter/home-view-model";
 
-const REVALIDATE_SECONDS = 60;
-const REVALIDATE = { next: { revalidate: REVALIDATE_SECONDS } };
+const REVALIDATE = {
+  next: { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot },
+};
+const HOME_DATA_CACHE_VERSION = "results-v3";
 const getCachedHomeSnapshot = unstable_cache(
   async (params: { league?: string; season?: string }) => {
     try {
@@ -24,8 +27,8 @@ const getCachedHomeSnapshot = unstable_cache(
       return { data: undefined };
     }
   },
-  ["home-snapshot", "results-v2"],
-  { revalidate: REVALIDATE_SECONDS }
+  ["home-snapshot", HOME_DATA_CACHE_VERSION],
+  { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot }
 );
 const getCachedWorldCupSnapshot = unstable_cache(
   async (season: number) => {
@@ -40,8 +43,8 @@ const getCachedWorldCupSnapshot = unstable_cache(
       return { data: undefined };
     }
   },
-  ["world-cup-snapshot", "results-v2"],
-  { revalidate: REVALIDATE_SECONDS }
+  ["world-cup-snapshot", HOME_DATA_CACHE_VERSION],
+  { revalidate: OPENLIGADB_CACHE_SECONDS.seasonMatches }
 );
 
 const getCompetitionData = async (

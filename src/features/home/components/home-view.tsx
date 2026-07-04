@@ -45,6 +45,10 @@ import type {
 } from "../presenter/home-view-model";
 import { ErrorBanner } from "./error-banner";
 import { HomeHero, type HomeHeroImage, type HomeHeroStat } from "./home-hero";
+import {
+  LiveMatchdayRefresher,
+  type LiveMatchdayPollTarget,
+} from "./live-matchday-refresher";
 import { RoundSection } from "./round-section";
 import { SectionKicker } from "./section-kicker";
 
@@ -64,6 +68,41 @@ const getSectionAnchorId = (
   section: WebHomeSection
 ) => {
   return `${getLeagueAnchorId(competition)}-${section.key}`;
+};
+
+const getLiveMatchdayPollTargets = (
+  competitions: WebCompetitionViewModel[]
+): LiveMatchdayPollTarget[] => {
+  const targets = new Map<string, LiveMatchdayPollTarget>();
+
+  for (const competition of competitions) {
+    for (const section of competition.sections) {
+      if (section.renderKind === "table") continue;
+      if (typeof section.groupOrderID !== "number") continue;
+
+      const matches =
+        section.renderKind === "matches"
+          ? section.items
+          : section.items.flatMap((tie) => tie.matches);
+      const hasLiveMatch = matches.some((match) => getMatchStatus(match) === "live");
+
+      if (!hasLiveMatch) continue;
+
+      const target = {
+        groupOrderID: section.groupOrderID,
+        lastChanged: section.lastChanged,
+        league: competition.resolvedLeague,
+        season: competition.resolvedSeason,
+      };
+
+      targets.set(
+        `${target.league}:${target.season}:${target.groupOrderID}`,
+        target
+      );
+    }
+  }
+
+  return Array.from(targets.values());
 };
 
 const getPrimaryActionHref = (
@@ -808,9 +847,11 @@ export function HomeView({ data }: { data: WebHomeViewModel }) {
   const hasVisibleTable = data.isOverview
     ? overviewCompetitions.some(hasCompetitionTable)
     : data.hasTable;
+  const liveMatchdayPollTargets = getLiveMatchdayPollTargets(visibleCompetitions);
 
   return (
     <div className="poster-shell min-h-screen w-full text-[#f2f7f2]">
+      <LiveMatchdayRefresher targets={liveMatchdayPollTargets} />
       <main className="relative z-10">
         <OrbitNavigation
           currentLabel={data.isOverview ? "Heute" : data.leagueLabel}

@@ -9,6 +9,7 @@ import {
 import type { ApiGroup, ApiMatch } from "../../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { BracketRound, HomeErrorKey, HomeRoundSnapshot } from "../types";
+import { loadMatchdayResults } from "./matchday-loader";
 
 const dedupeMatches = (matches: ApiMatch[]) => {
   const seen = new Set<string>();
@@ -146,12 +147,15 @@ export const loadBracketMatches = async ({
     knockoutGroups.map(async (group) => {
       if (!group.groupOrderID) return { group, matches: [] as ApiMatch[] };
 
-      const roundMatches = await dataSource.getMatchesByGroup(
-        effectiveShortcut,
-        resolvedSeason,
-        group.groupOrderID,
-        requestOptions
-      );
+      const roundMatches = (
+        await loadMatchdayResults({
+          dataSource,
+          groupOrderId: group.groupOrderID,
+          leagueShortcut: effectiveShortcut,
+          requestOptions,
+          season: resolvedSeason,
+        })
+      ).matches;
 
       return {
         group,

@@ -13,6 +13,7 @@ import type { ApiGroup } from "../../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { HomeErrorKey, HomeRoundSnapshot } from "../types";
 import { getGroupsWithFallback } from "./league-groups";
+import { loadMatchdayResults } from "./matchday-loader";
 import { getStatusCode, MAX_NEXT_GROUP_LOOKAHEAD } from "./shared";
 
 const dedupeMatches = (matches: ReturnType<typeof sortMatchesByKickoff>) => {
@@ -63,20 +64,19 @@ const loadCandidateRounds = async ({
   const results = await Promise.all(
     candidateGroupOrderIDs.map(async (groupOrderID) => {
       try {
-        const matches = sortMatchesByKickoff(
-          (
-            await dataSource.getMatchdayResults(
-              effectiveShortcut,
-              resolvedSeason,
-              groupOrderID,
-              requestOptions
-            )
-          ).map(sortGoals)
-        );
+        const matchdayResult = await loadMatchdayResults({
+          dataSource,
+          groupOrderId: groupOrderID,
+          leagueShortcut: effectiveShortcut,
+          requestOptions,
+          season: resolvedSeason,
+        });
+        const matches = sortMatchesByKickoff(matchdayResult.matches.map(sortGoals));
 
         return {
           groupOrderID,
           groupName: getGroupNameForMatches(groupOrderID, groups, matches),
+          lastChanged: matchdayResult.lastChanged,
           matches,
           failed: false,
         };
@@ -449,6 +449,7 @@ export const resolveRoundSnapshots = async ({
         latestResultsRound = {
           groupName: candidateRound.groupName,
           groupOrderID: candidateRound.groupOrderID,
+          lastChanged: candidateRound.lastChanged,
           matches: candidateRound.matches,
         };
         continue;
@@ -457,6 +458,7 @@ export const resolveRoundSnapshots = async ({
       nextRound = {
         groupName: candidateRound.groupName,
         groupOrderID: candidateRound.groupOrderID,
+        lastChanged: candidateRound.lastChanged,
         matches: candidateRound.matches,
       };
       break;
@@ -466,6 +468,7 @@ export const resolveRoundSnapshots = async ({
       latestResultsRound = {
         groupName: candidateRound.groupName,
         groupOrderID: candidateRound.groupOrderID,
+        lastChanged: candidateRound.lastChanged,
         matches: candidateRound.matches,
       };
       continue;
@@ -474,6 +477,7 @@ export const resolveRoundSnapshots = async ({
     nextRound = {
       groupName: candidateRound.groupName,
       groupOrderID: candidateRound.groupOrderID,
+      lastChanged: candidateRound.lastChanged,
       matches: candidateRound.matches,
     };
     break;
