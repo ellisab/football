@@ -3,7 +3,10 @@ import type {
   WorldCupKnockoutRound,
   WorldCupSnapshot,
 } from "@footballleagues/core/world-cup";
-import { sortMatchesByUpcomingFirst } from "@footballleagues/core/matches";
+import {
+  areAllMatchesFinished,
+  sortMatchesByUpcomingFirst,
+} from "@footballleagues/core/matches";
 import { Button } from "@footballleagues/ui/button";
 import {
   CalendarDays,
@@ -76,8 +79,14 @@ const getRoundKey = (
   );
 };
 
-function WorldCupHeader({ data }: { data: WorldCupSnapshot }) {
-  const matchCount = data.knockoutRounds.reduce(
+function WorldCupHeader({
+  data,
+  rounds,
+}: {
+  data: WorldCupSnapshot;
+  rounds: WorldCupKnockoutRound[];
+}) {
+  const matchCount = rounds.reduce(
     (total, round) => total + round.matches.length,
     0
   );
@@ -184,6 +193,35 @@ function WorldCupEmptyState({ data }: { data: WorldCupSnapshot }) {
   );
 }
 
+function WorldCupCompletedState({ data }: { data: WorldCupSnapshot }) {
+  return (
+    <section className="poster-empty grid gap-4 rounded-[1.6rem] p-5 text-[#d7e4dd] sm:p-6">
+      <div className="flex items-start gap-3">
+        <Trophy className="mt-1 h-5 w-5 shrink-0 text-[#d8b86a]" />
+        <div className="grid gap-2">
+          <h3 className="text-xl font-semibold text-[#f5edc9]">
+            Alle WM-Finalrundenspiele sind beendet
+          </h3>
+          <p className="max-w-[68ch] text-sm leading-6 text-[#a8bbb2]">
+            Für diese Saison gibt es aktuell keine offenen K.-o.-Runden.
+          </p>
+        </div>
+      </div>
+      <div>
+        <Button
+          asChild
+          className="rounded-full bg-[linear-gradient(94deg,#f5edc9_0%,#d8b86a_46%,#ffb45f_100%)] text-[#030708] hover:brightness-105"
+        >
+          <Link href={`/?league=wc&season=${data.season}`}>
+            <RotateCcw className="h-4 w-4" />
+            Erneut versuchen
+          </Link>
+        </Button>
+      </div>
+    </section>
+  );
+}
+
 function WorldCupKnockout({ rounds }: { rounds: WorldCupKnockoutRound[] }) {
   if (rounds.length === 0) return null;
 
@@ -219,17 +257,26 @@ function WorldCupKnockout({ rounds }: { rounds: WorldCupKnockoutRound[] }) {
 }
 
 export function WorldCupPanel({ data }: { data: WorldCupSnapshot }) {
-  const hasTournamentContent = data.knockoutRounds.length > 0;
+  const visibleKnockoutRounds = data.knockoutRounds.filter(
+    (round) => !areAllMatchesFinished(round.matches)
+  );
+  const hasTournamentContent = visibleKnockoutRounds.length > 0;
+  const hasCompletedTournamentContent =
+    !hasTournamentContent && data.knockoutRounds.length > 0;
 
   return (
     <div className="grid gap-8 lg:gap-10">
-      <WorldCupHeader data={data} />
+      <WorldCupHeader data={data} rounds={visibleKnockoutRounds} />
       <WorldCupIssueBanner data={data} />
 
       {!hasTournamentContent ? (
-        <WorldCupEmptyState data={data} />
+        hasCompletedTournamentContent ? (
+          <WorldCupCompletedState data={data} />
+        ) : (
+          <WorldCupEmptyState data={data} />
+        )
       ) : (
-        <WorldCupKnockout rounds={data.knockoutRounds} />
+        <WorldCupKnockout rounds={visibleKnockoutRounds} />
       )}
     </div>
   );
