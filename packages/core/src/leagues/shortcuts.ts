@@ -4,10 +4,6 @@ export const getDataShortcutForLeague = (leagueKey: LeagueKey) => {
   return leagueKey === "cl" ? "ucl" : leagueKey;
 };
 
-export const getGroupShortcutForLeague = (leagueKey: LeagueKey) => {
-  return leagueKey === "cl" ? "cl" : leagueKey;
-};
-
 export const resolveEffectiveLeagueShortcut = (
   leagueKey: LeagueKey,
   entryShortcut?: string

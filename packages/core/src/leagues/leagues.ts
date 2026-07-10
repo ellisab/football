@@ -74,28 +74,6 @@ const resolveGroupByShortcut = (leagueShortcut: string): LeagueKey | undefined =
   return bestMatch?.key;
 };
 
-export const matchesLeagueGroup = (league: ApiLeague, groupKey: LeagueKey) => {
-  const group = LEAGUE_GROUPS.find((entry) => entry.key === groupKey);
-  if (!group) return false;
-
-  const leagueName = normalizeText(league.leagueName);
-  const leagueShortcut = normalizeText(league.leagueShortcut);
-  const combined = `${leagueShortcut} ${leagueName}`;
-
-  if (UNSUPPORTED_LEAGUE_REGEX.test(combined)) {
-    return false;
-  }
-
-  const shortcutGroup = resolveGroupByShortcut(leagueShortcut);
-
-  if (shortcutGroup) {
-    return shortcutGroup === groupKey;
-  }
-
-  const nameHit = group.nameMatch.some((needle) => leagueName.includes(needle));
-  return nameHit;
-};
-
 const resolveGroupKeyForLeague = (league: ApiLeague): LeagueKey | undefined => {
   const leagueShortcut = normalizeText(league.leagueShortcut);
   const leagueName = normalizeText(league.leagueName);

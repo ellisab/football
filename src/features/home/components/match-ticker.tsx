@@ -17,7 +17,7 @@ import { TeamBadge } from "@/features/teams/components/team-badge";
 import { ArrowRight, Clock3, Radio } from "lucide-react";
 import { SectionKicker } from "./section-kicker";
 
-export type MatchTickerItem = {
+type MatchTickerItem = {
   league: LeagueKey;
   match: ApiMatch;
 };

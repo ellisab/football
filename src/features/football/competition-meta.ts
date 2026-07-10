@@ -3,14 +3,13 @@ import {
   Flag,
   Globe2,
   Goal,
-  Medal,
   Shield,
   Shirt,
   Trophy,
   type LucideIcon,
 } from "lucide-react";
 
-export type CompetitionMeta = {
+type CompetitionMeta = {
   accentClass: string;
   category: "Männer" | "Frauen" | "Global";
   href: string;
@@ -20,7 +19,7 @@ export type CompetitionMeta = {
   slug: string;
 };
 
-export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
+const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
   wc: {
     accentClass: "from-[#f5edc9] via-[#d8b86a] to-[#6eeaf2]",
     category: "Global",
@@ -78,15 +77,7 @@ export const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
 };
 
 export const getCompetitionMeta = (league: LeagueKey): CompetitionMeta => {
-  return COMPETITION_META[league] ?? {
-    accentClass: "from-[#d8b86a] via-[#6eeaf2] to-[#43c886]",
-    category: "Global",
-    href: "/",
-    icon: Medal,
-    label: league.toUpperCase(),
-    shortLabel: league.toUpperCase(),
-    slug: league,
-  };
+  return COMPETITION_META[league];
 };
 
 export const getCompetitionHref = (

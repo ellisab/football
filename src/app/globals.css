@@ -80,24 +80,6 @@
   --sidebar-border: rgba(242, 247, 242, 0.12);
   --sidebar-ring: #d8b86a;
   --poster-gold: #d8b86a;
-  --poster-orange: #ffb45f;
-  --poster-pink: #b06f49;
-  --poster-cyan: #6eeaf2;
-  --poster-violet: #2d6f67;
-  --poster-cream: #f5edc9;
-  --poster-shadow: rgba(2, 9, 12, 0.56);
-  --surface-night: #030708;
-  --surface-pitch: #061512;
-  --surface-glass: rgba(242, 247, 242, 0.07);
-  --line-soft: rgba(242, 247, 242, 0.12);
-  --accent-gold: #d8b86a;
-  --accent-cyan: #6eeaf2;
-  --accent-orange: #ffb45f;
-  --accent-green: #43c886;
-  --accent-red: #f45f63;
-  --text-high: #f2f7f2;
-  --text-mid: #a8bbb2;
-  --text-low: #65776f;
 }
 
 .dark {
@@ -237,9 +219,6 @@
   }
   .font-stadium-heading {
     font-family: var(--font-stadium-heading);
-  }
-  .font-stadium-body {
-    font-family: var(--font-stadium-body);
   }
   .poster-shell {
     position: relative;

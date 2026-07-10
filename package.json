@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "pnpm exec tsx --test src/**/*.test.ts && pnpm -C packages/core test",
-    "typecheck": "next typegen && mkdir -p .next/types && touch .next/types/cache-life.d.ts && tsc --noEmit"
+    "typecheck": "next typegen && touch .next/types/cache-life.d.ts && tsc --noEmit"
   },
   "dependencies": {
     "@footballleagues/core": "workspace:*",

@@ -16,7 +16,7 @@ export type CompetitionMatch = {
   match: ApiMatch;
 };
 
-export type MatchStatus = "finished" | "live" | "upcoming";
+type MatchStatus = "finished" | "live" | "upcoming";
 
 export type TeamSummary = {
   competitions: Array<{
@@ -197,7 +197,7 @@ export const getAllCompetitionMatches = (
   return sortCompetitionMatches(matches);
 };
 
-export const sortCompetitionMatches = (matches: CompetitionMatch[]) => {
+const sortCompetitionMatches = (matches: CompetitionMatch[]) => {
   return [...matches].sort((a, b) => {
     const statusRank = (item: CompetitionMatch) => {
       const status = getMatchStatus(item.match);

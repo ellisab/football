@@ -16,13 +16,13 @@ export type MatchdayCacheStatus =
   | "stale"
   | "unchecked";
 
-export type MatchdayLoadResult = {
+type MatchdayLoadResult = {
   cacheStatus: MatchdayCacheStatus;
   lastChanged?: string;
   matches: ApiMatch[];
 };
 
-export type LastChangeStrategy = "always" | "when-cached" | "never";
+type LastChangeStrategy = "always" | "when-cached" | "never";
 
 const MATCHDAY_CACHE_MAX_AGE_MS =
   OPENLIGADB_CACHE_SECONDS.seasonMatches * 1_000;
