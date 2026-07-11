@@ -439,7 +439,7 @@
 
   .match-summary {
     display: grid;
-    grid-template-columns: 6.25rem minmax(0, 1fr);
+    grid-template-columns: max-content minmax(0, 1fr);
     gap: 0.9rem;
     min-width: 0;
     border: 1px solid var(--border);
