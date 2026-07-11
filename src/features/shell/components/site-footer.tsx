@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark, BrandWordmark } from "./brand";
 
 const footerLinks = [
   { href: "/today", label: "Heute" },
@@ -14,7 +15,10 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer__inner page-container">
         <div>
-          <div className="site-footer__brand">Spieltag</div>
+          <div className="site-footer__brand">
+            <BrandMark className="site-footer__mark" />
+            <BrandWordmark className="site-footer__wordmark" />
+          </div>
           <p className="site-footer__description">
             Ergebnisse, Spieltage und Tabellen ohne Umwege.
           </p>

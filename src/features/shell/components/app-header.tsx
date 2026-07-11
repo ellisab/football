@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark, BrandWordmark } from "./brand";
 import { PrimaryNavigation } from "./primary-navigation";
 import { SearchControl } from "./search-control";
 
@@ -9,12 +10,10 @@ export function AppHeader() {
         <Link
           href="/"
           className="app-brand focus-ring"
-          aria-label="Spieltag Startseite"
+          aria-label="spieltag.day Startseite"
         >
-          <span className="app-brand__mark" aria-hidden="true">
-            S
-          </span>
-          <span className="app-brand__wordmark">Spieltag</span>
+          <BrandMark className="app-brand__mark" />
+          <BrandWordmark className="app-brand__wordmark" />
         </Link>
 
         <PrimaryNavigation />

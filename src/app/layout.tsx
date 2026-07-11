@@ -22,21 +22,25 @@ const monoFont = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Spieltag",
-    template: "%s | Spieltag",
+    default: "spieltag.day",
+    template: "%s | spieltag.day",
   },
   description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
-  applicationName: "Spieltag",
+  applicationName: "spieltag.day",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: "/icon.svg",
+  },
   openGraph: {
     type: "website",
     url: "/",
-    siteName: "Spieltag",
-    title: "Spieltag",
+    siteName: "spieltag.day",
+    title: "spieltag.day",
     description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Spieltag",
+    title: "spieltag.day",
     description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
   },
   robots: {

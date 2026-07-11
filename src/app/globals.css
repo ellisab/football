@@ -1301,6 +1301,7 @@
   --text-soft: #71827c;
   --border: rgba(18, 35, 30, 0.14);
   --border-strong: rgba(18, 35, 30, 0.28);
+  --brand-mark: #087565;
   --action: #0c6654;
   --action-contrast: #ffffff;
   --focus: #006f87;
@@ -1357,6 +1358,7 @@
     --text-soft: #82968e;
     --border: rgba(242, 245, 239, 0.13);
     --border-strong: rgba(242, 245, 239, 0.25);
+    --brand-mark: #5dd7c2;
     --action: #d8bd74;
     --action-contrast: #162019;
     --focus: #74d7df;
@@ -1505,7 +1507,7 @@
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
   border-radius: 0.7rem;
   color: var(--text);
   font-weight: 750;
@@ -1513,21 +1515,22 @@
 }
 
 .app-brand__mark {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border-radius: 0.68rem 0.68rem 0.68rem 0.24rem;
-  color: var(--action-contrast);
-  background: var(--action);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  font-weight: 700;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--action-contrast) 18%, transparent);
+  display: block;
+  width: 2.05rem;
+  height: 2.05rem;
+  flex: none;
+  color: var(--brand-mark);
 }
 
 .app-brand__wordmark {
-  font-size: 1rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.brand-wordmark__dot {
+  color: var(--brand-mark);
 }
 
 .shell-primary-nav {
@@ -1681,9 +1684,22 @@
 }
 
 .site-footer__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   color: var(--text);
-  font-size: 1rem;
-  font-weight: 750;
+}
+
+.site-footer__mark {
+  width: 1.45rem;
+  height: 1.45rem;
+  color: var(--brand-mark);
+}
+
+.site-footer__wordmark {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
 }
 
 .site-footer__description,
