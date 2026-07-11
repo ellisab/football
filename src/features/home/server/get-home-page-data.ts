@@ -17,7 +17,7 @@ const REVALIDATE = {
   next: { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot },
 };
 const HOME_DATA_CACHE_VERSION = "results-v3";
-const HOME_SNAPSHOT_TIMEOUT_MS = 3_500;
+const HOME_SNAPSHOT_TIMEOUT_MS = 6_000;
 
 const withTimeout = <T>(
   promise: Promise<T>,
