@@ -215,6 +215,20 @@ test("buildLeagueEntriesByGroup maps women Bundesliga shortcuts to dedicated gro
   );
 });
 
+test("buildLeagueEntriesByGroup recognizes the current ffb1 Frauen-Bundesliga alias", () => {
+  const grouped = buildLeagueEntriesByGroup([
+    {
+      leagueShortcut: "ffb1",
+      leagueName: "Frauen Fußballbundesliga",
+      leagueSeason: 2026,
+      sport: { sportName: "Fußball" },
+    },
+  ]);
+
+  assert.equal(grouped.get("fbl1")?.length, 1);
+  assert.equal(grouped.get("fbl1")?.[0]?.leagueShortcut, "ffb1");
+});
+
 test("buildLeagueEntriesByGroup resolves bl1f specifically and ignores bl2f", () => {
   const leagues = [
     {

@@ -1,6 +1,6 @@
 import { getLeagueLabel } from "../leagues";
 import { localizeGroupName, type KnockoutTie } from "../matches";
-import type { ApiMatch, ApiTableRow } from "../openligadb";
+import type { ApiGroup, ApiMatch, ApiTableRow } from "../openligadb";
 import type { HomeState } from "./model";
 import type { HomeErrorKey, HomeRoundSnapshot } from "./types";
 
@@ -81,6 +81,7 @@ export type HomeViewModel = {
   resolvedSeason: number;
   leagueLabel: string;
   leagueOptions: HomeState["leagueOptions"];
+  availableGroups: ApiGroup[];
   hasTable: boolean;
   bracketMatches: HomeState["bracketMatches"];
   visibleErrors: string[];
@@ -165,6 +166,7 @@ export const createHomeViewModel = (
     resolvedSeason: state.resolvedSeason,
     leagueLabel,
     leagueOptions: state.leagueOptions,
+    availableGroups: state.availableGroups ?? [],
     hasTable: state.hasTable,
     bracketMatches: state.bracketMatches,
     visibleErrors: state.errorKeys.map((key) => HOME_ERROR_LABEL_MAP[key]),

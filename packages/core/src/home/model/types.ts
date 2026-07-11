@@ -1,6 +1,6 @@
 import type { KnockoutTie } from "../../matches";
 import type { LeagueKey, LeagueOption } from "../../leagues";
-import type { ApiMatch, ApiTableRow } from "../../openligadb";
+import type { ApiGroup, ApiMatch, ApiTableRow } from "../../openligadb";
 import type {
   BracketRound,
   HomeErrorKey,
@@ -34,6 +34,7 @@ export type HomeState = {
   resolvedLeague: LeagueKey;
   resolvedSeason: number;
   leagueOptions: LeagueOption[];
+  availableGroups?: ApiGroup[];
   currentRound: HomeRoundSnapshot;
   nextRound: HomeRoundSnapshot;
   hasTable: boolean;

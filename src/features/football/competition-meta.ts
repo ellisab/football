@@ -9,12 +9,14 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-type CompetitionMeta = {
+export type CompetitionMeta = {
   accentClass: string;
   category: "Männer" | "Frauen" | "Global";
+  description: string;
   href: string;
   icon: LucideIcon;
   label: string;
+  region: string;
   shortLabel: string;
   slug: string;
 };
@@ -23,54 +25,66 @@ const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
   wc: {
     accentClass: "from-[#f5edc9] via-[#d8b86a] to-[#6eeaf2]",
     category: "Global",
+    description: "Nationalteams, Gruppen und K.-o.-Runden der Weltmeisterschaft.",
     href: "/competitions/world-cup",
     icon: Globe2,
     label: "FIFA-Weltmeisterschaft",
+    region: "Global",
     shortLabel: "WM",
     slug: "world-cup",
   },
   bl1: {
     accentClass: "from-[#f45f63] via-[#d8b86a] to-[#030708]",
     category: "Männer",
+    description: "Spieltag, Ergebnisse und Tabelle der Bundesliga.",
     href: "/competitions/bundesliga-1",
     icon: Goal,
     label: "Bundesliga",
+    region: "Deutschland",
     shortLabel: "Bundesliga",
     slug: "bundesliga-1",
   },
   bl2: {
     accentClass: "from-[#ffb45f] via-[#f5edc9] to-[#43c886]",
     category: "Männer",
+    description: "Spieltag, Ergebnisse und Tabelle der 2. Bundesliga.",
     href: "/competitions/bundesliga-2",
     icon: Shirt,
     label: "2. Bundesliga",
+    region: "Deutschland",
     shortLabel: "2. Bundesliga",
     slug: "bundesliga-2",
   },
   fbl1: {
     accentClass: "from-[#f06fb4] via-[#6eeaf2] to-[#43c886]",
     category: "Frauen",
+    description: "Spieltag, Ergebnisse und Tabelle der Frauen-Bundesliga.",
     href: "/competitions/women",
     icon: Shield,
     label: "Frauen-Bundesliga",
+    region: "Deutschland",
     shortLabel: "Frauen-Bundesliga",
     slug: "women",
   },
   dfb: {
     accentClass: "from-[#43c886] via-[#f5edc9] to-[#030708]",
     category: "Männer",
+    description: "Runden und Ergebnisse des deutschen Pokalwettbewerbs.",
     href: "/competitions/dfb-pokal",
     icon: Flag,
     label: "DFB-Pokal",
+    region: "Deutschland",
     shortLabel: "DFB",
     slug: "dfb-pokal",
   },
   cl: {
     accentClass: "from-[#6eeaf2] via-[#d8b86a] to-[#8c8cff]",
     category: "Männer",
+    description: "Spieltage, K.-o.-Runden und Tabelle der Champions League.",
     href: "/competitions/champions-league",
     icon: Trophy,
     label: "Champions League",
+    region: "Europa",
     shortLabel: "UCL",
     slug: "champions-league",
   },
@@ -78,6 +92,13 @@ const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
 
 export const getCompetitionMeta = (league: LeagueKey): CompetitionMeta => {
   return COMPETITION_META[league];
+};
+
+export const getCompetitionCatalog = () => {
+  return (Object.keys(COMPETITION_META) as LeagueKey[]).map((key) => ({
+    key,
+    ...COMPETITION_META[key],
+  }));
 };
 
 export const getCompetitionHref = (
@@ -95,13 +116,3 @@ export const getLeagueKeyFromSlug = (slug: string): LeagueKey | undefined => {
     (key) => COMPETITION_META[key].slug === slug
   );
 };
-
-export const PRIMARY_NAV_ITEMS = [
-  { href: "/today", label: "Heute" },
-  { href: "/competitions/world-cup", label: "WM" },
-  { href: "/competitions/bundesliga-1", label: "Bundesliga" },
-  { href: "/competitions/bundesliga-2", label: "2. Bundesliga" },
-  { href: "/competitions/women", label: "Frauen-Bundesliga" },
-  { href: "/tables", label: "Tabellen" },
-  { href: "/teams", label: "Teams" },
-] as const;

@@ -6,6 +6,7 @@ import {
   getCurrentGroup,
   getGroups,
   getMatchById,
+  getMatchesByTeamId,
   OPENLIGADB_CACHE_SECONDS,
 } from "../src/openligadb";
 
@@ -53,6 +54,32 @@ test("OpenLigaDB client retries 429 and applies endpoint cache TTL", async () =>
       OPENLIGADB_CACHE_SECONDS.availableLeagues
     );
     assert.equal(leagues[0]?.leagueShortcut, "bl1");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("OpenLigaDB client loads bounded team fixtures with the live TTL", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ input: RequestInfo | URL; init?: RequestInit }> = [];
+
+  globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    requests.push({ input, init });
+    return jsonResponse([{ matchID: 12 }]);
+  };
+
+  try {
+    const matches = await getMatchesByTeamId(40, 8, 8);
+
+    assert.equal(
+      String(requests[0]?.input),
+      "https://api.openligadb.de/getmatchesbyteamid/40/8/8"
+    );
+    assert.equal(
+      requests[0]?.init?.next?.revalidate,
+      OPENLIGADB_CACHE_SECONDS.liveMatchday
+    );
+    assert.equal(matches[0]?.matchID, 12);
   } finally {
     globalThis.fetch = originalFetch;
   }

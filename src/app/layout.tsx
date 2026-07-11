@@ -1,17 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
-  Bungee,
   JetBrains_Mono,
   Space_Grotesk,
 } from "next/font/google";
 import "./globals.css";
 import { siteUrl } from "@/lib/site-config";
-
-const stadiumHeadingFont = Bungee({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-stadium-heading",
-});
+import { AppShell } from "@/features/shell/components/app-shell";
 
 const stadiumBodyFont = Space_Grotesk({
   weight: ["400", "500", "600", "700"],
@@ -33,9 +27,6 @@ export const metadata: Metadata = {
   },
   description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
   applicationName: "Spieltag",
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     url: "/",
@@ -54,6 +45,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f2ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#07110f" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -62,9 +61,9 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body
-        className={`${stadiumHeadingFont.variable} ${stadiumBodyFont.variable} ${monoFont.variable} antialiased`}
+        className={`${stadiumBodyFont.variable} ${monoFont.variable} antialiased`}
       >
-        {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

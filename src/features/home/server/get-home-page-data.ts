@@ -92,6 +92,8 @@ const getCompetitionData = async (
     return {
       ...fallback,
       worldCup: worldCupResult?.data,
+      availableGroups:
+        worldCupResult?.data?.groups ?? fallback.availableGroups,
     };
   }
 
@@ -108,6 +110,8 @@ const getCompetitionData = async (
   return {
     ...createWebHomeViewModel(state),
     worldCup: worldCupResult?.data,
+    availableGroups:
+      worldCupResult?.data?.groups ?? state.availableGroups ?? [],
   };
 };
 
@@ -133,6 +137,7 @@ const createFallbackCompetitionData = (params: {
 
   return {
     bracketMatches: [],
+    availableGroups: [],
     hasTable: tableSupported,
     leagueLabel,
     leagueOptions: LEAGUE_GROUPS.map((group) => ({

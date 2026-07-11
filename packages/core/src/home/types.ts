@@ -27,6 +27,7 @@ export type HomeSnapshot = {
   resolvedLeague: LeagueKey;
   resolvedSeason: number;
   leagueOptions: LeagueOption[];
+  availableGroups?: ApiGroup[];
   currentRound: HomeRoundSnapshot;
   nextRound: HomeRoundSnapshot;
   hasTable: boolean;

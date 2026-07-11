@@ -30,7 +30,7 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
       "frauen fußball bundesliga",
       "frauen fussball bundesliga",
     ],
-    shortcutMatch: ["fbl1", "bl1f", "dbl1", "frbu"],
+    shortcutMatch: ["fbl1", "ffb1", "bl1f", "dbl1", "frbu"],
   },
   {
     key: "dfb",

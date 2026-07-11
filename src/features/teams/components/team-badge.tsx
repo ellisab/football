@@ -7,6 +7,7 @@ type TeamBadgeProps = {
   size?: number;
   className?: string;
   textClassName?: string;
+  decorative?: boolean;
 };
 
 export function TeamBadge({
@@ -15,6 +16,7 @@ export function TeamBadge({
   size = 28,
   className,
   textClassName,
+  decorative = false,
 }: TeamBadgeProps) {
   const normalizedUrl = normalizeIconUrl(iconUrl);
   const sizeStyle = { width: size, height: size, borderRadius: size / 2 };
@@ -26,7 +28,7 @@ export function TeamBadge({
     return (
       <Image
         src={normalizedUrl}
-        alt={name ?? "Vereinswappen"}
+        alt={decorative ? "" : (name ?? "Vereinswappen")}
         width={size}
         height={size}
         className={`rounded-full object-contain ${baseClassName}`}
@@ -37,7 +39,10 @@ export function TeamBadge({
 
   return (
     <div
-      className={`flex items-center justify-center rounded-full text-xs font-semibold text-[#f2f7f2] ${baseClassName}`}
+      aria-hidden={decorative || undefined}
+      aria-label={decorative ? undefined : (name ?? "Vereinswappen")}
+      role={decorative ? undefined : "img"}
+      className={`flex items-center justify-center rounded-full text-xs font-semibold text-[var(--text)] ${baseClassName}`}
       style={sizeStyle}
     >
       <span className={textClassName}>{(name ?? "T").slice(0, 1)}</span>

@@ -1,10 +1,11 @@
+import Link from "next/link";
+import { Table2 } from "lucide-react";
 import { StandingsCard } from "@/features/standings/components/standings-card";
 import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
-import {
-  getCompetitionMeta,
-} from "@/features/football/competition-meta";
+import { getCompetitionMeta } from "@/features/football/competition-meta";
 import { hasCompetitionTable } from "@/features/football/view-utils";
-import { RouteFrame } from "./route-frame";
+import { EmptyState, PageIntro } from "@/features/football/components/product-ui";
+import { FavoriteButton } from "@/features/favorites";
 
 export function TablesView({
   competitions,
@@ -14,51 +15,69 @@ export function TablesView({
   const tableCompetitions = competitions.filter(hasCompetitionTable);
 
   return (
-    <RouteFrame
-      eyebrow="Tabellen"
-      title="Liga-Rennen"
-      description="Alle verfügbaren Tabellen in einer besonders lesbaren Ansicht, mit Qualifikation, Aufstieg und Gefahrenzone für schnelles Erfassen."
-    >
-      <div className="grid gap-8">
+    <div className="page-shell">
+      <div className="wide-column">
+        <PageIntro
+          eyebrow="Wettbewerbsüberblick"
+          title="Tabellen"
+          description="Verlässliche Platzierungen und Saisonwerte, ohne pauschal abgeleitete Qualifikations- oder Abstiegszonen."
+        />
         {tableCompetitions.length === 0 ? (
-          <section className="poster-empty rounded-[1.25rem] p-5 text-sm leading-6 text-[#a8bbb2]">
-            Noch sind keine Tabellendaten verfügbar. Spielpläne und Matchseiten bleiben sichtbar.
-          </section>
+          <EmptyState
+            title="Noch keine Tabellen"
+            description="Für den geladenen Ausschnitt sind gerade keine Tabellendaten verfügbar. Spielpläne und Matchseiten bleiben erreichbar."
+            actionHref="/competitions"
+            actionLabel="Wettbewerbe öffnen"
+            icon={<Table2 aria-hidden="true" className="h-5 w-5" />}
+          />
         ) : (
-          tableCompetitions.map((competition) => {
-            const meta = getCompetitionMeta(competition.resolvedLeague);
-            const tableSection = competition.sections.find(
-              (section) => section.renderKind === "table"
-            );
+          <div className="grid gap-10">
+            {tableCompetitions.map((competition) => {
+              const meta = getCompetitionMeta(competition.resolvedLeague);
+              const tableSection = competition.sections.find(
+                (section) => section.renderKind === "table"
+              );
+              if (!tableSection || tableSection.renderKind !== "table") return null;
 
-            if (!tableSection || tableSection.renderKind !== "table") return null;
-
-            return (
-              <section
-                key={`${competition.resolvedLeague}-${competition.resolvedSeason}`}
-                className="grid scroll-mt-32 gap-3"
-              >
-                <div className="poster-empty flex flex-wrap items-end justify-between gap-3 rounded-[1.25rem] p-4">
-                  <div>
-                    <div className="section-kicker">{meta.category}</div>
-                    <h2 className="mt-2 text-3xl leading-none font-[var(--font-stadium-heading)] uppercase tracking-[0.03em] text-[#f5edc9]">
-                      {meta.label}
-                    </h2>
-                    <p className="mt-2 text-sm text-[#a8bbb2]">
-                      Saison {competition.resolvedSeason}
-                    </p>
+              return (
+                <section
+                  key={`${competition.resolvedLeague}-${competition.resolvedSeason}`}
+                  className="content-section"
+                >
+                  <div className="section-heading-row">
+                    <div>
+                      <p className="eyebrow">{meta.region}</p>
+                      <h2 className="section-title">{meta.label}</h2>
+                      <p className="section-description">
+                        Saison {competition.resolvedSeason}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FavoriteButton
+                        kind="competition"
+                        id={competition.resolvedLeague}
+                        label={meta.label}
+                        showLabel={false}
+                        className="favorite-icon-button"
+                      />
+                      <Link
+                        href={`${meta.href}?season=${competition.resolvedSeason}&view=standings`}
+                        className="button-secondary"
+                      >
+                        Öffnen
+                      </Link>
+                    </div>
                   </div>
-                  <span
-                    className={`h-1.5 w-32 rounded-full bg-gradient-to-r ${meta.accentClass}`}
-                    aria-hidden
+                  <StandingsCard
+                    table={tableSection.items}
+                    emptyText={tableSection.emptyText}
                   />
-                </div>
-                <StandingsCard table={tableSection.items} emptyText={tableSection.emptyText} />
-              </section>
-            );
-          })
+                </section>
+              );
+            })}
+          </div>
         )}
       </div>
-    </RouteFrame>
+    </div>
   );
 }

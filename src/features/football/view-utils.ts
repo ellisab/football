@@ -1,10 +1,12 @@
-import type { LeagueKey } from "@footballleagues/core/leagues";
+import { LEAGUE_GROUPS, type LeagueKey } from "@footballleagues/core/leagues";
 import {
+  createMatchPresentation,
   getBerlinDateKey,
+  getMatchKickoffTimestamp,
+  getMatchPresentationScore,
   isMatchOnBerlinDate,
 } from "@footballleagues/core/matches";
 import {
-  getFinalResult,
   type ApiMatch,
   type ApiTableRow,
   type ApiTeam,
@@ -16,7 +18,7 @@ export type CompetitionMatch = {
   match: ApiMatch;
 };
 
-type MatchStatus = "finished" | "live" | "upcoming";
+type MatchStatus = "finished" | "live" | "upcoming" | "unknown";
 
 export type TeamSummary = {
   competitions: Array<{
@@ -29,6 +31,8 @@ export type TeamSummary = {
   name: string;
   nextMatch?: CompetitionMatch;
   recentMatch?: CompetitionMatch;
+  upcomingMatches: CompetitionMatch[];
+  recentMatches: CompetitionMatch[];
   tablePosition?: {
     competitionLabel: string;
     points?: number;
@@ -42,20 +46,8 @@ const timeFormatter = new Intl.DateTimeFormat("de-DE", {
   timeZone: "Europe/Berlin",
 });
 
-const dayFormatter = new Intl.DateTimeFormat("de-DE", {
-  day: "numeric",
-  month: "long",
-  timeZone: "Europe/Berlin",
-  weekday: "long",
-});
-
-export const formatTodayLabel = (date: Date) => {
-  return dayFormatter.format(date);
-};
-
 export const getMatchTime = (match: ApiMatch) => {
-  const timestamp = Date.parse(match.matchDateTimeUTC ?? match.matchDateTime ?? "");
-  return Number.isNaN(timestamp) ? Number.MAX_SAFE_INTEGER : timestamp;
+  return getMatchKickoffTimestamp(match) ?? Number.MAX_SAFE_INTEGER;
 };
 
 export const getMatchIdentity = (match: ApiMatch) => {
@@ -92,34 +84,28 @@ export const formatMatchTime = (match: ApiMatch) => {
 };
 
 export const getMatchScore = (match: ApiMatch) => {
-  const finalResult = getFinalResult(match);
-
-  return finalResult
-    ? `${finalResult.pointsTeam1 ?? 0}:${finalResult.pointsTeam2 ?? 0}`
-    : "-:-";
+  return getMatchPresentationScore(match).label;
 };
 
 export const getMatchStatus = (
   match: ApiMatch,
   now: Date = new Date()
 ): MatchStatus => {
-  if (match.matchIsFinished) return "finished";
+  const status = createMatchPresentation(match, { now }).status;
 
-  const kickoff = getMatchTime(match);
-  if (kickoff === Number.MAX_SAFE_INTEGER) return "upcoming";
-
-  const elapsedMs = now.getTime() - kickoff;
-  const liveWindowMs = 2.75 * 60 * 60 * 1000;
-
-  return elapsedMs >= 0 && elapsedMs <= liveWindowMs ? "live" : "upcoming";
+  if (status === "finished") return "finished";
+  if (status === "live-estimate") return "live";
+  if (status === "scheduled") return "upcoming";
+  return "unknown";
 };
 
 export const getMatchStatusLabel = (match: ApiMatch, now?: Date) => {
-  const status = getMatchStatus(match, now);
+  const presentation = createMatchPresentation(match, { now });
+  return presentation.statusLabel;
+};
 
-  if (status === "finished") return "Ende";
-  if (status === "live") return "Läuft";
-  return formatMatchTime(match);
+export const getMatchScreenReaderLabel = (match: ApiMatch, now?: Date) => {
+  return createMatchPresentation(match, { now }).screenReaderLabel;
 };
 
 export const getCompetitionMatches = (
@@ -135,7 +121,10 @@ export const getCompetitionMatches = (
   });
   const bracketMatches = competition.bracketMatches.flatMap((round) => round.matches);
   const worldCupMatches = competition.worldCup
-    ? competition.worldCup.knockoutRounds.flatMap((round) => round.matches)
+    ? [
+        ...competition.worldCup.groupSections.flatMap((section) => section.matches),
+        ...competition.worldCup.knockoutRounds.flatMap((round) => round.matches),
+      ]
     : [];
 
   return [...sectionMatches, ...bracketMatches, ...worldCupMatches];
@@ -203,7 +192,8 @@ const sortCompetitionMatches = (matches: CompetitionMatch[]) => {
       const status = getMatchStatus(item.match);
       if (status === "live") return 0;
       if (status === "upcoming") return 1;
-      return 2;
+      if (status === "unknown") return 2;
+      return 3;
     };
     const byStatus = statusRank(a) - statusRank(b);
     if (byStatus !== 0) return byStatus;
@@ -224,55 +214,14 @@ export const getStatusCounts = (matches: CompetitionMatch[]) => {
     {
       finished: 0,
       live: 0,
+      unknown: 0,
       upcoming: 0,
     } satisfies Record<MatchStatus, number>
   );
 };
 
-export const getUpcomingCompetitionMatchCount = (
-  competition: WebCompetitionViewModel
-) => {
-  return getCompetitionMatches(competition).filter(
-    (match) => getMatchStatus(match) !== "finished"
-  ).length;
-};
-
-export const getCompetitionNextKickoff = (
-  competition: WebCompetitionViewModel
-) => {
-  return getCompetitionMatches(competition)
-    .filter((match) => getMatchStatus(match) !== "finished")
-    .map(getMatchTime)
-    .sort((a, b) => a - b)[0];
-};
-
 export const hasCompetitionTable = (competition: WebCompetitionViewModel) => {
   return competition.hasTable;
-};
-
-export const sortOverviewCompetitions = (
-  competitions: WebCompetitionViewModel[]
-) => {
-  return competitions
-    .map((competition, index) => ({
-      competition,
-      index,
-      nextKickoff: getCompetitionNextKickoff(competition),
-    }))
-    .sort((a, b) => {
-      const aHasUpcoming = typeof a.nextKickoff === "number";
-      const bHasUpcoming = typeof b.nextKickoff === "number";
-
-      if (aHasUpcoming && bHasUpcoming) {
-        const byKickoff = (a.nextKickoff as number) - (b.nextKickoff as number);
-        if (byKickoff !== 0) return byKickoff;
-      }
-
-      if (aHasUpcoming !== bHasUpcoming) return aHasUpcoming ? -1 : 1;
-
-      return a.index - b.index;
-    })
-    .map(({ competition }) => competition);
 };
 
 const normalizeTeamId = (value: string) => {
@@ -295,6 +244,19 @@ export const getTeamId = (team?: ApiTeam | ApiTableRow) => {
   if (typeof numericId === "number") return String(numericId);
   if (name) return normalizeTeamId(name);
   return "team";
+};
+
+export const resolveCompetitionLeagueForMatch = (
+  match: ApiMatch
+): LeagueKey | undefined => {
+  const shortcut = (match.leagueShortcut ?? "").toLowerCase();
+  const name = (match.leagueName ?? "").toLowerCase();
+
+  return LEAGUE_GROUPS.find(
+    (group) =>
+      group.shortcutMatch.some((needle) => shortcut.startsWith(needle)) ||
+      group.nameMatch.some((needle) => name.includes(needle))
+  )?.key;
 };
 
 export const findMatchById = (
@@ -335,6 +297,8 @@ export const collectTeams = (
         iconUrl,
         id,
         name,
+        recentMatches: [],
+        upcomingMatches: [],
       } satisfies TeamSummary);
 
     summary.iconUrl ??= iconUrl;
@@ -353,13 +317,27 @@ export const collectTeams = (
     if (match) {
       const status = getMatchStatus(match.match);
       if (status === "finished") {
+        if (
+          !summary.recentMatches.some(
+            (entry) => getMatchIdentity(entry.match) === getMatchIdentity(match.match)
+          )
+        ) {
+          summary.recentMatches.push(match);
+        }
         const recentTime = summary.recentMatch
           ? getMatchTime(summary.recentMatch.match)
           : Number.NEGATIVE_INFINITY;
         if (getMatchTime(match.match) >= recentTime) {
           summary.recentMatch = match;
         }
-      } else {
+      } else if (status === "live" || status === "upcoming") {
+        if (
+          !summary.upcomingMatches.some(
+            (entry) => getMatchIdentity(entry.match) === getMatchIdentity(match.match)
+          )
+        ) {
+          summary.upcomingMatches.push(match);
+        }
         const nextTime = summary.nextMatch
           ? getMatchTime(summary.nextMatch.match)
           : Number.POSITIVE_INFINITY;
@@ -402,6 +380,15 @@ export const collectTeams = (
         name: getTeamLabel(team, "Team"),
       });
     }
+  }
+
+  for (const team of teams.values()) {
+    team.recentMatches.sort(
+      (a, b) => getMatchTime(b.match) - getMatchTime(a.match)
+    );
+    team.upcomingMatches.sort(
+      (a, b) => getMatchTime(a.match) - getMatchTime(b.match)
+    );
   }
 
   return [...teams.values()].sort((a, b) => {
