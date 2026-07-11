@@ -9,7 +9,6 @@ import {
 } from "@/features/football/competition-meta";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 
-export const dynamic = "force-dynamic";
 const MATCHDAY_REQUEST_TIMEOUT_MS = 6_000;
 
 export async function generateMetadata({

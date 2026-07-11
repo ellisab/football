@@ -14,7 +14,11 @@ import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { HomeErrorKey, HomeRoundSnapshot } from "../types";
 import { getGroupsWithFallback } from "./league-groups";
 import { loadMatchdayResults } from "./matchday-loader";
-import { getStatusCode, MAX_NEXT_GROUP_LOOKAHEAD } from "./shared";
+import {
+  getStatusCode,
+  mapSettledWithConcurrency,
+  MAX_NEXT_GROUP_LOOKAHEAD,
+} from "./shared";
 
 const dedupeMatches = (matches: ReturnType<typeof sortMatchesByKickoff>) => {
   const seen = new Set<string>();
@@ -61,37 +65,62 @@ const loadCandidateRounds = async ({
   groups: ApiGroup[];
   requestOptions?: HomeRequestOptions;
 }) => {
-  const results = await Promise.all(
-    candidateGroupOrderIDs.map(async (groupOrderID) => {
-      try {
-        const matchdayResult = await loadMatchdayResults({
-          dataSource,
-          groupOrderId: groupOrderID,
-          leagueShortcut: effectiveShortcut,
-          requestOptions,
-          season: resolvedSeason,
-        });
-        const matches = sortMatchesByKickoff(matchdayResult.matches.map(sortGoals));
+  const settledRounds = await mapSettledWithConcurrency(
+    candidateGroupOrderIDs,
+    async (groupOrderID) => {
+      const matchdayResult = await loadMatchdayResults({
+        dataSource,
+        groupOrderId: groupOrderID,
+        leagueShortcut: effectiveShortcut,
+        requestOptions,
+        season: resolvedSeason,
+      });
+      const matches = sortMatchesByKickoff(
+        matchdayResult.matches.map(sortGoals)
+      );
 
-        return {
-          groupOrderID,
-          groupName: getGroupNameForMatches(groupOrderID, groups, matches),
-          lastChanged: matchdayResult.lastChanged,
-          matches,
-          failed: false,
-        };
-      } catch (error) {
-        return {
-          groupOrderID,
-          groupName: groups.find((group) => group?.groupOrderID === groupOrderID)?.groupName,
-          matches: [] as ReturnType<typeof sortMatchesByKickoff>,
-          failed: getStatusCode(error) !== 404,
-        };
-      }
-    })
+      return {
+        groupOrderID,
+        groupName: getGroupNameForMatches(groupOrderID, groups, matches),
+        lastChanged: matchdayResult.lastChanged,
+        matches,
+        failed: matchdayResult.refreshFailed === true,
+        rateLimited: matchdayResult.rateLimited === true,
+        refreshFailed: matchdayResult.refreshFailed === true,
+        status: matchdayResult.rateLimited ? 429 : undefined,
+      };
+    },
+    {
+      shouldStop: (error) => getStatusCode(error) === 429,
+      shouldStopValue: (round) => round.rateLimited,
+    }
   );
 
-  return results;
+  const rounds = settledRounds.map((result) => {
+    if (result.status === "fulfilled") {
+      return result.value;
+    }
+
+    const status = getStatusCode(result.reason);
+
+    return {
+      groupOrderID: result.input,
+      groupName: groups.find(
+        (group) => group?.groupOrderID === result.input
+      )?.groupName,
+      lastChanged: undefined,
+      matches: [] as ReturnType<typeof sortMatchesByKickoff>,
+      failed: status !== 404,
+      rateLimited: status === 429,
+      refreshFailed: status !== 404,
+      status,
+    };
+  });
+
+  return {
+    rateLimited: rounds.some((round) => round.rateLimited),
+    rounds,
+  };
 };
 
 const buildChampionsLeagueStageSnapshot = async ({
@@ -140,7 +169,10 @@ const buildChampionsLeagueStageSnapshot = async ({
     (groupOrderID) => groupOrderID !== seedGroupOrderID
   );
 
-  const companionRounds = await loadCandidateRounds({
+  const {
+    rateLimited: companionRateLimited,
+    rounds: companionRounds,
+  } = await loadCandidateRounds({
     dataSource,
     effectiveShortcut,
     resolvedSeason,
@@ -150,7 +182,15 @@ const buildChampionsLeagueStageSnapshot = async ({
   });
 
   if (companionRounds.some((round) => round.failed)) {
-    throw new Error("Champions-League-Begleitrunden konnten nicht geladen werden");
+    const error = new Error(
+      "Champions-League-Begleitrunden konnten nicht geladen werden"
+    );
+
+    if (companionRateLimited) {
+      (error as Error & { status?: number }).status = 429;
+    }
+
+    throw error;
   }
 
   for (const companionRound of companionRounds) {
@@ -201,6 +241,7 @@ const resolveChampionsLeagueRoundSnapshots = async ({
   currentRound: HomeRoundSnapshot;
   nextRound: HomeRoundSnapshot;
   errorKeys: HomeErrorKey[];
+  rateLimited: boolean;
 }> => {
   const currentGroupOrderID = currentGroup.groupOrderID as number;
   const normalizedCurrentMatches = sortMatchesByKickoff(currentRound.matches);
@@ -237,6 +278,15 @@ const resolveChampionsLeagueRoundSnapshots = async ({
     if (getStatusCode(error) !== 404) {
       currentMatchdayFailed = true;
     }
+
+    if (getStatusCode(error) === 429) {
+      return {
+        currentRound: currentStage.snapshot,
+        nextRound: { matches: [] },
+        errorKeys: ["matchday"],
+        rateLimited: true,
+      };
+    }
   }
 
   const lastCurrentStageGroupOrderID =
@@ -260,7 +310,10 @@ const resolveChampionsLeagueRoundSnapshots = async ({
     matches: [],
   };
 
-  const candidateRounds = await loadCandidateRounds({
+  const {
+    rateLimited: candidateRateLimited,
+    rounds: candidateRounds,
+  } = await loadCandidateRounds({
     dataSource,
     effectiveShortcut,
     resolvedSeason,
@@ -268,6 +321,20 @@ const resolveChampionsLeagueRoundSnapshots = async ({
     groups,
     requestOptions,
   });
+
+  if (candidateRateLimited) {
+    return {
+      currentRound: currentStage.snapshot,
+      nextRound,
+      errorKeys: [
+        ...(currentMatchdayFailed ? (["matchday"] as HomeErrorKey[]) : []),
+        "next matchday",
+      ],
+      rateLimited: true,
+    };
+  }
+
+  let rateLimited = false;
 
   for (const candidateRound of candidateRounds) {
     if (candidateRound.failed) {
@@ -302,6 +369,11 @@ const resolveChampionsLeagueRoundSnapshots = async ({
       if (getStatusCode(error) !== 404) {
         nextMatchdayFailed = true;
       }
+
+      if (getStatusCode(error) === 429) {
+        rateLimited = true;
+        break;
+      }
     }
 
     if (nextRound.matches.length > 0) {
@@ -315,7 +387,7 @@ const resolveChampionsLeagueRoundSnapshots = async ({
     errorKeys.push("matchday");
   }
 
-  if (nextRound.matches.length === 0 && nextMatchdayFailed) {
+  if (nextMatchdayFailed || rateLimited) {
     errorKeys.push("next matchday");
   }
 
@@ -323,6 +395,7 @@ const resolveChampionsLeagueRoundSnapshots = async ({
     currentRound: currentStage.snapshot,
     nextRound,
     errorKeys,
+    rateLimited,
   };
 };
 
@@ -348,6 +421,7 @@ export const resolveRoundSnapshots = async ({
   currentRound: HomeRoundSnapshot;
   nextRound: HomeRoundSnapshot;
   errorKeys: HomeErrorKey[];
+  rateLimited: boolean;
 }> => {
   if (resolvedLeague === "cl" && isKnockoutGroup(currentGroup.groupName)) {
     return resolveChampionsLeagueRoundSnapshots({
@@ -378,6 +452,7 @@ export const resolveRoundSnapshots = async ({
       currentRound,
       nextRound: { matches: [] },
       errorKeys: [],
+      rateLimited: false,
     };
   }
 
@@ -389,6 +464,7 @@ export const resolveRoundSnapshots = async ({
       currentRound,
       nextRound: { matches: [] },
       errorKeys: [],
+      rateLimited: false,
     };
   }
 
@@ -419,6 +495,15 @@ export const resolveRoundSnapshots = async ({
       if (getStatusCode(error) !== 404) {
         nextGroupsFailed = true;
       }
+
+      if (getStatusCode(error) === 429) {
+        return {
+          currentRound: latestResultsRound ?? currentRound,
+          nextRound,
+          errorKeys: ["next groups"],
+          rateLimited: true,
+        };
+      }
     }
   }
 
@@ -445,7 +530,10 @@ export const resolveRoundSnapshots = async ({
     ])
   );
 
-  const candidateRounds = await loadCandidateRounds({
+  const {
+    rateLimited: candidateRateLimited,
+    rounds: candidateRounds,
+  } = await loadCandidateRounds({
     dataSource,
     effectiveShortcut,
     resolvedSeason,
@@ -505,18 +593,17 @@ export const resolveRoundSnapshots = async ({
 
   const errorKeys: HomeErrorKey[] = [];
 
-  if (nextRound.matches.length === 0) {
-    if (nextGroupsFailed) {
-      errorKeys.push("next groups");
-    }
-    if (nextMatchdayFailed) {
-      errorKeys.push("next matchday");
-    }
+  if (nextGroupsFailed) {
+    errorKeys.push("next groups");
+  }
+  if (nextMatchdayFailed || candidateRateLimited) {
+    errorKeys.push("next matchday");
   }
 
   return {
     currentRound: latestResultsRound ?? currentRound,
     nextRound,
     errorKeys,
+    rateLimited: candidateRateLimited,
   };
 };

@@ -5,8 +5,9 @@ import { getStatusCode } from "./shared";
 
 type MatchdayCacheEntry = {
   expiresAt: number;
-  lastChanged: string;
+  lastChanged?: string;
   matches: ApiMatch[];
+  revalidateAt: number;
 };
 
 export type MatchdayCacheStatus =
@@ -20,14 +21,38 @@ type MatchdayLoadResult = {
   cacheStatus: MatchdayCacheStatus;
   lastChanged?: string;
   matches: ApiMatch[];
+  rateLimited?: boolean;
+  refreshFailed?: true;
 };
 
 type LastChangeStrategy = "always" | "when-cached" | "never";
 
 const MATCHDAY_CACHE_MAX_AGE_MS =
   OPENLIGADB_CACHE_SECONDS.seasonMatches * 1_000;
+const MATCHDAY_CACHE_REVALIDATE_MS =
+  OPENLIGADB_CACHE_SECONDS.liveMatchday * 1_000;
+export const MATCHDAY_CACHE_MAX_ENTRIES = 128;
 
 const matchdayCache = new Map<string, MatchdayCacheEntry>();
+
+const getCachedMatchday = (cacheKey: string) => {
+  const cached = matchdayCache.get(cacheKey);
+  if (!cached) return undefined;
+
+  matchdayCache.delete(cacheKey);
+  matchdayCache.set(cacheKey, cached);
+  return cached;
+};
+
+const setCachedMatchday = (cacheKey: string, entry: MatchdayCacheEntry) => {
+  matchdayCache.delete(cacheKey);
+  matchdayCache.set(cacheKey, entry);
+
+  if (matchdayCache.size > MATCHDAY_CACHE_MAX_ENTRIES) {
+    const oldestKey = matchdayCache.keys().next().value;
+    if (oldestKey !== undefined) matchdayCache.delete(oldestKey);
+  }
+};
 
 const getCacheKey = ({
   groupOrderId,
@@ -78,14 +103,28 @@ export const loadMatchdayResults = async ({
   requestOptions?: HomeRequestOptions;
   season: number;
 }): Promise<MatchdayLoadResult> => {
+  const cacheContext = { groupOrderId, leagueShortcut, season };
   const cacheKey = getCacheKey({ groupOrderId, leagueShortcut, season });
-  const cached = matchdayCache.get(cacheKey);
+  const cached = getCachedMatchday(cacheKey);
   const now = Date.now();
   let lastChanged: string | undefined;
   let lastChangeUnavailable = false;
   const shouldCheckLastChanged =
     lastChangeStrategy === "always" ||
     (lastChangeStrategy === "when-cached" && cached !== undefined);
+
+  if (
+    lastChangeStrategy === "when-cached" &&
+    cached &&
+    cached.revalidateAt > now
+  ) {
+    logMatchdayCache("hit", cacheContext);
+    return {
+      cacheStatus: "hit",
+      lastChanged: cached.lastChanged,
+      matches: cached.matches,
+    };
+  }
 
   if (shouldCheckLastChanged) {
     try {
@@ -97,14 +136,28 @@ export const loadMatchdayResults = async ({
       );
     } catch (error) {
       lastChangeUnavailable = true;
+      const status = getStatusCode(error);
 
-      if (getStatusCode(error) !== 404 && shouldLogDiagnostics()) {
+      if (status !== 404 && shouldLogDiagnostics()) {
         console.warn("[OpenLigaDB] last-change check failed", {
           groupOrderId,
           leagueShortcut,
           season,
-          status: getStatusCode(error),
+          status,
         });
+      }
+
+      if (status === 429) {
+        if (!cached) throw error;
+
+        logMatchdayCache("stale", cacheContext);
+        return {
+          cacheStatus: "stale",
+          lastChanged: cached.lastChanged,
+          matches: cached.matches,
+          rateLimited: true,
+          refreshFailed: true,
+        };
       }
     }
   }
@@ -112,7 +165,7 @@ export const loadMatchdayResults = async ({
   if (lastChanged && cached?.lastChanged === lastChanged) {
     const cacheStatus = cached.expiresAt > now ? "hit" : "stale";
     if (cacheStatus === "hit") {
-      logMatchdayCache(cacheStatus, { groupOrderId, leagueShortcut, season });
+      logMatchdayCache(cacheStatus, cacheContext);
       return {
         cacheStatus,
         lastChanged,
@@ -121,12 +174,35 @@ export const loadMatchdayResults = async ({
     }
   }
 
-  const matches = await dataSource.getMatchdayResults(
-    leagueShortcut,
-    season,
-    groupOrderId,
-    requestOptions
-  );
+  let matches: ApiMatch[];
+
+  try {
+    matches = await dataSource.getMatchdayResults(
+      leagueShortcut,
+      season,
+      groupOrderId,
+      requestOptions
+    );
+  } catch (error) {
+    if (!cached) throw error;
+
+    if (shouldLogDiagnostics()) {
+      console.warn("[OpenLigaDB] matchday refresh failed; serving stale cache", {
+        ...cacheContext,
+        status: getStatusCode(error),
+      });
+    }
+
+    logMatchdayCache("stale", cacheContext);
+
+    return {
+      cacheStatus: "stale",
+      lastChanged: cached.lastChanged,
+      matches: cached.matches,
+      rateLimited: getStatusCode(error) === 429 || undefined,
+      refreshFailed: true,
+    };
+  }
 
   const cacheStatus = !shouldCheckLastChanged
     ? cached
@@ -138,15 +214,14 @@ export const loadMatchdayResults = async ({
       ? "stale"
       : "miss";
 
-  if (lastChanged) {
-    matchdayCache.set(cacheKey, {
-      expiresAt: now + MATCHDAY_CACHE_MAX_AGE_MS,
-      lastChanged,
-      matches,
-    });
-  }
+  setCachedMatchday(cacheKey, {
+    expiresAt: now + MATCHDAY_CACHE_MAX_AGE_MS,
+    lastChanged,
+    matches,
+    revalidateAt: now + MATCHDAY_CACHE_REVALIDATE_MS,
+  });
 
-  logMatchdayCache(cacheStatus, { groupOrderId, leagueShortcut, season });
+  logMatchdayCache(cacheStatus, cacheContext);
 
   return {
     cacheStatus,

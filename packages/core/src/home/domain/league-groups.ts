@@ -4,6 +4,7 @@ import {
   type LeagueKey,
 } from "../../leagues";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
+import { getStatusCode } from "./shared";
 
 export const getGroupsWithFallback = async (
   dataSource: FootballDataSource,
@@ -24,7 +25,9 @@ export const getGroupsWithFallback = async (
       groups: await dataSource.getGroups("cl", season, requestOptions),
       shortcut: "cl",
     };
-  } catch {
+  } catch (error) {
+    if (getStatusCode(error) !== 404) throw error;
+
     return {
       groups: await dataSource.getGroups(leagueShortcut, season, requestOptions),
       shortcut: leagueShortcut,

@@ -34,4 +34,5 @@ export type HomeSnapshot = {
   bracketMatches: BracketRound[];
   table: ApiTableRow[];
   errorKeys: HomeErrorKey[];
+  rateLimited?: boolean;
 };

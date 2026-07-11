@@ -61,6 +61,7 @@ const loadRoundSnapshot = async ({
 }): Promise<{
   round: HomeRoundSnapshot;
   failed: boolean;
+  status?: number;
 }> => {
   const groupOrderID = group.groupOrderID;
 
@@ -71,6 +72,7 @@ const loadRoundSnapshot = async ({
         matches: [],
       },
       failed: false,
+      status: undefined,
     };
   }
 
@@ -91,16 +93,20 @@ const loadRoundSnapshot = async ({
         lastChanged: matchdayResult.lastChanged,
         matches,
       },
-      failed: false,
+      failed: matchdayResult.refreshFailed === true,
+      status: matchdayResult.rateLimited ? 429 : undefined,
     };
   } catch (error) {
+    const status = getStatusCode(error);
+
     return {
       round: {
         groupName: getGroupName(groupOrderID, groups, group.groupName),
         groupOrderID,
         matches: [],
       },
-      failed: getStatusCode(error) !== 404,
+      failed: status !== 404,
+      status,
     };
   }
 };
@@ -127,6 +133,7 @@ const resolvePrimaryRoundSnapshot = async ({
   currentGroup: ApiGroup | null;
   currentRound: HomeRoundSnapshot;
   errorKeys: HomeErrorKey[];
+  rateLimited: boolean;
 }> => {
   const orderedGroups = getOrderedGroups(groups);
   const currentRoundResult = currentGroup
@@ -139,6 +146,15 @@ const resolvePrimaryRoundSnapshot = async ({
         requestOptions,
       })
     : undefined;
+
+  if (currentRoundResult?.status === 429) {
+    return {
+      currentGroup,
+      currentRound: currentRoundResult.round,
+      errorKeys: ["matchday"],
+      rateLimited: true,
+    };
+  }
 
   if (isBundesligaMatchdayLeague(resolvedLeague) && orderedGroups.length > 0) {
     if (currentGroup && currentRoundResult) {
@@ -156,6 +172,7 @@ const resolvePrimaryRoundSnapshot = async ({
           currentGroup,
           currentRound: currentRoundResult.round,
           errorKeys: currentRoundResult.failed ? ["matchday"] : [],
+          rateLimited: false,
         };
       }
     }
@@ -194,6 +211,21 @@ const resolvePrimaryRoundSnapshot = async ({
         round: roundResult.round,
       };
 
+      if (roundResult.status === 429) {
+        const fallbackGroupResult =
+          latestFinishedGroupResult ?? firstSeasonGroupResult;
+
+        return {
+          currentGroup: fallbackGroupResult?.group ?? currentGroup,
+          currentRound:
+            fallbackGroupResult?.round ??
+            currentRoundResult?.round ??
+            { matches: [] },
+          errorKeys: ["matchday"],
+          rateLimited: true,
+        };
+      }
+
       if (roundResult.round.matches.length === 0) {
         continue;
       }
@@ -214,6 +246,7 @@ const resolvePrimaryRoundSnapshot = async ({
           currentGroup: group,
           currentRound: roundResult.round,
           errorKeys: matchdayFailed ? ["matchday"] : [],
+          rateLimited: false,
         };
       }
 
@@ -221,6 +254,7 @@ const resolvePrimaryRoundSnapshot = async ({
         currentGroup: latestFinishedGroupResult.group,
         currentRound: latestFinishedGroupResult.round,
         errorKeys: matchdayFailed ? ["matchday"] : [],
+        rateLimited: false,
       };
     }
 
@@ -232,6 +266,7 @@ const resolvePrimaryRoundSnapshot = async ({
       currentRound:
         fallbackGroupResult?.round ?? currentRoundResult?.round ?? { matches: [] },
       errorKeys: matchdayFailed ? ["matchday"] : [],
+      rateLimited: false,
     };
   }
 
@@ -244,6 +279,7 @@ const resolvePrimaryRoundSnapshot = async ({
       currentGroup,
       currentRound: currentRoundResult?.round ?? { matches: [] },
       errorKeys: currentRoundResult?.failed ? ["matchday"] : [],
+      rateLimited: false,
     };
   }
 
@@ -275,11 +311,21 @@ const resolvePrimaryRoundSnapshot = async ({
       round: roundResult.round,
     };
 
+    if (roundResult.status === 429) {
+      return {
+        currentGroup: firstSeasonGroupResult.group,
+        currentRound: firstSeasonGroupResult.round,
+        errorKeys: ["matchday"],
+        rateLimited: true,
+      };
+    }
+
     if (roundResult.round.matches.length > 0) {
       return {
         currentGroup: group,
         currentRound: roundResult.round,
-        errorKeys: [],
+        errorKeys: matchdayFailed ? ["matchday"] : [],
+        rateLimited: false,
       };
     }
   }
@@ -289,6 +335,7 @@ const resolvePrimaryRoundSnapshot = async ({
     currentRound:
       firstSeasonGroupResult?.round ?? currentRoundResult?.round ?? { matches: [] },
     errorKeys: matchdayFailed ? ["matchday"] : [],
+    rateLimited: false,
   };
 };
 
@@ -354,21 +401,29 @@ export const getHomeSnapshot = async (
     requestOptions,
   });
   const dataErrors = [...primaryHomeData.errorKeys];
-  const primaryRoundData = await resolvePrimaryRoundSnapshot({
-    dataSource,
-    resolvedLeague,
-    currentGroup: primaryHomeData.currentGroup,
-    groups: primaryHomeData.groups,
-    effectiveShortcut,
-    resolvedSeason,
-    referenceSeason,
-    requestOptions,
-  });
+  const primaryRoundData = primaryHomeData.rateLimited
+    ? {
+        currentGroup: primaryHomeData.currentGroup,
+        currentRound: { matches: [] } as HomeRoundSnapshot,
+        errorKeys: [] as HomeErrorKey[],
+        rateLimited: true,
+      }
+    : await resolvePrimaryRoundSnapshot({
+        dataSource,
+        resolvedLeague,
+        currentGroup: primaryHomeData.currentGroup,
+        groups: primaryHomeData.groups,
+        effectiveShortcut,
+        resolvedSeason,
+        referenceSeason,
+        requestOptions,
+      });
   const baseCurrentRound = primaryRoundData.currentRound;
 
   dataErrors.push(...primaryRoundData.errorKeys);
 
-  const { currentRound, nextRound, errorKeys: roundErrorKeys } =
+  const roundData =
+    !primaryRoundData.rateLimited &&
     primaryRoundData.currentGroup?.groupOrderID
       ? await resolveRoundSnapshots({
           dataSource,
@@ -384,19 +439,27 @@ export const getHomeSnapshot = async (
           currentRound: baseCurrentRound,
           nextRound: { matches: [] },
           errorKeys: [],
+          rateLimited: primaryRoundData.rateLimited,
         };
 
-  const { bracketMatches, errorKeys: bracketErrorKeys } = await loadBracketMatches({
-    dataSource,
-    resolvedLeague,
-    currentRound,
-    nextRound,
-    groups: primaryHomeData.groups,
-    playoffMatches: primaryHomeData.playoffMatches,
-    effectiveShortcut,
-    resolvedSeason,
-    requestOptions,
-  });
+  const { currentRound, nextRound, errorKeys: roundErrorKeys } = roundData;
+  const {
+    bracketMatches,
+    errorKeys: bracketErrorKeys,
+    rateLimited: bracketRateLimited,
+  } = roundData.rateLimited
+    ? { bracketMatches: [], errorKeys: [], rateLimited: false }
+    : await loadBracketMatches({
+        dataSource,
+        resolvedLeague,
+        currentRound,
+        nextRound,
+        groups: primaryHomeData.groups,
+        playoffMatches: primaryHomeData.playoffMatches,
+        effectiveShortcut,
+        resolvedSeason,
+        requestOptions,
+      });
 
   dataErrors.push(...roundErrorKeys, ...bracketErrorKeys);
 
@@ -419,5 +482,9 @@ export const getHomeSnapshot = async (
     bracketMatches,
     table: primaryHomeData.table,
     errorKeys: Array.from(new Set(dataErrors)),
+    rateLimited:
+      primaryHomeData.rateLimited ||
+      roundData.rateLimited ||
+      bracketRateLimited,
   };
 };

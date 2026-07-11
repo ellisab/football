@@ -676,10 +676,16 @@ const capture = async <T>(
 ) => {
   try {
     return await task;
-  } catch {
+  } catch (error) {
+    if (getStatusCode(error) === 429) throw error;
+
     errors.push(errorKey);
     return fallback;
   }
+};
+
+const getStatusCode = (error: unknown) => {
+  return (error as { status?: number } | undefined)?.status;
 };
 
 export const getWorldCupSnapshot = async ({
@@ -740,7 +746,9 @@ export const getWorldCupSnapshot = async ({
         ),
         tableLoaded: true,
       };
-    } catch {
+    } catch (error) {
+      if (getStatusCode(error) === 429) throw error;
+
       return {
         ...candidate,
         groupTables: [],
@@ -751,12 +759,16 @@ export const getWorldCupSnapshot = async ({
 
   const probeCandidates = leagueCandidates.slice(0, MAX_WORLD_CUP_PROBE_CANDIDATES);
   const firstProbe = await probeLeague(probeCandidates[0]);
-  const leagueProbes = hasCompleteWorldCupGroupTable(firstProbe.groupTables)
-    ? [firstProbe]
-    : [
-        firstProbe,
-        ...(await Promise.all(probeCandidates.slice(1).map(probeLeague))),
-      ];
+  const leagueProbes = [firstProbe];
+
+  if (!hasCompleteWorldCupGroupTable(firstProbe.groupTables)) {
+    for (const candidate of probeCandidates.slice(1)) {
+      const probe = await probeLeague(candidate);
+      leagueProbes.push(probe);
+
+      if (hasCompleteWorldCupGroupTable(probe.groupTables)) break;
+    }
+  }
   const selectedProbe = selectBestWorldCupLeagueProbe(leagueProbes);
   const league = selectedProbe?.league;
   if (!selectedProbe || !league?.leagueShortcut) {

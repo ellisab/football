@@ -15,6 +15,18 @@ import {
 const API_BASE = "https://api.openligadb.de";
 const REQUEST_TIMEOUT_MS = 5_000;
 const RETRY_DELAYS_MS = [300, 900] as const;
+const MAX_RETRY_AFTER_MS = 2_000;
+const MEMORY_CACHE_MAX_AGE_MS = 5 * 60 * 1_000;
+export const OPENLIGADB_MEMORY_CACHE_MAX_ENTRIES = 128;
+const inFlightGetRequests = new Map<string, Promise<unknown>>();
+const successfulGetResponses = new Map<
+  string,
+  { expiresAt: number; value: unknown }
+>();
+const endpointCooldowns = new Map<
+  string,
+  { expiresAt: number; status: number }
+>();
 
 const getStatusCode = (error: unknown) => {
   return (error as { status?: number } | undefined)?.status;
@@ -28,7 +40,7 @@ const parseRetryAfterMs = (value: string | null) => {
   if (!value) return undefined;
 
   const seconds = Number.parseFloat(value);
-  if (!Number.isNaN(seconds)) return Math.max(0, seconds * 1_000);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1_000);
 
   const retryAt = Date.parse(value);
   if (Number.isNaN(retryAt)) return undefined;
@@ -49,6 +61,102 @@ const getRetryDelayMs = (response: Response | undefined, retryIndex: number) => 
   return baseDelay + jitter;
 };
 
+const getEndpointKey = (baseUrl: string, path: string) => `${baseUrl}${path}`;
+
+const pruneCooldowns = (
+  cooldowns: Map<string, { expiresAt: number; status: number }>,
+  now: number
+) => {
+  for (const [key, cooldown] of cooldowns) {
+    if (cooldown.expiresAt <= now) cooldowns.delete(key);
+  }
+};
+
+const getActiveCooldown = (endpointKey: string) => {
+  const now = Date.now();
+
+  pruneCooldowns(endpointCooldowns, now);
+
+  return endpointCooldowns.get(endpointKey);
+};
+
+const getSingleFlightKey = (
+  endpointKey: string,
+  options: FetchOptions | undefined
+) => {
+  const method = options?.method?.toUpperCase() ?? "GET";
+  if (method !== "GET") return undefined;
+
+  const safeOptionKeys = new Set(["cache", "method", "next"]);
+  if (options && Object.keys(options).some((key) => !safeOptionKeys.has(key))) {
+    return undefined;
+  }
+
+  const safeNextKeys = new Set(["revalidate", "tags"]);
+  if (
+    options?.next &&
+    Object.keys(options.next).some((key) => !safeNextKeys.has(key))
+  ) {
+    return undefined;
+  }
+
+  return JSON.stringify({
+    endpointKey,
+    cache: options?.cache ?? null,
+    revalidate: options?.next?.revalidate ?? null,
+    tags: options?.next?.tags ? [...options.next.tags].sort() : [],
+  });
+};
+
+const getMemoryCacheTtlMs = (options: FetchOptions | undefined) => {
+  if (options?.cache === "no-store") return undefined;
+
+  const revalidate = options?.next?.revalidate;
+  if (
+    typeof revalidate !== "number" ||
+    !Number.isFinite(revalidate) ||
+    revalidate <= 0
+  ) {
+    return undefined;
+  }
+
+  return Math.min(revalidate * 1_000, MEMORY_CACHE_MAX_AGE_MS);
+};
+
+const getSuccessfulResponse = <T>(requestKey: string) => {
+  const entry = successfulGetResponses.get(requestKey);
+  if (!entry) return undefined;
+  if (entry.expiresAt <= Date.now()) {
+    successfulGetResponses.delete(requestKey);
+    return undefined;
+  }
+
+  successfulGetResponses.delete(requestKey);
+  successfulGetResponses.set(requestKey, entry);
+  return entry.value as T;
+};
+
+const setSuccessfulResponse = (
+  requestKey: string,
+  value: unknown,
+  ttlMs: number
+) => {
+  successfulGetResponses.delete(requestKey);
+  successfulGetResponses.set(requestKey, {
+    expiresAt: Date.now() + ttlMs,
+    value,
+  });
+
+  if (successfulGetResponses.size > OPENLIGADB_MEMORY_CACHE_MAX_ENTRIES) {
+    const oldestKey = successfulGetResponses.keys().next().value;
+    if (oldestKey !== undefined) successfulGetResponses.delete(oldestKey);
+  }
+};
+
+export const clearOpenLigaDbMemoryCache = () => {
+  successfulGetResponses.clear();
+};
+
 const createOpenLigaDbError = (status: number) => {
   const error = new Error(`OpenLigaDB-Anfrage fehlgeschlagen (${status})`);
   (error as Error & { status?: number }).status = status;
@@ -61,40 +169,102 @@ const getShorterRevalidate = (
 ) => {
   const requestedRevalidate = options?.next?.revalidate;
 
-  return typeof requestedRevalidate === "number"
+  return typeof requestedRevalidate === "number" &&
+    Number.isFinite(requestedRevalidate) &&
+    requestedRevalidate > 0
     ? Math.min(requestedRevalidate, defaultRevalidate)
     : defaultRevalidate;
 };
 
-const logRetry = ({
+const getErrorName = (error: unknown) => {
+  if (error instanceof Error && error.name) return error.name;
+  return "UnknownError";
+};
+
+const classifyFailure = (
+  error: unknown,
+  status: number | undefined
+): "http" | "timeout" | "network" => {
+  if (typeof status === "number") return "http";
+
+  const errorName = getErrorName(error);
+  return errorName === "AbortError" || errorName === "TimeoutError"
+    ? "timeout"
+    : "network";
+};
+
+const logRecoveredRetry = ({
   attempts,
   path,
   status,
-  final,
 }: {
   attempts: number;
   path: string;
   status?: number;
-  final: boolean;
 }) => {
   if (process.env.OPENLIGADB_DIAGNOSTICS !== "1") return;
   if (attempts <= 1) return;
 
-  const payload = { attempts, path, status };
+  console.warn({
+    event: "openligadb.request.recovered",
+    attempts,
+    path,
+    status: status ?? null,
+  });
+};
 
-  if (final) {
-    console.warn("[OpenLigaDB] request failed after retries", payload);
+const logTerminalFailure = ({
+  attempts,
+  duration,
+  error,
+  path,
+  status,
+}: {
+  attempts: number;
+  duration: number;
+  error: unknown;
+  path: string;
+  status?: number;
+}) => {
+  if (
+    (status === 404 || attempts === 0) &&
+    process.env.OPENLIGADB_DIAGNOSTICS !== "1"
+  ) {
     return;
   }
 
-  console.warn("[OpenLigaDB] request recovered after retry", payload);
+  console.warn({
+    event: "openligadb.request.failed",
+    path,
+    duration,
+    attempts,
+    status: status ?? null,
+    errorName: getErrorName(error),
+    classification: classifyFailure(error, status),
+  });
 };
 
-const fetchJson = async <T>(
+const executeFetchJson = async <T>(
   path: string,
   options?: FetchOptions,
   baseUrl: string = API_BASE
 ): Promise<T> => {
+  const startedAt = Date.now();
+  const endpointKey = getEndpointKey(baseUrl, path);
+  const cooldown = getActiveCooldown(endpointKey);
+
+  if (cooldown) {
+    const error = createOpenLigaDbError(cooldown.status);
+    logTerminalFailure({
+      attempts: 0,
+      duration: Date.now() - startedAt,
+      error,
+      path,
+      status: cooldown.status,
+    });
+    throw error;
+  }
+
   let lastError: unknown;
   let lastStatus: number | undefined;
   let attemptsMade = 0;
@@ -110,21 +280,35 @@ const fetchJson = async <T>(
       });
 
       if (response.ok) {
-        logRetry({
+        const data = (await response.json()) as T;
+        logRecoveredRetry({
           attempts: attempt + 1,
           path,
           status: response.status,
-          final: false,
         });
-        return response.json() as Promise<T>;
+        return data;
       }
 
       lastStatus = response.status;
       lastError = createOpenLigaDbError(response.status);
 
-      if (!isRetryableStatus(response.status) || attempt === RETRY_DELAYS_MS.length) {
+      if (!isRetryableStatus(response.status)) break;
+
+      const retryAfterMs = parseRetryAfterMs(response.headers.get("retry-after"));
+      if (retryAfterMs !== undefined && retryAfterMs > MAX_RETRY_AFTER_MS) {
+        const existingCooldown = endpointCooldowns.get(endpointKey);
+
+        endpointCooldowns.set(endpointKey, {
+          expiresAt: Math.max(
+            existingCooldown?.expiresAt ?? 0,
+            Date.now() + retryAfterMs
+          ),
+          status: response.status,
+        });
         break;
       }
+
+      if (attempt === RETRY_DELAYS_MS.length) break;
     } catch (error) {
       lastError = error;
       lastStatus = getStatusCode(error);
@@ -137,14 +321,50 @@ const fetchJson = async <T>(
     await wait(getRetryDelayMs(response, attempt));
   }
 
-  logRetry({
+  logTerminalFailure({
     attempts: attemptsMade,
+    duration: Date.now() - startedAt,
+    error: lastError,
     path,
     status: lastStatus,
-    final: true,
   });
 
   throw lastError;
+};
+
+const fetchJson = <T>(
+  path: string,
+  options?: FetchOptions,
+  baseUrl: string = API_BASE
+): Promise<T> => {
+  const endpointKey = getEndpointKey(baseUrl, path);
+  const requestKey = getSingleFlightKey(endpointKey, options);
+  if (!requestKey) return executeFetchJson<T>(path, options, baseUrl);
+
+  const memoryCacheTtlMs = getMemoryCacheTtlMs(options);
+  if (memoryCacheTtlMs !== undefined) {
+    const cached = getSuccessfulResponse<T>(requestKey);
+    if (cached !== undefined) return Promise.resolve(cached);
+  }
+
+  const existingRequest = inFlightGetRequests.get(requestKey);
+  if (existingRequest) return existingRequest as Promise<T>;
+
+  const request = executeFetchJson<T>(path, options, baseUrl)
+    .then((value) => {
+      if (memoryCacheTtlMs !== undefined) {
+        setSuccessfulResponse(requestKey, value, memoryCacheTtlMs);
+      }
+      return value;
+    })
+    .finally(() => {
+      if (inFlightGetRequests.get(requestKey) === request) {
+        inFlightGetRequests.delete(requestKey);
+      }
+    });
+
+  inFlightGetRequests.set(requestKey, request);
+  return request;
 };
 
 export const getAvailableLeagues = async (options?: FetchOptions) => {
@@ -181,7 +401,10 @@ export const getCurrentGroup = async (
 ) => {
   return fetchJson<ApiGroup>(
     `/getcurrentgroup/${leagueShortcut}`,
-    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.currentGroup)
+    withOpenLigaDbCache(
+      options,
+      getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.currentGroup)
+    )
   );
 };
 
@@ -205,7 +428,10 @@ export const getMatchdayResults = async (
 ) => {
   return fetchJson<ApiMatch[]>(
     `/getmatchdata/${leagueShortcut}/${season}/${groupOrderId}`,
-    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.matchday)
+    withOpenLigaDbCache(
+      options,
+      getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.matchday)
+    )
   );
 };
 
@@ -251,12 +477,20 @@ export const getMatchesByGroup = async (
   try {
     return await fetchJson<ApiMatch[]>(
       `/getmatchbygroup/${leagueShortcut}/${groupOrderId}/${season}`,
-      withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.matchday)
+      withOpenLigaDbCache(
+        options,
+        getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.matchday)
+      )
     );
-  } catch {
+  } catch (error) {
+    if (getStatusCode(error) !== 404) throw error;
+
     return fetchJson<ApiMatch[]>(
       `/getmatchdata/${leagueShortcut}/${season}/${groupOrderId}`,
-      withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.matchday)
+      withOpenLigaDbCache(
+        options,
+        getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.matchday)
+      )
     );
   }
 };

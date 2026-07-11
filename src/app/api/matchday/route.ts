@@ -5,6 +5,10 @@ import {
 } from "@footballleagues/core/home";
 import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
 
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, max-age=0",
+};
+
 export async function GET(request: NextRequest) {
   const league = request.nextUrl.searchParams.get("league") ?? undefined;
   const season = request.nextUrl.searchParams.get("season") ?? undefined;
@@ -27,9 +31,11 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json(snapshot, {
-      headers: {
-        "Cache-Control": `public, max-age=0, s-maxage=${OPENLIGADB_CACHE_SECONDS.liveMatchday}, stale-while-revalidate=${OPENLIGADB_CACHE_SECONDS.matchday}`,
-      },
+      headers: snapshot.refreshFailed
+        ? NO_STORE_HEADERS
+        : {
+            "Cache-Control": `public, max-age=0, s-maxage=${OPENLIGADB_CACHE_SECONDS.liveMatchday}, stale-while-revalidate=${OPENLIGADB_CACHE_SECONDS.matchday}`,
+          },
     });
   } catch (error) {
     const status =
@@ -46,9 +52,7 @@ export async function GET(request: NextRequest) {
       },
       {
         status,
-        headers: {
-          "Cache-Control": "public, max-age=0, s-maxage=30, stale-while-revalidate=60",
-        },
+        headers: NO_STORE_HEADERS,
       }
     );
   }

@@ -5,8 +5,6 @@ import {
 } from "@/features/football/view-utils";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Teams",
   description: "Teams, nächste Spiele und Tabellenkontext.",

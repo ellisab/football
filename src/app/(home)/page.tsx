@@ -5,8 +5,6 @@ import { resolveDateQuery } from "@/features/football/components/date-navigator"
 import { getCompetitionMeta } from "@/features/football/competition-meta";
 import { isLeagueKey } from "@footballleagues/core/leagues";
 
-export const dynamic = "force-dynamic";
-
 export default async function Home({
   searchParams,
 }: {

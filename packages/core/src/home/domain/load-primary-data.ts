@@ -29,6 +29,7 @@ export const loadPrimaryHomeData = async ({
   groups: ApiGroup[];
   playoffMatches: ApiMatch[];
   errorKeys: HomeErrorKey[];
+  rateLimited: boolean;
 }> => {
   const currentGroupPromise = dataSource.getCurrentGroup(
     effectiveShortcut,
@@ -52,8 +53,12 @@ export const loadPrimaryHomeData = async ({
           leagueShortcut: getDataShortcutForLeague(resolvedLeague),
           requestOptions,
           season: resolvedSeason,
-        }).then((result) => result.matches)
-      : Promise.resolve([]);
+        })
+      : Promise.resolve({
+          matches: [] as ApiMatch[],
+          rateLimited: false,
+          refreshFailed: false,
+        });
 
   const [currentGroupResult, tableResult, groupsResult, playoffResult] =
     await Promise.allSettled([
@@ -83,8 +88,20 @@ export const loadPrimaryHomeData = async ({
         })();
   const playoffMatches =
     playoffResult.status === "fulfilled"
-      ? playoffResult.value.map(sortGoals)
+      ? (() => {
+          if (playoffResult.value.refreshFailed) {
+            errorKeys.push("playoffs");
+          }
+          return playoffResult.value.matches.map(sortGoals);
+        })()
       : (errorKeys.push("playoffs"), []);
+  const rateLimited =
+    [currentGroupResult, tableResult, groupsResult, playoffResult].some(
+      (result) =>
+        result.status === "rejected" && getStatusCode(result.reason) === 429
+    ) ||
+    (playoffResult.status === "fulfilled" &&
+      playoffResult.value.rateLimited === true);
 
   return {
     currentGroup,
@@ -92,5 +109,6 @@ export const loadPrimaryHomeData = async ({
     groups,
     playoffMatches,
     errorKeys,
+    rateLimited,
   };
 };

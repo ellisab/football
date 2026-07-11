@@ -10,6 +10,10 @@ import type { ApiGroup, ApiMatch } from "../../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { BracketRound, HomeErrorKey, HomeRoundSnapshot } from "../types";
 import { loadMatchdayResults } from "./matchday-loader";
+import {
+  getStatusCode,
+  mapSettledWithConcurrency,
+} from "./shared";
 
 const dedupeMatches = (matches: ApiMatch[]) => {
   const seen = new Set<string>();
@@ -138,41 +142,68 @@ export const loadBracketMatches = async ({
 }): Promise<{
   bracketMatches: BracketRound[];
   errorKeys: HomeErrorKey[];
+  rateLimited: boolean;
 }> => {
   const knockoutGroups = Array.isArray(groups)
     ? groups.filter((group) => isKnockoutGroup(group.groupName))
     : [];
 
-  const knockoutRoundResults = await Promise.allSettled(
-    knockoutGroups.map(async (group) => {
-      if (!group.groupOrderID) return { group, matches: [] as ApiMatch[] };
+  const knockoutRoundResults = await mapSettledWithConcurrency(
+    knockoutGroups,
+    async (group) => {
+      if (!group.groupOrderID) {
+        return {
+          group,
+          matches: [] as ApiMatch[],
+          rateLimited: false,
+          refreshFailed: false,
+        };
+      }
 
-      const roundMatches = (
-        await loadMatchdayResults({
-          dataSource,
-          groupOrderId: group.groupOrderID,
-          leagueShortcut: effectiveShortcut,
-          requestOptions,
-          season: resolvedSeason,
-        })
-      ).matches;
+      const matchdayResult = await loadMatchdayResults({
+        dataSource,
+        groupOrderId: group.groupOrderID,
+        leagueShortcut: effectiveShortcut,
+        requestOptions,
+        season: resolvedSeason,
+      });
 
       return {
         group,
-        matches: roundMatches.map(sortGoals),
+        matches: matchdayResult.matches.map(sortGoals),
+        rateLimited: matchdayResult.rateLimited === true,
+        refreshFailed: matchdayResult.refreshFailed === true,
       };
-    })
+    },
+    {
+      shouldStop: (error) => getStatusCode(error) === 429,
+      shouldStopValue: (round) => round.rateLimited,
+    }
   );
 
   const errorKeys: HomeErrorKey[] = [];
-  const knockoutRounds: BracketRound[] = knockoutRoundResults.map((result, index) => {
-    const fallbackGroup = knockoutGroups[index] as ApiGroup;
+  let rateLimited = false;
+  const knockoutRounds: BracketRound[] = knockoutRoundResults.map((result) => {
+    const fallbackGroup = result.input;
 
     if (result.status === "fulfilled") {
-      return result.value;
+      if (result.value.refreshFailed) {
+        errorKeys.push("knockout rounds");
+      }
+      rateLimited = rateLimited || result.value.rateLimited;
+
+      return {
+        group: result.value.group,
+        matches: result.value.matches,
+      };
     }
 
-    errorKeys.push("knockout rounds");
+    const status = getStatusCode(result.reason);
+    if (status !== 404) {
+      errorKeys.push("knockout rounds");
+    }
+    rateLimited = rateLimited || status === 429;
+
     return {
       group: fallbackGroup,
       matches: [],
@@ -200,6 +231,7 @@ export const loadBracketMatches = async ({
       resolvedLeague === "cl"
         ? selectLatestChampionsLeagueRound(allBracketRounds)
         : allBracketRounds,
-    errorKeys,
+    errorKeys: Array.from(new Set(errorKeys)),
+    rateLimited,
   };
 };

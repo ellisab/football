@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { LiveView } from "@/features/live/components/live-view";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
-
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Live",
@@ -10,6 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function LivePage() {
+  await connection();
   const data = await getHomePageData({});
   return <LiveView data={data} />;
 }

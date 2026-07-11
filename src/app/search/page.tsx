@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { SearchPageView } from "@/features/search/search-page";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Suchen",
   description: "Teams, Wettbewerbe, Spiele und Spieltage durchsuchen.",

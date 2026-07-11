@@ -4,8 +4,6 @@ import { getVisibleCompetitions } from "@/features/football/view-utils";
 import { getLeagueKeyFromSlug } from "@/features/football/competition-meta";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Tabellen",
   description: "Tabellen der unterstützten Fußballwettbewerbe.",

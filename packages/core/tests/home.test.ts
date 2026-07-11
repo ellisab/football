@@ -1,11 +1,21 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import test, { beforeEach } from "node:test";
 import {
   createHomeState,
   getHomeSnapshot,
   type HomeSnapshot,
 } from "../src/home";
-import type { ApiMatch, ApiTableRow } from "../src/openligadb";
+import {
+  clearOpenLigaDbMemoryCache,
+  type ApiMatch,
+  type ApiTableRow,
+} from "../src/openligadb";
+import { clearMatchdayCache } from "../src/home/domain/matchday-loader";
+
+beforeEach(() => {
+  clearMatchdayCache();
+  clearOpenLigaDbMemoryCache();
+});
 
 const jsonResponse = (body: unknown, status: number = 200) => {
   return new Response(JSON.stringify(body), {

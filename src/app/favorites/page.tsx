@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { FavoritesView, type FavoriteMatchItem } from "@/features/favorites/favorites-view";
 import { buildSearchItems } from "@/features/search/search-page";
 import {
@@ -10,14 +11,13 @@ import {
 } from "@/features/football/view-utils";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Favoriten",
   description: "Deine lokal gespeicherten Teams und Wettbewerbe.",
 };
 
 export default async function FavoritesPage() {
+  await connection();
   const data = await getHomePageData({});
   const searchItems = buildSearchItems(data);
   const competitions = searchItems.filter((item) => item.kind === "competition");

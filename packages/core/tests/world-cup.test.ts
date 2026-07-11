@@ -351,6 +351,87 @@ test("getWorldCupSnapshot stops probing after finding a complete World Cup table
   assert.deepEqual(probedShortcuts, ["complete-wm"]);
 });
 
+test("getWorldCupSnapshot stops duplicate-league probing after a 429", async () => {
+  const probedShortcuts: string[] = [];
+  const rateLimitError = Object.assign(new Error("rate limited"), {
+    status: 429,
+  });
+  const dataSource: WorldCupDataSource = {
+    async getAvailableLeaguesBySeason() {
+      return [
+        {
+          leagueId: 100,
+          leagueShortcut: "first-wm",
+          leagueName: "WM 2026",
+          leagueSeason: 2026,
+          sport: { sportName: "Fußball" },
+        },
+        {
+          leagueId: 200,
+          leagueShortcut: "second-wm",
+          leagueName: "World Cup 2026",
+          leagueSeason: 2026,
+          sport: { sportName: "Football" },
+        },
+      ];
+    },
+    async getGroups() {
+      return [];
+    },
+    async getAllMatches() {
+      return [];
+    },
+    async getGroupTable(leagueShortcut) {
+      probedShortcuts.push(leagueShortcut);
+      throw rateLimitError;
+    },
+    async getAvailableTeams() {
+      return [];
+    },
+  };
+
+  await assert.rejects(
+    getWorldCupSnapshot({ dataSource, season: 2026 }),
+    (error) => error === rateLimitError
+  );
+  assert.deepEqual(probedShortcuts, ["first-wm"]);
+});
+
+test("getWorldCupSnapshot rejects a 429 from a final snapshot resource", async () => {
+  const rateLimitError = Object.assign(new Error("rate limited"), {
+    status: 429,
+  });
+  const dataSource: WorldCupDataSource = {
+    async getAvailableLeaguesBySeason() {
+      return [
+        {
+          leagueShortcut: "wm-rate-limited",
+          leagueName: "WM 2026",
+          leagueSeason: 2026,
+          sport: { sportName: "Fußball" },
+        },
+      ];
+    },
+    async getGroups() {
+      return [];
+    },
+    async getAllMatches() {
+      return [];
+    },
+    async getGroupTable() {
+      return [];
+    },
+    async getAvailableTeams() {
+      throw rateLimitError;
+    },
+  };
+
+  await assert.rejects(
+    getWorldCupSnapshot({ dataSource, season: 2026 }),
+    (error) => error === rateLimitError
+  );
+});
+
 test("getWorldCupSnapshot returns an empty state when OpenLigaDB has no 2026 WM league", async () => {
   const dataSource: WorldCupDataSource = {
     async getAvailableLeaguesBySeason() {

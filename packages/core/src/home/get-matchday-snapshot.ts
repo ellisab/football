@@ -35,6 +35,7 @@ export type MatchdaySnapshot = {
   group: Pick<ApiGroup, "groupID" | "groupName" | "groupOrderID">;
   lastChanged?: string;
   matches: ApiMatch[];
+  refreshFailed?: true;
   resolvedLeague: LeagueKey;
   resolvedSeason: number;
 };
@@ -137,6 +138,7 @@ export const getMatchdaySnapshot = async (
     },
     lastChanged: matchdayResult.lastChanged,
     matches: sortMatchesByKickoff(matchdayResult.matches.map(sortGoals)),
+    refreshFailed: matchdayResult.refreshFailed,
     resolvedLeague: requestedLeague,
     resolvedSeason,
   };
