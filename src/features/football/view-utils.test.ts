@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  formatMatchDate,
+  formatMatchTime,
   getMatchScore,
   getMatchScreenReaderLabel,
   getMatchStatus,
@@ -8,6 +10,13 @@ import {
 } from "./view-utils";
 
 const now = new Date("2026-07-11T18:00:00Z");
+
+test("football view formats the Berlin-local match date and time", () => {
+  const match = { matchDateTimeUTC: "2026-07-11T22:30:00Z" };
+
+  assert.equal(formatMatchDate(match), "12.07.2026");
+  assert.equal(formatMatchTime(match), "00:30");
+});
 
 test("football view status wrappers retain caller-compatible names without hiding uncertainty", () => {
   assert.equal(

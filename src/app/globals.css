@@ -468,6 +468,7 @@
   }
 
   .match-time,
+  .match-date,
   .match-score-number,
   .event-minute,
   .event-score,
@@ -475,6 +476,17 @@
   .result-phase-list dd {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
+  }
+
+  .match-kickoff {
+    display: grid;
+    gap: 0.08rem;
+  }
+
+  .match-date {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 650;
   }
 
   .match-time {

@@ -45,6 +45,12 @@ const timeFormatter = new Intl.DateTimeFormat("de-DE", {
   minute: "2-digit",
   timeZone: "Europe/Berlin",
 });
+const dateFormatter = new Intl.DateTimeFormat("de-DE", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "Europe/Berlin",
+});
 
 export const getMatchTime = (match: ApiMatch) => {
   return getMatchKickoffTimestamp(match) ?? Number.MAX_SAFE_INTEGER;
@@ -81,6 +87,16 @@ export const formatMatchTime = (match: ApiMatch) => {
   if (Number.isNaN(date.getTime())) return "offen";
 
   return timeFormatter.format(date);
+};
+
+export const formatMatchDate = (match: ApiMatch) => {
+  const value = match.matchDateTimeUTC ?? match.matchDateTime;
+  if (!value) return "Datum offen";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Datum offen";
+
+  return dateFormatter.format(date);
 };
 
 export const getMatchScore = (match: ApiMatch) => {

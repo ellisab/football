@@ -4,6 +4,7 @@ import type { ApiMatch } from "@footballleagues/core/openligadb";
 import { TeamBadge } from "@/features/teams/components/team-badge";
 import type { CompetitionMatch } from "@/features/football/view-utils";
 import {
+  formatMatchDate,
   formatMatchTime,
   getMatchScore,
   getMatchScreenReaderLabel,
@@ -62,7 +63,10 @@ export function MatchSummary({
   const content = (
     <>
       <div className="match-time-column" aria-hidden="true">
-        <span className="match-time">{formatMatchTime(match)}</span>
+        <div className="match-kickoff">
+          <span className="match-date">{formatMatchDate(match)}</span>
+          <span className="match-time">{formatMatchTime(match)}</span>
+        </div>
         <span className={statusClassNames[status]}>
           {status === "live" ? (
             <Radio className="h-3 w-3" />
