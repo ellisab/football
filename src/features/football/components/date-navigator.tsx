@@ -16,6 +16,15 @@ const longDateFormatter = new Intl.DateTimeFormat("de-DE", {
 
 const toDisplayDate = (dateKey: string) => new Date(`${dateKey}T12:00:00.000Z`);
 
+const dayFormatter = new Intl.DateTimeFormat("de-DE", {
+  day: "2-digit",
+  timeZone: "Europe/Berlin",
+  weekday: "short",
+});
+
+const compactDateLabel = (dateKey: string) =>
+  dayFormatter.format(toDisplayDate(dateKey)).replace(".", "");
+
 export const resolveDateQuery = (value?: string) => {
   return parseBerlinDateQuery(value) ?? getBerlinDateKey(new Date()) ?? "";
 };
@@ -36,13 +45,17 @@ export function DateNavigator({ dateKey }: { dateKey: string }) {
         >
           <ChevronLeft aria-hidden="true" className="h-5 w-5" />
         </Link>
-        <div className="min-w-0 flex-1 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-soft)]">
-            {isToday ? "Heute" : "Ausgewählter Tag"}
-          </p>
-          <p className="mt-0.5 truncate text-sm font-semibold text-[var(--text)] sm:text-base">
-            {longDateFormatter.format(toDisplayDate(dateKey))}
-          </p>
+        <div className="date-navigator__days">
+          <Link href={`/today?date=${previous}`} className="date-navigator__day">
+            {compactDateLabel(previous)}
+          </Link>
+          <span className="date-navigator__day" data-active="true" aria-current="date">
+            <span>{isToday ? "Heute" : compactDateLabel(dateKey)}</span>
+            <small>{longDateFormatter.format(toDisplayDate(dateKey))}</small>
+          </span>
+          <Link href={`/today?date=${next}`} className="date-navigator__day">
+            {compactDateLabel(next)}
+          </Link>
         </div>
         {!isToday ? (
           <Link href={`/today?date=${today}`} className="date-today-link">

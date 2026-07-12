@@ -30,40 +30,11 @@ function MatchSection({
   title: string;
 }) {
   if (matches.length === 0) return null;
-  const groups = new Map<string, CompetitionMatch[]>();
-  for (const item of matches) {
-    const key = item.competition.resolvedLeague;
-    groups.set(key, [...(groups.get(key) ?? []), item]);
-  }
 
   return (
     <section className="content-section">
       <SectionHeading count={matches.length} description={description} title={title} />
-      <div className="grid gap-4">
-        {[...groups.values()].map((items) => {
-          const competition = items[0]?.competition;
-          if (!competition) return null;
-          const meta = getCompetitionMeta(competition.resolvedLeague);
-          return (
-            <section
-              key={competition.resolvedLeague}
-              className="today-competition-group"
-              aria-label={meta.label}
-            >
-              <div className="today-competition-heading">
-                <div>
-                  <strong>{meta.label}</strong>
-                  <span>{items.length} {items.length === 1 ? "Spiel" : "Spiele"}</span>
-                </div>
-                <Link href={`${meta.href}?season=${competition.resolvedSeason}`}>
-                  Wettbewerb öffnen
-                </Link>
-              </div>
-              <MatchList matches={items} showCompetition={false} />
-            </section>
-          );
-        })}
-      </div>
+      <MatchList matches={matches} />
     </section>
   );
 }
@@ -106,7 +77,7 @@ export function TodayView({
   );
 
   return (
-    <div className="page-shell">
+    <div className="page-shell today-page">
       <div className="content-column">
         <PageIntro
           eyebrow="Spielplan"

@@ -4,12 +4,11 @@ import { FavoritesView, type FavoriteMatchItem } from "@/features/favorites/favo
 import { buildSearchItems } from "@/features/search/search-page";
 import {
   getAllCompetitionMatches,
-  getMatchStatusLabel,
   getTeamId,
-  getTeamLabel,
   getVisibleCompetitions,
 } from "@/features/football/view-utils";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
+import { getCompetitionMeta } from "@/features/football/competition-meta";
 
 export const metadata: Metadata = {
   title: "Favoriten",
@@ -26,14 +25,18 @@ export default async function FavoritesPage() {
     getVisibleCompetitions(data)
   )
     .filter((item) => item.match.matchID)
-    .map((item) => ({
-      competitionId: item.competition.resolvedLeague,
-      href: `/matches/${item.match.matchID}`,
-      id: String(item.match.matchID),
-      label: `${getTeamLabel(item.match.team1, "Offen")} gegen ${getTeamLabel(item.match.team2, "Offen")}`,
-      status: getMatchStatusLabel(item.match),
-      teamIds: [getTeamId(item.match.team1), getTeamId(item.match.team2)],
-    }));
+    .map((item) => {
+      const meta = getCompetitionMeta(item.competition.resolvedLeague);
+
+      return {
+        competitionId: item.competition.resolvedLeague,
+        competitionLabel: meta.label,
+        match: item.match,
+        roundLabel:
+          item.match.group?.groupName ?? `Saison ${item.competition.resolvedSeason}`,
+        teamIds: [getTeamId(item.match.team1), getTeamId(item.match.team2)],
+      };
+    });
 
   return <FavoritesView competitions={competitions} matches={matches} teams={teams} />;
 }

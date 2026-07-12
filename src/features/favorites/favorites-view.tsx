@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { Star, Trophy, Users } from "lucide-react";
+import type { ApiMatch } from "@footballleagues/core/openligadb";
 import type { SearchResultItem } from "@/features/search";
 import { FavoriteButton, useFavorites } from "@/features/favorites";
+import { SculptedMatch } from "@/features/football/components/sculpted-match";
 
 export type FavoriteMatchItem = {
   competitionId: string;
-  href: string;
-  id: string;
-  label: string;
-  status: string;
+  competitionLabel: string;
+  match: ApiMatch;
+  roundLabel: string;
   teamIds: string[];
 };
 
@@ -141,16 +142,16 @@ export function FavoritesView({
                     </p>
                   </div>
                 </div>
-                <ul className="favorite-match-list">
+                <div className="match-list match-list--sculpted">
                   {relevantMatches.slice(0, 12).map((match) => (
-                    <li key={match.id}>
-                      <Link href={match.href}>
-                        <strong>{match.label}</strong>
-                        <span>{match.status}</span>
-                      </Link>
-                    </li>
+                    <SculptedMatch
+                      competitionLabel={match.competitionLabel}
+                      key={match.match.matchID}
+                      match={match.match}
+                      roundLabel={match.roundLabel}
+                    />
                   ))}
-                </ul>
+                </div>
               </section>
             ) : null}
           </div>
