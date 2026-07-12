@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Search, Trophy } from "lucide-react";
+import { ArrowRight, Trophy } from "lucide-react";
 import { getCompetitionCatalog } from "@/features/football/competition-meta";
 import { EmptyState, PageIntro } from "@/features/football/components/product-ui";
+import { SearchField } from "@/features/football/components/search-field";
 import { FavoriteButton } from "@/features/favorites";
 
 const normalize = (value: string) =>
@@ -29,21 +30,14 @@ export function CompetitionDirectory({ query = "" }: { query?: string }) {
           description="Alle unterstützten Ligen und Turniere, direkt mit Spieltagen, Ergebnissen und verfügbaren Tabellen."
         />
 
-        <form action="/competitions" method="get" className="directory-search" role="search">
-          <label htmlFor="competition-query" className="sr-only">
-            Wettbewerbe durchsuchen
-          </label>
-          <Search aria-hidden="true" className="h-5 w-5 text-[var(--text-soft)]" />
-          <input
-            id="competition-query"
+        <form action="/competitions" method="get" className="mb-6" role="search">
+          <SearchField
+            inputId="competition-query"
             name="q"
-            type="search"
             defaultValue={query}
             placeholder="Wettbewerb oder Region"
+            label="Wettbewerbe durchsuchen"
           />
-          <button type="submit" className="button-primary">
-            Suchen
-          </button>
         </form>
 
         <p className="sr-only" aria-live="polite">

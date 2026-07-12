@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, Search, Shirt } from "lucide-react";
+import { ArrowRight, Shirt } from "lucide-react";
 import { TeamBadge } from "@/features/teams/components/team-badge";
 import type { TeamSummary } from "@/features/football/view-utils";
 import { MatchSummary } from "@/features/football/components/match-summary";
 import { EmptyState, PageIntro } from "@/features/football/components/product-ui";
+import { SearchField } from "@/features/football/components/search-field";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
 import { FavoriteButton } from "@/features/favorites";
 
@@ -83,21 +84,14 @@ export function TeamsView({
           title="Teams"
           description="Schneller Zugriff auf nächste Partien, letzte Ergebnisse und den verfügbaren Tabellenkontext."
         />
-        <form action="/teams" method="get" className="directory-search" role="search">
-          <label htmlFor="team-query" className="sr-only">
-            Teams durchsuchen
-          </label>
-          <Search aria-hidden="true" className="h-5 w-5 text-[var(--text-soft)]" />
-          <input
-            id="team-query"
+        <form action="/teams" method="get" className="mb-6" role="search">
+          <SearchField
+            inputId="team-query"
             name="q"
-            type="search"
             defaultValue={query}
             placeholder="Teamname"
+            label="Teams durchsuchen"
           />
-          <button type="submit" className="button-primary">
-            Suchen
-          </button>
         </form>
         <p className="sr-only" aria-live="polite">
           {filtered.length} Teams gefunden.

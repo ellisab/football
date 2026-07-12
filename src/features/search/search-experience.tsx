@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, X } from "lucide-react";
 import { type FormEvent, useId, useMemo, useRef, useState } from "react";
+import { SearchField } from "@/features/football/components/search-field";
 import {
   rankSearchResults,
   type SearchResultItem,
@@ -83,50 +83,31 @@ export function SearchExperience({
     <section
       role="search"
       aria-labelledby={`${inputId}-label`}
-      className={`grid gap-4 ${className ?? ""}`}
+      className={`grid min-w-0 gap-4 ${className ?? ""}`}
     >
-      <form action="/search" method="get" onSubmit={handleSubmit} className="grid gap-2">
-        <label
-          id={`${inputId}-label`}
-          htmlFor={inputId}
-          className="text-sm font-semibold text-current"
-        >
-          {label}
-        </label>
-        <div className="relative">
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-current opacity-60"
-          />
-          <input
-            ref={inputRef}
-            id={inputId}
-            name="q"
-            type="search"
-            inputMode="search"
-            autoComplete="off"
-            autoFocus={autoFocus}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={placeholder}
-            aria-controls={resultsId}
-            aria-describedby={statusId}
-            className="min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] py-3 pr-32 pl-12 text-base text-[var(--text)] outline-none transition focus-visible:border-[var(--focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_srgb,var(--focus)_16%,transparent)]"
-          />
-          {hasQuery ? (
-            <button
-              type="button"
-              onClick={clearQuery}
-              aria-label="Suchanfrage löschen"
-              className="absolute top-1/2 right-[5.4rem] grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-[var(--text-muted)] transition hover:bg-[var(--surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
-            >
-              <X aria-hidden="true" className="h-4 w-4" />
-            </button>
-          ) : null}
-          <button type="submit" className="button-primary absolute top-1/2 right-1.5 min-h-11 -translate-y-1/2 px-3">
-            Suchen
-          </button>
-        </div>
+      <form
+        action="/search"
+        method="get"
+        onSubmit={handleSubmit}
+        className="grid min-w-0 gap-2"
+      >
+        <SearchField
+          inputId={inputId}
+          inputRef={inputRef}
+          name="q"
+          inputMode="search"
+          autoComplete="off"
+          autoFocus={autoFocus}
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={placeholder}
+          aria-controls={resultsId}
+          aria-describedby={statusId}
+          label={label}
+          labelClassName="text-sm font-semibold text-current"
+          onClear={clearQuery}
+          showClear={hasQuery}
+        />
       </form>
 
       <p id={statusId} role="status" aria-live="polite" aria-atomic="true" className="text-sm opacity-70">
@@ -137,20 +118,24 @@ export function SearchExperience({
           : emptyMessage}
       </p>
 
-      <div id={resultsId} aria-label="Suchergebnisse" className="grid gap-5">
+      <div id={resultsId} aria-label="Suchergebnisse" className="grid min-w-0 gap-5">
         {hasQuery && results.length === 0 ? (
           <p className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 text-sm text-[var(--text-muted)]">
             {noResultsMessage}
           </p>
         ) : (
           groupedResults.map(([kind, kindResults]) => (
-            <section key={kind} aria-labelledby={`${resultsId}-${kind}`}>
+            <section
+              key={kind}
+              aria-labelledby={`${resultsId}-${kind}`}
+              className="min-w-0"
+            >
               <h2 id={`${resultsId}-${kind}`} className="eyebrow mb-2">
                 {KIND_LABELS[kind]}
               </h2>
-              <ul className="grid gap-2">
+              <ul className="grid min-w-0 gap-2">
                 {kindResults.map(({ item }) => (
-                  <li key={`${item.kind}-${item.id}`}>
+                  <li key={`${item.kind}-${item.id}`} className="min-w-0">
                     <Link
                       href={item.href}
                       onClick={() => selectResult(item)}

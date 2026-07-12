@@ -223,7 +223,6 @@
   .date-today-link:focus-visible,
   .matchday-current-link:focus-visible,
   .select-control:focus-visible,
-  .directory-search input:focus-visible,
   .match-summary:focus-visible,
   .competition-card-link:focus-visible,
   .team-card-link:focus-visible,
@@ -601,29 +600,78 @@
     line-height: 1.5;
   }
 
-  .directory-search {
+  .search-field {
     display: grid;
+    width: 100%;
+    min-width: 0;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.65rem;
-    margin-bottom: 1.5rem;
+    min-height: 3.5rem;
     border: 1px solid var(--border);
     border-radius: 0.9rem;
-    padding: 0.45rem;
-    padding-left: 0.9rem;
+    padding: 0.3125rem;
     background: var(--surface-raised);
+    transition: border-color 140ms ease, box-shadow 140ms ease;
   }
 
-  .directory-search input {
+  .search-field--clearable {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+  }
+
+  .search-field:focus-within {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--focus) 16%, transparent);
+  }
+
+  .search-field__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-left: 0.6rem;
+    color: var(--text-soft);
+  }
+
+  .search-field__input {
+    width: 100%;
     min-width: 0;
     min-height: 2.75rem;
+    border: 0;
     color: var(--text);
     background: transparent;
-    font-size: 0.9rem;
+    font-size: 1rem;
+    line-height: 1.5;
     outline: none;
   }
 
-  .directory-search input::placeholder { color: var(--text-soft); }
+  .search-field__input::placeholder { color: var(--text-soft); }
+
+  .search-field__input::-webkit-search-cancel-button,
+  .search-field__input::-webkit-search-decoration { appearance: none; }
+
+  .search-field__clear {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    color: var(--text-muted);
+    background: transparent;
+    transition: background-color 140ms ease, color 140ms ease;
+  }
+
+  .search-field__clear:hover { background: var(--surface-subtle); }
+
+  .search-field__clear:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--focus) 65%, transparent);
+    outline-offset: 1px;
+  }
+
+  .search-field__submit {
+    min-height: 2.75rem;
+    padding-inline: 0.9rem;
+    white-space: nowrap;
+  }
 
   .competition-grid,
   .team-grid {
@@ -1266,7 +1314,6 @@
   .match-detail-team-link img,
   .match-detail-team-link > div { width: 52px !important; height: 52px !important; }
 
-  .directory-search .button-primary { padding-inline: 0.7rem; }
 }
 
 @media (max-width: 22rem) {
@@ -1279,8 +1326,14 @@
   .matchday-navigator > .icon-button,
   .matchday-navigator > .matchday-current-link { display: none; }
 
-  .directory-search { grid-template-columns: auto minmax(0, 1fr); }
-  .directory-search .button-primary { grid-column: 1 / -1; width: 100%; }
+  .search-field { grid-template-columns: auto minmax(0, 1fr); }
+  .search-field--clearable { grid-template-columns: auto minmax(0, 1fr) auto; }
+
+  .search-field__submit {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1722,6 +1775,10 @@
 @media (max-width: 56rem) {
   .shell-primary-nav {
     display: none;
+  }
+
+  .app-header__actions {
+    margin-left: auto;
   }
 
   .shell-search-control__label,
