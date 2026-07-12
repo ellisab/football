@@ -1858,8 +1858,11 @@
   padding-top: clamp(2.5rem, 6vw, 5rem);
 }
 
-.today-page .content-column {
-  width: min(100%, 70rem);
+@media (min-width: 48rem) {
+  .today-page .content-column,
+  .live-page .content-column {
+    width: min(100%, 70rem);
+  }
 }
 
 .today-page .page-intro {

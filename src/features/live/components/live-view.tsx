@@ -29,7 +29,7 @@ export function LiveView({ data }: { data: WebHomeViewModel }) {
     .slice(0, 5);
 
   return (
-    <div className="page-shell">
+    <div className="page-shell live-page">
       <div className="content-column">
         <PageIntro
           eyebrow="Live-Zentrale"
