@@ -4,7 +4,6 @@ import type { WebHomeViewModel } from "@/features/home/presenter/home-view-model
 import {
   getMatchStatus,
   getStatusCounts,
-  getTodayCompetitionMatches,
   getVisibleCompetitions,
   collectTeams,
   type CompetitionMatch,
@@ -20,9 +19,6 @@ import {
 } from "@/features/football/components/product-ui";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
 import { FavoriteSpotlight } from "@/features/favorites";
-
-const selectedDateToDate = (dateKey: string) =>
-  new Date(`${dateKey}T12:00:00.000Z`);
 
 function MatchSection({
   description,
@@ -75,9 +71,11 @@ function MatchSection({
 export function TodayView({
   data,
   dateKey,
+  matches,
 }: {
   data: WebHomeViewModel;
   dateKey: string;
+  matches: CompetitionMatch[];
 }) {
   const competitions = getVisibleCompetitions(data);
   const favoriteItems = [
@@ -97,10 +95,6 @@ export function TodayView({
       label: team.name,
     })),
   ];
-  const matches = getTodayCompetitionMatches({
-    competitions,
-    date: selectedDateToDate(dateKey),
-  });
   const counts = getStatusCounts(matches);
   const live = matches.filter((item) => getMatchStatus(item.match) === "live");
   const upcoming = matches.filter(

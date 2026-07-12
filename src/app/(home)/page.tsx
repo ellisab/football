@@ -3,6 +3,11 @@ import { getHomePageData } from "@/features/home/server/get-home-page-data";
 import { TodayView } from "@/features/today/components/today-view";
 import { resolveDateQuery } from "@/features/football/components/date-navigator";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
+import {
+  getTodayCompetitionMatches,
+  getVisibleCompetitions,
+} from "@/features/football/view-utils";
+import { refreshTodayMatches } from "@/features/today/server/refresh-today-matches";
 import { isLeagueKey } from "@footballleagues/core/leagues";
 
 export default async function Home({
@@ -27,6 +32,12 @@ export default async function Home({
   }
 
   const data = await getHomePageData({});
+  const dateKey = resolveDateQuery(params.date);
+  const cachedMatches = getTodayCompetitionMatches({
+    competitions: getVisibleCompetitions(data),
+    date: new Date(`${dateKey}T12:00:00.000Z`),
+  });
+  const matches = await refreshTodayMatches({ matches: cachedMatches });
 
-  return <TodayView data={data} dateKey={resolveDateQuery(params.date)} />;
+  return <TodayView data={data} dateKey={dateKey} matches={matches} />;
 }
