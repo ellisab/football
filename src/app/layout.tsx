@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   description: "Spieltagsergebnisse und Tabellen für deine Lieblingsligen.",
   applicationName: "spieltag.day",
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: "/icon.svg",
+    icon: [{ url: "/icon.svg?v=2", type: "image/svg+xml", sizes: "any" }],
+    shortcut: "/icon.svg?v=2",
   },
   openGraph: {
     type: "website",
