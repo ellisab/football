@@ -1,19 +1,16 @@
 import Link from "next/link";
 import { CalendarDays, Goal, MapPin, Trophy } from "lucide-react";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
-import { TeamBadge } from "@/features/teams/components/team-badge";
 import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
 import {
-  formatMatchTime,
-  getMatchScore,
   getMatchStatus,
-  getMatchStatusLabel,
   getTeamId,
   getTeamLabel,
   getVenueLabel,
 } from "@/features/football/view-utils";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
 import { FavoriteButton } from "@/features/favorites";
+import { SculptedMatch } from "@/features/football/components/sculpted-match";
 
 const fullDateFormatter = new Intl.DateTimeFormat("de-DE", {
   dateStyle: "full",
@@ -30,40 +27,24 @@ const getFullKickoff = (match: ApiMatch) => {
     : `${fullDateFormatter.format(date)} Uhr`;
 };
 
-function TeamBlock({ team }: { team: ApiMatch["team1"] }) {
+function TeamAction({ team }: { team: ApiMatch["team1"] }) {
+  if (!team) return null;
+
   const name = getTeamLabel(team, "Noch offen");
   const teamId = getTeamId(team);
-  const identity = (
-    <>
-      <TeamBadge
-        name={name}
-        iconUrl={team?.teamIconUrl}
-        size={72}
-        decorative
-        className="team-badge-surface"
-      />
-      <span>{name}</span>
-    </>
-  );
 
   return (
-    <div className="match-detail-team">
-      {team ? (
-        <Link href={`/teams/${teamId}`} className="match-detail-team-link">
-          {identity}
-        </Link>
-      ) : (
-        <div className="match-detail-team-link">{identity}</div>
-      )}
-      {team ? (
-        <FavoriteButton
-          kind="team"
-          id={teamId}
-          label={name}
-          showLabel={false}
-          className="favorite-icon-button"
-        />
-      ) : null}
+    <div className="match-detail-team-action">
+      <Link href={`/teams/${teamId}`} className="match-detail-team-link">
+        {name}
+      </Link>
+      <FavoriteButton
+        kind="team"
+        id={teamId}
+        label={name}
+        showLabel={false}
+        className="favorite-icon-button"
+      />
     </div>
   );
 }
@@ -80,12 +61,16 @@ export function MatchDetailView({
   previousMatch?: ApiMatch;
 }) {
   const status = getMatchStatus(match);
-  const score = getMatchScore(match);
   const venue = getVenueLabel(match);
   const meta = competition ? getCompetitionMeta(competition.resolvedLeague) : undefined;
   const competitionName = meta?.label ?? match.leagueName ?? "Wettbewerb";
+  const season = competition?.resolvedSeason ?? match.leagueSeason;
+  const roundLabel =
+    match.group?.groupName ?? (season ? `Saison ${season}` : "Runde noch offen");
   const competitionHref = meta
-    ? `${meta.href}?season=${competition?.resolvedSeason ?? match.leagueSeason ?? ""}`
+    ? season
+      ? `${meta.href}?season=${season}`
+      : meta.href
     : undefined;
   const periodResults = [...(match.matchResults ?? [])].sort(
     (a, b) => (a.resultOrderID ?? 0) - (b.resultOrderID ?? 0)
@@ -95,51 +80,51 @@ export function MatchDetailView({
   );
 
   return (
-    <div className="page-shell">
+    <div className="page-shell match-detail-page">
       <div className="content-column">
-        <header className="match-detail-header">
-          <div className="match-detail-context">
-            {competitionHref ? (
-              <Link href={competitionHref}>
-                <Trophy aria-hidden="true" className="h-4 w-4" />
-                {competitionName}
-              </Link>
-            ) : (
-              <span>
-                <Trophy aria-hidden="true" className="h-4 w-4" />
-                {competitionName}
-              </span>
-            )}
-            <span className={`status-badge status-${status}`}>
-              {getMatchStatusLabel(match)}
-            </span>
-          </div>
+        <section className="match-detail-hero">
           <h1 className="sr-only">
             {getTeamLabel(match.team1, "Heimteam")} gegen {getTeamLabel(match.team2, "Auswärtsteam")}
           </h1>
-          <div className="match-scoreboard">
-            <TeamBlock team={match.team1} />
-            <div className="match-detail-score">
-              <strong>{score}</strong>
-              <span>{status === "upcoming" ? formatMatchTime(match) : getMatchStatusLabel(match)}</span>
+          <SculptedMatch
+            competitionLabel={competitionName}
+            match={match}
+            roundLabel={roundLabel}
+          />
+          <div className="match-detail-support">
+            <div className="match-detail-meta">
+              {competitionHref ? (
+                <Link href={competitionHref}>
+                  <Trophy aria-hidden="true" className="h-4 w-4" />
+                  {competitionName}
+                </Link>
+              ) : (
+                <span>
+                  <Trophy aria-hidden="true" className="h-4 w-4" />
+                  {competitionName}
+                </span>
+              )}
+              <span>
+                <CalendarDays aria-hidden="true" className="h-4 w-4" />
+                {getFullKickoff(match)}
+              </span>
+              <span>
+                <Trophy aria-hidden="true" className="h-4 w-4" />
+                {roundLabel}
+              </span>
+              <span>
+                <MapPin aria-hidden="true" className="h-4 w-4" />
+                {venue ?? "Spielort noch offen"}
+              </span>
             </div>
-            <TeamBlock team={match.team2} />
+            {match.team1 || match.team2 ? (
+              <nav className="match-detail-team-actions" aria-label="Teams und Favoriten">
+                <TeamAction team={match.team1} />
+                <TeamAction team={match.team2} />
+              </nav>
+            ) : null}
           </div>
-          <div className="match-detail-meta">
-            <span>
-              <CalendarDays aria-hidden="true" className="h-4 w-4" />
-              {getFullKickoff(match)}
-            </span>
-            <span>
-              <Trophy aria-hidden="true" className="h-4 w-4" />
-              {match.group?.groupName ?? "Runde noch offen"}
-            </span>
-            <span>
-              <MapPin aria-hidden="true" className="h-4 w-4" />
-              {venue ?? "Spielort noch offen"}
-            </span>
-          </div>
-        </header>
+        </section>
 
         <div className="match-detail-grid">
           <section className="content-section">

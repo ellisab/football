@@ -146,6 +146,11 @@ export function FavoritesView({
                   {relevantMatches.slice(0, 12).map((match) => (
                     <SculptedMatch
                       competitionLabel={match.competitionLabel}
+                      href={
+                        match.match.matchID
+                          ? `/matches/${match.match.matchID}`
+                          : undefined
+                      }
                       key={match.match.matchID}
                       match={match.match}
                       roundLabel={match.roundLabel}

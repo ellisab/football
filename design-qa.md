@@ -1,68 +1,61 @@
-# Search Field Design QA
+# Shared Match Card Design QA
 
 ## Comparison target
 
 - Source visual truth:
-  - `/Users/alex/Desktop/WhatsApp Image 2026-07-12 at 10.37.23 PM.jpeg` — selected competition-directory structure and proportions.
-  - `/Users/alex/Desktop/WhatsApp Image 2026-07-12 at 10.36.57 PM.jpeg` — original global-search variant used to identify the inconsistency.
+  - `/Users/alex/Desktop/Screenshot 2026-07-13 at 13.43.54.png` — user-selected Heute/Live card.
+  - `/private/tmp/football-match-card-design-qa/today-1440-card-reference.png` — live desktop reference at 1440 × 900.
+  - `/private/tmp/football-match-card-design-qa/today-390-card-reference.png` — live mobile reference at 390 × 844.
 - Implementation screenshots:
-  - `/private/tmp/football-search-design-qa/search-390-final.png`
-  - `/private/tmp/football-search-design-qa/competitions-390-final.png`
-  - `/private/tmp/football-search-design-qa/teams-390.png`
-  - `/private/tmp/football-search-design-qa/search-320-empty-after-fix.png`
-  - `/private/tmp/football-search-design-qa/search-320-query-final.png`
-  - `/private/tmp/football-search-design-qa/search-768-final.png`
-  - `/private/tmp/football-search-design-qa/competitions-768-final.png`
-  - `/private/tmp/football-search-design-qa/search-1440-final.png`
-  - `/private/tmp/football-search-design-qa/competitions-1440-final.png`
-  - `/private/tmp/football-search-design-qa/teams-1440-final.png`
-- Viewports: 320 × 844, 390 × 844, 768 × 1024, and 1440 × 900.
-- States: empty and focused global search, populated global search, visible clear action, cleared query, directory search, and responsive stacked submit.
+  - `/private/tmp/football-match-card-design-qa/detail-1440-viewport-final.png`
+  - `/private/tmp/football-match-card-design-qa/detail-390-viewport-final.png`
+- Route and state: `/matches/84682`, France vs Spain, upcoming at 21:00, `Geplant`.
+- Responsive checks: 320 × 844, 390 × 844, 768 × 1024, and 1440 × 900.
 
 ## Full-view comparison evidence
 
-The supplied mobile references and the 390 × 844 implementation captures were opened together. The implementation intentionally preserves each page's surrounding layout while giving every search control the competition-directory structure: one bordered field shell, an inline icon and input, and the same inset submit action. At 390px and above, global search, competitions, and teams all render a 56px field and a 44px submit action. At 320px, every submit action follows the same full-width second-row rule.
+The Heute reference and match-detail implementation captures were opened together for desktop and mobile comparison. The detail page now renders the same `featured-match` component tree and the same responsive CSS as Heute/Live. Detail-only competition navigation, full kickoff, round, venue, team links, favorite controls, goals, and result phases remain outside the shared card.
+
+At 1440px, the source and detail boards both measure 1040 × 240px. At 390px, both measure 358 × 176px. The visual order, team badges, names, score placeholders, center dial, competition/round line, surface, radius, and shadow match because they are the same component rather than parallel implementations.
 
 ## Focused-region comparison evidence
 
-The following crops were opened in one comparison input so control geometry remained readable:
+The 1440 and 390 viewport captures keep the full card large enough to inspect typography, alignment, badge treatment, center dial, border, radius, and shadow without a further crop. Computed geometry was also compared at each relevant breakpoint:
 
-- `/private/tmp/football-search-design-qa/reference-search-control.png`
-- `/private/tmp/football-search-design-qa/reference-competition-control.png`
-- `/private/tmp/football-search-design-qa/implementation-search-control.png`
-- `/private/tmp/football-search-design-qa/implementation-competition-control.png`
-
-The new global and competition controls have matching button height, radius, horizontal padding, text treatment, and field radius. Their overall widths differ only because `/search` uses the narrower content column and an inset search card, which is an intentional page-level constraint.
+- 320px: detail board 296 × 176px; no horizontal overflow.
+- 390px: source and detail boards 358 × 176px; no horizontal overflow.
+- 768px: source and detail boards 720 × 240px; no horizontal overflow.
+- 1440px: source and detail boards 1040 × 240px; no horizontal overflow.
 
 ## Findings
 
 No actionable P0, P1, or P2 differences remain.
 
-- Fonts and typography: existing product fonts and weights are preserved. Search inputs are standardized at 16px with a 1.5 line height; submit text continues to use the existing primary-button typography.
-- Spacing and layout rhythm: computed values match across consumers — 56px field height, 44px input and button minimum height, 14.4px field radius, 11.2px button radius, and 14.4px horizontal button padding.
-- Colors and visual tokens: the shared control uses the existing surface, border, action, contrast, muted-text, and focus tokens. No new palette values were introduced.
-- Image quality and asset fidelity: no raster assets were added or replaced. The existing Lucide search and clear icons are reused at their existing visual weight.
-- Copy and content: labels, placeholders, submit copy, status copy, result content, and page descriptions remain unchanged.
-- Accessibility: labels stay associated with their inputs, controls remain native input/button elements, input text is 16px, touch targets are at least 44px, and `:focus-within` visibly marks the complete field.
+- Fonts and typography: the exact shared team-name, score, time, status, competition, and round classes are used in both surfaces. Font family, weight, size, line height, letter spacing, wrapping, and truncation therefore match at each breakpoint.
+- Spacing and layout rhythm: card dimensions and grid geometry match at desktop, tablet, mobile, and narrow-mobile widths. Detail-only controls sit below a separate divider and do not alter the shared card.
+- Colors and visual tokens: the detail card uses the same gradients, surfaces, borders, semantic live color, muted text, and shadows as Heute/Live. No new card palette was introduced.
+- Image quality and asset fidelity: existing `TeamBadge` assets and fallbacks are reused unchanged. No raster assets, substitute illustrations, custom SVGs, or placeholder artwork were added.
+- Copy and content: competition, round, team names, score placeholders, time, and `Geplant` appear in the same positions. The duplicate detail status pill and alternate `– : – / 21:00` hierarchy were removed.
+- Accessibility: the list card remains one keyboard-focusable link. The detail card is a static labelled article with no self-link, no false `Spiel öffnen` affordance, and one page `h1`. Team links and 44px favorite buttons remain sibling controls with explicit labels and `aria-pressed` state.
 
 ## Comparison history
 
-1. Initial migration: the three pages rendered the same 56px/44px geometry at 390px, 768px, and 1440px.
-2. First 320px pass found a P2 text-pressure issue: the inactive clear action reserved 44px and shortened the empty placeholder. The clear action now renders only when a query is present.
-3. Populated 320px search found a P2 reflow issue: result-item minimum content widened the document to 350px and could pull the clear action off-screen. Minimum-width constraints were added to the search form, result groups, lists, and list items. Post-fix evidence reports `documentWidth: 320`, `horizontalOverflow: false`, a 262px field, and 262px result rows.
-4. Focus review found a P2 resilience gap in an input-specific `:has(...)` selector. It was replaced with the shared shell's `:focus-within` state. Post-fix captures show the outer focus treatment while button and clear controls retain their own keyboard focus indication.
+1. The first rendered desktop check exposed a P1 width mismatch: the detail preview still showed the old 48rem stylesheet while Heute used the 70rem canvas. The page-scoped 70rem rule was applied in the refreshed stylesheet. Post-fix evidence shows both boards at 1040 × 240px at 1440px.
+2. The post-fix desktop comparison found no remaining component mismatch.
+3. The mobile comparison confirmed the same 358 × 176px card at 390px. Narrow-phone and tablet geometry also matched their Heute/Live counterparts with no overflow, so no further responsive fix was required.
 
 ## Interaction and runtime checks
 
-- Global search typing produced ranked results and exposed the clear action.
-- The clear action emptied the query, removed results, and returned focus to the input.
-- Competition search submitted through its native submit button and produced a `?q=` URL.
-- `/`, `/search`, `/competitions`, and `/teams` rendered meaningful content without a framework error overlay.
-- Browser console errors: none.
-- Automated checks: full ESLint, typecheck, 130 tests, and production build passed.
+- Clicking the unique Heute card navigated to `/matches/84682`.
+- The destination rendered the shared card as an article, with no `/matches/84682` self-link.
+- The France favorite button toggled its pressed state and accessible label correctly; the test state was restored afterward.
+- Competition, team, previous-match, and next-match links remained present.
+- Browser console errors and warnings in the clean interaction tab: none.
+- React review: named components, Server Component boundaries, stable semantics, native links/buttons, TypeScript props, and the existing client-only favorite island remain sound.
+- Automated verification: ESLint, TypeScript, 133 tests, production build, focused component regression tests, and `git diff --check` passed.
 
 ## Follow-up polish
 
-No P3 follow-up is required for this scoped consistency fix.
+No P3 follow-up is required for this scoped shared-card change.
 
 final result: passed

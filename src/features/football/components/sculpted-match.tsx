@@ -52,12 +52,14 @@ function SculptedTeam({
 export function SculptedMatch({
   compact = false,
   competitionLabel,
+  href,
   match,
   roundLabel,
   showCompetition = true,
 }: {
   compact?: boolean;
   competitionLabel: string;
+  href?: string;
   match: ApiMatch;
   roundLabel: string;
   showCompetition?: boolean;
@@ -96,17 +98,21 @@ export function SculptedMatch({
           score={score[1] ?? "–"}
         />
       </div>
-      <span className="featured-match__affordance" aria-hidden="true">
-        Spiel öffnen
-      </span>
+      {href ? (
+        <span className="featured-match__affordance" aria-hidden="true">
+          Spiel öffnen
+        </span>
+      ) : null}
     </>
   );
   const label = `Spiel: ${getMatchScreenReaderLabel(match)}`;
-  const className = `featured-match focus-ring${compact ? " featured-match--compact" : ""}`;
+  const className = `featured-match${href ? " focus-ring" : ""}${
+    compact ? " featured-match--compact" : ""
+  }`;
 
-  if (match.matchID) {
+  if (href) {
     return (
-      <Link href={`/matches/${match.matchID}`} className={className} aria-label={label}>
+      <Link href={href} className={className} aria-label={label}>
         {body}
       </Link>
     );

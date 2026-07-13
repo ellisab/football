@@ -18,6 +18,7 @@ export function MatchSummary({
     <SculptedMatch
       compact={compact}
       competitionLabel={meta.label}
+      href={match.matchID ? `/matches/${match.matchID}` : undefined}
       match={match}
       roundLabel={match.group?.groupName ?? `Saison ${competition.resolvedSeason}`}
       showCompetition={showCompetition}
