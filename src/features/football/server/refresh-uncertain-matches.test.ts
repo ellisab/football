@@ -6,7 +6,7 @@ import {
   getMatchStatus,
   type CompetitionMatch,
 } from "@/features/football/view-utils";
-import { refreshTodayMatches } from "./refresh-today-matches";
+import { refreshUncertainMatches } from "./refresh-uncertain-matches";
 
 const now = new Date("2026-07-12T12:00:00Z");
 
@@ -15,7 +15,7 @@ const createItem = (match: ApiMatch): CompetitionMatch => ({
   match,
 });
 
-test("refreshTodayMatches replaces a stale unknown match with its fresh result", async () => {
+test("refreshUncertainMatches replaces a stale unknown match with its fresh result", async () => {
   const staleMatch: ApiMatch = {
     matchID: 84295,
     matchDateTimeUTC: "2026-07-12T01:00:00Z",
@@ -25,7 +25,7 @@ test("refreshTodayMatches replaces a stale unknown match with its fresh result",
   };
   const loadedIds: number[] = [];
 
-  const matches = await refreshTodayMatches({
+  const matches = await refreshUncertainMatches({
     matches: [createItem(staleMatch)],
     now,
     loadMatch: async (matchId) => {
@@ -50,7 +50,36 @@ test("refreshTodayMatches replaces a stale unknown match with its fresh result",
   assert.equal(getMatchScore(matches[0]!.match), "3:1");
 });
 
-test("refreshTodayMatches skips already settled and upcoming matches", async () => {
+test("refreshUncertainMatches adds a current score to a possibly live match", async () => {
+  const staleMatch: ApiMatch = {
+    matchID: 84682,
+    matchDateTimeUTC: "2026-07-12T11:00:00Z",
+    matchIsFinished: false,
+    team1: { teamName: "Frankreich" },
+    team2: { teamName: "Spanien" },
+  };
+
+  const matches = await refreshUncertainMatches({
+    matches: [createItem(staleMatch)],
+    now,
+    loadMatch: async () => ({
+      ...staleMatch,
+      matchResults: [
+        {
+          pointsTeam1: 0,
+          pointsTeam2: 2,
+          resultOrderID: 2,
+          resultTypeID: 2,
+        },
+      ],
+    }),
+  });
+
+  assert.equal(getMatchStatus(matches[0]!.match, now), "live");
+  assert.equal(getMatchScore(matches[0]!.match), "0:2");
+});
+
+test("refreshUncertainMatches skips already settled and upcoming matches", async () => {
   const settled = createItem({
     matchID: 1,
     matchDateTimeUTC: "2026-07-12T01:00:00Z",
@@ -63,7 +92,7 @@ test("refreshTodayMatches skips already settled and upcoming matches", async () 
   });
   let calls = 0;
 
-  const matches = await refreshTodayMatches({
+  const matches = await refreshUncertainMatches({
     matches: [settled, upcoming],
     now,
     loadMatch: async () => {
@@ -77,14 +106,14 @@ test("refreshTodayMatches skips already settled and upcoming matches", async () 
   assert.equal(matches[1]!.match, upcoming.match);
 });
 
-test("refreshTodayMatches preserves stale data when the direct refresh fails", async () => {
+test("refreshUncertainMatches preserves stale data when the direct refresh fails", async () => {
   const staleMatch: ApiMatch = {
     matchID: 84295,
     matchDateTimeUTC: "2026-07-12T01:00:00Z",
     matchIsFinished: false,
   };
 
-  const matches = await refreshTodayMatches({
+  const matches = await refreshUncertainMatches({
     matches: [createItem(staleMatch)],
     now,
     loadMatch: async () => {
@@ -95,7 +124,7 @@ test("refreshTodayMatches preserves stale data when the direct refresh fails", a
   assert.equal(matches[0]!.match, staleMatch);
 });
 
-test("refreshTodayMatches bounds direct refresh volume and concurrency", async () => {
+test("refreshUncertainMatches bounds direct refresh volume and concurrency", async () => {
   const matches = Array.from({ length: 10 }, (_, index) =>
     createItem({
       matchID: index + 1,
@@ -107,7 +136,7 @@ test("refreshTodayMatches bounds direct refresh volume and concurrency", async (
   let maxActive = 0;
   let calls = 0;
 
-  await refreshTodayMatches({
+  await refreshUncertainMatches({
     matches,
     now,
     loadMatch: async (matchId) => {

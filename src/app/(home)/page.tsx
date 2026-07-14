@@ -7,7 +7,7 @@ import {
   getTodayCompetitionMatches,
   getVisibleCompetitions,
 } from "@/features/football/view-utils";
-import { refreshTodayMatches } from "@/features/today/server/refresh-today-matches";
+import { refreshUncertainMatches } from "@/features/football/server/refresh-uncertain-matches";
 import { isLeagueKey } from "@footballleagues/core/leagues";
 
 export default async function Home({
@@ -37,7 +37,7 @@ export default async function Home({
     competitions: getVisibleCompetitions(data),
     date: new Date(`${dateKey}T12:00:00.000Z`),
   });
-  const matches = await refreshTodayMatches({ matches: cachedMatches });
+  const matches = await refreshUncertainMatches({ matches: cachedMatches });
 
   return <TodayView data={data} dateKey={dateKey} matches={matches} />;
 }

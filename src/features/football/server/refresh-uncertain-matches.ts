@@ -27,7 +27,7 @@ const isRefreshCandidate = (item: CompetitionMatch, now: Date) => {
   return status === "live" || status === "unknown";
 };
 
-export const refreshTodayMatches = async ({
+export const refreshUncertainMatches = async ({
   loadMatch = loadUncachedMatch,
   matches,
   now = new Date(),

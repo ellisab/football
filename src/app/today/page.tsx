@@ -6,7 +6,7 @@ import {
   getVisibleCompetitions,
 } from "@/features/football/view-utils";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
-import { refreshTodayMatches } from "@/features/today/server/refresh-today-matches";
+import { refreshUncertainMatches } from "@/features/football/server/refresh-uncertain-matches";
 
 export const metadata: Metadata = {
   title: "Heute",
@@ -25,7 +25,7 @@ export default async function TodayPage({
     competitions: getVisibleCompetitions(data),
     date: new Date(`${dateKey}T12:00:00.000Z`),
   });
-  const matches = await refreshTodayMatches({ matches: cachedMatches });
+  const matches = await refreshUncertainMatches({ matches: cachedMatches });
 
   return <TodayView data={data} dateKey={dateKey} matches={matches} />;
 }

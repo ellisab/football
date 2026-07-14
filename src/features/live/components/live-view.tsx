@@ -1,9 +1,8 @@
 import { Satellite } from "lucide-react";
 import type { WebHomeViewModel } from "@/features/home/presenter/home-view-model";
 import {
-  getAllCompetitionMatches,
   getMatchStatus,
-  getVisibleCompetitions,
+  type CompetitionMatch,
 } from "@/features/football/view-utils";
 import { MatchList } from "@/features/football/components/match-summary";
 import {
@@ -21,10 +20,15 @@ const checkedFormatter = new Intl.DateTimeFormat("de-DE", {
   timeZone: "Europe/Berlin",
 });
 
-export function LiveView({ data }: { data: WebHomeViewModel }) {
-  const allMatches = getAllCompetitionMatches(getVisibleCompetitions(data));
-  const live = allMatches.filter((item) => getMatchStatus(item.match) === "live");
-  const upcoming = allMatches
+export function LiveView({
+  data,
+  matches,
+}: {
+  data: WebHomeViewModel;
+  matches: CompetitionMatch[];
+}) {
+  const live = matches.filter((item) => getMatchStatus(item.match) === "live");
+  const upcoming = matches
     .filter((item) => getMatchStatus(item.match) === "upcoming")
     .slice(0, 5);
 
