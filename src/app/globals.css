@@ -1048,6 +1048,11 @@
     color: var(--text);
   }
 
+  .match-detail-meta .match-detail-kickoff--upcoming {
+    color: var(--upcoming);
+    font-weight: 700;
+  }
+
   .match-detail-team-actions {
     display: grid;
     width: min(100%, 23rem);

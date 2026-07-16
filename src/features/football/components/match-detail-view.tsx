@@ -104,7 +104,7 @@ export function MatchDetailView({
                   {competitionName}
                 </span>
               )}
-              <span>
+              <span className={`match-detail-kickoff match-detail-kickoff--${status}`}>
                 <CalendarDays aria-hidden="true" className="h-4 w-4" />
                 {getFullKickoff(match)}
               </span>
