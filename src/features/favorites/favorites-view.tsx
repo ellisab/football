@@ -1,19 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Star, Trophy, Users } from "lucide-react";
-import type { ApiMatch } from "@footballleagues/core/openligadb";
 import type { SearchResultItem } from "@/features/search";
 import { FavoriteButton, useFavorites } from "@/features/favorites";
-import { SculptedMatch } from "@/features/football/components/sculpted-match";
+import {
+  MatchCardList,
+  type MatchCardItem,
+} from "@/features/football/components/match-card-list";
 
-export type FavoriteMatchItem = {
-  competitionId: string;
-  competitionLabel: string;
-  match: ApiMatch;
-  roundLabel: string;
+export type FavoriteMatchItem = MatchCardItem & {
   teamIds: string[];
 };
+
+const MATCH_PAGE_SIZE = 12;
 
 export function FavoritesView({
   competitions,
@@ -25,6 +26,14 @@ export function FavoritesView({
   teams: SearchResultItem[];
 }) {
   const favorites = useFavorites();
+  const favoritesKey = JSON.stringify([
+    favorites.competitionIds,
+    favorites.teamIds,
+  ]);
+  const [matchReveal, setMatchReveal] = useState({
+    favoritesKey: "",
+    visibleCount: MATCH_PAGE_SIZE,
+  });
   const favoriteCompetitions = competitions.filter((item) =>
     favorites.competitionIds.includes(item.id)
   );
@@ -34,10 +43,17 @@ export function FavoritesView({
       favorites.competitionIds.includes(match.competitionId) ||
       match.teamIds.some((id) => favorites.teamIds.includes(id))
   );
+  const requestedMatchCount =
+    matchReveal.favoritesKey === favoritesKey
+      ? matchReveal.visibleCount
+      : MATCH_PAGE_SIZE;
+  const visibleMatches = relevantMatches.slice(0, requestedMatchCount);
+  const remainingMatchCount = relevantMatches.length - visibleMatches.length;
+  const nextMatchCount = Math.min(MATCH_PAGE_SIZE, remainingMatchCount);
   const isEmpty = favoriteCompetitions.length === 0 && favoriteTeams.length === 0;
 
   return (
-    <div className="page-shell">
+    <div className="page-shell match-feed-page favorites-page">
       <div className="content-column">
         <header className="page-intro">
           <div>
@@ -142,21 +158,33 @@ export function FavoritesView({
                     </p>
                   </div>
                 </div>
-                <div className="match-list match-list--sculpted">
-                  {relevantMatches.slice(0, 12).map((match) => (
-                    <SculptedMatch
-                      competitionLabel={match.competitionLabel}
-                      href={
-                        match.match.matchID
-                          ? `/matches/${match.match.matchID}`
-                          : undefined
-                      }
-                      key={match.match.matchID}
-                      match={match.match}
-                      roundLabel={match.roundLabel}
-                    />
-                  ))}
+                <div id="favorite-relevant-matches">
+                  <MatchCardList matches={visibleMatches} />
                 </div>
+                {relevantMatches.length > MATCH_PAGE_SIZE ? (
+                  <div className="match-list-pagination">
+                    <p aria-live="polite">
+                      <strong>{visibleMatches.length}</strong> von{" "}
+                      {relevantMatches.length} Spielen
+                    </p>
+                    {remainingMatchCount > 0 ? (
+                      <button
+                        aria-controls="favorite-relevant-matches"
+                        className="button-secondary"
+                        onClick={() =>
+                          setMatchReveal({
+                            favoritesKey,
+                            visibleCount: visibleMatches.length + nextMatchCount,
+                          })
+                        }
+                        type="button"
+                      >
+                        Weitere {nextMatchCount}{" "}
+                        {nextMatchCount === 1 ? "Spiel" : "Spiele"} anzeigen
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
               </section>
             ) : null}
           </div>

@@ -33,7 +33,7 @@ export function LiveView({
     .slice(0, 5);
 
   return (
-    <div className="page-shell live-page">
+    <div className="page-shell match-feed-page live-page">
       <div className="content-column">
         <PageIntro
           eyebrow="Live-Zentrale"

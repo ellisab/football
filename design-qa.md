@@ -1,61 +1,44 @@
-# Shared Match Card Design QA
+**Comparison Target**
 
-## Comparison target
+- Source visual truth: `/var/folders/wq/vxdybprx2hxf69zpn1yfzc9w0000gn/T/TemporaryItems/NSIRD_screencaptureui_o76GBt/Screenshot 2026-07-20 at 00.53.27.png` (reported Favorites defect) and `https://www.spieltag.day/today?date=2026-08-09` captured at `/private/tmp/football-today-canonical.png` (canonical Heute card).
+- Rendered implementation: `http://127.0.0.1:3000/favorites` captured at `/private/tmp/football-favorites-after.png`; mobile capture at `/private/tmp/football-favorites-mobile.png`.
+- Viewports: 1280 × 720 desktop and 390 × 844 mobile.
+- State: 1. FC Nürnberg favorited; relevant 2. Bundesliga and DFB-Pokal fixtures visible. The canonical Heute comparison uses the 9 August 2026 fixtures so the Nürnberg–Dresden card is present in both views.
+- Full-view comparison evidence: `/private/tmp/football-card-target-comparison.png` (canonical Heute on the left, local Favorites on the right). The normalized defect comparison is `/private/tmp/football-favorites-comparison.png` (deployed Favorites before on the left, local Favorites after on the right).
+- Focused comparison: not needed. At original resolution, each full-view capture makes the card typography, badge assets, center signal, spacing, radii, and shadows clearly legible; DOM measurements were used to confirm the exact widths and overflow behavior.
 
-- Source visual truth:
-  - `/Users/alex/Desktop/Screenshot 2026-07-13 at 13.43.54.png` — user-selected Heute/Live card.
-  - `/private/tmp/football-match-card-design-qa/today-1440-card-reference.png` — live desktop reference at 1440 × 900.
-  - `/private/tmp/football-match-card-design-qa/today-390-card-reference.png` — live mobile reference at 390 × 844.
-- Implementation screenshots:
-  - `/private/tmp/football-match-card-design-qa/detail-1440-viewport-final.png`
-  - `/private/tmp/football-match-card-design-qa/detail-390-viewport-final.png`
-- Route and state: `/matches/84682`, France vs Spain, upcoming at 21:00, `Geplant`.
-- Responsive checks: 320 × 844, 390 × 844, 768 × 1024, and 1440 × 900.
+**Findings**
 
-## Full-view comparison evidence
+- No actionable P0, P1, or P2 differences remain.
+- Fonts and typography: Favorites uses the same `SculptedMatch` renderer as Heute/Live. Team names now receive 207px per track on desktop instead of 31px, removing the unintended ellipsis and stacked fragments while preserving the established weights, sizes, line heights, and status treatment.
+- Spacing and layout rhythm: canonical Heute and Favorites cards both measure 1040px at the 1280px viewport. All shared match lists are capped at 65rem and centered; the card gaps, radii, elevation, and vertical rhythm match. The 390px mobile viewport renders 358px-wide cards with a 390px document width and no horizontal overflow.
+- Colors and visual tokens: unchanged shared tokens and component styles are used throughout; no route-specific color drift was introduced.
+- Image quality and asset fidelity: the existing team badge assets and badge surfaces are reused without substitutions, cropping, or scaling artifacts.
+- Copy and content: competition, round, team, kickoff, and status content remains driven by the same data and shared component. Favorites sorting and filtering are unchanged; 12 matches remain the initial batch while every remaining match is now accessible progressively.
+- Accessibility and interaction: the favorite-team control was exercised through the UI, persisted to Favorites, and the linked match cards retained their accessible game labels. The progressive reveal was verified from 12 of 19 to 19 of 19 matches, removed its button when complete, reset when the favorite selection changed, and issued no additional server request. Team Detail also renders its fixtures through the canonical shared list. Browser console warnings/errors checked: none.
 
-The Heute reference and match-detail implementation captures were opened together for desktop and mobile comparison. The detail page now renders the same `featured-match` component tree and the same responsive CSS as Heute/Live. Detail-only competition navigation, full kickoff, round, venue, team links, favorite controls, goals, and result phases remain outside the shared card.
+**Comparison History**
 
-At 1440px, the source and detail boards both measure 1040 × 240px. At 390px, both measure 358 × 176px. The visual order, team badges, names, score placeholders, center dial, competition/round line, surface, radius, and shadow match because they are the same component rather than parallel implementations.
+- Iteration 1 — [P2] Desktop team names were unreadable in Favorites. Evidence: the deployed Favorites capture measured a 688px card and only 31px of rendered width per team-name track, despite 79–90px of content, matching the truncation in the supplied screenshot.
+- Fix: introduced a lean `MatchCardItem`/`MatchCardList` adapter so Favorites shares the canonical renderer without serializing full competition models, routed Team Detail through `MatchList`, introduced the shared `match-feed-page` width used by Heute/Live, and capped every canonical match list at 65rem.
+- Post-fix evidence: Favorites and canonical Heute both measure 1040px; the Nürnberg and Dresden name tracks each measure 207px with no truncation. Competition lists now use the same 1040px cap. Mobile verification found no page overflow.
 
-## Focused-region comparison evidence
+**Open Questions**
 
-The 1440 and 390 viewport captures keep the full card large enough to inspect typography, alignment, badge treatment, center dial, border, radius, and shadow without a further crop. Computed geometry was also compared at each relevant breakpoint:
+- None.
 
-- 320px: detail board 296 × 176px; no horizontal overflow.
-- 390px: source and detail boards 358 × 176px; no horizontal overflow.
-- 768px: source and detail boards 720 × 240px; no horizontal overflow.
-- 1440px: source and detail boards 1040 × 240px; no horizontal overflow.
+**Implementation Checklist**
 
-## Findings
+- [x] Use the canonical shared match-card list path in Favorites.
+- [x] Use the canonical `MatchList` path in Team Detail.
+- [x] Share the Heute/Live desktop feed width with Favorites and Team Detail.
+- [x] Cap shared match lists to one consistent site-wide card width.
+- [x] Reveal additional favorite matches in batches of 12 without another data request.
+- [x] Verify desktop and mobile favorite flows in the browser.
+- [x] Check console errors, types, lint, and automated tests.
 
-No actionable P0, P1, or P2 differences remain.
+**Follow-up Polish**
 
-- Fonts and typography: the exact shared team-name, score, time, status, competition, and round classes are used in both surfaces. Font family, weight, size, line height, letter spacing, wrapping, and truncation therefore match at each breakpoint.
-- Spacing and layout rhythm: card dimensions and grid geometry match at desktop, tablet, mobile, and narrow-mobile widths. Detail-only controls sit below a separate divider and do not alter the shared card.
-- Colors and visual tokens: the detail card uses the same gradients, surfaces, borders, semantic live color, muted text, and shadows as Heute/Live. No new card palette was introduced.
-- Image quality and asset fidelity: existing `TeamBadge` assets and fallbacks are reused unchanged. No raster assets, substitute illustrations, custom SVGs, or placeholder artwork were added.
-- Copy and content: competition, round, team names, score placeholders, time, and `Geplant` appear in the same positions. The duplicate detail status pill and alternate `– : – / 21:00` hierarchy were removed.
-- Accessibility: the list card remains one keyboard-focusable link. The detail card is a static labelled article with no self-link, no false `Spiel öffnen` affordance, and one page `h1`. Team links and 44px favorite buttons remain sibling controls with explicit labels and `aria-pressed` state.
-
-## Comparison history
-
-1. The first rendered desktop check exposed a P1 width mismatch: the detail preview still showed the old 48rem stylesheet while Heute used the 70rem canvas. The page-scoped 70rem rule was applied in the refreshed stylesheet. Post-fix evidence shows both boards at 1040 × 240px at 1440px.
-2. The post-fix desktop comparison found no remaining component mismatch.
-3. The mobile comparison confirmed the same 358 × 176px card at 390px. Narrow-phone and tablet geometry also matched their Heute/Live counterparts with no overflow, so no further responsive fix was required.
-
-## Interaction and runtime checks
-
-- Clicking the unique Heute card navigated to `/matches/84682`.
-- The destination rendered the shared card as an article, with no `/matches/84682` self-link.
-- The France favorite button toggled its pressed state and accessible label correctly; the test state was restored afterward.
-- Competition, team, previous-match, and next-match links remained present.
-- Browser console errors and warnings in the clean interaction tab: none.
-- React review: named components, Server Component boundaries, stable semantics, native links/buttons, TypeScript props, and the existing client-only favorite island remain sound.
-- Automated verification: ESLint, TypeScript, 133 tests, production build, focused component regression tests, and `git diff --check` passed.
-
-## Follow-up polish
-
-No P3 follow-up is required for this scoped shared-card change.
+- No P3 follow-up is required for this change.
 
 final result: passed

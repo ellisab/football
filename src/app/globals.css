@@ -1863,8 +1863,7 @@
 }
 
 @media (min-width: 48rem) {
-  .today-page .content-column,
-  .live-page .content-column,
+  .match-feed-page .content-column,
   .match-detail-page .content-column {
     width: min(100%, 70rem);
   }
@@ -1911,6 +1910,30 @@
   display: grid;
   gap: clamp(2rem, 5vw, 3.4rem);
   margin-top: 1.4rem;
+}
+
+.match-list--sculpted {
+  width: min(100%, 65rem);
+  margin-inline: auto;
+}
+
+.match-list-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1.25rem;
+}
+
+.match-list-pagination p {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.match-list-pagination strong {
+  color: var(--text);
+  font-weight: 700;
 }
 
 .featured-match-list .featured-match,

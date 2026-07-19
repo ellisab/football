@@ -1,30 +1,17 @@
 import type { CompetitionMatch } from "@/features/football/view-utils";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
-import { SculptedMatch } from "./sculpted-match";
+import { MatchCardList, type MatchCardItem } from "./match-card-list";
 
-export function MatchSummary({
-  compact = false,
-  item,
-  showCompetition = true,
-}: {
-  compact?: boolean;
-  item: CompetitionMatch;
-  showCompetition?: boolean;
-}) {
-  const { competition, match } = item;
+const toMatchCardItem = ({ competition, match }: CompetitionMatch): MatchCardItem => {
   const meta = getCompetitionMeta(competition.resolvedLeague);
 
-  return (
-    <SculptedMatch
-      compact={compact}
-      competitionLabel={meta.label}
-      href={match.matchID ? `/matches/${match.matchID}` : undefined}
-      match={match}
-      roundLabel={match.group?.groupName ?? `Saison ${competition.resolvedSeason}`}
-      showCompetition={showCompetition}
-    />
-  );
-}
+  return {
+    competitionId: competition.resolvedLeague,
+    competitionLabel: meta.label,
+    match,
+    roundLabel: match.group?.groupName ?? `Saison ${competition.resolvedSeason}`,
+  };
+};
 
 export function MatchList({
   compact = false,
@@ -36,15 +23,10 @@ export function MatchList({
   showCompetition?: boolean;
 }) {
   return (
-    <div className="match-list match-list--sculpted">
-      {matches.map((item) => (
-        <MatchSummary
-          compact={compact}
-          item={item}
-          key={`${item.competition.resolvedLeague}-${item.match.matchID ?? item.match.matchDateTimeUTC}-${item.match.team1?.teamName}`}
-          showCompetition={showCompetition}
-        />
-      ))}
-    </div>
+    <MatchCardList
+      compact={compact}
+      matches={matches.map(toMatchCardItem)}
+      showCompetition={showCompetition}
+    />
   );
 }

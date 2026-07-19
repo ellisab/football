@@ -77,7 +77,7 @@ export function TodayView({
   );
 
   return (
-    <div className="page-shell today-page">
+    <div className="page-shell match-feed-page today-page">
       <div className="content-column">
         <PageIntro
           eyebrow="Spielplan"

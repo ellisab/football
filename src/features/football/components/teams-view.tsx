@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Shirt } from "lucide-react";
 import { TeamBadge } from "@/features/teams/components/team-badge";
 import type { TeamSummary } from "@/features/football/view-utils";
-import { MatchSummary } from "@/features/football/components/match-summary";
+import { MatchList } from "@/features/football/components/match-summary";
 import { EmptyState, PageIntro } from "@/features/football/components/product-ui";
 import { SearchField } from "@/features/football/components/search-field";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
@@ -118,7 +118,7 @@ export function TeamsView({
 
 export function TeamDetailView({ team }: { team: TeamSummary }) {
   return (
-    <div className="page-shell">
+    <div className="page-shell match-feed-page team-detail-page">
       <div className="content-column">
         <header className="team-detail-header">
           <TeamBadge
@@ -166,14 +166,7 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
               </div>
             </div>
             {team.upcomingMatches.length > 0 ? (
-              <div className="match-list">
-                {team.upcomingMatches.slice(0, 5).map((item) => (
-                  <MatchSummary
-                    key={`${item.competition.resolvedLeague}-${item.match.matchID}`}
-                    item={item}
-                  />
-                ))}
-              </div>
+              <MatchList matches={team.upcomingMatches.slice(0, 5)} />
             ) : (
               <p className="inline-empty">Kein kommendes Spiel sichtbar.</p>
             )}
@@ -189,14 +182,7 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
               </div>
             </div>
             {team.recentMatches.length > 0 ? (
-              <div className="match-list">
-                {team.recentMatches.slice(0, 5).map((item) => (
-                  <MatchSummary
-                    key={`${item.competition.resolvedLeague}-${item.match.matchID}`}
-                    item={item}
-                  />
-                ))}
-              </div>
+              <MatchList matches={team.recentMatches.slice(0, 5)} />
             ) : (
               <p className="inline-empty">Kein beendetes Ergebnis sichtbar.</p>
             )}
