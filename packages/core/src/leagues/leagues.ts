@@ -1,6 +1,7 @@
 import type { ApiLeague } from "../openligadb/index";
 import {
   DEFAULT_LEAGUE,
+  isLeagueKey,
   LEAGUE_GROUPS,
 } from "./constants";
 import {
@@ -34,12 +35,10 @@ export const isBundesligaMatchdayLeague = (leagueKey: LeagueKey) => {
 };
 
 const UNSUPPORTED_LEAGUE_REGEX = /\b(2\.?\s*frauen[- ]bundesliga|fbl2|bl2f)\b/i;
+const RETIRED_WORLD_CUP_REGEX =
+  /(?:\bworld[\s_-]*cup\b|weltmeisterschaft|\bfifa[\s_-]*(?:wm|wc)(?![a-z0-9])|\b(?:wm|wc)(?:[\s_-]*(?:20)?26)?(?![a-z0-9]))/i;
 
 export const normalizeText = (value?: string) => (value ?? "").toLowerCase();
-
-export const isLeagueKey = (value: string): value is LeagueKey => {
-  return LEAGUE_GROUPS.some((group) => group.key === value);
-};
 
 export const isFootballLeague = (league: ApiLeague) => {
   const sportName = normalizeText(league.sport?.sportName);
@@ -48,6 +47,13 @@ export const isFootballLeague = (league: ApiLeague) => {
     sportName.includes("fussball") ||
     sportName.includes("football")
   );
+};
+
+export const isRetiredLeague = (
+  league: Pick<ApiLeague, "leagueName" | "leagueShortcut">
+) => {
+  const combined = `${league.leagueShortcut ?? ""} ${league.leagueName ?? ""}`;
+  return RETIRED_WORLD_CUP_REGEX.test(combined);
 };
 
 const isShortcutMatch = (leagueShortcut: string, needle: string) => {
@@ -74,12 +80,14 @@ const resolveGroupByShortcut = (leagueShortcut: string): LeagueKey | undefined =
   return bestMatch?.key;
 };
 
-const resolveGroupKeyForLeague = (league: ApiLeague): LeagueKey | undefined => {
+export const resolveLeagueKey = (
+  league: Pick<ApiLeague, "leagueName" | "leagueShortcut">
+): LeagueKey | undefined => {
   const leagueShortcut = normalizeText(league.leagueShortcut);
   const leagueName = normalizeText(league.leagueName);
   const combined = `${leagueShortcut} ${leagueName}`;
 
-  if (UNSUPPORTED_LEAGUE_REGEX.test(combined)) {
+  if (isRetiredLeague(league) || UNSUPPORTED_LEAGUE_REGEX.test(combined)) {
     return undefined;
   }
 
@@ -104,7 +112,7 @@ export const buildLeagueEntriesByGroup = (leagues: ApiLeague[]) => {
       continue;
     }
 
-    const resolvedGroup = resolveGroupKeyForLeague(league);
+    const resolvedGroup = resolveLeagueKey(league);
     if (!resolvedGroup) continue;
     map.get(resolvedGroup)?.push(league);
   }

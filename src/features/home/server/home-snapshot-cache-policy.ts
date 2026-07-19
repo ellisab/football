@@ -1,5 +1,4 @@
 import type { HomeSnapshot } from "@footballleagues/core/home";
-import type { WorldCupSnapshot } from "@footballleagues/core/world-cup";
 
 const FIXTURE_CRITICAL_HOME_ERRORS = new Set<HomeSnapshot["errorKeys"][number]>([
   "current group",
@@ -11,13 +10,9 @@ const FIXTURE_CRITICAL_HOME_ERRORS = new Set<HomeSnapshot["errorKeys"][number]>(
   "knockout rounds",
 ]);
 
-const FIXTURE_CRITICAL_WORLD_CUP_ERRORS = new Set<
-  WorldCupSnapshot["errors"][number]
->(["discovery", "groups", "matches"]);
-
 export class IncompleteSnapshotError extends Error {
   readonly errorKeys: readonly string[];
-  readonly snapshotKind: "home" | "world-cup";
+  readonly snapshotKind: "home";
   readonly status?: number;
 
   constructor({
@@ -26,7 +21,7 @@ export class IncompleteSnapshotError extends Error {
     status,
   }: {
     errorKeys: readonly string[];
-    snapshotKind: "home" | "world-cup";
+    snapshotKind: "home";
     status?: number;
   }) {
     super(`Incomplete ${snapshotKind} snapshot`);
@@ -60,24 +55,6 @@ export const requireCacheableHomeSnapshot = (snapshot: HomeSnapshot) => {
       ],
       snapshotKind: "home",
       status: snapshot.rateLimited ? 429 : undefined,
-    });
-  }
-
-  return snapshot;
-};
-
-export const requireCacheableWorldCupSnapshot = (
-  snapshot: WorldCupSnapshot
-) => {
-  const criticalErrors = snapshot.errors.filter((errorKey) =>
-    FIXTURE_CRITICAL_WORLD_CUP_ERRORS.has(errorKey)
-  );
-
-  if (snapshot.status === "error" || criticalErrors.length > 0) {
-    throw new IncompleteSnapshotError({
-      errorKeys:
-        criticalErrors.length > 0 ? criticalErrors : [snapshot.status],
-      snapshotKind: "world-cup",
     });
   }
 

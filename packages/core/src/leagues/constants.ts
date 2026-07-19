@@ -1,6 +1,6 @@
 import type { LeagueGroupConfig, LeagueKey } from "./types";
 
-export const DEFAULT_LEAGUE: LeagueKey = "wc";
+export const DEFAULT_LEAGUE: LeagueKey = "bl1";
 
 export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
   {
@@ -44,10 +44,8 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
     nameMatch: ["champions league"],
     shortcutMatch: ["cl", "ucl"],
   },
-  {
-    key: "wc",
-    label: "Weltmeisterschaft",
-    nameMatch: ["world cup", "weltmeisterschaft", "fifa wm"],
-    shortcutMatch: ["wc", "wm", "fifa"],
-  },
 ];
+
+export const isLeagueKey = (value: string): value is LeagueKey => {
+  return LEAGUE_GROUPS.some((group) => group.key === value);
+};

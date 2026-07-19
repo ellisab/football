@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { HomeSnapshot } from "@footballleagues/core/home";
-import type { WorldCupSnapshot } from "@footballleagues/core/world-cup";
 import {
   createKeyedSingleFlight,
   createSingleFlight,
@@ -9,7 +8,6 @@ import {
   IncompleteSnapshotError,
   mapWithConcurrency,
   requireCacheableHomeSnapshot,
-  requireCacheableWorldCupSnapshot,
   SnapshotTimeoutError,
   withSnapshotDeadline,
 } from "./home-snapshot-cache-policy";
@@ -23,30 +21,15 @@ const homeSnapshot = (errorKeys: HomeSnapshot["errorKeys"] = []) =>
     hasTable: false,
     leagueOptions: [],
     nextRound: { matches: [] },
-    resolvedLeague: "wc",
-    resolvedSeason: 2026,
+    resolvedLeague: "bl1",
+    resolvedSeason: 2025,
     table: [],
   }) satisfies HomeSnapshot;
 
-const worldCupSnapshot = (
-  overrides: Partial<WorldCupSnapshot> = {}
-): WorldCupSnapshot => ({
-  errors: [],
-  groupSections: [],
-  groups: [],
-  knockoutRounds: [],
-  leagueName: "Weltmeisterschaft",
-  season: 2026,
-  status: "empty",
-  ...overrides,
-});
-
 test("cache policy accepts legitimate empty snapshots without errors", () => {
   const home = homeSnapshot();
-  const worldCup = worldCupSnapshot();
 
   assert.equal(requireCacheableHomeSnapshot(home), home);
-  assert.equal(requireCacheableWorldCupSnapshot(worldCup), worldCup);
 });
 
 test("cache policy rejects fixture-critical home errors", () => {
@@ -83,32 +66,6 @@ test("cache policy rejects a rate-limited snapshot even with only a table error"
     () => requireCacheableHomeSnapshot(snapshot),
     (error) =>
       error instanceof IncompleteSnapshotError && error.status === 429
-  );
-});
-
-test("cache policy rejects World Cup errors but accepts an error-free ready result", () => {
-  assert.throws(
-    () =>
-      requireCacheableWorldCupSnapshot(
-        worldCupSnapshot({ errors: ["matches"], status: "error" })
-      ),
-    IncompleteSnapshotError
-  );
-  assert.throws(
-    () => requireCacheableWorldCupSnapshot(worldCupSnapshot({ status: "error" })),
-    IncompleteSnapshotError
-  );
-
-  const ready = worldCupSnapshot({ status: "ready" });
-  assert.equal(requireCacheableWorldCupSnapshot(ready), ready);
-
-  const readyWithoutTable = worldCupSnapshot({
-    errors: ["table", "teams"],
-    status: "ready",
-  });
-  assert.equal(
-    requireCacheableWorldCupSnapshot(readyWithoutTable),
-    readyWithoutTable
   );
 });
 
@@ -159,12 +116,12 @@ test("keyed single-flight shares only matching work", async () => {
   );
 
   const [first, duplicate, different] = await Promise.all([
-    load("wc"),
-    load("wc"),
     load("bl1"),
+    load("bl1"),
+    load("cl"),
   ]);
 
-  assert.deepEqual([first, duplicate, different], ["WC", "WC", "BL1"]);
+  assert.deepEqual([first, duplicate, different], ["BL1", "BL1", "CL"]);
   assert.equal(calls, 2);
 });
 

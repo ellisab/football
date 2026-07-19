@@ -1,7 +1,6 @@
 import type { LeagueKey, LeagueOption } from "@footballleagues/core/leagues";
 import {
   Flag,
-  Globe2,
   Goal,
   Shield,
   Shirt,
@@ -22,17 +21,6 @@ export type CompetitionMeta = {
 };
 
 const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
-  wc: {
-    accentClass: "from-[#f5edc9] via-[#d8b86a] to-[#6eeaf2]",
-    category: "Global",
-    description: "Nationalteams, Gruppen und K.-o.-Runden der Weltmeisterschaft.",
-    href: "/competitions/world-cup",
-    icon: Globe2,
-    label: "FIFA-Weltmeisterschaft",
-    region: "Global",
-    shortLabel: "WM",
-    slug: "world-cup",
-  },
   bl1: {
     accentClass: "from-[#f45f63] via-[#d8b86a] to-[#030708]",
     category: "Männer",

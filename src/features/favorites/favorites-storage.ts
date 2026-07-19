@@ -1,5 +1,7 @@
+import { isLeagueKey } from "@footballleagues/core/leagues";
+
 export const FAVORITES_STORAGE_KEY = "spieltag:favorites";
-export const FAVORITES_STORAGE_VERSION = 1 as const;
+export const FAVORITES_STORAGE_VERSION = 2 as const;
 
 export type FavoriteKind = "competition" | "team";
 
@@ -8,7 +10,7 @@ export type FavoritesSnapshot = Readonly<{
   teamIds: readonly string[];
 }>;
 
-type StoredFavoritesV1 = {
+type StoredFavorites = {
   version: typeof FAVORITES_STORAGE_VERSION;
   competitionIds: string[];
   teamIds: string[];
@@ -55,6 +57,10 @@ const normalizeIds = (value: unknown): string[] => {
   return ids;
 };
 
+const normalizeCompetitionIds = (value: unknown): string[] => {
+  return normalizeIds(value).filter(isLeagueKey);
+};
+
 const getTypedLegacyIds = (
   value: unknown,
   kind: FavoriteKind
@@ -85,7 +91,7 @@ const createFavoritesSnapshot = ({
   teamIds = [],
 }: Partial<FavoritesSnapshot> = {}): FavoritesSnapshot => {
   return Object.freeze({
-    competitionIds: Object.freeze(normalizeIds(competitionIds)),
+    competitionIds: Object.freeze(normalizeCompetitionIds(competitionIds)),
     teamIds: Object.freeze(normalizeIds(teamIds)),
   });
 };
@@ -126,9 +132,9 @@ export const parseFavoritesStorage = (raw: string | null): FavoritesSnapshot => 
 };
 
 export const serializeFavorites = (snapshot: FavoritesSnapshot): string => {
-  const payload: StoredFavoritesV1 = {
+  const payload: StoredFavorites = {
     version: FAVORITES_STORAGE_VERSION,
-    competitionIds: normalizeIds(snapshot.competitionIds),
+    competitionIds: normalizeCompetitionIds(snapshot.competitionIds),
     teamIds: normalizeIds(snapshot.teamIds),
   };
 
@@ -141,7 +147,12 @@ export const isFavorite = (
   id: unknown
 ): boolean => {
   const normalizedId = normalizeFavoriteId(id);
-  if (!normalizedId) return false;
+  if (
+    !normalizedId ||
+    (kind === "competition" && !isLeagueKey(normalizedId))
+  ) {
+    return false;
+  }
 
   const ids = kind === "competition" ? snapshot.competitionIds : snapshot.teamIds;
   return ids.includes(normalizedId);
@@ -154,7 +165,11 @@ export const updateFavorite = (
   selected: boolean
 ): FavoritesSnapshot => {
   const normalizedId = normalizeFavoriteId(id);
-  if (!normalizedId || isFavorite(snapshot, kind, normalizedId) === selected) {
+  if (
+    !normalizedId ||
+    (kind === "competition" && !isLeagueKey(normalizedId)) ||
+    isFavorite(snapshot, kind, normalizedId) === selected
+  ) {
     return snapshot;
   }
 

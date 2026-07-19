@@ -3,8 +3,7 @@ export type LeagueKey =
   | "bl2"
   | "fbl1"
   | "dfb"
-  | "cl"
-  | "wc";
+  | "cl";
 
 export type LeagueGroupConfig = {
   key: LeagueKey;

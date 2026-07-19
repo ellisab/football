@@ -3,11 +3,8 @@ import {
   type HomeState,
   type HomeViewModel,
 } from "@footballleagues/core/home";
-import type { WorldCupSnapshot } from "@footballleagues/core/world-cup";
 
-export type WebCompetitionViewModel = HomeViewModel & {
-  worldCup?: WorldCupSnapshot;
-};
+export type WebCompetitionViewModel = HomeViewModel;
 export type WebHomeViewModel = WebCompetitionViewModel & {
   competitions?: WebCompetitionViewModel[];
   isOverview?: boolean;

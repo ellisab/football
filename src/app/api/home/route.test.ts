@@ -22,6 +22,30 @@ const jsonResponse = (
   });
 };
 
+test("/api/home rejects the retired World Cup key without loading data", async () => {
+  const originalFetch = globalThis.fetch;
+  let fetchCalled = false;
+
+  globalThis.fetch = async () => {
+    fetchCalled = true;
+    return jsonResponse({});
+  };
+
+  try {
+    const response = await GET(
+      new NextRequest("http://localhost/api/home?league=wc&season=2026")
+    );
+    const payload = await response.json();
+
+    assert.equal(response.status, 404);
+    assert.match(payload.error, /not found/i);
+    assert.match(response.headers.get("cache-control") ?? "", /no-store/);
+    assert.equal(fetchCalled, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("/api/home does not cache a fixture-critical partial snapshot", async () => {
   const originalFetch = globalThis.fetch;
 

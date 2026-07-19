@@ -1,4 +1,4 @@
-import { LEAGUE_GROUPS, type LeagueKey } from "@footballleagues/core/leagues";
+import { resolveLeagueKey, type LeagueKey } from "@footballleagues/core/leagues";
 import {
   createMatchPresentation,
   getBerlinDateKey,
@@ -136,14 +136,7 @@ export const getCompetitionMatches = (
     return [];
   });
   const bracketMatches = competition.bracketMatches.flatMap((round) => round.matches);
-  const worldCupMatches = competition.worldCup
-    ? [
-        ...competition.worldCup.groupSections.flatMap((section) => section.matches),
-        ...competition.worldCup.knockoutRounds.flatMap((round) => round.matches),
-      ]
-    : [];
-
-  return [...sectionMatches, ...bracketMatches, ...worldCupMatches];
+  return [...sectionMatches, ...bracketMatches];
 };
 
 export const getVisibleCompetitions = (data: WebCompetitionViewModel & {
@@ -265,14 +258,7 @@ export const getTeamId = (team?: ApiTeam | ApiTableRow) => {
 export const resolveCompetitionLeagueForMatch = (
   match: ApiMatch
 ): LeagueKey | undefined => {
-  const shortcut = (match.leagueShortcut ?? "").toLowerCase();
-  const name = (match.leagueName ?? "").toLowerCase();
-
-  return LEAGUE_GROUPS.find(
-    (group) =>
-      group.shortcutMatch.some((needle) => shortcut.startsWith(needle)) ||
-      group.nameMatch.some((needle) => name.includes(needle))
-  )?.key;
+  return resolveLeagueKey(match);
 };
 
 export const findMatchById = (

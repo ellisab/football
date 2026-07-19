@@ -8,7 +8,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/today", priority: 0.95 },
     { path: "/live", priority: 0.92 },
     { path: "/competitions", priority: 0.9 },
-    { path: "/competitions/world-cup", priority: 0.9 },
     { path: "/competitions/bundesliga-1", priority: 0.9 },
     { path: "/competitions/bundesliga-2", priority: 0.88 },
     { path: "/competitions/women", priority: 0.86 },

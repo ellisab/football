@@ -1,4 +1,5 @@
 import {
+  DEFAULT_LEAGUE,
   getCurrentSeasonYear,
   getLeagueLabel,
   hasLeagueTable,
@@ -8,7 +9,6 @@ import {
 } from "@footballleagues/core/leagues";
 import { createHomeState, getHomeSnapshot } from "@footballleagues/core/home";
 import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
-import { getWorldCupSnapshot } from "@footballleagues/core/world-cup";
 import { unstable_cache } from "next/cache";
 import { createWebHomeViewModel } from "../presenter/home-view-model";
 import type {
@@ -22,7 +22,6 @@ import {
   IncompleteSnapshotError,
   mapWithConcurrency,
   requireCacheableHomeSnapshot,
-  requireCacheableWorldCupSnapshot,
   SnapshotTimeoutError,
   withSnapshotDeadline,
 } from "./home-snapshot-cache-policy";
@@ -30,7 +29,7 @@ import {
 const REVALIDATE = {
   next: { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot },
 };
-const HOME_DATA_CACHE_VERSION = "results-v4";
+const HOME_DATA_CACHE_VERSION = "results-v5";
 const HOME_SNAPSHOT_TIMEOUT_MS = 6_000;
 const OVERVIEW_SNAPSHOT_TIMEOUT_MS = 15_000;
 const OVERVIEW_COMPETITION_CONCURRENCY = 3;
@@ -41,7 +40,7 @@ type CompetitionParams = {
   season?: string;
 };
 
-type SnapshotScope = "competition" | "overview" | "world-cup";
+type SnapshotScope = "competition" | "overview";
 
 const getCompetitionCacheKey = (params: CompetitionParams) =>
   `${params.league ?? "default"}:${params.season ?? "default"}`;
@@ -110,42 +109,15 @@ const getCachedHomeSnapshot = unstable_cache(
   { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot }
 );
 
-const loadWorldCupSnapshotSingleFlight = createKeyedSingleFlight(
-  async (season: number) =>
-    requireCacheableWorldCupSnapshot(
-      await getWorldCupSnapshot({
-        season,
-        requestOptions: REVALIDATE,
-      })
-    ),
-  (season) => String(season)
-);
-const getCachedWorldCupSnapshot = unstable_cache(
-  loadWorldCupSnapshotSingleFlight,
-  ["world-cup-snapshot", HOME_DATA_CACHE_VERSION],
-  { revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday }
-);
-
 const getCompetitionDataOrThrow = async (
   params: CompetitionParams
 ): Promise<WebCompetitionViewModel> => {
   const snapshot = await getCachedHomeSnapshot(params);
   const state = createHomeState(snapshot);
-  const baseViewModel = createWebHomeViewModel(state);
-
-  if (state.resolvedLeague !== "wc") {
-    return {
-      ...baseViewModel,
-      availableGroups: state.availableGroups ?? [],
-    };
-  }
-
-  const worldCup = await getCachedWorldCupSnapshot(state.resolvedSeason);
 
   return {
-    ...baseViewModel,
-    worldCup,
-    availableGroups: worldCup.groups,
+    ...createWebHomeViewModel(state),
+    availableGroups: state.availableGroups ?? [],
   };
 };
 
@@ -177,56 +149,26 @@ const getCompetitionData = async (
       startedAt,
     });
 
-    const fallback = createFallbackCompetitionData(params);
-    const remainingMs = HOME_SNAPSHOT_TIMEOUT_MS - (Date.now() - startedAt);
-
-    if (fallback.resolvedLeague !== "wc" || remainingMs <= 0) {
-      return fallback;
-    }
-
-    const worldCupStartedAt = Date.now();
-    try {
-      const worldCup = await withSnapshotDeadline(
-        getCachedWorldCupSnapshot(fallback.resolvedSeason),
-        remainingMs
-      );
-
-      return {
-        ...fallback,
-        worldCup,
-        availableGroups: worldCup.groups,
-      };
-    } catch (worldCupError) {
-      logSnapshotFallback({
-        error: worldCupError,
-        params: {
-          league: fallback.resolvedLeague,
-          season: String(fallback.resolvedSeason),
-        },
-        scope: "world-cup",
-        startedAt: worldCupStartedAt,
-      });
-      return fallback;
-    }
+    return createFallbackCompetitionData(params);
   }
 };
 
 const getFallbackLeague = (value?: string): LeagueKey => {
-  return value && isLeagueKey(value) ? value : "wc";
+  return value && isLeagueKey(value) ? value : DEFAULT_LEAGUE;
 };
 
-const getFallbackSeason = (league: LeagueKey, value?: string) => {
+const getFallbackSeason = (value?: string) => {
   const parsed = value ? Number.parseInt(value, 10) : Number.NaN;
   if (!Number.isNaN(parsed)) return parsed;
 
-  return league === "wc" ? 2026 : getCurrentSeasonYear();
+  return getCurrentSeasonYear();
 };
 
 const createFallbackCompetitionData = (
   params: CompetitionParams
 ): WebCompetitionViewModel => {
   const resolvedLeague = getFallbackLeague(params.league);
-  const resolvedSeason = getFallbackSeason(resolvedLeague, params.season);
+  const resolvedSeason = getFallbackSeason(params.season);
   const leagueLabel = getLeagueLabel(resolvedLeague);
   const tableSupported = hasLeagueTable(resolvedLeague);
 
@@ -237,7 +179,7 @@ const createFallbackCompetitionData = (
     leagueLabel,
     leagueOptions: LEAGUE_GROUPS.map((group) => ({
       label: group.label,
-      seasons: [group.key === "wc" ? 2026 : getCurrentSeasonYear()],
+      seasons: [getCurrentSeasonYear()],
       shortcut: group.key,
     })),
     resolvedLeague,

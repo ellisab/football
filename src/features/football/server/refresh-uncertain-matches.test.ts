@@ -11,14 +11,22 @@ import { refreshUncertainMatches } from "./refresh-uncertain-matches";
 const now = new Date("2026-07-12T12:00:00Z");
 
 const createItem = (match: ApiMatch): CompetitionMatch => ({
-  competition: {} as CompetitionMatch["competition"],
-  match,
+  competition: {
+    resolvedLeague: "bl1",
+  } as CompetitionMatch["competition"],
+  match: {
+    leagueName: "Bundesliga",
+    leagueShortcut: "bl1",
+    ...match,
+  },
 });
 
 test("refreshUncertainMatches replaces a stale unknown match with its fresh result", async () => {
   const staleMatch: ApiMatch = {
     matchID: 84295,
     matchDateTimeUTC: "2026-07-12T01:00:00Z",
+    leagueName: "Bundesliga",
+    leagueShortcut: "bl1",
     matchIsFinished: false,
     team1: { teamName: "Argentinien" },
     team2: { teamName: "Schweiz" },
@@ -54,6 +62,8 @@ test("refreshUncertainMatches adds a current score to a possibly live match", as
   const staleMatch: ApiMatch = {
     matchID: 84682,
     matchDateTimeUTC: "2026-07-12T11:00:00Z",
+    leagueName: "Bundesliga",
+    leagueShortcut: "bl1",
     matchIsFinished: false,
     team1: { teamName: "Frankreich" },
     team2: { teamName: "Spanien" },
@@ -112,16 +122,39 @@ test("refreshUncertainMatches preserves stale data when the direct refresh fails
     matchDateTimeUTC: "2026-07-12T01:00:00Z",
     matchIsFinished: false,
   };
+  const item = createItem(staleMatch);
 
   const matches = await refreshUncertainMatches({
-    matches: [createItem(staleMatch)],
+    matches: [item],
     now,
     loadMatch: async () => {
       throw new Error("OpenLigaDB unavailable");
     },
   });
 
-  assert.equal(matches[0]!.match, staleMatch);
+  assert.equal(matches[0]!.match, item.match);
+});
+
+test("refreshUncertainMatches rejects replacement data from a retired competition", async () => {
+  const item = createItem({
+    matchID: 84295,
+    matchDateTimeUTC: "2026-07-12T01:00:00Z",
+    matchIsFinished: false,
+  });
+
+  const matches = await refreshUncertainMatches({
+    matches: [item],
+    now,
+    loadMatch: async () => ({
+      ...item.match,
+      leagueName: "Deutsche Nationalmannschaft- WM 2026",
+      leagueShortcut: "dfb-wm26",
+      matchIsFinished: true,
+    }),
+  });
+
+  assert.equal(matches[0]!.match, item.match);
+  assert.equal(matches[0]!.match.matchIsFinished, false);
 });
 
 test("refreshUncertainMatches bounds direct refresh volume and concurrency", async () => {

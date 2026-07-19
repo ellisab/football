@@ -17,7 +17,6 @@ import {
   sortMatchesByKickoff,
 } from "../matches";
 import { openLigaDbDataSource, type ApiGroup } from "../openligadb";
-import { WORLD_CUP_LEAGUE_KEY, WORLD_CUP_SEASON } from "../world-cup";
 import type { FootballDataSource, HomeRequestOptions } from "./data-source";
 import { loadBracketMatches } from "./domain/load-bracket";
 import { loadMatchdayResults } from "./domain/matchday-loader";
@@ -354,31 +353,8 @@ export const getHomeSnapshot = async (
   const requestOptions = options?.requestOptions;
   const referenceSeason = options?.fallbackYear ?? getCurrentSeasonYear();
   const normalizedGroups = await normalizeLeagueEntries(dataSource, requestOptions);
-  const availableGroupKeys = Array.from(
-    new Set([...getAvailableGroupKeys(normalizedGroups), WORLD_CUP_LEAGUE_KEY])
-  );
+  const availableGroupKeys = getAvailableGroupKeys(normalizedGroups);
   const resolvedLeague = resolveLeagueSelection(params.league, availableGroupKeys);
-
-  if (resolvedLeague === WORLD_CUP_LEAGUE_KEY) {
-    return {
-      resolvedLeague,
-      resolvedSeason: WORLD_CUP_SEASON,
-      leagueOptions: buildLeagueOptions({
-        availableGroupKeys,
-        groupedLeagues: normalizedGroups,
-        seasonOverrides: {
-          [WORLD_CUP_LEAGUE_KEY]: WORLD_CUP_SEASON,
-        },
-      }),
-      availableGroups: [],
-      currentRound: { matches: [] },
-      nextRound: { matches: [] },
-      hasTable: false,
-      bracketMatches: [],
-      table: [],
-      errorKeys: [],
-    };
-  }
 
   const leagueEntries = normalizedGroups.get(resolvedLeague) ?? [];
   const resolvedSeason = resolveSeasonSelection({
@@ -466,9 +442,6 @@ export const getHomeSnapshot = async (
   const leagueOptions = buildLeagueOptions({
     availableGroupKeys,
     groupedLeagues: normalizedGroups,
-    seasonOverrides: {
-      [WORLD_CUP_LEAGUE_KEY]: WORLD_CUP_SEASON,
-    },
   });
 
   return {

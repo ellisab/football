@@ -15,6 +15,7 @@ import {
   hasLeagueTable,
   isPlayoffRoundName,
   normalizeIconUrl,
+  resolveLeagueKey,
   resolveLeagueSelection,
   resolveSeasonSelection,
   sortGoals,
@@ -64,11 +65,25 @@ test("resolveLeagueSelection falls back for unsupported leagues", () => {
   assert.equal(resolveLeagueSelection("pl", [...available]), "bl1");
 });
 
-test("resolveLeagueSelection defaults to World Cup when it is available", () => {
-  const available = ["bl1", "cl", "wc"] as const;
+test("resolveLeagueSelection defaults to Bundesliga when it is available", () => {
+  const available = ["bl1", "cl"] as const;
 
-  assert.equal(resolveLeagueSelection(undefined, [...available]), "wc");
-  assert.equal(resolveLeagueSelection("pl", [...available]), "wc");
+  assert.equal(resolveLeagueSelection(undefined, [...available]), "bl1");
+  assert.equal(resolveLeagueSelection("pl", [...available]), "bl1");
+});
+
+test("retired World Cup aliases cannot be classified as active competitions", () => {
+  for (const league of [
+    { leagueShortcut: "wm26", leagueName: "WM 2026" },
+    { leagueShortcut: "wm2026", leagueName: "FIFA WM" },
+    { leagueShortcut: "wm2026_xlife", leagueName: "World Cup" },
+    {
+      leagueShortcut: "dfb-wm26",
+      leagueName: "Deutsche Nationalmannschaft- WM 2026",
+    },
+  ]) {
+    assert.equal(resolveLeagueKey(league), undefined);
+  }
 });
 
 test("league labels and table support come from the canonical config", () => {

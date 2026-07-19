@@ -2,6 +2,7 @@ import {
   getMatchById,
   type ApiMatch,
 } from "@footballleagues/core/openligadb";
+import { resolveLeagueKey } from "@footballleagues/core/leagues";
 import {
   getMatchStatus,
   type CompetitionMatch,
@@ -50,7 +51,10 @@ export const refreshUncertainMatches = async ({
 
         try {
           const freshMatch = await loadMatch(matchId);
-          return freshMatch.matchID === matchId ? freshMatch : item.match;
+          return freshMatch.matchID === matchId &&
+            resolveLeagueKey(freshMatch) === item.competition.resolvedLeague
+            ? freshMatch
+            : item.match;
         } catch {
           return item.match;
         }

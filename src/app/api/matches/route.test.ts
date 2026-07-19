@@ -39,6 +39,8 @@ test("/api/matches returns fresh single-match payloads for requested ids", async
     if (path === "/getmatchdata/82127") {
       return jsonResponse({
         matchID: 82127,
+        leagueName: "Bundesliga",
+        leagueShortcut: "bl1",
         matchResults: [{ pointsTeam1: 0, pointsTeam2: 1 }],
       });
     }
@@ -76,7 +78,12 @@ test("/api/matches never shared-caches a partial response", async () => {
     const path = new URL(url).pathname;
 
     if (path === "/getmatchdata/82128") {
-      return jsonResponse({ matchID: 82128, matchResults: [] });
+      return jsonResponse({
+        matchID: 82128,
+        leagueName: "Bundesliga",
+        leagueShortcut: "bl1",
+        matchResults: [],
+      });
     }
 
     return jsonResponse({ path }, 404);
@@ -97,6 +104,73 @@ test("/api/matches never shared-caches a partial response", async () => {
     assert.match(cacheControl, /no-store/);
     assert.doesNotMatch(cacheControl, /public/);
     assert.doesNotMatch(cacheControl, /s-maxage/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("/api/matches does not expose retired World Cup matches", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async () =>
+    jsonResponse({
+      matchID: 80099,
+      leagueName: "Deutsche Nationalmannschaft- WM 2026",
+      leagueShortcut: "dfb-wm26",
+      matchResults: [],
+    });
+
+  try {
+    const response = await GET(
+      new NextRequest("http://localhost/api/matches?ids=80099")
+    );
+    const payload = await response.json();
+    const cacheControl = response.headers.get("cache-control") ?? "";
+
+    assert.equal(response.status, 404);
+    assert.deepEqual(payload.matches, []);
+    assert.match(cacheControl, /no-store/);
+    assert.doesNotMatch(cacheControl, /public/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("/api/matches omits retired matches from mixed responses without caching", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async (input: RequestInfo | URL) => {
+    const url = input instanceof URL ? input : new URL(String(input));
+
+    return url.pathname.endsWith("/90001")
+      ? jsonResponse({
+          matchID: 90001,
+          leagueName: "Bundesliga",
+          leagueShortcut: "bl1",
+          matchResults: [],
+        })
+      : jsonResponse({
+          matchID: 81641,
+          leagueName: "Deutsche Nationalmannschaft- WM 2026",
+          leagueShortcut: "dfb-wm26",
+          matchResults: [],
+        });
+  };
+
+  try {
+    const response = await GET(
+      new NextRequest("http://localhost/api/matches?ids=90001,81641")
+    );
+    const payload = await response.json();
+    const cacheControl = response.headers.get("cache-control") ?? "";
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(
+      payload.matches.map((match: { matchID: number }) => match.matchID),
+      [90001]
+    );
+    assert.match(cacheControl, /no-store/);
+    assert.doesNotMatch(cacheControl, /public/);
   } finally {
     globalThis.fetch = originalFetch;
   }

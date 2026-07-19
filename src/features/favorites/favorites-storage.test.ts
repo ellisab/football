@@ -24,7 +24,7 @@ test("parseFavoritesValue migrates legacy fields and typed favorites", () => {
       teams: [40, "7", ""],
     }),
     {
-      competitionIds: ["bl1", "wc"],
+      competitionIds: ["bl1"],
       teamIds: ["40", "7"],
     }
   );
@@ -67,6 +67,24 @@ test("current empty collections are not repopulated from stale legacy fields", (
       ],
     }),
     EMPTY_FAVORITES
+  );
+});
+
+test("retired competition favorites are removed from stored and updated state", () => {
+  const parsed = parseFavoritesValue({
+    version: 1,
+    competitionIds: ["wc", "bl1"],
+    teamIds: [],
+  });
+
+  assert.deepEqual(parsed.competitionIds, ["bl1"]);
+  assert.equal(isFavorite(parsed, "competition", "wc"), false);
+  assert.equal(updateFavorite(parsed, "competition", "wc", true), parsed);
+  assert.deepEqual(
+    JSON.parse(
+      serializeFavorites({ competitionIds: ["wc", "cl"], teamIds: [] })
+    ).competitionIds,
+    ["cl"]
   );
 });
 

@@ -80,7 +80,7 @@ const LEAGUES_RESPONSE = [
   },
 ];
 
-test("getHomeSnapshot defaults to World Cup when no league is requested", async () => {
+test("getHomeSnapshot defaults to Bundesliga when no league is requested", async () => {
   const originalFetch = globalThis.fetch;
 
   globalThis.fetch = createFetchMock((path) => {
@@ -95,9 +95,13 @@ test("getHomeSnapshot defaults to World Cup when no league is requested", async 
   try {
     const snapshot = await getHomeSnapshot({});
 
-    assert.equal(snapshot.resolvedLeague, "wc");
-    assert.equal(snapshot.resolvedSeason, 2026);
-    assert.equal(snapshot.hasTable, false);
+    assert.equal(snapshot.resolvedLeague, "bl1");
+    assert.equal(snapshot.resolvedSeason, 2025);
+    assert.equal(snapshot.hasTable, true);
+    assert.deepEqual(
+      snapshot.leagueOptions.map((option) => option.shortcut),
+      ["bl1", "cl"]
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }

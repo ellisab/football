@@ -45,12 +45,16 @@ export default async function MatchPage({
       ? freshMatch
       : item?.match;
   if (!match) notFound();
+  const resolvedLeague = resolveCompetitionLeagueForMatch(match);
+  if (!item && !resolvedLeague) notFound();
+
   const competition =
     item?.competition ??
     getVisibleCompetitions(data).find(
-      (candidate) =>
-        candidate.resolvedLeague === resolveCompetitionLeagueForMatch(match)
+      (candidate) => candidate.resolvedLeague === resolvedLeague
     );
+  if (!competition) notFound();
+
   const contextMatches = competition
     ? getCompetitionMatches(competition)
         .filter((candidate) => candidate.matchID)

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getHomeSnapshot } from "@footballleagues/core/home";
+import { isLeagueKey } from "@footballleagues/core/leagues";
 import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
 import {
   IncompleteSnapshotError,
@@ -13,6 +14,14 @@ const NO_STORE_HEADERS = {
 export async function GET(request: NextRequest) {
   const league = request.nextUrl.searchParams.get("league") ?? undefined;
   const season = request.nextUrl.searchParams.get("season") ?? undefined;
+
+  if (league && !isLeagueKey(league)) {
+    return NextResponse.json(
+      { error: "Competition not found." },
+      { status: 404, headers: NO_STORE_HEADERS }
+    );
+  }
+
   try {
     const snapshot = requireCacheableHomeSnapshot(
       await getHomeSnapshot(

@@ -9,18 +9,19 @@ import { SculptedMatch } from "./sculpted-match";
 const scheduledMatch: ApiMatch = {
   matchID: 42,
   matchDateTimeUTC: "2099-12-31T20:00:00Z",
-  leagueName: "FIFA-Weltmeisterschaft",
+  leagueName: "UEFA Champions League",
+  leagueShortcut: "ucl",
   leagueSeason: 2099,
   group: { groupName: "Halbfinale" },
-  team1: { teamId: 1, teamName: "Frankreich" },
-  team2: { teamId: 2, teamName: "Spanien" },
+  team1: { teamId: 1, teamName: "FC Beispiel" },
+  team2: { teamId: 2, teamName: "Sporting Muster" },
   matchIsFinished: false,
 };
 
 const renderMatch = (href?: string) =>
   renderToStaticMarkup(
     createElement(SculptedMatch, {
-      competitionLabel: "FIFA-Weltmeisterschaft",
+      competitionLabel: "Champions League",
       href,
       match: scheduledMatch,
       roundLabel: "Halbfinale",
@@ -55,7 +56,7 @@ test("uses the shared card as the match-detail hero", () => {
   );
 
   assert.match(markup, /class="page-shell match-detail-page"/);
-  assert.match(markup, /<h1 class="sr-only">Frankreich gegen Spanien<\/h1>/);
+  assert.match(markup, /<h1 class="sr-only">FC Beispiel gegen Sporting Muster<\/h1>/);
   assert.match(markup, /<article class="featured-match" aria-label="Spiel: /);
   assert.match(markup, /class="match-detail-support"/);
   assert.match(markup, /class="match-detail-meta"/);

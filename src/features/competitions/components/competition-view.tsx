@@ -64,8 +64,6 @@ export function CompetitionView({
   );
   const table =
     tableSection?.renderKind === "table" ? tableSection.items : ([] as ApiTableRow[]);
-  const worldCupTables =
-    competition.worldCup?.groupSections.filter((section) => section.table.length > 0) ?? [];
   const seasonOption = competition.leagueOptions.find(
     (option) => option.shortcut === competition.resolvedLeague
   );
@@ -255,16 +253,7 @@ export function CompetitionView({
               title="Tabelle"
               description="Nur verifizierbare Tabellenwerte – ohne abgeleitete Qualifikations- oder Abstiegszonen."
             />
-            {worldCupTables.length > 0 ? (
-              <div className="grid gap-6">
-                {worldCupTables.map((section) => (
-                  <section key={section.group.groupID ?? section.title} className="grid gap-3">
-                    <h3 className="text-base font-semibold text-[var(--text)]">{section.title}</h3>
-                    <StandingsCard table={section.table} emptyText="Keine Tabelle verfügbar." />
-                  </section>
-                ))}
-              </div>
-            ) : table.length > 0 ? (
+            {table.length > 0 ? (
               <StandingsCard table={table} emptyText="Keine Tabelle verfügbar." />
             ) : (
               <EmptyState

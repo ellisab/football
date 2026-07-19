@@ -3,6 +3,7 @@ import {
   getMatchById,
   OPENLIGADB_CACHE_SECONDS,
 } from "@footballleagues/core/openligadb";
+import { resolveLeagueKey } from "@footballleagues/core/leagues";
 
 const MAX_MATCH_IDS = 14;
 const MATCH_LOOKUP_CONCURRENCY = 3;
@@ -83,22 +84,27 @@ export async function GET(request: NextRequest) {
   }
 
   const results = await loadMatches(ids);
-  const matches = results.flatMap((result) =>
+  const loadedMatches = results.flatMap((result) =>
     result.status === "fulfilled" ? [result.value] : []
   );
+  const matches = loadedMatches.filter((match) => resolveLeagueKey(match));
+  const filteredCount = loadedMatches.length - matches.length;
   const failures = results.filter(
     (result): result is Extract<MatchLookupResult, { status: "rejected" }> =>
       result.status === "rejected"
   );
-  const failedCount = failures.length + (ids.length - results.length);
+  const failedCount =
+    failures.length + (ids.length - results.length) + filteredCount;
 
   if (matches.length === 0) {
     const statuses = failures.map(({ reason }) => getStatusCode(reason));
-    const status = statuses.includes(429)
-      ? 429
-      : statuses.length > 0 && statuses.every((value) => value === 404)
-        ? 404
-        : 502;
+    const status = filteredCount > 0
+      ? 404
+      : statuses.includes(429)
+        ? 429
+        : statuses.length > 0 && statuses.every((value) => value === 404)
+          ? 404
+          : 502;
 
     return NextResponse.json(
       {
