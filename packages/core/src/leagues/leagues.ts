@@ -34,10 +34,6 @@ export const isBundesligaMatchdayLeague = (leagueKey: LeagueKey) => {
   return BUNDESLIGA_MATCHDAY_LEAGUES.has(leagueKey);
 };
 
-const UNSUPPORTED_LEAGUE_REGEX = /\b(2\.?\s*frauen[- ]bundesliga|fbl2|bl2f)\b/i;
-const RETIRED_WORLD_CUP_REGEX =
-  /(?:\bworld[\s_-]*cup\b|weltmeisterschaft|\bfifa[\s_-]*(?:wm|wc)(?![a-z0-9])|\b(?:wm|wc)(?:[\s_-]*(?:20)?26)?(?![a-z0-9]))/i;
-
 export const normalizeText = (value?: string) => (value ?? "").toLowerCase();
 
 export const isFootballLeague = (league: ApiLeague) => {
@@ -49,27 +45,12 @@ export const isFootballLeague = (league: ApiLeague) => {
   );
 };
 
-export const isRetiredLeague = (
-  league: Pick<ApiLeague, "leagueName" | "leagueShortcut">
-) => {
-  const combined = `${league.leagueShortcut ?? ""} ${league.leagueName ?? ""}`;
-  return RETIRED_WORLD_CUP_REGEX.test(combined);
-};
-
-const isShortcutMatch = (leagueShortcut: string, needle: string) => {
-  if (!leagueShortcut.startsWith(needle)) return false;
-  if (leagueShortcut.length === needle.length) return true;
-
-  const nextChar = leagueShortcut[needle.length];
-  return !/[a-z0-9]/i.test(nextChar);
-};
-
 const resolveGroupByShortcut = (leagueShortcut: string): LeagueKey | undefined => {
   let bestMatch: { key: LeagueKey; length: number } | undefined;
 
   for (const group of LEAGUE_GROUPS) {
     for (const needle of group.shortcutMatch) {
-      if (!isShortcutMatch(leagueShortcut, needle)) continue;
+      if (leagueShortcut !== needle) continue;
 
       if (!bestMatch || needle.length > bestMatch.length) {
         bestMatch = { key: group.key, length: needle.length };
@@ -84,20 +65,7 @@ export const resolveLeagueKey = (
   league: Pick<ApiLeague, "leagueName" | "leagueShortcut">
 ): LeagueKey | undefined => {
   const leagueShortcut = normalizeText(league.leagueShortcut);
-  const leagueName = normalizeText(league.leagueName);
-  const combined = `${leagueShortcut} ${leagueName}`;
-
-  if (isRetiredLeague(league) || UNSUPPORTED_LEAGUE_REGEX.test(combined)) {
-    return undefined;
-  }
-
-  const shortcutMatch = resolveGroupByShortcut(leagueShortcut);
-  if (shortcutMatch) return shortcutMatch;
-
-  const nameMatch = LEAGUE_GROUPS.find((group) =>
-    group.nameMatch.some((needle) => leagueName.includes(needle))
-  );
-  return nameMatch?.key;
+  return resolveGroupByShortcut(leagueShortcut);
 };
 
 export const buildLeagueEntriesByGroup = (leagues: ApiLeague[]) => {

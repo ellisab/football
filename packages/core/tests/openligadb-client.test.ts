@@ -381,7 +381,7 @@ test("OpenLigaDB all-season matches can use a shorter caller TTL", async () => {
   };
 
   try {
-    await getAllMatches("wm26", 2026, {
+    await getAllMatches("cup1", 2026, {
       next: { revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday },
     });
 

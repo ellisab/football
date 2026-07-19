@@ -22,7 +22,7 @@ const jsonResponse = (
   });
 };
 
-test("/api/home rejects the retired World Cup key without loading data", async () => {
+test("/api/home rejects unsupported league keys without loading data", async () => {
   const originalFetch = globalThis.fetch;
   let fetchCalled = false;
 
@@ -33,7 +33,7 @@ test("/api/home rejects the retired World Cup key without loading data", async (
 
   try {
     const response = await GET(
-      new NextRequest("http://localhost/api/home?league=wc&season=2026")
+      new NextRequest("http://localhost/api/home?league=unsupported&season=2026")
     );
     const payload = await response.json();
 

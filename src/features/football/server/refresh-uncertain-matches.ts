@@ -23,6 +23,9 @@ const loadUncachedMatch: MatchLoader = (matchId) =>
 const isRefreshCandidate = (item: CompetitionMatch, now: Date) => {
   const matchId = item.match.matchID;
   if (!Number.isInteger(matchId) || (matchId ?? 0) <= 0) return false;
+  if (resolveLeagueKey(item.match) !== item.competition.resolvedLeague) {
+    return false;
+  }
 
   const status = getMatchStatus(item.match, now);
   return status === "live" || status === "unknown";

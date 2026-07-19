@@ -1,10 +1,8 @@
 import type {
   ApiGroup,
-  ApiGroupTable,
   ApiLeague,
   ApiMatch,
   ApiTableRow,
-  ApiTeam,
 } from "../openligadb";
 
 export type HomeRequestOptions = RequestInit & {
@@ -15,10 +13,6 @@ export type HomeRequestOptions = RequestInit & {
 
 export type FootballDataSource = {
   getAvailableLeagues(options?: HomeRequestOptions): Promise<ApiLeague[]>;
-  getAvailableLeaguesBySeason(
-    season: number,
-    options?: HomeRequestOptions
-  ): Promise<ApiLeague[]>;
   getGroups(
     leagueShortcut: string,
     season: number,
@@ -40,11 +34,6 @@ export type FootballDataSource = {
     groupOrderId: number,
     options?: HomeRequestOptions
   ): Promise<ApiMatch[]>;
-  getAllMatches(
-    leagueShortcut: string,
-    season: number,
-    options?: HomeRequestOptions
-  ): Promise<ApiMatch[]>;
   getMatchesByGroup(
     leagueShortcut: string,
     season: number,
@@ -56,14 +45,4 @@ export type FootballDataSource = {
     season: number,
     options?: HomeRequestOptions
   ): Promise<ApiTableRow[]>;
-  getGroupTable(
-    leagueShortcut: string,
-    season: number,
-    options?: HomeRequestOptions
-  ): Promise<ApiGroupTable[]>;
-  getAvailableTeams(
-    leagueShortcut: string,
-    season: number,
-    options?: HomeRequestOptions
-  ): Promise<ApiTeam[]>;
 };

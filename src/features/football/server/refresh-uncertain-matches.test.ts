@@ -135,7 +135,7 @@ test("refreshUncertainMatches preserves stale data when the direct refresh fails
   assert.equal(matches[0]!.match, item.match);
 });
 
-test("refreshUncertainMatches rejects replacement data from a retired competition", async () => {
+test("refreshUncertainMatches rejects replacement data from a different competition", async () => {
   const item = createItem({
     matchID: 84295,
     matchDateTimeUTC: "2026-07-12T01:00:00Z",
@@ -147,14 +147,37 @@ test("refreshUncertainMatches rejects replacement data from a retired competitio
     now,
     loadMatch: async () => ({
       ...item.match,
-      leagueName: "Deutsche Nationalmannschaft- WM 2026",
-      leagueShortcut: "dfb-wm26",
+      leagueName: "UEFA Champions League",
+      leagueShortcut: "cl",
       matchIsFinished: true,
     }),
   });
 
   assert.equal(matches[0]!.match, item.match);
   assert.equal(matches[0]!.match.matchIsFinished, false);
+});
+
+test("refreshUncertainMatches does not load an untrusted competition shortcut", async () => {
+  const item = createItem({
+    matchID: 84295,
+    matchDateTimeUTC: "2026-07-12T01:00:00Z",
+    leagueName: "International Tournament",
+    leagueShortcut: "dfb-international",
+    matchIsFinished: false,
+  });
+  let calls = 0;
+
+  const matches = await refreshUncertainMatches({
+    matches: [item],
+    now,
+    loadMatch: async () => {
+      calls += 1;
+      return { ...item.match, matchIsFinished: true };
+    },
+  });
+
+  assert.equal(calls, 0);
+  assert.equal(matches[0]!.match, item.match);
 });
 
 test("refreshUncertainMatches bounds direct refresh volume and concurrency", async () => {

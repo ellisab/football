@@ -78,12 +78,21 @@ const LEAGUES_RESPONSE = [
     leagueSeason: 2025,
     sport: { sportName: "Football" },
   },
+  {
+    leagueShortcut: "dfb-international",
+    leagueName: "DFB-Pokal International 2025/2026",
+    leagueSeason: 2025,
+    sport: { sportName: "Fußball" },
+  },
 ];
 
 test("getHomeSnapshot defaults to Bundesliga when no league is requested", async () => {
   const originalFetch = globalThis.fetch;
+  const paths: string[] = [];
 
   globalThis.fetch = createFetchMock((path) => {
+    paths.push(path);
+
     switch (path) {
       case "/getavailableleagues":
         return jsonResponse(LEAGUES_RESPONSE);
@@ -102,6 +111,27 @@ test("getHomeSnapshot defaults to Bundesliga when no league is requested", async
       snapshot.leagueOptions.map((option) => option.shortcut),
       ["bl1", "cl"]
     );
+    assert.equal(paths.some((path) => path.includes("dfb-international")), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("getHomeSnapshot rejects unsupported league keys before loading data", async () => {
+  const originalFetch = globalThis.fetch;
+  let fetchCalled = false;
+
+  globalThis.fetch = async () => {
+    fetchCalled = true;
+    return jsonResponse({});
+  };
+
+  try {
+    await assert.rejects(
+      getHomeSnapshot({ league: "unsupported", season: "2026" }),
+      /unsupported league/i
+    );
+    assert.equal(fetchCalled, false);
   } finally {
     globalThis.fetch = originalFetch;
   }

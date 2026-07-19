@@ -22,12 +22,8 @@ const createDataSource = ({
   getMatchdayResults,
 }: Pick<FootballDataSource, "getLastChangeDate" | "getMatchdayResults">): FootballDataSource => ({
   getAvailableLeagues: async () => [],
-  getAvailableLeaguesBySeason: async () => [],
-  getAvailableTeams: async () => [],
   getCurrentGroup: async () => ({}),
-  getGroupTable: async () => [],
   getGroups: async () => [],
-  getAllMatches: async () => [],
   getLastChangeDate,
   getMatchdayResults,
   getMatchesByGroup: async () => [],

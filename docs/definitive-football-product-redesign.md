@@ -46,9 +46,9 @@ This document is the product, UX, visual, accessibility, data, and engineering s
 
 - Next.js App Router and Server Components by default.
 - OpenLigaDB typed transport types, data-source abstraction, retry/backoff, caching, and last-change matchday cache.
-- League discovery, season resolution, matchday loading, World Cup normalization, and tie grouping.
+- League discovery, season resolution, matchday loading, and tie grouping.
 - `TeamBadge` host validation, Next Image sizing, and missing-image fallback.
-- Berlin date utilities, match IDs, competition slugs, narrow matchday API, and compatibility API routes.
+- Berlin date utilities, match IDs, competition slugs, and the narrow matchday API.
 - Semantic desktop table foundation and reduced-motion support.
 
 ### Redesign
@@ -457,9 +457,9 @@ Server Components remain the default. Client code is limited to active navigatio
 - Competition directory and command center: `src/features/competitions/**`, `/competitions`, and URL-driven season, matchday, scope, and view controls.
 - Match presentation and normalized status guardrails: `packages/core/src/matches/**` and `src/features/football/components/match-summary.tsx`.
 - Local favorites and forgiving search: `src/features/favorites/**`, `src/features/search/**`, `/favorites`, and `/search?q=`.
-- Team and match journeys: bounded team-history loading, direct match loading, verified goal/period detail, and adjacent match context.
+- Team and match journeys: supported-snapshot team and match details, verified goal/period detail, and adjacent match context.
 - Global route states: `src/app/loading.tsx`, `src/app/error.tsx`, and `src/app/not-found.tsx`.
-- Retired implementation: the full-screen hero, duplicate route frame, duplicate match card, horizontal context rail, old polling layer, and legacy World Cup/Champions League presentation tree were removed.
+- Retired implementation: the full-screen hero, duplicate route frame, duplicate match card, horizontal context rail, old polling layer, and legacy tournament presentation tree were removed.
 
 ## 14. Validation plan
 
@@ -481,16 +481,16 @@ Server Components remain the default. Client code is limited to active navigatio
 
 Completed against the production code:
 
-- `pnpm run test`: 72 tests passed, including status provenance, nullable scores, Berlin date parsing/shifting, favorite persistence/migration, search ranking, matchday loading, direct match loading, and bounded team fixtures.
+- `pnpm run test`: coverage includes status provenance, nullable scores, Berlin date parsing/shifting, favorite persistence/migration, search ranking, matchday loading, and snapshot-backed match and team details.
 - `pnpm run typecheck`: strict TypeScript and generated Next.js route types passed.
 - `pnpm run lint`: repository-wide ESLint passed.
 - `pnpm dlx knip`: no unused files, dependencies, or exports reported.
-- `pnpm run build`: production build passed with all primary and compatibility routes in the route manifest.
+- `pnpm run build`: production build passed with all primary routes in the route manifest.
 - `git diff --check`: no whitespace errors.
 - Accessibility audit: one application `main`, skip link, route-level `h1`, semantic tables, `aria-current`, decorative crest handling, labelled native date/select controls, 44px interactive targets, polite favorite/live feedback, non-color status text, focus-visible rules, and reduced-motion handling were verified in the rendered application.
 - Static performance audit: the 2.7MB hero is no longer requested, Bungee was removed from the font payload, Server Components remain the default, legacy presentation code was deleted, and live refresh is a single visibility-aware client island.
 - Agent-browser route and responsive verification passed at 320, 375, 430, 768, 900, 1024, and 1440px. Every tested page reported `scrollWidth === viewport width`, one `main`, one `h1`, and the expected mobile/desktop navigation mode.
-- Browser interaction verification passed for previous-date/back navigation, direct matchday selection with a bounded failure fallback, matches/standings switching, direct match/team pages, search typing and shareable query submit, `/` search shortcut, favorite persistence and Today prioritization, manual live refresh, and 404 recovery actions.
+- Browser interaction verification passed for previous-date/back navigation, direct matchday selection with a bounded failure fallback, matches/standings switching, snapshot-backed match/team pages, search typing and shareable query submit, `/` search shortcut, favorite persistence and Today prioritization, manual live refresh, and 404 recovery actions.
 - System light/dark emulation selected the intended semantic palettes with no UI toggle or stored theme override. Reduced-motion emulation reduced transitions to effectively zero.
 - Keyboard verification passed for the skip link, focus transfer to `main`, logical next focus, and visible 3px focus treatment.
 - Browser console inspection found no application errors. The match-detail network audit showed no obsolete hero request or unsupported-statistics request.

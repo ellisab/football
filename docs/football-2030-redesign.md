@@ -6,7 +6,7 @@ The site should feel like a live football broadcast rebuilt as a premium daily u
 
 Working title: **Spieltag Orbit**.
 
-The current product already has a strong dark stadium language in `HomeHero`, `LeagueTabs`, `MatchCard`, `StandingsCard`, and `WorldCupPanel`. The redesign should evolve that foundation into a sharper football operating system: cinematic above the fold, compact and scannable everywhere else.
+The current product already has a strong dark stadium language in `HomeHero`, `LeagueTabs`, `MatchCard`, and `StandingsCard`. The redesign should evolve that foundation into a sharper football operating system: cinematic above the fold, compact and scannable everywhere else.
 
 ## Design Principles
 
@@ -23,7 +23,7 @@ The current product already has a strong dark stadium language in `HomeHero`, `L
    The mobile layout is not a compressed desktop. It is the primary score-checking experience: thumb-friendly, sticky controls, swipeable match strips, dense but calm lists.
 
 5. **Every competition has identity.**
-   World Cup, Bundesliga 1, Bundesliga 2, women's leagues, men's leagues, cups, and international competitions should carry distinct accenting through flags, badges, colors, trophy shapes, and subtle background treatment.
+   Bundesliga 1, Bundesliga 2, women's leagues, men's leagues, cups, and international competitions should carry distinct accenting through flags, badges, colors, trophy shapes, and subtle background treatment.
 
 ## Visual Identity
 
@@ -90,7 +90,6 @@ Navigation should be obvious, shallow, and always visible in some form.
 
 - `/` - Today dashboard and football home.
 - `/today` - all matches today across competitions.
-- `/competitions/world-cup`
 - `/competitions/bundesliga-1`
 - `/competitions/bundesliga-2`
 - `/competitions/women`
@@ -107,7 +106,7 @@ The existing query-param model can remain as a technical fallback, but the user-
 Desktop:
 
 - Left: brand mark and current date.
-- Center: `Today`, `World Cup`, `Bundesliga 1`, `Bundesliga 2`, `Women`, `Men`, `Tables`, `Teams`.
+- Center: `Today`, `Bundesliga 1`, `Bundesliga 2`, `Women`, `Men`, `Tables`, `Teams`.
 - Right: search, season selector, timezone chip, live count.
 
 Mobile:
@@ -147,9 +146,9 @@ Mobile layout:
 
 Hero content examples:
 
-- `Tonight: Germany chase the group lead`
+- `Tonight: the title race tightens under the lights`
 - `Bundesliga 1 matchday opens under the lights`
-- `World Cup groups: all eyes on Group B`
+- `The cup semifinal takes center stage`
 
 The hero should not hide utility. It should include:
 
@@ -181,7 +180,6 @@ Interaction:
 
 Replace simple pills with **Competition Capsules**:
 
-- World Cup: globe/trophy mark, flag accents, group/knockout count.
 - Bundesliga 1: red/black accent, matchday number, table leader.
 - Bundesliga 2: amber/white accent, promotion race cue.
 - Women: distinct magenta/cyan or green/gold accent, clearly not secondary.
@@ -220,10 +218,10 @@ Layout:
 - Mobile: context header -> matchday selector -> fixtures list -> table snapshot -> teams.
 - Desktop: main fixtures column with right rail containing table snapshot, top teams, next key match.
 
-World Cup variant:
+Cup and knockout variant:
 
-- Hero shows tournament phase: `Group Stage`, `Round of 16`, `Quarter-finals`, `Semi-finals`, `Final`.
-- Group navigation as compact tabs: `A B C D E F G H`.
+- Hero shows the current phase: `League phase`, `Round of 16`, `Quarter-finals`, `Semi-finals`, or `Final`.
+- Round navigation uses compact tabs for the stages available in that competition.
 - Knockout path uses a bracket spine, not a dense full bracket on mobile.
 
 Bundesliga 1/Bundesliga 2 variant:
@@ -395,7 +393,7 @@ The context bar is the anchor. It should always show competition, gender/categor
 
 Current `LeagueTabs` should become a two-level switcher:
 
-- Top level: `Today`, `World Cup`, `Bundesliga 1`, `Bundesliga 2`, `Women`, `Men`.
+- Top level: `Today`, `Bundesliga 1`, `Bundesliga 2`, `Women`, `Men`.
 - Secondary level appears when needed: league season, group, matchday.
 
 Visual:
@@ -446,7 +444,7 @@ Current `StandingsCard` should become:
 - `LeagueTable` for full standings.
 - `MobileTableRow` for compact expansion.
 
-Zone logic should be configurable by competition, not hard-coded by index only. Bundesliga 1, Bundesliga 2, World Cup groups, and cups need different zone rules.
+Zone logic should be configurable by competition, not hard-coded by index only. Bundesliga 1, Bundesliga 2, and cups need different zone rules.
 
 ### Timeline
 
@@ -500,7 +498,7 @@ Examples:
 
 - "No matches today in Bundesliga 1. Next kickoff: Saturday 15:30."
 - "Table data is not available yet. Fixtures are still visible."
-- "World Cup groups have not been published for this season."
+- "The next round has not been published for this competition."
 
 ### Error
 
@@ -559,8 +557,8 @@ Rules:
 5. **Team Color Aura**
    Team pages and match cards use a subtle extracted-color edge from the badge or known club colors. Never flood the UI; just a premium signal.
 
-6. **World Cup Map Moment**
-   World Cup pages can use flags and a quiet global grid behind the header, with group tabs that feel like a tournament command center.
+6. **Knockout Path Moment**
+   Cup pages can use a quiet bracket grid behind the header, with round tabs that feel like a tournament command center.
 
 ## Page-by-Page Blueprint
 
@@ -679,7 +677,6 @@ Current files likely touched first:
 - `src/features/home/components/league-tabs.tsx`
 - `src/features/matchday/components/match-card.tsx`
 - `src/features/standings/components/standings-card.tsx`
-- `src/features/world-cup/components/world-cup-panel.tsx`
 - `packages/ui/src/components/*`
 
 ## Success Criteria
@@ -688,7 +685,7 @@ The redesign is successful when:
 
 - A new user knows the current competition, category, round, and match status within three seconds.
 - A returning fan can check today's scores in one thumb motion on mobile.
-- World Cup, Bundesliga 1, Bundesliga 2, men's, and women's football all feel first-class.
+- Bundesliga 1, Bundesliga 2, men's, and women's football all feel first-class.
 - Tables are easier to read on mobile than a desktop-style squeezed grid.
 - Live matches feel alive without noisy motion.
 - The UI feels premium and emotional, but the data remains the hero.

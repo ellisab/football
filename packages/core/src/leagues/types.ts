@@ -8,7 +8,6 @@ export type LeagueKey =
 export type LeagueGroupConfig = {
   key: LeagueKey;
   label: string;
-  nameMatch: string[];
   shortcutMatch: string[];
 };
 

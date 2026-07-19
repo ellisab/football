@@ -72,18 +72,25 @@ test("resolveLeagueSelection defaults to Bundesliga when it is available", () =>
   assert.equal(resolveLeagueSelection("pl", [...available]), "bl1");
 });
 
-test("retired World Cup aliases cannot be classified as active competitions", () => {
-  for (const league of [
-    { leagueShortcut: "wm26", leagueName: "WM 2026" },
-    { leagueShortcut: "wm2026", leagueName: "FIFA WM" },
-    { leagueShortcut: "wm2026_xlife", leagueName: "World Cup" },
-    {
-      leagueShortcut: "dfb-wm26",
-      leagueName: "Deutsche Nationalmannschaft- WM 2026",
-    },
-  ]) {
-    assert.equal(resolveLeagueKey(league), undefined);
-  }
+test("resolveLeagueKey accepts only explicitly configured shortcuts", () => {
+  assert.equal(
+    resolveLeagueKey({
+      leagueShortcut: "dfb-international",
+      leagueName: "DFB-Pokal International",
+    }),
+    undefined
+  );
+  assert.equal(
+    resolveLeagueKey({
+      leagueShortcut: "ucl-extra",
+      leagueName: "Champions League Extra",
+    }),
+    undefined
+  );
+  assert.equal(
+    resolveLeagueKey({ leagueShortcut: "dfb", leagueName: "DFB-Pokal" }),
+    "dfb"
+  );
 });
 
 test("league labels and table support come from the canonical config", () => {
@@ -180,7 +187,7 @@ test("normalizeIconUrl upgrades allowed http hosts to https", () => {
   assert.equal(normalized, "https://upload.wikimedia.org/logo.svg");
 });
 
-test("buildLeagueEntriesByGroup prioritizes shortcut over broad name matches", () => {
+test("buildLeagueEntriesByGroup uses exact shortcut identities", () => {
   const leagues = [
     {
       leagueShortcut: "bl2",

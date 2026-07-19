@@ -119,17 +119,30 @@ test("/api/matchday returns errors with no-store cache policy", async () => {
   assert.doesNotMatch(cacheControl, /s-maxage/);
 });
 
-test("/api/matchday rejects the retired World Cup key", async () => {
-  const response = await GET(
-    new NextRequest(
-      "http://localhost/api/matchday?league=wc&season=2026&group=1"
-    )
-  );
-  const payload = await response.json();
+test("/api/matchday rejects unsupported league keys without loading data", async () => {
+  const originalFetch = globalThis.fetch;
+  let fetchCalled = false;
 
-  assert.equal(response.status, 400);
-  assert.match(payload.error, /unsupported league/i);
-  assert.match(response.headers.get("cache-control") ?? "", /no-store/);
+  globalThis.fetch = async () => {
+    fetchCalled = true;
+    return jsonResponse({});
+  };
+
+  try {
+    const response = await GET(
+      new NextRequest(
+        "http://localhost/api/matchday?league=unsupported&season=2026&group=1"
+      )
+    );
+    const payload = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.match(payload.error, /unsupported league/i);
+    assert.match(response.headers.get("cache-control") ?? "", /no-store/);
+    assert.equal(fetchCalled, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test("/api/matchday serves a failed refresh as stale without caching it", async () => {

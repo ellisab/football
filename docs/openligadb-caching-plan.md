@@ -32,7 +32,6 @@ Use endpoint-specific TTLs.
 | Matchday data | `/getmatchdata/{league}/{season}/{groupOrderId}` | 5-15m | Guard large fetches with last-change checks. |
 | Live matchday data | same matchday endpoint | 30-60s check, fetch only on change | Poll only visible active matchday. |
 | Whole-season matches | `/getmatchdata/{league}/{season}` | 6-24h | Avoid for live polling; use only where needed. |
-| World Cup groups/teams/all matches | grouped endpoints | 6-24h normally, shorter near live windows | Keep World Cup discovery stable. |
 
 ## Add `getlastchangedate`
 

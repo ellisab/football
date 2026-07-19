@@ -4,6 +4,7 @@ import {
   getCurrentSeasonYear,
   hasLeagueTable,
   isBundesligaMatchdayLeague,
+  isLeagueKey,
   pickLeagueEntryForSeason,
   resolveEffectiveLeagueShortcut,
   resolveLeagueSelection,
@@ -349,6 +350,10 @@ export const getHomeSnapshot = async (
     fallbackYear?: number;
   }
 ): Promise<HomeSnapshot> => {
+  if (params.league && !isLeagueKey(params.league)) {
+    throw new Error(`Unsupported league: ${params.league}`);
+  }
+
   const dataSource = options?.dataSource ?? openLigaDbDataSource;
   const requestOptions = options?.requestOptions;
   const referenceSeason = options?.fallbackYear ?? getCurrentSeasonYear();

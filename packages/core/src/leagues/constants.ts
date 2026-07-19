@@ -6,42 +6,26 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
   {
     key: "bl1",
     label: "Bundesliga",
-    nameMatch: ["bundesliga"],
-    shortcutMatch: ["bl1"],
+    shortcutMatch: ["bl1", "bl1/arena"],
   },
   {
     key: "bl2",
     label: "Zweite Bundesliga",
-    nameMatch: [
-      "2. bundesliga",
-      "2. fussball-bundesliga",
-      "2. fußball-bundesliga",
-    ],
     shortcutMatch: ["bl2"],
   },
   {
     key: "fbl1",
     label: "Frauen-Bundesliga",
-    nameMatch: [
-      "1. frauen-bundesliga",
-      "1. frauen bundesliga",
-      "1. fussball-bundesliga damen",
-      "1. fußball-bundesliga damen",
-      "frauen fußball bundesliga",
-      "frauen fussball bundesliga",
-    ],
     shortcutMatch: ["fbl1", "ffb1", "bl1f", "dbl1", "frbu"],
   },
   {
     key: "dfb",
     label: "DFB-Pokal",
-    nameMatch: ["dfb-pokal", "dfb pokal"],
     shortcutMatch: ["dfb"],
   },
   {
     key: "cl",
     label: "Champions League",
-    nameMatch: ["champions league"],
     shortcutMatch: ["cl", "ucl"],
   },
 ];
