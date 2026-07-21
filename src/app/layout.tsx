@@ -6,6 +6,7 @@ import {
 import "./globals.css";
 import { siteUrl } from "@/lib/site-config";
 import { AppShell } from "@/features/shell/components/app-shell";
+import { Analytics } from "@vercel/analytics/next";
 
 const stadiumBodyFont = Space_Grotesk({
   weight: ["400", "500", "600", "700"],
@@ -65,6 +66,7 @@ export default function RootLayout({
         className={`${stadiumBodyFont.variable} ${monoFont.variable} antialiased`}
       >
         <AppShell>{children}</AppShell>
+        <Analytics />
       </body>
     </html>
   );
