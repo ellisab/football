@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { MatchdaySnapshot } from "@footballleagues/core/home";
+import type {
+  HomeRequestOptions,
+  MatchdaySnapshot,
+} from "@footballleagues/core/home";
 import {
   loadMatchdayWithBackoff,
   MatchdayRefreshBackoffError,
@@ -40,6 +43,77 @@ const snapshot = ({
   refreshFailed,
   resolvedLeague: "bl1",
   resolvedSeason: 2025,
+});
+
+test("matchday refresh bypasses the Data Cache only for score validation", async () => {
+  const receivedOptions: Array<
+    | {
+        requestOptions?: HomeRequestOptions;
+        validationRequestOptions?: HomeRequestOptions;
+      }
+    | undefined
+  > = [];
+
+  for (const candidate of [params, { ...params, season: undefined }]) {
+    await loadMatchdayWithBackoff(candidate, {
+      cache: new MemoryCache(),
+      loadSnapshot: async (_params, options) => {
+        receivedOptions.push(options);
+        return snapshot();
+      },
+      now: () => 1_000,
+    });
+  }
+
+  assert.equal(receivedOptions.length, 2);
+
+  for (const options of receivedOptions) {
+    assert.equal(options?.requestOptions?.next?.revalidate, 30);
+    assert.equal(options?.validationRequestOptions?.cache, "no-store");
+    assert.equal(options?.validationRequestOptions?.next, undefined);
+    assert.ok(options?.requestOptions?.signal instanceof AbortSignal);
+    assert.equal(
+      options?.requestOptions?.signal,
+      options?.validationRequestOptions?.signal
+    );
+  }
+});
+
+test("matchday refresh ignores version-one Runtime Cache records", async () => {
+  const cache = new MemoryCache();
+  cache.values.set("matchday:bl1:2025:10", {
+    checkedAt: 1_000,
+    failureCount: 1,
+    lastFailureStatus: 503,
+    lastGood: snapshot({ matchId: 999 }),
+    lastGoodAt: 1_000,
+    retryAt: 60_000,
+    version: 1,
+  });
+  cache.values.set("matchday:openligadb-origin", {
+    failureCount: 1,
+    retryAt: 60_000,
+    version: 1,
+  });
+
+  let calls = 0;
+  const result = await loadMatchdayWithBackoff(params, {
+    cache,
+    loadSnapshot: async () => {
+      calls += 1;
+      return snapshot({ matchId: 101 });
+    },
+    now: () => 2_000,
+  });
+
+  assert.equal(calls, 1);
+  assert.equal(result.refreshState, "fresh");
+  assert.equal(result.matches[0]?.matchID, 101);
+  assert.equal(
+    (cache.values.get("matchday:bl1:2025:10") as { version?: number })
+      .version,
+    2
+  );
 });
 
 test("matchday backoff keeps the last success and skips upstream while open", async () => {

@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "pnpm exec tsx --test src/**/*.test.ts && pnpm -C packages/core test",
+    "test": "pnpm exec tsx --test \"src/**/*.test.ts\" && pnpm -C packages/core test",
     "typecheck": "next typegen && touch .next/types/cache-life.d.ts && tsc --noEmit"
   },
   "dependencies": {

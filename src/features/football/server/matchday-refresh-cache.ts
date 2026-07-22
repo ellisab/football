@@ -7,7 +7,7 @@ import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
 import type { RuntimeCache } from "@vercel/functions";
 import { getFootballRuntimeCache } from "@/lib/server/runtime-cache";
 
-const CACHE_RECORD_VERSION = 1;
+const CACHE_RECORD_VERSION = 2;
 const CACHE_TTL_SECONDS = OPENLIGADB_CACHE_SECONDS.seasonMatches;
 const MAX_STALE_AGE_MS = CACHE_TTL_SECONDS * 1_000;
 const TRANSIENT_BACKOFF_MS = [15_000, 30_000, 60_000, 120_000] as const;
@@ -212,6 +212,24 @@ const toStaleResult = ({
 
 const inFlightLoads = new Map<string, Promise<MatchdayRefreshResult>>();
 
+const loadValidatedSnapshot = (
+  params: MatchdayParams,
+  loadSnapshot: typeof getMatchdaySnapshot
+) => {
+  const signal = AbortSignal.timeout(4_000);
+
+  return loadSnapshot(params, {
+    requestOptions: {
+      next: { revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday },
+      signal,
+    },
+    validationRequestOptions: {
+      cache: "no-store",
+      signal,
+    },
+  });
+};
+
 export const loadMatchdayWithBackoff = async (
   params: MatchdayParams,
   {
@@ -228,7 +246,7 @@ export const loadMatchdayWithBackoff = async (
 ): Promise<MatchdayRefreshResult> => {
   const cacheKey = getCacheKey(params);
   if (!cacheKey) {
-    const snapshot = await loadSnapshot(params);
+    const snapshot = await loadValidatedSnapshot(params, loadSnapshot);
     const checkedAt = now();
     return { ...snapshot, checkedAt, refreshState: "fresh" };
   }
@@ -271,12 +289,7 @@ export const loadMatchdayWithBackoff = async (
     }
 
     try {
-      const snapshot = await loadSnapshot(params, {
-        requestOptions: {
-          next: { revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday },
-          signal: AbortSignal.timeout(4_000),
-        },
-      });
+      const snapshot = await loadValidatedSnapshot(params, loadSnapshot);
       const checkedAt = now();
 
       if (!snapshot.refreshFailed) {

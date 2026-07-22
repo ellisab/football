@@ -23,7 +23,8 @@ normally a score update within roughly 30-75 seconds, plus any delay in the upst
 2. Key ordinary failures by league, season, and matchday.
 3. Use an origin-wide cooldown only for `429 Too Many Requests`.
 4. Keep the overview slow and stable; overlay live scores through a narrow route.
-5. Never use `cache: "no-store"` for routine per-viewer score refreshes.
+5. Never use `cache: "no-store"` for routine per-viewer score refreshes. Use it only for the
+   shared matchday route's blocking last-change/result validation after a CDN miss.
 6. Do not sleep inside a function for circuit-breaker backoff. Persist `retryAt` and skip
    upstream work until that time.
 7. Treat stale data as stale in the response and UI; never present an old result as freshly
@@ -37,8 +38,8 @@ Visible /live tab
   -> Vercel CDN response cache
   -> matchday route handler
   -> regional Vercel Runtime Cache state
-  -> getlastchangedate
-  -> full getmatchdata only when lastChanged changed
+  -> blocking, no-store getlastchangedate
+  -> blocking, no-store getmatchdata only when lastChanged changed
 ```
 
 The initial `/live` request still receives a server-rendered overview. After hydration, the
@@ -52,7 +53,7 @@ does not rebuild the full React Server Component tree on its 45-second interval.
 | Browser state | One visible tab | Display and merge updated scores | Polls active scopes every 45s and honors `retryAt`/`Retry-After`. |
 | Vercel CDN | Shared per cache location | Avoid a function invocation for every viewer | Caches `/api/matchday` responses using `s-maxage`. |
 | Vercel Runtime Cache | Per region, project, and environment | Store last-good snapshots and breaker state across function instances | Namespace `football-data-v1`, provided by `@vercel/functions`. |
-| Next.js fetch/data cache | Framework cache | Cache individual OpenLigaDB fetches and computed snapshots | Endpoint TTLs plus `unstable_cache` for home snapshots. |
+| Next.js fetch/data cache | Framework cache | Cache stable OpenLigaDB fetches and computed snapshots | Endpoint TTLs plus `unstable_cache` for home snapshots; the live validation transaction bypasses this layer. |
 | Process memory | One warm function instance | Fast local deduplication | 128-entry successful-response LRU, 128-entry matchday LRU, and keyed single-flight. |
 
 Vercel Runtime Cache is regional and ephemeral. It is not a database and does not provide an
@@ -78,7 +79,7 @@ The canonical values live in `packages/core/src/openligadb/cache-policy.ts`.
 | Tables | `/getbltable/{league}/{season}` | 3h | Useful browsing freshness without live-rate polling. |
 | Current group | `/getcurrentgroup/{league}` | 5m | Small control payload that changes around matchdays. |
 | Matchday payload | `/getmatchdata/{league}/{season}/{group}` | 10m default | Full payload is guarded by a last-change check. |
-| Live matchday check/payload | last-change and narrow live requests | 30s | Shared live freshness target. |
+| Live matchday validation | last-change and conditional matchday payload | `no-store` inside the route | Prevents an expired marker or payload from being accepted as a fresh validation result; the route response remains CDN-cached for 30s. |
 | Whole-season matches | `/getmatchdata/{league}/{season}` | 12h | Never used as a live polling primitive. |
 | Home/competition snapshot | computed snapshot | 5m | Prevents repeated multi-competition fan-out. |
 | Home API stale-while-revalidate | response cache | 5m | Allows stale navigation while a snapshot refreshes. |
@@ -109,18 +110,20 @@ The core matchday loader stores:
 The refresh algorithm is:
 
 1. For ordinary `when-cached` callers, reuse a local matchday entry until `revalidateAt`.
-2. When a check is due, request `getlastchangedate`.
+2. When a live-route check is due, request `getlastchangedate` as a blocking `no-store`
+   validation.
 3. If the timestamp is unchanged and the entry remains within its 12-hour maximum age, reuse
    the matches and advance `revalidateAt` by 30 seconds.
 4. If the timestamp changed, the entry is missing/expired, or the last-change endpoint is
-   unavailable, request the complete matchday and replace the cached payload. A `429` instead
-   returns an existing entry as stale or fails cold.
+   unavailable, request the complete matchday through the same blocking validation policy and
+   replace the cached payload. A `429` instead returns an existing entry as stale or fails cold.
 5. If the full refresh fails and a usable payload exists, return it as stale.
 6. If refresh fails cold, preserve the status and let the outer breaker control the next retry.
 
 The local matchday cache is an LRU limited to 128 scopes. The narrow matchday route uses the
-`always` check strategy, while the 30-second fetch/Data Cache still coalesces its last-change
-requests.
+`always` check strategy. Its last-change and conditional matchday calls bypass the Next.js Data
+Cache together so an expired payload cannot be stored under a newer marker. The 30-second CDN
+response cache and per-instance in-flight map still coalesce viewer traffic before validation.
 
 Advancing `revalidateAt` on an unchanged timestamp is important. Without it, every later
 request would probe `getlastchangedate`, even though the previous check confirmed no change.
@@ -160,7 +163,9 @@ On every permitted refresh:
 3. Read the matchday state and the origin-wide `429` cooldown in parallel.
 4. If either breaker is open, return last-good data immediately or return a cached error when
    no last-good value exists.
-5. Otherwise load the narrow matchday snapshot with a four-second abort deadline.
+5. Otherwise load the narrow matchday snapshot with a four-second abort deadline. Discovery
+   metadata keeps its endpoint TTLs, while last-change and conditional matchday validation are
+   blocking `no-store` requests.
 6. On success, replace last-good data and reset the failure count.
 7. On failure, calculate and store the next `retryAt` without overwriting the last success.
 
@@ -293,7 +298,8 @@ shared `/api/matchday` Runtime Cache breaker.
 ## Versioning And Invalidation
 
 - Runtime Cache namespace: `football-data-v1`.
-- Runtime record schema version: `1`.
+- Runtime record schema version: `2` (version `1` records are ignored because they may contain
+  a stale payload paired with a newer change marker).
 - Overview cache version: `results-v6`.
 - Runtime tags: `openligadb`, `openligadb-matchdays`, and `openligadb-overview`.
 
@@ -354,6 +360,8 @@ The implementation has focused coverage for:
 - transient retry and non-retryable status behavior;
 - `Retry-After` propagation and shared `429` cooldown;
 - last-change hit and changed-data refresh behavior;
+- separation of cached metadata from blocking live validation;
+- invalidation of version `1` Runtime Cache records;
 - revalidation advancement when `lastChanged` is unchanged;
 - last-good serving and open-breaker suppression;
 - isolation between matchday breaker keys;
@@ -367,6 +375,7 @@ The implementation has focused coverage for:
 Relevant test files:
 
 - `packages/core/tests/openligadb-client.test.ts`
+- `packages/core/tests/get-matchday-snapshot.test.ts`
 - `packages/core/tests/matchday-loader.test.ts`
 - `src/app/api/matchday/route.test.ts`
 - `src/features/football/server/matchday-refresh-cache.test.ts`

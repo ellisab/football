@@ -71,6 +71,7 @@ export const getMatchdaySnapshot = async (
   options?: {
     dataSource?: FootballDataSource;
     requestOptions?: HomeRequestOptions;
+    validationRequestOptions?: HomeRequestOptions;
   }
 ): Promise<MatchdaySnapshot> => {
   const requestedLeague = getRequestedLeague(params.league);
@@ -82,6 +83,8 @@ export const getMatchdaySnapshot = async (
 
   const dataSource = options?.dataSource ?? openLigaDbDataSource;
   const requestOptions = options?.requestOptions;
+  const validationRequestOptions =
+    options?.validationRequestOptions ?? requestOptions;
   const normalizedGroups = await normalizeLeagueEntries(dataSource, requestOptions);
   const availableGroupKeys = getAvailableGroupKeys(normalizedGroups);
 
@@ -127,7 +130,7 @@ export const getMatchdaySnapshot = async (
     groupOrderId,
     lastChangeStrategy: "always",
     leagueShortcut: effectiveShortcut,
-    requestOptions,
+    requestOptions: validationRequestOptions,
     season: resolvedSeason,
   });
 

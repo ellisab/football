@@ -7,6 +7,7 @@ import {
   getAllMatches,
   getCurrentGroup,
   getGroups,
+  getLastChangeDate,
   getMatchById,
   getMatchdayResults,
   getMatchesByGroup,
@@ -423,6 +424,31 @@ test("OpenLigaDB live snapshot resources use a shorter positive caller TTL", asy
         OPENLIGADB_CACHE_SECONDS.currentGroup,
       ]
     );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("OpenLigaDB live validation preserves blocking no-store requests", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ input: RequestInfo | URL; init?: RequestInit }> = [];
+
+  globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    requests.push({ input, init });
+    return String(input).includes("/getlastchangedate/")
+      ? jsonResponse("2026-07-22T18:00:00Z")
+      : jsonResponse([]);
+  };
+
+  try {
+    await getLastChangeDate("bl1", 2026, 1, { cache: "no-store" });
+    await getMatchdayResults("bl1", 2026, 1, { cache: "no-store" });
+
+    assert.equal(requests.length, 2);
+    for (const { init } of requests) {
+      assert.equal(init?.cache, "no-store");
+      assert.equal(init?.next, undefined);
+    }
   } finally {
     globalThis.fetch = originalFetch;
   }
