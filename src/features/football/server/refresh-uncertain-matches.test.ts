@@ -21,10 +21,10 @@ const createItem = (match: ApiMatch): CompetitionMatch => ({
   },
 });
 
-test("refreshUncertainMatches replaces a stale unknown match with its fresh result", async () => {
+test("refreshUncertainMatches refreshes an unknown match during its settlement grace", async () => {
   const staleMatch: ApiMatch = {
     matchID: 84295,
-    matchDateTimeUTC: "2026-07-12T01:00:00Z",
+    matchDateTimeUTC: "2026-07-12T06:00:00Z",
     leagueName: "Bundesliga",
     leagueShortcut: "bl1",
     matchIsFinished: false,
@@ -119,7 +119,7 @@ test("refreshUncertainMatches skips already settled and upcoming matches", async
 test("refreshUncertainMatches preserves stale data when the direct refresh fails", async () => {
   const staleMatch: ApiMatch = {
     matchID: 84295,
-    matchDateTimeUTC: "2026-07-12T01:00:00Z",
+    matchDateTimeUTC: "2026-07-12T07:00:00Z",
     matchIsFinished: false,
   };
   const item = createItem(staleMatch);
@@ -138,7 +138,7 @@ test("refreshUncertainMatches preserves stale data when the direct refresh fails
 test("refreshUncertainMatches rejects replacement data from a different competition", async () => {
   const item = createItem({
     matchID: 84295,
-    matchDateTimeUTC: "2026-07-12T01:00:00Z",
+    matchDateTimeUTC: "2026-07-12T07:00:00Z",
     matchIsFinished: false,
   });
 
@@ -155,6 +155,38 @@ test("refreshUncertainMatches rejects replacement data from a different competit
 
   assert.equal(matches[0]!.match, item.match);
   assert.equal(matches[0]!.match.matchIsFinished, false);
+});
+
+test("refreshUncertainMatches stops polling old or undated unknown matches", async () => {
+  const tooOld = createItem({
+    matchID: 1,
+    matchDateTimeUTC: "2026-07-12T05:59:59Z",
+    matchIsFinished: false,
+  });
+  const missingKickoff = createItem({
+    matchID: 2,
+    matchIsFinished: false,
+  });
+  const invalidKickoff = createItem({
+    matchID: 3,
+    matchDateTimeUTC: "not-a-date",
+    matchIsFinished: false,
+  });
+  let calls = 0;
+
+  const matches = await refreshUncertainMatches({
+    matches: [tooOld, missingKickoff, invalidKickoff],
+    now,
+    loadMatch: async () => {
+      calls += 1;
+      return { matchIsFinished: true };
+    },
+  });
+
+  assert.equal(calls, 0);
+  assert.equal(matches[0]!.match, tooOld.match);
+  assert.equal(matches[1]!.match, missingKickoff.match);
+  assert.equal(matches[2]!.match, invalidKickoff.match);
 });
 
 test("refreshUncertainMatches does not load an untrusted competition shortcut", async () => {
@@ -184,7 +216,7 @@ test("refreshUncertainMatches bounds direct refresh volume and concurrency", asy
   const matches = Array.from({ length: 10 }, (_, index) =>
     createItem({
       matchID: index + 1,
-      matchDateTimeUTC: "2026-07-12T01:00:00Z",
+      matchDateTimeUTC: "2026-07-12T08:00:00Z",
       matchIsFinished: false,
     })
   );

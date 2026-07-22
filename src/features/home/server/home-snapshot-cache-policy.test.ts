@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { HomeSnapshot } from "@footballleagues/core/home";
 import {
+  createSharedStaleBackoff,
   createKeyedSingleFlight,
   createSingleFlight,
   createStaleOnError,
@@ -9,6 +10,7 @@ import {
   mapWithConcurrency,
   requireCacheableHomeSnapshot,
   SnapshotTimeoutError,
+  withAbortableSnapshotDeadline,
   withSnapshotDeadline,
 } from "./home-snapshot-cache-policy";
 
@@ -75,6 +77,96 @@ test("snapshot deadline rejects instead of resolving a cacheable fallback", asyn
     (error) =>
       error instanceof SnapshotTimeoutError && error.timeoutMs === 5
   );
+});
+
+test("abortable snapshot deadline cancels the underlying work", async () => {
+  let observedAbort = false;
+
+  await assert.rejects(
+    withAbortableSnapshotDeadline(
+      (signal) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener("abort", () => {
+            observedAbort = true;
+            reject(new DOMException("Aborted", "AbortError"));
+          });
+        }),
+      5
+    ),
+    (error) =>
+      error instanceof SnapshotTimeoutError && error.timeoutMs === 5
+  );
+
+  assert.equal(observedAbort, true);
+});
+
+test("shared backoff serves last-good data and suppresses repeated work", async () => {
+  const values = new Map<string, unknown>();
+  const cache = {
+    get: async (key: string) => values.get(key) ?? null,
+    set: async (key: string, value: unknown) => {
+      values.set(key, value);
+    },
+  };
+  let currentTime = 1_000;
+  let calls = 0;
+  let shouldFail = false;
+  const load = createSharedStaleBackoff(
+    async () => {
+      calls += 1;
+      if (shouldFail) throw new Error("failed");
+      return { fixtures: [101, 202] };
+    },
+    () => "overview",
+    {
+      getCache: () => cache,
+      maxStaleMs: 60 * 60 * 1_000,
+      now: () => currentTime,
+      random: () => 0.5,
+      scheduleMs: [60_000],
+      ttlSeconds: 3_600,
+    }
+  );
+
+  assert.deepEqual(await load(), { fixtures: [101, 202] });
+  shouldFail = true;
+  currentTime = 2_000;
+  assert.deepEqual(await load(), { fixtures: [101, 202] });
+  currentTime = 3_000;
+  assert.deepEqual(await load(), { fixtures: [101, 202] });
+  assert.equal(calls, 2);
+});
+
+test("shared backoff keeps cold failures visible but skips their retry window", async () => {
+  const values = new Map<string, unknown>();
+  const cache = {
+    get: async (key: string) => values.get(key) ?? null,
+    set: async (key: string, value: unknown) => {
+      values.set(key, value);
+    },
+  };
+  let calls = 0;
+  let currentTime = 1_000;
+  const load = createSharedStaleBackoff(
+    async () => {
+      calls += 1;
+      throw new Error("cold failure");
+    },
+    () => "overview",
+    {
+      getCache: () => cache,
+      maxStaleMs: 60 * 60 * 1_000,
+      now: () => currentTime,
+      random: () => 0.5,
+      scheduleMs: [60_000],
+      ttlSeconds: 3_600,
+    }
+  );
+
+  await assert.rejects(load(), /cold failure/);
+  currentTime = 2_000;
+  await assert.rejects(load(), /temporarily paused/);
+  assert.equal(calls, 1);
 });
 
 test("single-flight shares concurrent work and clears after it settles", async () => {

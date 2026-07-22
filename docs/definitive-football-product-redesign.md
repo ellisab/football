@@ -1,10 +1,12 @@
 # Spieltag: Definitive Football Product Redesign
 
-Status: implemented product specification and verification record for the 2026 rebuild.
+Status: canonical product and visual specification for the current 2026 implementation.
 
-This document is the product, UX, visual, accessibility, data, and engineering source of truth for the redesign. It is grounded in the current Next.js repository and the fields OpenLigaDB actually exposes.
+This document is the product, UX, visual, accessibility, data, and engineering source of truth for the redesign. It incorporates the later sculpted-light theme and is grounded in the current Next.js repository and the fields OpenLigaDB actually exposes. The pre-redesign audit and dated validation record are retained as historical context. Runtime caching and polling are documented separately in [the OpenLigaDB caching plan](./openligadb-caching-plan.md).
 
-## 1. UX audit
+## 1. Pre-redesign UX audit
+
+The findings in this section describe the product before the July 2026 rebuild. They explain the decisions that follow; they are not a description of the current interface.
 
 ### The five most important problems
 
@@ -42,6 +44,10 @@ This document is the product, UX, visual, accessibility, data, and engineering s
 - Repeated blur, continuous decorative animation, three font families, and a full-screen image are disproportionate to a score task.
 - The current timeout fallback does not abort underlying work.
 
+Current limitation after the rebuild: Today, Tables, Teams, team detail, and match detail still
+derive from the shared overview snapshot. Match/team IDs outside that loaded slice can still
+return `404`. The two old polling systems were replaced by one scoped live refresh controller.
+
 ### Retain
 
 - Next.js App Router and Server Components by default.
@@ -51,13 +57,14 @@ This document is the product, UX, visual, accessibility, data, and engineering s
 - Berlin date utilities, match IDs, competition slugs, and the narrow matchday API.
 - Semantic desktop table foundation and reduced-motion support.
 
-### Redesign
+### Rebuild decisions
 
-- `HomeView`, full-screen `HomeHero`, duplicated headers, context rail, and ticker.
-- The three competing match-card anatomies.
-- Standings zone/form presentation.
-- Team and match pages as direct, contextual journeys.
-- All global states, navigation, themes, search, favorites, and route-specific data loaders.
+- `HomeView`, full-screen `HomeHero`, duplicated headers, context rail, and ticker were removed.
+- The three competing match-card anatomies were replaced by `SculptedMatch`.
+- Unsupported standings zones/form and fictional match statistics were removed.
+- Team and match pages became contextual, snapshot-backed journeys.
+- Global states, navigation, the light theme, search, favorites, and route-specific views were
+  added over the shared data layer.
 
 ## 2. Product strategy
 
@@ -101,8 +108,8 @@ Favorites are optional, versioned local data. They never replace URL state or re
 - `/competitions` — searchable competition directory.
 - `/competitions/[slug]?season=YYYY&matchday=N&view=matches|standings` — competition command center.
 - `/tables?competition=slug&season=YYYY` — compatibility overview for tables.
-- `/teams` and `/teams/[teamId]` — team browse and team detail.
-- `/matches/[matchId]` — direct match detail even when absent from the overview slice.
+- `/teams` and `/teams/[teamId]` — team browse and snapshot-backed team detail.
+- `/matches/[matchId]` — match detail for IDs present in the supported competition snapshot.
 - `/search?q=...` — universal, shareable search.
 - `/favorites` — locally prioritized teams and competitions.
 
@@ -114,16 +121,16 @@ Legacy `/?league=&season=` and the existing API routes remain compatible during 
 - Today.
 - Live.
 - Competitions.
+- Tables.
 - Teams.
 - Favorites.
 - Search.
-- The user’s system theme preference.
 
 The global header remains compact and sticky. Route-specific context bars live inside pages because season, matchday, and date belong to the URL and cannot be reliably inferred by the root layout.
 
 ### Mobile navigation
 
-- Compact top bar: identity and search; color mode follows the user’s system theme.
+- Compact top bar: identity and search.
 - Bottom navigation: Today, Live, Competitions, Favorites.
 - Teams remain one tap away through search and competition pages.
 - The page reserves bottom safe-area space and never depends on a hidden horizontal rail.
@@ -138,14 +145,17 @@ The global header remains compact and sticky. Route-specific context bars live i
 5. Search → team, competition, match, or matchday.
 6. Favorite control → immediate feedback → prioritized Today/Favorites content.
 
-## 4. Three visual directions
+## 4. Historical visual-direction exploration
+
+These were the alternatives evaluated during the rebuild. Matchday Signal supplied the product
+structure; the subsequent sculpted-light pass supplied the current visual expression.
 
 ### Direction A: Matchday Signal — recommended
 
 - **Concept:** stadium wayfinding plus a precise live instrument.
 - **Character:** immediate, calm, confident, modern.
 - **Typography:** Space Grotesk for product/editorial hierarchy; JetBrains Mono for time, scores, and standings.
-- **Color:** warm paper-like light theme and deep slate dark theme; one signal red/coral live token, one blue action token, restrained competition accents.
+- **Color:** warm paper-like light theme; one signal red/coral estimated-live token, one blue action token, restrained competition accents.
 - **Layout:** compact sticky shell, date rail, grouped fixture ledger, strong whitespace, shallow surfaces.
 - **Match treatment:** one reusable horizontal anatomy with comfortable and compact densities; score and team names dominate.
 - **Navigation:** persistent product destinations plus route-owned context controls.
@@ -176,23 +186,51 @@ The global header remains compact and sticky. Route-specific context bars live i
 - **Strengths:** strong live identity and high desktop density.
 - **Risks:** easiest direction to overanimate, over-darken, or resemble a generic dashboard.
 
-## 5. Selected direction
+## 5. Current direction: Matchday Signal with Sculpted Light
 
-**Matchday Signal** is selected because it best serves the product principle “every score and every competition is one step away.” It gives Today and Live the strongest information hierarchy, adapts to 320px without hiding essential match data, supports semantic light and dark themes, and can be maintained with a small token system rather than decorative one-off components.
+**Matchday Signal** remains the structural foundation because it best serves the product
+principle “every score and every competition is one step away.” Today, Live, competition,
+search, team, and favorites routes retain its shallow information architecture, honest status
+language, and server-first behavior.
 
-The emotional identity comes from rhythm, typography, live language, team crests, and precise competition accents—not from a full-screen stadium image or fictional statistics.
+The current visual layer is **Sculpted Light**:
+
+- warm-white canvas, white and pale-gray surfaces, charcoal text, and hairline borders;
+- subtle shadows and dimensional controls used to create hierarchy rather than decoration;
+- Space Grotesk for product text and JetBrains Mono for time and compact data;
+- a predominantly monochrome palette, with red reserved for estimated-live emphasis; team and
+  competition identity comes mainly from names and crests rather than colored UI surfaces;
+- a sculpted scoreboard with a central circular status signal as the signature match component;
+- responsive boards that preserve team, score, status, and kickoff information on small screens;
+- compact navigation, tables, directories, and supporting controls around the more expressive
+  match treatment.
+
+The application intentionally ships a light-only theme. It declares `colorScheme: "light"` and
+does not expose a theme toggle or dark token set. The emotional identity comes from typography,
+spacing, score scale, team crests, and physical-looking surfaces—not a full-screen stadium image
+or fictional statistics.
+
+The original theme recommendation proposed limiting the sculpted scoreboard to featured
+matches. The current implementation instead uses it for every `MatchCardList` item and for the
+match-detail hero. This is the implemented behavior, while list density remains a tuning
+opportunity rather than an undocumented assumption.
 
 ## 6. Design system
 
 ### Tokens
 
 - Spacing: 4, 8, 12, 16, 20, 24, 32, 48, 64px.
-- Content widths: 760px reading/list column; 1180px full shell.
-- Radius: 8px controls, 12px rows, 16px primary surfaces, pill only for status/actions.
-- Type: 12 metadata, 14 compact, 16 body, 20 section, 28 page, 40 desktop display.
-- Motion: 120ms feedback, 180ms state changes; no ambient motion except a restrained live marker.
-- Shadow: one subtle elevation tier for floating navigation/dialogs; dense rows use borders, not blur.
-- Breakpoints: 640px compact/tablet, 900px navigation/layout, 1200px wide content.
+- Content widths: 48rem reading column, 70rem match-feed/detail column, 73.75rem wide
+  content, and 77.5rem outer shell.
+- Radius: 1.1rem base radius, pill controls, and larger 2.15rem desktop/1.5rem mobile
+  sculpted scoreboards.
+- Type: fluid display sizes with compact metadata; scores use large Space Grotesk while
+  time/status data uses JetBrains Mono and tabular numerals where applicable.
+- Motion: mostly 140-180ms interaction transitions, skeleton shimmer while loading, a static
+  live marker, and reduced-motion overrides.
+- Shadow: shallow elevation for ordinary surfaces and deeper dimensional shadow only for the
+  sculpted scoreboard.
+- Breakpoints: 40rem, 48rem, 56rem, and 64rem behavior changes, plus a 22rem narrow-phone guard.
 
 ### Semantic colors
 
@@ -200,9 +238,11 @@ The emotional identity comes from rhythm, typography, live language, team crests
 - `text`, `text-muted`, `text-soft`, `border`, `border-strong`.
 - `action`, `action-contrast`, `focus`.
 - `live`, `live-surface`, `finished`, `upcoming`, `unknown`.
-- Competition accent is decorative and never the only status cue.
+- Team and competition identity comes from text and crests; status never depends on color alone.
 
-Light and dark themes use the same semantic roles. Dark mode is deep slate rather than pure black; light mode is warm neutral rather than sterile white.
+The active palette is warm light: `#f7f6f2` canvas, white raised surfaces, `#252623`
+primary text, `#c82b3a` estimated-live emphasis, and `#315f73` focus. Semantic roles remain
+preferable to hard-coded component colors even though no dark variant currently ships.
 
 ### Interaction rules
 
@@ -210,25 +250,26 @@ Light and dark themes use the same semantic roles. Dark mode is deep slate rathe
 - Status always combines text with shape/icon where useful.
 - Whole match rows are clickable only when a real match ID exists.
 - Missing IDs render a non-interactive `<article>`, never `href="#"`.
-- Focus rings use a 2px high-contrast outline with offset.
+- Focus rings use a 3px high-contrast outline with offset.
 - Reduced motion disables transforms and score transitions.
 
 ### Density
 
-- Comfortable: mobile and primary Today lists.
-- Compact: desktop multi-match lists.
-- Detail: match page with periods, goals, venue, and context.
+- Expressive: the current sculpted match board used across match lists and match detail.
+- Compact: navigation, metadata, directories, tables, filters, and supporting controls.
+- Detail: match page with periods, goals, venue, and adjacent context.
 
 ## 7. Page-by-page specification
 
 ### Today
 
 - **Purpose:** answer what is happening on the selected date within one second.
-- **Hierarchy:** date navigator → favorite spotlight → live → upcoming → finished, grouped by competition.
+- **Hierarchy:** date navigator → score summary → favorite spotlight → data scope notice →
+  estimated live → upcoming → status unknown → finished → competition links.
 - **Primary action:** open a match.
 - **Secondary:** change date, open competition, favorite content.
-- **Mobile:** single column, sticky date context, comfortable rows.
-- **Desktop:** centered list with compact rows and competition summary rail.
+- **Mobile:** single column with compacted sculpted scoreboards and full date controls.
+- **Desktop:** centered, wide sculpted scoreboards with supporting content kept compact.
 - **Edges:** no matches, incomplete date index, partial competition failure.
 
 ### Live
@@ -240,8 +281,9 @@ Light and dark themes use the same semantic roles. Dark mode is deep slate rathe
 
 ### Competitions
 
-- **Purpose:** expose every supported competition and season without a deep hierarchy.
-- **Hierarchy:** search/filter → favorites → complete directory.
+- **Purpose:** expose every supported competition without a deep hierarchy.
+- **Hierarchy:** server-filtered complete catalog with a favorite control on each card; seasons
+  are selected after opening a competition.
 - **Primary action:** open competition.
 - **Edges:** temporarily unavailable season metadata.
 
@@ -251,7 +293,8 @@ Light and dark themes use the same semantic roles. Dark mode is deep slate rathe
 - **Hierarchy:** competition/season/status → matchday controls → matches/standings view.
 - **Primary action:** inspect selected matchday.
 - **Secondary:** previous/next/current matchday, season, standings, favorite.
-- **Mobile:** scroll-free primary controls, native select for direct jump, stacked match rows.
+- **Mobile:** scroll-free primary controls, native select for direct jump, and responsive
+  sculpted match boards.
 - **Desktop:** previous/select/next controls and matches/table in a focused content grid.
 - **Edges:** invalid season/matchday, season not started, empty round, no table.
 
@@ -267,13 +310,15 @@ Light and dark themes use the same semantic roles. Dark mode is deep slate rathe
 - **Purpose:** answer next match, previous result, competitions, and table position.
 - **Primary action:** open next match.
 - **Secondary:** open recent result or competition.
-- **Edges:** team known but no nearby matches, missing crest, partial snapshot.
+- **Edges:** team known but no nearby matches, missing crest, partial snapshot, or team absent
+  from the currently loaded supported-competition slice.
 
 ### Match detail
 
 - **Purpose:** present the verified match story with excellent hierarchy.
 - **Hierarchy:** status/competition → teams/score → date/venue/matchday → period results → goals → adjacent context.
-- **Edges:** missing score/time/venue, unknown status, no goals, match absent from overview.
+- **Edges:** missing score/time/venue, unknown status, no goals, or a `404` when the match ID is
+  absent from the currently loaded supported-competition slice.
 - Never show possession, shots, corners, lineups, or xG without a source.
 
 ### Search
@@ -307,12 +352,13 @@ Light and dark themes use the same semantic roles. Dark mode is deep slate rathe
 
 ## 8. Responsive behavior
 
-- 320px: no horizontal page overflow; four-item bottom navigation; score remains visible; long names truncate once.
-- 375/430px: comfortable match rows and full date controls.
+- 320px: no horizontal page overflow; four-item bottom navigation; score remains visible; long
+  team names clamp to two lines.
+- 375/430px: responsive sculpted boards and full date controls.
 - Tablet portrait: one main column with contextual cards.
-- Tablet landscape: main list plus compact context rail.
-- Laptop: compact rows and persistent global header.
-- Wide desktop: whitespace expands; rows do not become oversized.
+- Tablet landscape: the primary content remains a focused main column.
+- Laptop: persistent global header and match boards bounded to their feed width.
+- Wide desktop: whitespace expands while match boards remain bounded to 65rem.
 - Essential score, status, teams, and kickoff are never removed merely to fit.
 
 ## 9. Accessibility specification
@@ -328,7 +374,7 @@ Light and dark themes use the same semantic roles. Dark mode is deep slate rathe
 - Keyboard order follows visual order; Escape closes overlays.
 - Status is never color-only.
 - Minimum 44px touch targets.
-- Both themes meet AA text and focus contrast.
+- The light theme must meet AA text and focus contrast.
 - Reduced-motion preference removes nonessential transitions/transforms.
 
 ## 10. OpenLigaDB mapping strategy
@@ -368,7 +414,7 @@ Light and dark themes use the same semantic roles. Dark mode is deep slate rathe
 - Future kickoff and unfinished: scheduled.
 - Recent kickoff and unfinished: live estimate, labelled as such without a minute.
 - Substantially overdue and unfinished: status unknown.
-- Missing kickoff: schedule pending.
+- Missing kickoff: status unknown.
 
 ### Date strategy
 
@@ -379,53 +425,51 @@ OpenLigaDB has no all-competitions-by-date endpoint. Complete arbitrary-date sup
 ```text
 AppShell (server)
 ├── AppHeader
-│   ├── PrimaryNav (small client active-state island)
-│   ├── SearchLink
-│   └── System color-scheme styles (CSS)
-├── RouteContextBar (server)
+│   ├── Brand
+│   ├── PrimaryNavigation (small client active-state island)
+│   └── SearchControl (small client keyboard-navigation island)
 ├── Page content (server-first)
-├── MobileNav (small client active-state island)
+├── MobileNavigation (small client active-state island)
 └── SiteFooter
 
 Football presentation
-├── CompetitionIdentity
 ├── DateNavigator
-├── SeasonSelector
 ├── MatchdayNavigator
 ├── FavoriteButton (client)
 ├── MatchList
-│   └── MatchSummary
-│       ├── TeamIdentity
-│       ├── ScoreDisplay
-│       └── MatchStatusBadge
-├── StandingsTable
-├── TeamSummary
-├── MatchEventList
-├── EmptyState
-├── ErrorState
-└── SkeletonState
+│   └── MatchCardList
+│       └── MatchCard
+│           └── SculptedMatch
+│               └── TeamBadge
+├── StandingsCard / TablesView
+├── TeamsView / TeamDetailView
+├── MatchDetailView
+└── Product UI states
 
 Feature islands
 ├── FavoriteSpotlight
+├── FavoritesView
 ├── SearchExperience
-├── CompetitionDirectoryFilter
-└── LiveUpdateController
+└── LiveRefreshController
 ```
 
-Server Components remain the default. Client code is limited to active navigation, theme, local favorites, progressive search filtering, and focused live updates.
+Server Components remain the default. Client code is limited to `PrimaryNavigation`,
+`MobileNavigation`, `SearchControl`, favorites state and pagination, progressive
+`SearchExperience` filtering, and `LiveRefreshController` updates.
 
-## 12. Implementation plan
+## 12. Implementation record
 
-1. Add pure normalized status/query/search/favorites utilities and tests.
-2. Introduce semantic light/dark tokens, compact global shell, skip link, and responsive mobile navigation.
-3. Build one reusable match anatomy and truthful standings table.
-4. Rebuild `/` and `/today?date=`; add `/live`.
-5. Add `/competitions` and a URL-driven competition command center.
-6. Make match pages direct and remove unsupported stats; refine team pages.
-7. Add `/search` and versioned local `/favorites` behavior.
-8. Add app-level loading, error, empty, and 404 states.
-9. Remove obsolete hero/navigation/card implementations after reference checks.
-10. Verify every route, theme, breakpoint, keyboard path, state, and build gate.
+1. Added normalized status, query, search, and favorites utilities with tests.
+2. Introduced semantic light tokens, the sculpted visual layer, a compact global shell, skip
+   link, and responsive mobile navigation.
+3. Built one reusable `SculptedMatch` anatomy and a truthful semantic standings table.
+4. Rebuilt `/` and `/today?date=` and added `/live`.
+5. Added `/competitions` and a URL-driven competition command center.
+6. Removed unsupported match statistics and implemented snapshot-backed match/team detail.
+7. Added `/search` and versioned local `/favorites` behavior.
+8. Added application-level loading, error, empty, and 404 states.
+9. Removed obsolete hero, duplicate navigation, duplicate cards, and legacy presentation trees.
+10. Established route, breakpoint, keyboard, data-state, and build verification baselines.
 
 ## 13. Before and after
 
@@ -442,26 +486,30 @@ Server Components remain the default. Client code is limited to active navigatio
 ### Implemented after
 
 - Scores and selected date appear immediately.
-- Focused route-specific pages and smaller payloads.
+- Focused route-specific presentation and a lean live-client payload.
 - Stable desktop header and thumb-reachable mobile navigation.
 - Shareable date, search, season, matchday, and view state.
 - Honest OpenLigaDB status and missing-data semantics.
-- One reusable match anatomy and semantic standings table.
-- Intentional light/dark themes and complete route states.
+- One reusable sculpted match anatomy and semantic standings table.
+- Intentional sculpted-light theme and complete route states.
 
 ### Production implementation map
 
-- Global shell and system-driven themes: `src/features/shell/**`, `src/app/layout.tsx`, and semantic tokens in `src/app/globals.css`.
+- Global shell and sculpted-light theme: `src/features/shell/**`, `src/app/layout.tsx`, and
+  semantic tokens plus dimensional surfaces in `src/app/globals.css`.
 - Score-first Today and date state: `src/features/today/**`, `/`, and `/today?date=YYYY-MM-DD`.
-- Honest live experience and one visibility-aware refresh controller: `src/features/live/**` and `/live`.
+- Honest live experience and one visibility-aware refresh controller: `src/features/live/**`
+  and `/live`, polling scoped `/api/matchday` data every 45 seconds while visible.
 - Competition directory and command center: `src/features/competitions/**`, `/competitions`, and URL-driven season, matchday, scope, and view controls.
-- Match presentation and normalized status guardrails: `packages/core/src/matches/**` and `src/features/football/components/match-summary.tsx`.
+- Match presentation and normalized status guardrails: `packages/core/src/matches/**`,
+  `src/features/football/components/sculpted-match.tsx`, and
+  `src/features/football/components/match-card-list.tsx`.
 - Local favorites and forgiving search: `src/features/favorites/**`, `src/features/search/**`, `/favorites`, and `/search?q=`.
 - Team and match journeys: supported-snapshot team and match details, verified goal/period detail, and adjacent match context.
 - Global route states: `src/app/loading.tsx`, `src/app/error.tsx`, and `src/app/not-found.tsx`.
 - Retired implementation: the full-screen hero, duplicate route frame, duplicate match card, horizontal context rail, old polling layer, and legacy tournament presentation tree were removed.
 
-## 14. Validation plan
+## 14. Validation baseline
 
 - Install with frozen lockfile.
 - Unit tests for status, date/query parsing, search ranking, favorite serialization, and partial data.
@@ -472,36 +520,40 @@ Server Components remain the default. Client code is limited to active navigatio
 - Keyboard-only traversal and focus visibility.
 - Screen-reader-oriented snapshots for match labels, landmarks, tables, and live region.
 - 320, 375, 430, tablet portrait/landscape, laptop, and wide desktop.
-- Light, dark, system theme, reduced motion, and no horizontal overflow.
+- Light theme, reduced motion, and no horizontal overflow.
 - Loading, no matches, no live matches, invalid route, partial API failure, and total API failure.
 - Browser console/network audit and focused polling audit.
 - Core Web Vitals risk review: image priority, JS boundaries, font count, layout stability, and request fan-out.
 
-### Validation report
+### Latest recorded verification
 
-Completed against the production code:
+The latest repository-wide verification was recorded on 2026-07-22:
 
-- `pnpm run test`: coverage includes status provenance, nullable scores, Berlin date parsing/shifting, favorite persistence/migration, search ranking, matchday loading, and snapshot-backed match and team details.
-- `pnpm run typecheck`: strict TypeScript and generated Next.js route types passed.
-- `pnpm run lint`: repository-wide ESLint passed.
-- `pnpm dlx knip`: no unused files, dependencies, or exports reported.
-- `pnpm run build`: production build passed with all primary routes in the route manifest.
-- `git diff --check`: no whitespace errors.
-- Accessibility audit: one application `main`, skip link, route-level `h1`, semantic tables, `aria-current`, decorative crest handling, labelled native date/select controls, 44px interactive targets, polite favorite/live feedback, non-color status text, focus-visible rules, and reduced-motion handling were verified in the rendered application.
-- Static performance audit: the 2.7MB hero is no longer requested, Bungee was removed from the font payload, Server Components remain the default, legacy presentation code was deleted, and live refresh is a single visibility-aware client island.
-- Agent-browser route and responsive verification passed at 320, 375, 430, 768, 900, 1024, and 1440px. Every tested page reported `scrollWidth === viewport width`, one `main`, one `h1`, and the expected mobile/desktop navigation mode.
-- Browser interaction verification passed for previous-date/back navigation, direct matchday selection with a bounded failure fallback, matches/standings switching, snapshot-backed match/team pages, search typing and shareable query submit, `/` search shortcut, favorite persistence and Today prioritization, manual live refresh, and 404 recovery actions.
-- System light/dark emulation selected the intended semantic palettes with no UI toggle or stored theme override. Reduced-motion emulation reduced transitions to effectively zero.
-- Keyboard verification passed for the skip link, focus transfer to `main`, logical next focus, and visible 3px focus treatment.
-- Browser console inspection found no application errors. The match-detail network audit showed no obsolete hero request or unsupported-statistics request.
-- A local development Web Vitals sample for the competition route measured 116ms TTFB, 1.13s FCP/LCP, and zero CLS. This is a directional local sample, not a substitute for production RUM.
+- 60 application tests and 81 core-package tests passed when all test files were discovered;
+- strict TypeScript, repository ESLint, and the production build passed;
+- `/` and `/live` browser smoke checks completed without application console errors;
+- the live browser used the scoped matchday refresh path instead of periodic full-page RSC
+  refreshes.
+
+The 60 application tests required explicit recursive discovery because the package test
+script's shell glob does not recurse consistently in every shell. CI should verify discovery
+rather than assuming `pnpm run test` alone selected every `src/**/*.test.ts` file.
+
+The July 2026 rebuild also established a keyboard, landmark, semantic-table, focus,
+reduced-motion, and responsive baseline. Because the later sculpted pass materially changed
+layout density and removed dark mode, full breakpoint visual regression and automated
+accessibility checks should be rerun before treating that earlier visual report as current.
 
 ## 15. Remaining risks and opportunities
 
 - Complete arbitrary-date coverage needs cached season fixture indexes.
-- Bounded direct team history is implemented, but team identity and competition mapping still depend on the source IDs and supported competition catalog.
+- Match and team detail remain limited to entities present in the currently loaded supported
+  competition snapshot; valid source IDs outside that slice can return `404`.
 - Live is necessarily an estimate until the source exposes an authoritative live state/clock.
 - Qualification/relegation zones require explicit competition-rule data.
-- Matchday and direct-team requests use bounded UI fallbacks, but the losing promise in the timeout race is not yet aborted; adding end-to-end cancellation would reduce background work during upstream degradation.
+- A non-current competition matchday uses a bounded `Promise.race`, but its losing request is
+  not aborted; end-to-end cancellation would reduce background work during upstream degradation.
+- Every match list currently uses the large sculpted board. Production usability should decide
+  whether dense fixture pages need a compact variant.
 - A command palette can follow the dedicated accessible search route; it is not required for first release.
-- Visual regression and automated accessibility tooling can be added after the zero-dependency product vertical slice is stable.
+- Visual regression and automated accessibility tooling remain worthwhile follow-up work.

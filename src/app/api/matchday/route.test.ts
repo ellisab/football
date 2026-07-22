@@ -145,7 +145,7 @@ test("/api/matchday rejects unsupported league keys without loading data", async
   }
 });
 
-test("/api/matchday serves a failed refresh as stale without caching it", async () => {
+test("/api/matchday shares a stale response for the active backoff window", async () => {
   const originalFetch = globalThis.fetch;
   const originalWarn = console.warn;
   let lastChanged = "2026-07-04T18:00:00";
@@ -215,8 +215,10 @@ test("/api/matchday serves a failed refresh as stale without caching it", async 
     assert.equal(stale.status, 200);
     assert.equal(payload.matches[0]?.matchID, 200);
     assert.equal(payload.refreshFailed, true);
-    assert.match(cacheControl, /no-store/);
-    assert.doesNotMatch(cacheControl, /s-maxage/);
+    assert.equal(payload.refreshState, "stale");
+    assert.match(cacheControl, /public/);
+    assert.match(cacheControl, /s-maxage/);
+    assert.ok(Number(stale.headers.get("retry-after")) >= 1);
   } finally {
     globalThis.fetch = originalFetch;
     console.warn = originalWarn;

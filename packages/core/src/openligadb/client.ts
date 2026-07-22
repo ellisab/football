@@ -157,9 +157,14 @@ export const clearOpenLigaDbMemoryCache = () => {
   successfulGetResponses.clear();
 };
 
-const createOpenLigaDbError = (status: number) => {
+const createOpenLigaDbError = (status: number, retryAfterMs?: number) => {
   const error = new Error(`OpenLigaDB-Anfrage fehlgeschlagen (${status})`);
-  (error as Error & { status?: number }).status = status;
+  const failure = error as Error & {
+    retryAfterMs?: number;
+    status?: number;
+  };
+  failure.status = status;
+  if (retryAfterMs !== undefined) failure.retryAfterMs = retryAfterMs;
   return error;
 };
 
@@ -254,7 +259,10 @@ const executeFetchJson = async <T>(
   const cooldown = getActiveCooldown(endpointKey);
 
   if (cooldown) {
-    const error = createOpenLigaDbError(cooldown.status);
+    const error = createOpenLigaDbError(
+      cooldown.status,
+      Math.max(0, cooldown.expiresAt - Date.now())
+    );
     logTerminalFailure({
       attempts: 0,
       duration: Date.now() - startedAt,
@@ -290,11 +298,11 @@ const executeFetchJson = async <T>(
       }
 
       lastStatus = response.status;
-      lastError = createOpenLigaDbError(response.status);
+      const retryAfterMs = parseRetryAfterMs(response.headers.get("retry-after"));
+      lastError = createOpenLigaDbError(response.status, retryAfterMs);
 
       if (!isRetryableStatus(response.status)) break;
 
-      const retryAfterMs = parseRetryAfterMs(response.headers.get("retry-after"));
       if (retryAfterMs !== undefined && retryAfterMs > MAX_RETRY_AFTER_MS) {
         const existingCooldown = endpointCooldowns.get(endpointKey);
 

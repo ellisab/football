@@ -6,6 +6,15 @@ export const getStatusCode = (error: unknown) => {
   return reason?.status;
 };
 
+export const getRetryAfterMs = (error: unknown) => {
+  const reason = error as { retryAfterMs?: number } | undefined;
+  return typeof reason?.retryAfterMs === "number" &&
+    Number.isFinite(reason.retryAfterMs) &&
+    reason.retryAfterMs >= 0
+    ? reason.retryAfterMs
+    : undefined;
+};
+
 export type BoundedSettledResult<Input, Output> =
   | {
       input: Input;

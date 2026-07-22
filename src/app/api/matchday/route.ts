@@ -1,12 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  getMatchdaySnapshot,
   MatchdaySnapshotError,
 } from "@footballleagues/core/home";
 import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
+import {
+  getMatchdayRetrySeconds,
+  loadMatchdayWithBackoff,
+  MatchdayRefreshBackoffError,
+} from "@/features/football/server/matchday-refresh-cache";
 
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store, max-age=0",
+};
+
+const getSharedCacheHeaders = ({
+  retryAt,
+  stale,
+}: {
+  retryAt?: number;
+  stale: boolean;
+}) => {
+  const maxAge = stale
+    ? getMatchdayRetrySeconds(retryAt)
+    : OPENLIGADB_CACHE_SECONDS.liveMatchday;
+
+  return {
+    "Cache-Control": `public, max-age=0, s-maxage=${maxAge}, stale-while-revalidate=10`,
+    ...(stale ? { "Retry-After": String(maxAge) } : {}),
+  };
 };
 
 export async function GET(request: NextRequest) {
@@ -15,33 +36,30 @@ export async function GET(request: NextRequest) {
   const group = request.nextUrl.searchParams.get("group") ?? undefined;
 
   try {
-    const snapshot = await getMatchdaySnapshot(
-      {
-        group,
-        league,
-        season,
-      },
-      {
-        requestOptions: {
-          next: {
-            revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday,
-          },
-        },
-      }
-    );
+    const snapshot = await loadMatchdayWithBackoff({
+      group,
+      league,
+      season,
+    });
 
     return NextResponse.json(snapshot, {
-      headers: snapshot.refreshFailed
-        ? NO_STORE_HEADERS
-        : {
-            "Cache-Control": `public, max-age=0, s-maxage=${OPENLIGADB_CACHE_SECONDS.liveMatchday}, stale-while-revalidate=${OPENLIGADB_CACHE_SECONDS.matchday}`,
-          },
+      headers: getSharedCacheHeaders({
+        retryAt: snapshot.retryAt,
+        stale: snapshot.refreshState === "stale",
+      }),
     });
   } catch (error) {
     const status =
-      error instanceof MatchdaySnapshotError
+      error instanceof MatchdayRefreshBackoffError
+        ? error.status
+        : error instanceof MatchdaySnapshotError
         ? error.status
         : ((error as { status?: number } | undefined)?.status ?? 500);
+    const shouldShareFailure = status === 429 || status >= 500;
+    const retryAt =
+      error instanceof MatchdayRefreshBackoffError
+        ? error.retryAt
+        : undefined;
 
     return NextResponse.json(
       {
@@ -52,7 +70,9 @@ export async function GET(request: NextRequest) {
       },
       {
         status,
-        headers: NO_STORE_HEADERS,
+        headers: shouldShareFailure
+          ? getSharedCacheHeaders({ retryAt, stale: true })
+          : NO_STORE_HEADERS,
       }
     );
   }

@@ -1,24 +1,60 @@
-import { Satellite } from "lucide-react";
 import type { WebHomeViewModel } from "@/features/home/presenter/home-view-model";
-import {
-  getMatchStatus,
-  type CompetitionMatch,
-} from "@/features/football/view-utils";
-import { MatchList } from "@/features/football/components/match-summary";
+import type { CompetitionMatch } from "@/features/football/view-utils";
+import { getCompetitionMeta } from "@/features/football/competition-meta";
 import {
   DataNotice,
-  EmptyState,
   PageIntro,
   PartialDataNotice,
-  SectionHeading,
 } from "@/features/football/components/product-ui";
 import { LiveRefreshController } from "./live-refresh-controller";
+import type { LiveMatchItem } from "./live-polling";
 
-const checkedFormatter = new Intl.DateTimeFormat("de-DE", {
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Europe/Berlin",
-});
+const getSectionGroup = (
+  competition: CompetitionMatch["competition"],
+  matchId: number | undefined
+) => {
+  if (matchId === undefined) return undefined;
+
+  for (const section of competition.sections) {
+    if (section.renderKind === "table") continue;
+    const matches =
+      section.renderKind === "matches"
+        ? section.items
+        : section.items.flatMap((tie) => tie.matches);
+    if (matches.some((match) => match.matchID === matchId)) {
+      return section.groupOrderID;
+    }
+  }
+
+  return competition.bracketMatches.find((round) =>
+    round.matches.some((match) => match.matchID === matchId)
+  )?.group.groupOrderID;
+};
+
+const toLiveMatchItem = ({
+  competition,
+  match,
+}: CompetitionMatch): LiveMatchItem => {
+  const meta = getCompetitionMeta(competition.resolvedLeague);
+  const group =
+    match.group?.groupOrderID ?? getSectionGroup(competition, match.matchID);
+
+  return {
+    competitionId: competition.resolvedLeague,
+    competitionLabel: meta.label,
+    match,
+    roundLabel:
+      match.group?.groupName ?? `Saison ${competition.resolvedSeason}`,
+    scope:
+      typeof group === "number" && group > 0
+        ? {
+            group,
+            league: competition.resolvedLeague,
+            season: competition.resolvedSeason,
+          }
+        : undefined,
+  };
+};
 
 export function LiveView({
   data,
@@ -27,18 +63,13 @@ export function LiveView({
   data: WebHomeViewModel;
   matches: CompetitionMatch[];
 }) {
-  const live = matches.filter((item) => getMatchStatus(item.match) === "live");
-  const upcoming = matches
-    .filter((item) => getMatchStatus(item.match) === "upcoming")
-    .slice(0, 5);
-
   return (
     <div className="page-shell match-feed-page live-page">
       <div className="content-column">
         <PageIntro
           eyebrow="Live-Zentrale"
           title="Jetzt im Spiel"
-          description={`Zuletzt geprüft um ${checkedFormatter.format(new Date())} Uhr. Live-Hinweise werden bewusst als Schätzung gekennzeichnet.`}
+          description="Spielstände werden pro aktivem Spieltag gemeinsam aktualisiert. Live-Hinweise werden bewusst als Schätzung gekennzeichnet."
           actions={
             <span className="live-indicator">
               <span aria-hidden="true" />
@@ -47,49 +78,15 @@ export function LiveView({
           }
         />
 
-        <LiveRefreshController />
-
         <DataNotice>
           OpenLigaDB liefert weder einen bestätigten Live-Schalter noch die aktuelle
           Spielminute. „Läuft möglicherweise“ wird nur aus Anstoßzeit und fehlendem
           Endstatus abgeleitet.
         </DataNotice>
         <PartialDataNotice errors={data.visibleErrors} />
-
-        <p className="sr-only" aria-live="polite">
-          {live.length} möglicherweise laufende Spiele gefunden.
-        </p>
-
-        {live.length > 0 ? (
-          <section className="content-section">
-            <SectionHeading
-              title="Läuft möglicherweise"
-              count={live.length}
-              description="Partien innerhalb des dreistündigen Live-Schätzfensters."
-            />
-            <MatchList matches={live} />
-          </section>
-        ) : (
-          <EmptyState
-            title="Gerade kein Live-Hinweis"
-            description="Im geladenen Ausschnitt liegt keine unbeendete Partie im Live-Schätzfenster. Die nächsten geplanten Spiele stehen direkt darunter."
-            actionHref="/today"
-            actionLabel="Zum heutigen Spielplan"
-            icon={<Satellite aria-hidden="true" className="h-5 w-5" />}
-          />
-        )}
-
-        {upcoming.length > 0 ? (
-          <section className="content-section">
-            <SectionHeading
-              title="Als Nächstes"
-              count={upcoming.length}
-              description="Die nächsten geplanten Anstoßzeiten im geladenen Ausschnitt."
-            />
-            <MatchList matches={upcoming} />
-          </section>
-        ) : null}
-
+        <LiveRefreshController
+          initialMatches={matches.map(toLiveMatchItem)}
+        />
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 import {
   getMatchById,
+  OPENLIGADB_CACHE_SECONDS,
   type ApiMatch,
 } from "@footballleagues/core/openligadb";
 import { resolveLeagueKey } from "@footballleagues/core/leagues";
+import { getMatchKickoffTimestamp } from "@footballleagues/core/matches";
 import {
   getMatchStatus,
   type CompetitionMatch,
@@ -11,12 +13,13 @@ import {
 const MAX_REFRESH_MATCHES = 8;
 const REFRESH_CONCURRENCY = 4;
 const REFRESH_TIMEOUT_MS = 2_000;
+const MAX_UNKNOWN_REFRESH_AGE_MS = 6 * 60 * 60 * 1_000;
 
 type MatchLoader = (matchId: number) => Promise<ApiMatch>;
 
-const loadUncachedMatch: MatchLoader = (matchId) =>
+const loadCachedMatch: MatchLoader = (matchId) =>
   getMatchById(matchId, {
-    cache: "no-store",
+    next: { revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday },
     signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
   });
 
@@ -28,11 +31,19 @@ const isRefreshCandidate = (item: CompetitionMatch, now: Date) => {
   }
 
   const status = getMatchStatus(item.match, now);
-  return status === "live" || status === "unknown";
+  if (status === "live") return true;
+  if (status !== "unknown") return false;
+
+  const kickoffTimestamp = getMatchKickoffTimestamp(item.match);
+  const nowTimestamp = now.getTime();
+  if (kickoffTimestamp === null || Number.isNaN(nowTimestamp)) return false;
+
+  const ageMs = nowTimestamp - kickoffTimestamp;
+  return ageMs >= 0 && ageMs <= MAX_UNKNOWN_REFRESH_AGE_MS;
 };
 
 export const refreshUncertainMatches = async ({
-  loadMatch = loadUncachedMatch,
+  loadMatch = loadCachedMatch,
   matches,
   now = new Date(),
 }: {

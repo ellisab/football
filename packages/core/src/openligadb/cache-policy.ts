@@ -7,9 +7,9 @@ export const OPENLIGADB_CACHE_SECONDS = {
   table: 60 * 60 * 3,
   currentGroup: 60 * 5,
   matchday: 60 * 10,
-  liveMatchday: 60,
+  liveMatchday: 30,
   seasonMatches: 60 * 60 * 12,
-  homeSnapshot: 60,
+  homeSnapshot: 60 * 5,
   staleWhileRevalidate: 60 * 5,
 } as const;
 

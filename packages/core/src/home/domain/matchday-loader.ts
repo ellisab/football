@@ -1,9 +1,10 @@
 import { OPENLIGADB_CACHE_SECONDS } from "../../openligadb/cache-policy";
 import type { ApiMatch } from "../../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
-import { getStatusCode } from "./shared";
+import { getRetryAfterMs, getStatusCode } from "./shared";
 
 type MatchdayCacheEntry = {
+  dataUpdatedAt: number;
   expiresAt: number;
   lastChanged?: string;
   matches: ApiMatch[];
@@ -19,9 +20,11 @@ export type MatchdayCacheStatus =
 
 type MatchdayLoadResult = {
   cacheStatus: MatchdayCacheStatus;
+  dataUpdatedAt?: number;
   lastChanged?: string;
   matches: ApiMatch[];
   rateLimited?: boolean;
+  retryAfterMs?: number;
   refreshFailed?: true;
 };
 
@@ -121,6 +124,7 @@ export const loadMatchdayResults = async ({
     logMatchdayCache("hit", cacheContext);
     return {
       cacheStatus: "hit",
+      dataUpdatedAt: cached.dataUpdatedAt,
       lastChanged: cached.lastChanged,
       matches: cached.matches,
     };
@@ -153,9 +157,11 @@ export const loadMatchdayResults = async ({
         logMatchdayCache("stale", cacheContext);
         return {
           cacheStatus: "stale",
+          dataUpdatedAt: cached.dataUpdatedAt,
           lastChanged: cached.lastChanged,
           matches: cached.matches,
           rateLimited: true,
+          retryAfterMs: getRetryAfterMs(error),
           refreshFailed: true,
         };
       }
@@ -165,9 +171,14 @@ export const loadMatchdayResults = async ({
   if (lastChanged && cached?.lastChanged === lastChanged) {
     const cacheStatus = cached.expiresAt > now ? "hit" : "stale";
     if (cacheStatus === "hit") {
+      setCachedMatchday(cacheKey, {
+        ...cached,
+        revalidateAt: now + MATCHDAY_CACHE_REVALIDATE_MS,
+      });
       logMatchdayCache(cacheStatus, cacheContext);
       return {
         cacheStatus,
+        dataUpdatedAt: cached.dataUpdatedAt,
         lastChanged,
         matches: cached.matches,
       };
@@ -197,9 +208,11 @@ export const loadMatchdayResults = async ({
 
     return {
       cacheStatus: "stale",
+      dataUpdatedAt: cached.dataUpdatedAt,
       lastChanged: cached.lastChanged,
       matches: cached.matches,
       rateLimited: getStatusCode(error) === 429 || undefined,
+      retryAfterMs: getRetryAfterMs(error),
       refreshFailed: true,
     };
   }
@@ -215,6 +228,7 @@ export const loadMatchdayResults = async ({
       : "miss";
 
   setCachedMatchday(cacheKey, {
+    dataUpdatedAt: now,
     expiresAt: now + MATCHDAY_CACHE_MAX_AGE_MS,
     lastChanged,
     matches,
@@ -225,6 +239,7 @@ export const loadMatchdayResults = async ({
 
   return {
     cacheStatus,
+    dataUpdatedAt: now,
     lastChanged,
     matches,
   };

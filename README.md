@@ -36,3 +36,8 @@ pnpm run build
 pnpm run lint
 pnpm run typecheck
 ```
+
+## Documentation
+
+- [Product and visual specification](docs/definitive-football-product-redesign.md)
+- [OpenLigaDB caching, polling, and backoff](docs/openligadb-caching-plan.md)

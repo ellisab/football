@@ -31,10 +31,13 @@ export class MatchdaySnapshotError extends Error {
 
 export type MatchdaySnapshot = {
   cacheStatus: MatchdayCacheStatus;
+  dataUpdatedAt?: number;
   effectiveShortcut: string;
   group: Pick<ApiGroup, "groupID" | "groupName" | "groupOrderID">;
   lastChanged?: string;
   matches: ApiMatch[];
+  rateLimited?: boolean;
+  retryAfterMs?: number;
   refreshFailed?: true;
   resolvedLeague: LeagueKey;
   resolvedSeason: number;
@@ -130,6 +133,7 @@ export const getMatchdaySnapshot = async (
 
   return {
     cacheStatus: matchdayResult.cacheStatus,
+    dataUpdatedAt: matchdayResult.dataUpdatedAt,
     effectiveShortcut,
     group: {
       groupID: group?.groupID,
@@ -138,6 +142,8 @@ export const getMatchdaySnapshot = async (
     },
     lastChanged: matchdayResult.lastChanged,
     matches: sortMatchesByKickoff(matchdayResult.matches.map(sortGoals)),
+    rateLimited: matchdayResult.rateLimited,
+    retryAfterMs: matchdayResult.retryAfterMs,
     refreshFailed: matchdayResult.refreshFailed,
     resolvedLeague: requestedLeague,
     resolvedSeason,

@@ -10,6 +10,7 @@ import {
 import { createHomeState, getHomeSnapshot } from "@footballleagues/core/home";
 import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
 import { unstable_cache } from "next/cache";
+import { getFootballRuntimeCache } from "@/lib/server/runtime-cache";
 import { createWebHomeViewModel } from "../presenter/home-view-model";
 import type {
   WebCompetitionViewModel,
@@ -17,22 +18,26 @@ import type {
 } from "../presenter/home-view-model";
 import {
   createKeyedSingleFlight,
+  createSharedStaleBackoff,
   createSingleFlight,
   createStaleOnError,
   IncompleteSnapshotError,
   mapWithConcurrency,
   requireCacheableHomeSnapshot,
   SnapshotTimeoutError,
+  withAbortableSnapshotDeadline,
   withSnapshotDeadline,
 } from "./home-snapshot-cache-policy";
 
 const REVALIDATE = {
   next: { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot },
 };
-const HOME_DATA_CACHE_VERSION = "results-v5";
+const HOME_DATA_CACHE_VERSION = "results-v6";
 const HOME_SNAPSHOT_TIMEOUT_MS = 6_000;
 const OVERVIEW_SNAPSHOT_TIMEOUT_MS = 15_000;
 const OVERVIEW_COMPETITION_CONCURRENCY = 3;
+const OVERVIEW_STALE_MAX_AGE_MS = 6 * 60 * 60 * 1_000;
+const OVERVIEW_STALE_TTL_SECONDS = 6 * 60 * 60;
 const OPENLIGADB_UNAVAILABLE_ERROR = "OpenLigaDB ist gerade nicht verfügbar";
 
 type CompetitionParams = {
@@ -98,8 +103,14 @@ const logStaleSnapshot = ({
 
 const loadHomeSnapshotSingleFlight = createKeyedSingleFlight(
   async (params: CompetitionParams) =>
-    requireCacheableHomeSnapshot(
-      await getHomeSnapshot(params, { requestOptions: REVALIDATE })
+    withAbortableSnapshotDeadline(
+      async (signal) =>
+        requireCacheableHomeSnapshot(
+          await getHomeSnapshot(params, {
+            requestOptions: { ...REVALIDATE, signal },
+          })
+        ),
+      HOME_SNAPSHOT_TIMEOUT_MS
     ),
   getCompetitionCacheKey
 );
@@ -255,10 +266,23 @@ const buildOverviewDataOrThrow = async () => {
   return createOverviewData(seed, competitions);
 };
 
+const loadOverviewDataWithSharedBackoff = createSharedStaleBackoff(
+  buildOverviewDataOrThrow,
+  () => `home-overview:${HOME_DATA_CACHE_VERSION}`,
+  {
+    getCache: getFootballRuntimeCache,
+    maxStaleMs: OVERVIEW_STALE_MAX_AGE_MS,
+    onStale: ({ error }) =>
+      logStaleSnapshot({ error, params: {}, scope: "overview" }),
+    ttlSeconds: OVERVIEW_STALE_TTL_SECONDS,
+  }
+);
+
 const buildLoggedOverviewData = async () => {
   const startedAt = Date.now();
+
   try {
-    return await buildOverviewDataOrThrow();
+    return await loadOverviewDataWithSharedBackoff();
   } catch (error) {
     logSnapshotFallback({
       error,
@@ -266,7 +290,7 @@ const buildLoggedOverviewData = async () => {
       scope: "overview",
       startedAt,
     });
-    throw error;
+    return createFallbackOverviewData();
   }
 };
 
