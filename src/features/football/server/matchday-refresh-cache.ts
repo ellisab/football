@@ -288,6 +288,20 @@ export const loadMatchdayWithBackoff = async (
       });
     }
 
+    if (
+      state?.lastGood &&
+      state.failureCount === 0 &&
+      state.retryAt === 0 &&
+      state.checkedAt + OPENLIGADB_CACHE_SECONDS.liveMatchday * 1_000 >
+        currentTime
+    ) {
+      return {
+        ...state.lastGood,
+        checkedAt: state.checkedAt,
+        refreshState: "fresh",
+      };
+    }
+
     try {
       const snapshot = await loadValidatedSnapshot(params, loadSnapshot);
       const checkedAt = now();

@@ -33,6 +33,7 @@ const REVALIDATE = {
   next: { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot },
 };
 const HOME_DATA_CACHE_VERSION = "results-v6";
+const HOME_OVERVIEW_CACHE_VERSION = "results-v7";
 const HOME_SNAPSHOT_TIMEOUT_MS = 6_000;
 const OVERVIEW_SNAPSHOT_TIMEOUT_MS = 15_000;
 const OVERVIEW_COMPETITION_CONCURRENCY = 3;
@@ -268,7 +269,7 @@ const buildOverviewDataOrThrow = async () => {
 
 const loadOverviewDataWithSharedBackoff = createSharedStaleBackoff(
   buildOverviewDataOrThrow,
-  () => `home-overview:${HOME_DATA_CACHE_VERSION}`,
+  () => `home-overview:${HOME_OVERVIEW_CACHE_VERSION}`,
   {
     getCache: getFootballRuntimeCache,
     maxStaleMs: OVERVIEW_STALE_MAX_AGE_MS,
@@ -278,28 +279,12 @@ const loadOverviewDataWithSharedBackoff = createSharedStaleBackoff(
   }
 );
 
-const buildLoggedOverviewData = async () => {
-  const startedAt = Date.now();
-
-  try {
-    return await loadOverviewDataWithSharedBackoff();
-  } catch (error) {
-    logSnapshotFallback({
-      error,
-      params: {},
-      scope: "overview",
-      startedAt,
-    });
-    return createFallbackOverviewData();
-  }
-};
-
 const buildOverviewDataSingleFlight = createSingleFlight(
-  buildLoggedOverviewData
+  loadOverviewDataWithSharedBackoff
 );
 const getCachedOverviewData = unstable_cache(
   buildOverviewDataSingleFlight,
-  ["home-overview", HOME_DATA_CACHE_VERSION],
+  ["home-overview", HOME_OVERVIEW_CACHE_VERSION],
   { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot }
 );
 

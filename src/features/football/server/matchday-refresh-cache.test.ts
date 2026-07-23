@@ -116,6 +116,44 @@ test("matchday refresh ignores version-one Runtime Cache records", async () => {
   );
 });
 
+test("matchday refresh reuses a healthy Runtime Cache result for 30 seconds", async () => {
+  const cache = new MemoryCache();
+  let currentTime = 1_000;
+  let calls = 0;
+  const loadSnapshot = async () => {
+    calls += 1;
+    return snapshot({ matchId: 100 + calls });
+  };
+
+  const initial = await loadMatchdayWithBackoff(params, {
+    cache,
+    loadSnapshot,
+    now: () => currentTime,
+  });
+
+  currentTime = 30_999;
+  const shared = await loadMatchdayWithBackoff(params, {
+    cache,
+    loadSnapshot,
+    now: () => currentTime,
+  });
+
+  currentTime = 31_000;
+  const revalidated = await loadMatchdayWithBackoff(params, {
+    cache,
+    loadSnapshot,
+    now: () => currentTime,
+  });
+
+  assert.equal(calls, 2);
+  assert.equal(initial.matches[0]?.matchID, 101);
+  assert.equal(shared.matches[0]?.matchID, 101);
+  assert.equal(shared.checkedAt, 1_000);
+  assert.equal(shared.refreshState, "fresh");
+  assert.equal(revalidated.matches[0]?.matchID, 102);
+  assert.equal(revalidated.checkedAt, 31_000);
+});
+
 test("matchday backoff keeps the last success and skips upstream while open", async () => {
   const cache = new MemoryCache();
   let currentTime = 1_000;
@@ -140,7 +178,7 @@ test("matchday backoff keeps the last success and skips upstream while open", as
   assert.equal(fresh.refreshState, "fresh");
 
   fail = true;
-  currentTime = 2_000;
+  currentTime = 32_000;
   const stale = await loadMatchdayWithBackoff(params, {
     cache,
     loadSnapshot,
@@ -150,9 +188,9 @@ test("matchday backoff keeps the last success and skips upstream while open", as
 
   assert.equal(stale.refreshState, "stale");
   assert.equal(stale.matches[0]?.matchID, 100);
-  assert.equal(stale.retryAt, 17_000);
+  assert.equal(stale.retryAt, 47_000);
 
-  currentTime = 3_000;
+  currentTime = 33_000;
   const suppressed = await loadMatchdayWithBackoff(params, {
     cache,
     loadSnapshot,
@@ -161,7 +199,7 @@ test("matchday backoff keeps the last success and skips upstream while open", as
   });
 
   assert.equal(suppressed.refreshState, "stale");
-  assert.equal(suppressed.retryAt, 17_000);
+  assert.equal(suppressed.retryAt, 47_000);
   assert.equal(calls, 2);
 });
 

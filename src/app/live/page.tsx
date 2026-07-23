@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { LiveView } from "@/features/live/components/live-view";
-import { getHomePageData } from "@/features/home/server/get-home-page-data";
-import {
-  getAllCompetitionMatches,
-  getVisibleCompetitions,
-} from "@/features/football/view-utils";
+import { getLivePageData } from "@/features/live/server/get-live-page-data";
 
 export const metadata: Metadata = {
   title: "Live",
@@ -14,8 +10,12 @@ export const metadata: Metadata = {
 
 export default async function LivePage() {
   await connection();
-  const data = await getHomePageData({});
-  const matches = getAllCompetitionMatches(getVisibleCompetitions(data));
+  const data = await getLivePageData();
 
-  return <LiveView data={data} matches={matches} />;
+  return (
+    <LiveView
+      initialMatches={data.matches}
+      visibleErrors={data.visibleErrors}
+    />
+  );
 }

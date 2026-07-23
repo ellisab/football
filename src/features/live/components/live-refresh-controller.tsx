@@ -10,13 +10,17 @@ import {
 import { getMatchStatus } from "@/features/football/view-utils";
 import {
   getPollingScopes,
+  mergeLiveDiscovery,
   mergeMatchdayPayload,
+  parseLiveDiscoveryPayload,
   parseMatchdayPollingPayload,
   type LiveMatchItem,
   type LiveMatchScope,
 } from "./live-polling";
 
 const REFRESH_INTERVAL_MS = 45_000;
+const DISCOVERY_INTERVAL_MS = 5 * 60_000;
+const DISCOVERY_RETRY_MS = 60_000;
 
 const getScopeKey = ({ group, league, season }: LiveMatchScope) =>
   `${league}:${season}:${group}`;
@@ -34,18 +38,22 @@ export function LiveRefreshController({
   initialMatches: LiveMatchItem[];
 }) {
   const [items, setItems] = useState(initialMatches);
-  const [isPending, setIsPending] = useState(false);
-  const [isDelayed, setIsDelayed] = useState(false);
+  const [pendingKind, setPendingKind] = useState<
+    "discovery" | "scores" | null
+  >(null);
+  const [isDiscoveryDelayed, setIsDiscoveryDelayed] = useState(false);
+  const [isScoreDelayed, setIsScoreDelayed] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
   const itemsRef = useRef(items);
   const activeRequest = useRef<AbortController | null>(null);
+  const nextDiscoveryAt = useRef(Number.POSITIVE_INFINITY);
   const retryAtByScope = useRef(new Map<string, number>());
 
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
 
-  const refresh = useCallback(async () => {
+  const refreshScores = useCallback(async () => {
     if (activeRequest.current) return;
 
     const now = new Date();
@@ -53,11 +61,14 @@ export function LiveRefreshController({
       (scope) => (retryAtByScope.current.get(getScopeKey(scope)) ?? 0) <= now.getTime()
     );
 
-    if (scopes.length === 0) return;
+    if (scopes.length === 0) {
+      setIsScoreDelayed(false);
+      return;
+    }
 
     const controller = new AbortController();
     activeRequest.current = controller;
-    setIsPending(true);
+    setPendingKind("scores");
 
     try {
       const results = await Promise.allSettled(
@@ -111,10 +122,14 @@ export function LiveRefreshController({
         const checkedAt = Math.max(
           ...payloads.map((payload) => payload.checkedAt ?? Date.now())
         );
-        setLastChecked(new Date(checkedAt));
+        setLastChecked((current) =>
+          current && current.getTime() > checkedAt
+            ? current
+            : new Date(checkedAt)
+        );
       }
 
-      setIsDelayed(
+      setIsScoreDelayed(
         failed ||
           payloads.some(
             (payload) =>
@@ -123,18 +138,81 @@ export function LiveRefreshController({
       );
     } finally {
       activeRequest.current = null;
-      setIsPending(false);
+      setPendingKind(null);
     }
   }, []);
 
+  const refreshDiscovery = useCallback(async () => {
+    if (activeRequest.current) return;
+
+    const controller = new AbortController();
+    activeRequest.current = controller;
+    setPendingKind("discovery");
+
+    try {
+      const response = await fetch("/api/live-scopes", {
+        headers: { Accept: "application/json" },
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        nextDiscoveryAt.current =
+          getRetryAtFromResponse(response) ?? Date.now() + DISCOVERY_RETRY_MS;
+        throw new Error(`Live discovery failed (${response.status})`);
+      }
+
+      const payload = parseLiveDiscoveryPayload(await response.json());
+      if (!payload) throw new Error("Unexpected live discovery response");
+
+      const mergedItems = mergeLiveDiscovery(
+        itemsRef.current,
+        payload.matches,
+        payload.failedLeagues
+      );
+      itemsRef.current = mergedItems;
+      setItems(mergedItems);
+      setLastChecked((current) =>
+        current && current.getTime() > payload.checkedAt
+          ? current
+          : new Date(payload.checkedAt)
+      );
+      setIsDiscoveryDelayed(payload.visibleErrors.length > 0);
+      nextDiscoveryAt.current =
+        Date.now() +
+        (payload.visibleErrors.length > 0
+          ? DISCOVERY_RETRY_MS
+          : DISCOVERY_INTERVAL_MS);
+    } catch {
+      if (!controller.signal.aborted) {
+        setIsDiscoveryDelayed(true);
+        nextDiscoveryAt.current = Math.max(
+          nextDiscoveryAt.current,
+          Date.now() + DISCOVERY_RETRY_MS
+        );
+      }
+    } finally {
+      activeRequest.current = null;
+      setPendingKind(null);
+    }
+  }, []);
+
+  const runScheduledRefresh = useCallback(async () => {
+    if (Date.now() >= nextDiscoveryAt.current) {
+      await refreshDiscovery();
+    }
+
+    await refreshScores();
+  }, [refreshDiscovery, refreshScores]);
+
   useEffect(() => {
-    void refresh();
+    nextDiscoveryAt.current = Date.now() + DISCOVERY_INTERVAL_MS;
+    void refreshScores();
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") void refresh();
+      if (document.visibilityState === "visible") void runScheduledRefresh();
     };
     const interval = window.setInterval(() => {
-      if (document.visibilityState === "visible") void refresh();
+      if (document.visibilityState === "visible") void runScheduledRefresh();
     }, REFRESH_INTERVAL_MS);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
@@ -143,8 +221,10 @@ export function LiveRefreshController({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       activeRequest.current?.abort();
     };
-  }, [refresh]);
+  }, [refreshScores, runScheduledRefresh]);
 
+  const isDelayed = isDiscoveryDelayed || isScoreDelayed;
+  const isPending = pendingKind !== null;
   const live = useMemo(
     () => items.filter((item) => getMatchStatus(item.match) === "live"),
     [items]
@@ -162,7 +242,9 @@ export function LiveRefreshController({
       <div className="live-refresh-controller">
         <p role="status" aria-live="polite" aria-atomic="true">
           {isPending
-            ? "Spielstände werden aktualisiert."
+            ? pendingKind === "discovery"
+              ? "Spielplan wird aktualisiert."
+              : "Spielstände werden aktualisiert."
             : isDelayed
               ? lastChecked
                 ? `Datenquelle verzögert. Letzter Stand von ${lastChecked.toLocaleTimeString(
@@ -179,7 +261,7 @@ export function LiveRefreshController({
         </p>
         <button
           type="button"
-          onClick={() => void refresh()}
+          onClick={() => void refreshScores()}
           disabled={isPending}
           className="button-secondary"
         >

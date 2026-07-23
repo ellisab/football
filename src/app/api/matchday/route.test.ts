@@ -147,10 +147,13 @@ test("/api/matchday rejects unsupported league keys without loading data", async
 
 test("/api/matchday shares a stale response for the active backoff window", async () => {
   const originalFetch = globalThis.fetch;
+  const originalNow = Date.now;
   const originalWarn = console.warn;
+  let currentTime = 1_000;
   let lastChanged = "2026-07-04T18:00:00";
   let refreshShouldFail = false;
 
+  Date.now = () => currentTime;
   console.warn = () => undefined;
   globalThis.fetch = async (input: RequestInfo | URL) => {
     const url =
@@ -207,6 +210,7 @@ test("/api/matchday shares a stale response for the active backoff window", asyn
 
     lastChanged = "2026-07-04T18:05:00";
     refreshShouldFail = true;
+    currentTime = 32_000;
     clearOpenLigaDbMemoryCache();
     const stale = await GET(request);
     const payload = await stale.json();
@@ -221,6 +225,7 @@ test("/api/matchday shares a stale response for the active backoff window", asyn
     assert.ok(Number(stale.headers.get("retry-after")) >= 1);
   } finally {
     globalThis.fetch = originalFetch;
+    Date.now = originalNow;
     console.warn = originalWarn;
   }
 });
