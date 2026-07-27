@@ -3,6 +3,9 @@ import { ALLOWED_IMAGE_REMOTE_PATTERNS } from "./packages/core/src/teams/allowed
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@footballleagues/core", "@footballleagues/ui"],
+  experimental: {
+    useTypeScriptCli: true,
+  },
   images: {
     remotePatterns: ALLOWED_IMAGE_REMOTE_PATTERNS,
   },
