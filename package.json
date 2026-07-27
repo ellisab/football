@@ -15,7 +15,7 @@
     "@footballleagues/core": "workspace:*",
     "@footballleagues/ui": "workspace:*",
     "@vercel/analytics": "^2.0.1",
-    "@vercel/functions": "^3.7.5",
+    "@vercel/functions": "^3.7.6",
     "lucide-react": "^1.27.0",
     "next": "16.2.12",
     "react": "19.2.8",
