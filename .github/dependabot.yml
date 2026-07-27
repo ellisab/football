@@ -7,25 +7,12 @@ updates:
       day: "monday"
       time: "07:00"
       timezone: "Europe/Berlin"
-    open-pull-requests-limit: 8
     groups:
-      web-minor-patch:
+      all-dependencies:
+        applies-to: "version-updates"
         patterns:
-          - "next"
-          - "react"
-          - "react-dom"
-          - "@types/react*"
-        update-types:
-          - "minor"
-          - "patch"
-      tooling-minor-patch:
+          - "*"
+      all-security-updates:
+        applies-to: "security-updates"
         patterns:
-          - "eslint*"
-          - "@typescript-eslint/*"
-          - "typescript"
-          - "@types/*"
-          - "tailwind*"
-          - "@tailwindcss/*"
-        update-types:
-          - "minor"
-          - "patch"
+          - "*"
