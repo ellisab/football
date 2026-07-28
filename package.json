@@ -2,10 +2,9 @@
   "name": "footballleagues",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@11.0.9",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm run typecheck && next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "pnpm exec tsx --test \"src/**/*.test.ts\" && pnpm -C packages/core test",
@@ -26,10 +25,11 @@
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^10.8.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^9.39.5",
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.1",
-    "typescript": "^6.0.3"
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   }
 }
