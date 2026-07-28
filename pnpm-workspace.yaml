@@ -1,6 +1,9 @@
 packages:
   - "packages/*"
 
+minimumReleaseAge: 60
+minimumReleaseAgeStrict: true
+
 allowBuilds:
   esbuild: true
   sharp: true
