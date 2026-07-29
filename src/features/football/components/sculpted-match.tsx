@@ -1,3 +1,8 @@
+import {
+  getMatchBroadcasts,
+  type MatchBroadcastResolution,
+} from "@footballleagues/core/broadcasts";
+import type { LeagueKey } from "@footballleagues/core/leagues";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
 import { Radio } from "lucide-react";
 import Link from "next/link";
@@ -10,6 +15,10 @@ import {
   getTeamLabel,
 } from "@/features/football/view-utils";
 import { TeamBadge } from "@/features/teams/components/team-badge";
+import {
+  BroadcastDock,
+  getBroadcastAccessibilityLabel,
+} from "./broadcast-dock";
 
 const centerLabel = (match: ApiMatch) => {
   const status = getMatchStatus(match);
@@ -51,6 +60,7 @@ function SculptedTeam({
 
 export function SculptedMatch({
   compact = false,
+  competitionId,
   competitionLabel,
   href,
   match,
@@ -58,6 +68,7 @@ export function SculptedMatch({
   showCompetition = true,
 }: {
   compact?: boolean;
+  competitionId?: LeagueKey;
   competitionLabel: string;
   href?: string;
   match: ApiMatch;
@@ -68,6 +79,9 @@ export function SculptedMatch({
   const score = getMatchScore(match).split(":");
   const team1 = getTeamLabel(match.team1, "Team offen");
   const team2 = getTeamLabel(match.team2, "Team offen");
+  const broadcastResolution: MatchBroadcastResolution = competitionId
+    ? getMatchBroadcasts({ competitionId, match })
+    : { broadcasts: [], status: "unsupported" };
   const body = (
     <>
       <div className="featured-match__meta">
@@ -103,6 +117,7 @@ export function SculptedMatch({
           iconUrl={match.team2?.teamIconUrl}
           score={score[1] ?? "–"}
         />
+        <BroadcastDock resolution={broadcastResolution} />
       </div>
       {href ? (
         <span className="featured-match__affordance" aria-hidden="true">
@@ -111,9 +126,16 @@ export function SculptedMatch({
       ) : null}
     </>
   );
-  const label = `Spiel: ${getMatchScreenReaderLabel(match)}`;
+  const broadcastLabel = getBroadcastAccessibilityLabel(broadcastResolution);
+  const label = `Spiel: ${getMatchScreenReaderLabel(match)}${
+    broadcastLabel ? ` ${broadcastLabel}` : ""
+  }`;
   const className = `featured-match${href ? " focus-ring" : ""}${
     compact ? " featured-match--compact" : ""
+  }${
+    broadcastResolution.status !== "unsupported"
+      ? " featured-match--has-broadcast"
+      : ""
   }`;
 
   if (href) {

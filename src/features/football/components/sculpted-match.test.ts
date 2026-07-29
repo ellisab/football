@@ -7,6 +7,7 @@ import type {
   CompetitionMatch,
   TeamSummary,
 } from "@/features/football/view-utils";
+import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
 import { type MatchCardItem, MatchCardList } from "./match-card-list";
 import { MatchDetailView } from "./match-detail-view";
 import { MatchList } from "./match-summary";
@@ -28,6 +29,7 @@ const scheduledMatch: ApiMatch = {
 const renderMatch = (href?: string) =>
   renderToStaticMarkup(
     createElement(SculptedMatch, {
+      competitionId: "cl",
       competitionLabel: "Champions League",
       href,
       match: scheduledMatch,
@@ -136,4 +138,127 @@ test("uses canonical match feeds on team detail", () => {
     (markup.match(/class="match-list match-list--sculpted"/g) ?? []).length,
     2,
   );
+});
+
+test("renders a free-TV-first broadcaster dock from canonical match context", () => {
+  const opener: MatchCardItem = {
+    competitionId: "bl2",
+    competitionLabel: "2. Bundesliga",
+    match: {
+      group: { groupName: "1. Spieltag", groupOrderID: 1 },
+      leagueSeason: 2026,
+      matchDateTimeUTC: "2026-08-07T18:30:00Z",
+      matchID: 202607,
+      team1: { teamId: 10, teamName: "VfL Bochum" },
+      team2: { teamId: 20, teamName: "Hertha BSC" },
+    },
+    roundLabel: "1. Spieltag",
+  };
+  const markup = renderToStaticMarkup(
+    createElement(MatchCardList, { matches: [opener] }),
+  );
+
+  assert.match(markup, /class="featured-match__broadcast-dock"/);
+  assert.match(markup, /data-broadcaster="sat1"/);
+  assert.match(markup, /data-broadcaster="sky"/);
+  assert.match(markup, /data-broadcaster="wow"/);
+  assert.equal(
+    (markup.match(/class="featured-match__broadcast-list"/g) ?? []).length,
+    1,
+  );
+  assert.doesNotMatch(markup, /featured-match__broadcast-side/);
+  assert.match(
+    markup,
+    /featured-match__broadcast-label[\s\S]*data-broadcaster="sat1"[\s\S]*data-broadcaster="sky"[\s\S]*data-broadcaster="wow"/,
+  );
+  assert.match(
+    markup,
+    /class="featured-match__broadcast-dock"[\s\S]*<\/div><\/div><span class="featured-match__affordance"/,
+  );
+  assert.doesNotMatch(markup, /<small>/);
+  assert.doesNotMatch(markup, />Übertragung</);
+  assert.match(
+    markup,
+    /aria-label="Spiel: .*Übertragung: SAT\.1, Kostenlos, TV, Einzelspiel, privater Anbieter; Sky Sport Bundesliga, Abo, TV, Einzelspiel, privater Anbieter; WOW, Abo, Stream, Einzelspiel, privater Anbieter"/,
+  );
+  assert.equal((markup.match(/<a /g) ?? []).length, 1);
+  assert.doesNotMatch(markup, /href="https:\/\/(?:www\.)?(?:sky|wowtv|sat1)/);
+});
+
+test("labels DAZN as a conference without misrepresenting the individual games", () => {
+  const markup = renderToStaticMarkup(
+    createElement(SculptedMatch, {
+      competitionId: "bl1",
+      competitionLabel: "Bundesliga",
+      match: {
+        group: { groupName: "1. Spieltag", groupOrderID: 1 },
+        leagueSeason: 2026,
+        matchDateTimeUTC: "2026-08-29T13:30:00Z",
+        matchID: 202608,
+        team1: { teamId: 30, teamName: "FC Beispiel" },
+        team2: { teamId: 40, teamName: "SV Muster" },
+      },
+      roundLabel: "1. Spieltag",
+    }),
+  );
+
+  assert.match(markup, /data-broadcaster="dazn"/);
+  assert.match(
+    markup,
+    /title="DAZN: Abo, Stream, Konferenz, privater Anbieter"/,
+  );
+  assert.match(markup, /DAZN, Abo, Stream, Konferenz, privater Anbieter/);
+  assert.doesNotMatch(markup, /<small>/);
+});
+
+test("states when a supported fixture has no safe broadcaster inference", () => {
+  const markup = renderToStaticMarkup(
+    createElement(SculptedMatch, {
+      competitionId: "bl1",
+      competitionLabel: "Bundesliga",
+      match: {
+        leagueSeason: 2026,
+        matchDateTimeUTC: "2026-08-28T17:00:00Z",
+        matchID: 202609,
+        team1: { teamId: 50, teamName: "FC Offen" },
+        team2: { teamId: 60, teamName: "SV Offen" },
+      },
+      roundLabel: "Spieltag offen",
+    }),
+  );
+
+  assert.match(markup, /data-state="unconfirmed"/);
+  assert.match(markup, /Sender noch nicht bestätigt/);
+  assert.doesNotMatch(markup, /Keine Übertragung/);
+});
+
+test("omits the dock outside the supported rights modules", () => {
+  const markup = renderMatch();
+
+  assert.doesNotMatch(markup, /featured-match__broadcast-dock/);
+  assert.doesNotMatch(markup, /featured-match--has-broadcast/);
+  assert.doesNotMatch(markup, /Übertragung:/);
+});
+
+test("renders broadcasters on match detail from resolved competition context", () => {
+  const match: ApiMatch = {
+    group: { groupName: "2. Spieltag", groupOrderID: 2 },
+    leagueSeason: 2026,
+    matchDateTimeUTC: "2026-08-14T16:30:00Z",
+    matchID: 202610,
+    team1: { teamId: 70, teamName: "FC Detail" },
+    team2: { teamId: 80, teamName: "SV Detail" },
+  };
+  const competition = {
+    resolvedLeague: "bl2",
+    resolvedSeason: 2026,
+  } as WebCompetitionViewModel;
+  const markup = renderToStaticMarkup(
+    createElement(MatchDetailView, { competition, match }),
+  );
+
+  assert.match(markup, /class="featured-match__broadcast-dock"/);
+  assert.match(markup, /data-broadcaster="sky"/);
+  assert.match(markup, /data-broadcaster="wow"/);
+  assert.doesNotMatch(markup, /href="\/matches\/202610"/);
 });

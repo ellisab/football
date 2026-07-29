@@ -1,8 +1,9 @@
+import type { LeagueKey } from "@footballleagues/core/leagues";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
 import { SculptedMatch } from "./sculpted-match";
 
 export type MatchCardItem = {
-  competitionId: string;
+  competitionId: LeagueKey;
   competitionLabel: string;
   match: ApiMatch;
   roundLabel: string;
@@ -20,6 +21,7 @@ function MatchCard({
   return (
     <SculptedMatch
       compact={compact}
+      competitionId={item.competitionId}
       competitionLabel={item.competitionLabel}
       href={item.match.matchID ? `/matches/${item.match.matchID}` : undefined}
       match={item.match}

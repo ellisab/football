@@ -1,3 +1,4 @@
+import { resolveLeagueKey } from "@footballleagues/core/leagues";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
 import { CalendarDays, Goal, MapPin, Trophy } from "lucide-react";
 import Link from "next/link";
@@ -66,6 +67,7 @@ export function MatchDetailView({
     ? getCompetitionMeta(competition.resolvedLeague)
     : undefined;
   const competitionName = meta?.label ?? match.leagueName ?? "Wettbewerb";
+  const competitionId = competition?.resolvedLeague ?? resolveLeagueKey(match);
   const season = competition?.resolvedSeason ?? match.leagueSeason;
   const roundLabel =
     match.group?.groupName ??
@@ -91,6 +93,7 @@ export function MatchDetailView({
             {getTeamLabel(match.team2, "Auswärtsteam")}
           </h1>
           <SculptedMatch
+            competitionId={competitionId}
             competitionLabel={competitionName}
             match={match}
             roundLabel={roundLabel}

@@ -1,0 +1,114 @@
+[
+  {
+    "matchKey": "bl1:77382",
+    "competitionId": "bl1",
+    "matchId": 77382,
+    "season": 2025,
+    "kickoffUtc": "2025-12-19T19:30:00Z",
+    "homeTeamId": 7,
+    "awayTeamId": 87,
+    "broadcasters": [
+      {
+        "broadcasterId": "sat1",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "sky",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "wow",
+        "coverage": "individual"
+      }
+    ],
+    "sourceUrl": "https://www.dfl.de/de/fans/begegnungen-bis-zum-19-spieltag-der-bundesliga-und-2-bundesliga-zeitgenau-angesetzt-2/",
+    "verifiedAt": "2026-07-29T00:00:00Z",
+    "note": "SAT.1-Winterspiel von der DFL bestätigt"
+  },
+  {
+    "matchKey": "bl1:77393",
+    "competitionId": "bl1",
+    "matchId": 77393,
+    "season": 2025,
+    "kickoffUtc": "2026-01-09T19:30:00Z",
+    "homeTeamId": 91,
+    "awayTeamId": 7,
+    "broadcasters": [
+      {
+        "broadcasterId": "sat1",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "sky",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "wow",
+        "coverage": "individual"
+      }
+    ],
+    "sourceUrl": "https://www.dfl.de/de/fans/begegnungen-bis-zum-19-spieltag-der-bundesliga-und-2-bundesliga-zeitgenau-angesetzt-2/",
+    "verifiedAt": "2026-07-29T00:00:00Z",
+    "note": "SAT.1-Winterspiel von der DFL bestätigt"
+  },
+  {
+    "matchKey": "bl2:83510",
+    "competitionId": "bl2",
+    "matchId": 83510,
+    "season": 2026,
+    "kickoffUtc": "2026-08-08T18:30:00Z",
+    "homeTeamId": 131,
+    "awayTeamId": 76,
+    "broadcasters": [
+      {
+        "broadcasterId": "rtl",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "sky",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "wow",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "rtl-plus",
+        "coverage": "individual"
+      }
+    ],
+    "sourceUrl": "https://www.rtl.de/rtl-hd/sendungen-in-uhd/",
+    "verifiedAt": "2026-07-29T00:00:00Z",
+    "note": "Free-TV-Sender von RTL bestätigt"
+  },
+  {
+    "matchKey": "bl2:83527",
+    "competitionId": "bl2",
+    "matchId": 83527,
+    "season": 2026,
+    "kickoffUtc": "2026-08-15T18:30:00Z",
+    "homeTeamId": 76,
+    "awayTeamId": 105,
+    "broadcasters": [
+      {
+        "broadcasterId": "rtl",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "sky",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "wow",
+        "coverage": "individual"
+      },
+      {
+        "broadcasterId": "rtl-plus",
+        "coverage": "individual"
+      }
+    ],
+    "sourceUrl": "https://www.rtl.de/rtl-hd/sendungen-in-uhd/",
+    "verifiedAt": "2026-07-29T00:00:00Z",
+    "note": "Free-TV-Sender von RTL bestätigt"
+  }
+]

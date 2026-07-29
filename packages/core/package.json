@@ -10,6 +10,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./home": "./src/home/index.ts",
+    "./broadcasts": "./src/broadcasts/index.ts",
     "./live": "./src/live/index.ts",
     "./openligadb": "./src/openligadb.ts",
     "./leagues": "./src/leagues/index.ts",
