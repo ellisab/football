@@ -83,6 +83,11 @@ export function SculptedMatch({
   const broadcastResolution: MatchBroadcastResolution = competitionId
     ? getMatchBroadcasts({ competitionId, match })
     : { broadcasts: [], status: "unsupported" };
+  const isDateOnlyCompetition =
+    competitionId === "dfb" || competitionId === "fbl1";
+  const hasDock =
+    isDateOnlyCompetition || broadcastResolution.status !== "unsupported";
+  const dateLabel = formatMatchDate(match);
   const body = (
     <>
       <div className="featured-match__meta">
@@ -119,7 +124,8 @@ export function SculptedMatch({
           score={score[1] ?? "–"}
         />
         <BroadcastDock
-          dateLabel={formatMatchDate(match)}
+          dateLabel={dateLabel}
+          dateOnly={isDateOnlyCompetition}
           resolution={broadcastResolution}
         />
       </div>
@@ -130,17 +136,21 @@ export function SculptedMatch({
       ) : null}
     </>
   );
-  const broadcastLabel = getBroadcastAccessibilityLabel(broadcastResolution);
+  const broadcastLabel = isDateOnlyCompetition
+    ? ""
+    : getBroadcastAccessibilityLabel(broadcastResolution);
+  const accessibilityDetails = [
+    hasDock ? `Datum: ${dateLabel}.` : "",
+    broadcastLabel,
+  ]
+    .filter(Boolean)
+    .join(" ");
   const label = `Spiel: ${getMatchScreenReaderLabel(match)}${
-    broadcastLabel ? ` ${broadcastLabel}` : ""
+    accessibilityDetails ? ` ${accessibilityDetails}` : ""
   }`;
   const className = `featured-match${href ? " focus-ring" : ""}${
     compact ? " featured-match--compact" : ""
-  }${
-    broadcastResolution.status !== "unsupported"
-      ? " featured-match--has-broadcast"
-      : ""
-  }`;
+  }${hasDock ? " featured-match--has-dock" : ""}`;
 
   if (href) {
     return (

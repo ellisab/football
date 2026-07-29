@@ -179,7 +179,7 @@ test("renders a free-TV-first broadcaster dock from canonical match context", ()
   assert.doesNotMatch(markup, />Übertragung</);
   assert.match(
     markup,
-    /aria-label="Spiel: .*Übertragung: SAT\.1, Kostenlos, TV, Einzelspiel, privater Anbieter; Sky Sport Bundesliga, Abo, TV, Einzelspiel, privater Anbieter; WOW, Abo, Stream, Einzelspiel, privater Anbieter"/,
+    /aria-label="Spiel: .*Datum: 07\.08\.2026\. Übertragung: SAT\.1, Kostenlos, TV, Einzelspiel, privater Anbieter; Sky Sport Bundesliga, Abo, TV, Einzelspiel, privater Anbieter; WOW, Abo, Stream, Einzelspiel, privater Anbieter"/,
   );
   assert.equal((markup.match(/<a /g) ?? []).length, 1);
   assert.doesNotMatch(markup, /href="https:\/\/(?:www\.)?(?:sky|wowtv|sat1)/);
@@ -236,11 +236,47 @@ test("states when a supported fixture has no safe broadcaster inference", () => 
   assert.doesNotMatch(markup, /Keine Übertragung/);
 });
 
-test("omits the dock outside the supported rights modules", () => {
+for (const competition of [
+  { competitionId: "dfb", competitionLabel: "DFB-Pokal" },
+  { competitionId: "fbl1", competitionLabel: "Frauen-Bundesliga" },
+] as const) {
+  test(`renders a date-only dock for ${competition.competitionLabel}`, () => {
+    const markup = renderToStaticMarkup(
+      createElement(SculptedMatch, {
+        competitionId: competition.competitionId,
+        competitionLabel: competition.competitionLabel,
+        match: {
+          leagueSeason: 2026,
+          matchDateTimeUTC: "2026-08-30T13:00:00Z",
+          matchID: 202611,
+          team1: { teamId: 90, teamName: "FC Beispiel" },
+          team2: { teamId: 100, teamName: "SV Muster" },
+        },
+        roundLabel: "1. Runde",
+      }),
+    );
+
+    assert.match(markup, /featured-match featured-match--has-dock/);
+    assert.match(
+      markup,
+      /class="featured-match__broadcast-dock" data-state="date-only"/,
+    );
+    assert.match(markup, /class="featured-match__broadcast-date">30\.08\.2026/);
+    assert.match(markup, /aria-label="Spiel: .*Datum: 30\.08\.2026\."/);
+    assert.doesNotMatch(markup, /featured-match__broadcast-label/);
+    assert.doesNotMatch(markup, /featured-match__broadcast-list/);
+    assert.doesNotMatch(markup, /featured-match__broadcast-empty/);
+    assert.doesNotMatch(markup, /data-broadcaster=/);
+    assert.doesNotMatch(markup, /lucide-tv/);
+    assert.doesNotMatch(markup, /Sender noch nicht bestätigt|Übertragung:/);
+  });
+}
+
+test("omits the dock for Champions League", () => {
   const markup = renderMatch();
 
   assert.doesNotMatch(markup, /featured-match__broadcast-dock/);
-  assert.doesNotMatch(markup, /featured-match--has-broadcast/);
+  assert.doesNotMatch(markup, /featured-match--has-dock/);
   assert.doesNotMatch(markup, /Übertragung:/);
 });
 

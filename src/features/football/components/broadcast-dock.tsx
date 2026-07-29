@@ -57,20 +57,22 @@ function BroadcastChip({ broadcast }: { broadcast: MatchBroadcast }) {
 
 export function BroadcastDock({
   dateLabel,
+  dateOnly = false,
   resolution,
 }: {
   dateLabel: string;
+  dateOnly?: boolean;
   resolution: MatchBroadcastResolution;
 }) {
-  if (resolution.status === "unsupported") return null;
+  if (!dateOnly && resolution.status === "unsupported") return null;
 
   return (
     <div
       className="featured-match__broadcast-dock"
-      data-state={resolution.status}
+      data-state={dateOnly ? "date-only" : resolution.status}
       aria-hidden="true"
     >
-      {resolution.status === "unconfirmed" ? (
+      {dateOnly ? null : resolution.status === "unconfirmed" ? (
         <span className="featured-match__broadcast-empty">
           <Tv />
           {UNCONFIRMED_BROADCAST_LABEL}

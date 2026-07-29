@@ -2187,7 +2187,7 @@ a.featured-match:hover {
     0 10px 18px -12px rgba(37, 38, 35, 0.16);
 }
 
-.featured-match--has-broadcast .featured-match__board {
+.featured-match--has-dock .featured-match__board {
   padding-top: 1.25rem;
   padding-bottom: 3.55rem;
 }
@@ -2290,7 +2290,7 @@ a.featured-match:hover {
   height: 0.9rem;
 }
 
-.featured-match--has-broadcast .featured-match__affordance {
+.featured-match--has-dock .featured-match__affordance {
   display: none;
 }
 
@@ -2667,7 +2667,7 @@ a.match-summary:hover {
     padding: 1.35rem 0.7rem;
   }
 
-  .featured-match--has-broadcast .featured-match__board {
+  .featured-match--has-dock .featured-match__board {
     padding: 0.6rem 0.7rem 2.3rem;
   }
 

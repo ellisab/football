@@ -303,7 +303,7 @@ export function LiveRefreshController({
       )}
 
       {upcoming.length > 0 ? (
-        <section className="content-section">
+        <section className="content-section mt-9">
           <SectionHeading
             title="Als Nächstes"
             count={upcoming.length}
