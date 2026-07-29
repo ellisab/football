@@ -2260,6 +2260,18 @@ a.featured-match:hover {
   white-space: nowrap;
 }
 
+.featured-match__broadcast-date {
+  flex: none;
+  padding: 0 0.4rem 0 0.3rem;
+  color: #252623;
+  font-family: var(--font-stadium-body);
+  font-size: 0.67rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
 .featured-match__broadcast-empty {
   display: inline-flex;
   min-height: 1.65rem;
@@ -2687,6 +2699,11 @@ a.match-summary:hover {
   .featured-match__broadcast-mark {
     min-height: 1.15rem;
     padding-inline: 0.25rem;
+    font-size: 0.55rem;
+  }
+
+  .featured-match__broadcast-date {
+    padding: 0 0.15rem;
     font-size: 0.55rem;
   }
 

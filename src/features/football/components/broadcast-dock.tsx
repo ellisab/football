@@ -56,8 +56,10 @@ function BroadcastChip({ broadcast }: { broadcast: MatchBroadcast }) {
 }
 
 export function BroadcastDock({
+  dateLabel,
   resolution,
 }: {
+  dateLabel: string;
   resolution: MatchBroadcastResolution;
 }) {
   if (resolution.status === "unsupported") return null;
@@ -88,6 +90,7 @@ export function BroadcastDock({
           </span>
         </>
       )}
+      <span className="featured-match__broadcast-date">{dateLabel}</span>
     </div>
   );
 }

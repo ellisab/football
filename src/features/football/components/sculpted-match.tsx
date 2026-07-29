@@ -7,6 +7,7 @@ import type { ApiMatch } from "@footballleagues/core/openligadb";
 import { Radio } from "lucide-react";
 import Link from "next/link";
 import {
+  formatMatchDate,
   formatMatchTime,
   getMatchScore,
   getMatchScreenReaderLabel,
@@ -117,7 +118,10 @@ export function SculptedMatch({
           iconUrl={match.team2?.teamIconUrl}
           score={score[1] ?? "–"}
         />
-        <BroadcastDock resolution={broadcastResolution} />
+        <BroadcastDock
+          dateLabel={formatMatchDate(match)}
+          resolution={broadcastResolution}
+        />
       </div>
       {href ? (
         <span className="featured-match__affordance" aria-hidden="true">

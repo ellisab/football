@@ -169,7 +169,7 @@ test("renders a free-TV-first broadcaster dock from canonical match context", ()
   assert.doesNotMatch(markup, /featured-match__broadcast-side/);
   assert.match(
     markup,
-    /featured-match__broadcast-label[\s\S]*data-broadcaster="sat1"[\s\S]*data-broadcaster="sky"[\s\S]*data-broadcaster="wow"/,
+    /featured-match__broadcast-label[\s\S]*data-broadcaster="sat1"[\s\S]*data-broadcaster="sky"[\s\S]*data-broadcaster="wow"[\s\S]*featured-match__broadcast-date">07\.08\.2026/,
   );
   assert.match(
     markup,
@@ -229,6 +229,10 @@ test("states when a supported fixture has no safe broadcaster inference", () => 
 
   assert.match(markup, /data-state="unconfirmed"/);
   assert.match(markup, /Sender noch nicht bestätigt/);
+  assert.match(
+    markup,
+    /Sender noch nicht bestätigt[\s\S]*featured-match__broadcast-date">28\.08\.2026/,
+  );
   assert.doesNotMatch(markup, /Keine Übertragung/);
 });
 
