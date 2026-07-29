@@ -6,7 +6,9 @@ import { createWebHomeViewModel } from "./home-view-model";
 const sampleState: HomeState = {
   resolvedLeague: "bl1",
   resolvedSeason: 2025,
-  leagueOptions: [{ shortcut: "bl1", label: "Bundesliga 2025/2026", seasons: [2025] }],
+  leagueOptions: [
+    { shortcut: "bl1", label: "Bundesliga 2025/2026", seasons: [2025] },
+  ],
   currentRound: {
     groupName: "11. Spieltag",
     groupOrderID: 11,
@@ -112,12 +114,15 @@ test("createWebHomeViewModel adds web copy to semantic home state", () => {
   assert.equal(viewModel.leagueLabel, "Bundesliga");
   assert.deepEqual(
     viewModel.sections.map((section) => section.key),
-    ["next-round", "matchday", "table"]
+    ["next-round", "matchday", "table"],
   );
   assert.equal(viewModel.sections[0]?.subtitle, "Bundesliga · Saison 2025");
   assert.equal(
     viewModel.sections[2]?.subtitle,
-    "Aktualisierte Tabelle für die ausgewählte Saison."
+    "Aktualisierte Tabelle für die ausgewählte Saison.",
   );
-  assert.equal(viewModel.visibleErrors.join(", "), "Tabelle, Spiele der nächsten Runde");
+  assert.equal(
+    viewModel.visibleErrors.join(", "),
+    "Tabelle, Spiele der nächsten Runde",
+  );
 });

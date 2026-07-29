@@ -1,14 +1,14 @@
+import { isLeagueKey } from "@footballleagues/core/leagues";
 import { redirect } from "next/navigation";
-import { getHomePageData } from "@/features/home/server/get-home-page-data";
-import { TodayView } from "@/features/today/components/today-view";
-import { resolveDateQuery } from "@/features/football/components/date-navigator";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
+import { resolveDateQuery } from "@/features/football/components/date-navigator";
+import { refreshUncertainMatches } from "@/features/football/server/refresh-uncertain-matches";
 import {
   getTodayCompetitionMatches,
   getVisibleCompetitions,
 } from "@/features/football/view-utils";
-import { refreshUncertainMatches } from "@/features/football/server/refresh-uncertain-matches";
-import { isLeagueKey } from "@footballleagues/core/leagues";
+import { getHomePageData } from "@/features/home/server/get-home-page-data";
+import { TodayView } from "@/features/today/components/today-view";
 
 export default async function Home({
   searchParams,

@@ -1,10 +1,10 @@
-import Link from "next/link";
 import {
   getBerlinDateKey,
   parseBerlinDateQuery,
   shiftBerlinDateQuery,
 } from "@footballleagues/core/matches";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 const longDateFormatter = new Intl.DateTimeFormat("de-DE", {
   day: "numeric",
@@ -46,10 +46,17 @@ export function DateNavigator({ dateKey }: { dateKey: string }) {
           <ChevronLeft aria-hidden="true" className="h-5 w-5" />
         </Link>
         <div className="date-navigator__days">
-          <Link href={`/today?date=${previous}`} className="date-navigator__day">
+          <Link
+            href={`/today?date=${previous}`}
+            className="date-navigator__day"
+          >
             {compactDateLabel(previous)}
           </Link>
-          <span className="date-navigator__day" data-active="true" aria-current="date">
+          <span
+            className="date-navigator__day"
+            data-active="true"
+            aria-current="date"
+          >
             <span>{isToday ? "Heute" : compactDateLabel(dateKey)}</span>
             <small>{longDateFormatter.format(toDisplayDate(dateKey))}</small>
           </span>

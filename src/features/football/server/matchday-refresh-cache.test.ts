@@ -74,7 +74,7 @@ test("matchday refresh bypasses the Data Cache only for score validation", async
     assert.ok(options?.requestOptions?.signal instanceof AbortSignal);
     assert.equal(
       options?.requestOptions?.signal,
-      options?.validationRequestOptions?.signal
+      options?.validationRequestOptions?.signal,
     );
   }
 });
@@ -110,9 +110,8 @@ test("matchday refresh ignores version-one Runtime Cache records", async () => {
   assert.equal(result.refreshState, "fresh");
   assert.equal(result.matches[0]?.matchID, 101);
   assert.equal(
-    (cache.values.get("matchday:bl1:2025:10") as { version?: number })
-      .version,
-    2
+    (cache.values.get("matchday:bl1:2025:10") as { version?: number }).version,
+    2,
   );
 });
 
@@ -219,7 +218,7 @@ test("matchday backoff is isolated per matchday for transient failures", async (
       now: () => 1_000,
       random: () => 0.5,
     }),
-    MatchdayRefreshBackoffError
+    MatchdayRefreshBackoffError,
   );
 
   let otherCalls = 0;
@@ -236,7 +235,7 @@ test("matchday backoff is isolated per matchday for transient failures", async (
       },
       now: () => 2_000,
       random: () => 0.5,
-    }
+    },
   );
 
   assert.equal(other.refreshState, "fresh");
@@ -265,7 +264,7 @@ test("a 429 honors Retry-After and opens the shared origin cooldown", async () =
     (error) =>
       error instanceof MatchdayRefreshBackoffError &&
       error.status === 429 &&
-      error.retryAt === 91_000
+      error.retryAt === 91_000,
   );
 
   let calls = 0;
@@ -280,10 +279,10 @@ test("a 429 honors Retry-After and opens the shared origin cooldown", async () =
         },
         now: () => 2_000,
         random: () => 0.5,
-      }
+      },
     ),
     (error) =>
-      error instanceof MatchdayRefreshBackoffError && error.status === 429
+      error instanceof MatchdayRefreshBackoffError && error.status === 429,
   );
   assert.equal(calls, 0);
 });

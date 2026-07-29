@@ -13,7 +13,9 @@ export const ALLOWED_IMAGE_HOSTS = [
 
 export const ALLOWED_IMAGE_HOST_SET = new Set<string>(ALLOWED_IMAGE_HOSTS);
 
-export const ALLOWED_IMAGE_REMOTE_PATTERNS = ALLOWED_IMAGE_HOSTS.map((hostname) => ({
-  protocol: "https" as const,
-  hostname,
-}));
+export const ALLOWED_IMAGE_REMOTE_PATTERNS = ALLOWED_IMAGE_HOSTS.map(
+  (hostname) => ({
+    protocol: "https" as const,
+    hostname,
+  }),
+);

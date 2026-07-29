@@ -1,14 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { getLiveSchedule, type LiveDataSource } from "../src/live";
 import {
-  getLiveSchedule,
-  type LiveDataSource,
-} from "../src/live";
-import {
-  OPENLIGADB_CACHE_SECONDS,
   type ApiLeague,
   type ApiMatch,
   type FetchOptions,
+  OPENLIGADB_CACHE_SECONDS,
 } from "../src/openligadb";
 
 const NOW = new Date("2026-07-23T12:00:00.000Z");
@@ -47,7 +44,7 @@ const AVAILABLE_LEAGUES: ApiLeague[] = [
 ];
 
 const createDataSource = (
-  overrides: Partial<LiveDataSource> = {}
+  overrides: Partial<LiveDataSource> = {},
 ): LiveDataSource => ({
   getAvailableLeaguesBySeason: async () => AVAILABLE_LEAGUES,
   getAllMatches: async () => [],
@@ -65,7 +62,7 @@ const createMatch = ({
 }): ApiMatch => ({
   matchID: id,
   matchDateTimeUTC: new Date(
-    NOW.getTime() + offsetMinutes * 60 * 1_000
+    NOW.getTime() + offsetMinutes * 60 * 1_000,
   ).toISOString(),
   matchIsFinished: finished,
   group: {
@@ -112,25 +109,18 @@ test("getLiveSchedule resolves current-season aliases and applies cache policies
   assert.equal(metadataCalls[0]?.season, 2026);
   assert.equal(
     metadataCalls[0]?.options?.next?.revalidate,
-    OPENLIGADB_CACHE_SECONDS.availableLeagues
+    OPENLIGADB_CACHE_SECONDS.availableLeagues,
   );
   assert.deepEqual(
     scheduleCalls.map(({ shortcut, season }) => `${shortcut}:${season}`).sort(),
-    [
-      "bl1:2026",
-      "bl2:2026",
-      "dfb:2026",
-      "ffb1:2026",
-      "ucl:2026",
-    ]
+    ["bl1:2026", "bl2:2026", "dfb:2026", "ffb1:2026", "ucl:2026"],
   );
   assert.equal(
     scheduleCalls.every(
       ({ options }) =>
-        options?.next?.revalidate ===
-        OPENLIGADB_CACHE_SECONDS.liveSchedule
+        options?.next?.revalidate === OPENLIGADB_CACHE_SECONDS.liveSchedule,
     ),
-    true
+    true,
   );
   assert.equal(OPENLIGADB_CACHE_SECONDS.liveSchedule, 15 * 60);
 });
@@ -182,22 +172,34 @@ test("getLiveSchedule selects recent unfinished matches and five upcoming global
 
   assert.deepEqual(
     result.matches.map(({ match }) => match.matchID),
-    [101, 101, 103, 201, 202, 203, 204, 205]
+    [101, 101, 103, 201, 202, 203, 204, 205],
   );
   assert.deepEqual(
     result.matches
       .filter(({ match }) => match.matchID === 101)
       .map(({ league }) => league),
-    ["bl1", "dfb"]
+    ["bl1", "dfb"],
   );
   assert.equal(
     result.matches.filter(({ match }) => match.matchID === 202).length,
-    1
+    1,
   );
-  assert.equal(result.matches.some(({ match }) => match.matchID === 102), false);
-  assert.equal(result.matches.some(({ match }) => match.matchID === 104), false);
-  assert.equal(result.matches.some(({ match }) => match.matchID === 105), false);
-  assert.equal(result.matches.some(({ match }) => match.matchID === 206), false);
+  assert.equal(
+    result.matches.some(({ match }) => match.matchID === 102),
+    false,
+  );
+  assert.equal(
+    result.matches.some(({ match }) => match.matchID === 104),
+    false,
+  );
+  assert.equal(
+    result.matches.some(({ match }) => match.matchID === 105),
+    false,
+  );
+  assert.equal(
+    result.matches.some(({ match }) => match.matchID === 206),
+    false,
+  );
 });
 
 test("getLiveSchedule caps concurrency and isolates failed competitions", async () => {
@@ -227,7 +229,7 @@ test("getLiveSchedule caps concurrency and isolates failed competitions", async 
   assert.deepEqual(result.failedLeagues, ["dfb"]);
   assert.deepEqual(
     result.matches.map(({ match }) => match.matchID),
-    [301]
+    [301],
   );
 });
 
@@ -243,7 +245,10 @@ test("an unpublished Champions League schedule is a successful empty result", as
 
   const result = await getLiveSchedule({ dataSource, now: NOW });
 
-  assert.equal(calledShortcuts.filter((shortcut) => shortcut === "ucl").length, 1);
+  assert.equal(
+    calledShortcuts.filter((shortcut) => shortcut === "ucl").length,
+    1,
+  );
   assert.equal(result.failedLeagues.includes("cl"), false);
   assert.deepEqual(result.failedLeagues, ["dfb"]);
   assert.deepEqual(result.matches, []);
@@ -260,7 +265,7 @@ test("getLiveSchedule times out a hung competition without failing the others", 
         options?.signal?.addEventListener(
           "abort",
           () => reject(new Error("aborted")),
-          { once: true }
+          { once: true },
         );
       });
     },

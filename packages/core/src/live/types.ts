@@ -4,12 +4,12 @@ import type { ApiLeague, ApiMatch, FetchOptions } from "../openligadb";
 export type LiveDataSource = {
   getAvailableLeaguesBySeason(
     season: number,
-    options?: FetchOptions
+    options?: FetchOptions,
   ): Promise<ApiLeague[]>;
   getAllMatches(
     leagueShortcut: string,
     season: number,
-    options?: FetchOptions
+    options?: FetchOptions,
   ): Promise<ApiMatch[]>;
 };
 

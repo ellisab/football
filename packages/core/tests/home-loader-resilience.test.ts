@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test, { beforeEach } from "node:test";
 import type { FootballDataSource } from "../src/home";
 import { getHomeSnapshot } from "../src/home";
-import { loadBracketMatches } from "../src/home/domain/load-bracket";
 import { getGroupsWithFallback } from "../src/home/domain/league-groups";
+import { loadBracketMatches } from "../src/home/domain/load-bracket";
 import { clearMatchdayCache } from "../src/home/domain/matchday-loader";
 import { resolveRoundSnapshots } from "../src/home/domain/resolve-rounds";
 import type { ApiGroup, ApiMatch } from "../src/openligadb";
@@ -13,7 +13,7 @@ beforeEach(() => {
 });
 
 const createDataSource = (
-  overrides: Partial<FootballDataSource> = {}
+  overrides: Partial<FootballDataSource> = {},
 ): FootballDataSource => ({
   getAvailableLeagues: async () => [],
   getCurrentGroup: async () => ({}),
@@ -26,11 +26,14 @@ const createDataSource = (
 });
 
 const createGroups = (count: number, groupName = "Viertelfinale") => {
-  return Array.from({ length: count }, (_, index): ApiGroup => ({
-    groupID: index + 1,
-    groupName,
-    groupOrderID: index + 1,
-  }));
+  return Array.from(
+    { length: count },
+    (_, index): ApiGroup => ({
+      groupID: index + 1,
+      groupName,
+      groupOrderID: index + 1,
+    }),
+  );
 };
 
 const createFinishedMatch = (matchID: number): ApiMatch => ({
@@ -252,7 +255,7 @@ test("getHomeSnapshot stops all group scans after the current round returns 429"
 
   const snapshot = await getHomeSnapshot(
     { league: "dfb", season: "2026" },
-    { dataSource, fallbackYear: 2025 }
+    { dataSource, fallbackYear: 2025 },
   );
 
   assert.equal(matchdayRequests, 1);
@@ -285,7 +288,7 @@ test("getHomeSnapshot stops before matchday scans when a primary request is rate
 
   const snapshot = await getHomeSnapshot(
     { league: "bl1", season: "2026" },
-    { dataSource, fallbackYear: 2026 }
+    { dataSource, fallbackYear: 2026 },
   );
 
   assert.equal(matchdayRequests, 0);
@@ -305,7 +308,7 @@ test("getGroupsWithFallback does not try an alternate shortcut after a 429", asy
   await assert.rejects(
     getGroupsWithFallback(dataSource, "cl", "ucl", 2026),
     (error: unknown) =>
-      (error as { status?: number } | undefined)?.status === 429
+      (error as { status?: number } | undefined)?.status === 429,
   );
   assert.equal(groupRequests, 1);
 });
@@ -333,7 +336,7 @@ test("getHomeSnapshot preserves an earlier matchday failure when a later round s
 
   const snapshot = await getHomeSnapshot(
     { league: "dfb", season: "2026" },
-    { dataSource, fallbackYear: 2026 }
+    { dataSource, fallbackYear: 2026 },
   );
 
   assert.equal(snapshot.currentRound.matches[0]?.matchID, 2);

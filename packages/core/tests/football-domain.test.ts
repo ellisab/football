@@ -5,11 +5,11 @@ import {
   findNextGroup,
   formatKickoff,
   getBerlinDateKey,
+  getCurrentSeasonYear,
   getKnockoutLeg,
   getKnockoutStageName,
-  getCurrentSeasonYear,
-  getMatchBerlinDateKey,
   getLeagueLabel,
+  getMatchBerlinDateKey,
   getStageLabel,
   groupKnockoutMatchesByTie,
   hasLeagueTable,
@@ -28,10 +28,7 @@ test("getCurrentSeasonYear uses July as season cutoff", () => {
 });
 
 test("resolveSeasonSelection prefers requested season when available", () => {
-  const entries = [
-    { leagueSeason: 2025 },
-    { leagueSeason: 2024 },
-  ];
+  const entries = [{ leagueSeason: 2025 }, { leagueSeason: 2024 }];
 
   const resolved = resolveSeasonSelection({
     requestedSeason: "2024",
@@ -78,18 +75,18 @@ test("resolveLeagueKey accepts only explicitly configured shortcuts", () => {
       leagueShortcut: "dfb-international",
       leagueName: "DFB-Pokal International",
     }),
-    undefined
+    undefined,
   );
   assert.equal(
     resolveLeagueKey({
       leagueShortcut: "ucl-extra",
       leagueName: "Champions League Extra",
     }),
-    undefined
+    undefined,
   );
   assert.equal(
     resolveLeagueKey({ leagueShortcut: "dfb", leagueName: "DFB-Pokal" }),
-    "dfb"
+    "dfb",
   );
 });
 
@@ -113,7 +110,7 @@ test("sortGoals returns goals in chronological order", () => {
 
   assert.deepEqual(
     sorted.goals?.map((goal) => goal.goalID),
-    [1, 2, 3]
+    [1, 2, 3],
   );
 });
 
@@ -138,7 +135,7 @@ test("sortMatchesByUpcomingFirst puts incoming fixtures before results", () => {
 
   assert.deepEqual(
     sorted.map((match) => match.matchID),
-    [3, 2, 1]
+    [3, 2, 1],
   );
 });
 
@@ -165,7 +162,7 @@ test("Berlin date keys use the local matchday", () => {
     getMatchBerlinDateKey({
       matchDateTimeUTC: "2026-12-31T23:30:00Z",
     }),
-    "2027-01-01"
+    "2027-01-01",
   );
 });
 
@@ -175,7 +172,10 @@ test("stage helpers normalize matchday and playoff labels", () => {
   assert.equal(isPlayoffRoundName("Champions League Playoffs"), true);
   assert.equal(isPlayoffRoundName("Semi-finals"), false);
   assert.equal(getKnockoutStageName("Achtelfinale Hinspiele"), "Achtelfinale");
-  assert.equal(getKnockoutStageName("Quarter-finals second legs"), "Quarter-finals");
+  assert.equal(
+    getKnockoutStageName("Quarter-finals second legs"),
+    "Quarter-finals",
+  );
   assert.equal(getKnockoutLeg("Achtelfinale Hinspiele"), "first");
   assert.equal(getKnockoutLeg("Achtelfinale Rückspiele"), "second");
   assert.equal(getKnockoutLeg("Playoffs"), null);
@@ -233,7 +233,7 @@ test("buildLeagueEntriesByGroup maps women Bundesliga shortcuts to dedicated gro
   assert.equal(grouped.get("fbl1")?.[0]?.leagueShortcut, "fbl1");
   assert.equal(
     grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "fbl2"),
-    false
+    false,
   );
 });
 
@@ -285,17 +285,20 @@ test("buildLeagueEntriesByGroup resolves bl1f specifically and ignores bl2f", ()
   assert.equal(grouped.get("fbl1")?.[0]?.leagueShortcut, "bl1f");
   assert.equal(
     grouped.get("fbl1")?.some((entry) => entry.leagueShortcut === "bl1fan"),
-    false
+    false,
   );
   assert.equal(
     grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "bl2f"),
-    false
+    false,
   );
   assert.equal(
     grouped.get("bl2")?.some((entry) => entry.leagueShortcut === "bl2f"),
-    false
+    false,
   );
-  assert.equal(grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "bl1/arena"), true);
+  assert.equal(
+    grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "bl1/arena"),
+    true,
+  );
   assert.equal(grouped.get("bl2")?.length, 0);
 });
 

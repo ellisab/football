@@ -1,8 +1,8 @@
 "use client";
 
+import { Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
 import { useEffect } from "react";
 
 const isEditableTarget = (target: EventTarget | null) => {
@@ -46,9 +46,7 @@ export function SearchControl() {
     >
       <Search aria-hidden="true" className="shell-action-icon" />
       <span className="shell-search-control__label">Suchen</span>
-      <kbd className="shell-search-control__key" aria-hidden="true">
-        /
-      </kbd>
+      <kbd className="shell-search-control__key">/</kbd>
     </Link>
   );
 }

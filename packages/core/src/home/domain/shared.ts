@@ -38,15 +38,14 @@ export const mapSettledWithConcurrency = async <Input, Output>(
     concurrency?: number;
     shouldStop?: (reason: unknown) => boolean;
     shouldStopValue?: (value: Output) => boolean;
-  } = {}
+  } = {},
 ): Promise<Array<BoundedSettledResult<Input, Output>>> => {
   if (!Number.isInteger(concurrency) || concurrency < 1) {
     throw new RangeError("Concurrency must be a positive integer");
   }
 
-  const results: Array<
-    BoundedSettledResult<Input, Output> | undefined
-  > = new Array(inputs.length);
+  const results: Array<BoundedSettledResult<Input, Output> | undefined> =
+    new Array(inputs.length);
   let nextIndex = 0;
   let stopped = false;
 
@@ -85,11 +84,11 @@ export const mapSettledWithConcurrency = async <Input, Output>(
   };
 
   await Promise.all(
-    Array.from({ length: Math.min(concurrency, inputs.length) }, worker)
+    Array.from({ length: Math.min(concurrency, inputs.length) }, worker),
   );
 
   return results.filter(
     (result): result is BoundedSettledResult<Input, Output> =>
-      result !== undefined
+      result !== undefined,
   );
 };

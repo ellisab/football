@@ -9,5 +9,5 @@ const normalizeSiteUrl = (value?: string) => {
 };
 
 export const siteUrl = normalizeSiteUrl(
-  process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL
+  process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL,
 );

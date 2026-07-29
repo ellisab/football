@@ -5,8 +5,7 @@ import {
 } from "@/features/live/server/get-live-page-data";
 
 const HEALTHY_CACHE_HEADERS = {
-  "Cache-Control":
-    "public, max-age=0, s-maxage=300, stale-while-revalidate=60",
+  "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=60",
 };
 
 const PARTIAL_CACHE_HEADERS = {
@@ -47,7 +46,7 @@ export async function GET() {
       {
         headers: FAILED_CACHE_HEADERS,
         status: 503,
-      }
+      },
     );
   }
 }

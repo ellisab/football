@@ -1,11 +1,14 @@
-import Link from "next/link";
 import { Table2 } from "lucide-react";
-import { StandingsCard } from "@/features/standings/components/standings-card";
-import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
-import { getCompetitionMeta } from "@/features/football/competition-meta";
-import { hasCompetitionTable } from "@/features/football/view-utils";
-import { EmptyState, PageIntro } from "@/features/football/components/product-ui";
+import Link from "next/link";
 import { FavoriteButton } from "@/features/favorites";
+import { getCompetitionMeta } from "@/features/football/competition-meta";
+import {
+  EmptyState,
+  PageIntro,
+} from "@/features/football/components/product-ui";
+import { hasCompetitionTable } from "@/features/football/view-utils";
+import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
+import { StandingsCard } from "@/features/standings/components/standings-card";
 
 export function TablesView({
   competitions,
@@ -35,9 +38,10 @@ export function TablesView({
             {tableCompetitions.map((competition) => {
               const meta = getCompetitionMeta(competition.resolvedLeague);
               const tableSection = competition.sections.find(
-                (section) => section.renderKind === "table"
+                (section) => section.renderKind === "table",
               );
-              if (!tableSection || tableSection.renderKind !== "table") return null;
+              if (!tableSection || tableSection.renderKind !== "table")
+                return null;
 
               return (
                 <section

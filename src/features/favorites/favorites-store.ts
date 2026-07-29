@@ -104,7 +104,7 @@ const writeFavorites = (snapshot: FavoritesSnapshot): boolean => {
 export const setFavorite = (
   kind: FavoriteKind,
   id: string,
-  selected: boolean
+  selected: boolean,
 ): boolean => {
   const normalizedId = normalizeFavoriteId(id);
   if (!normalizedId) return false;
@@ -120,7 +120,7 @@ export const useFavorites = (): FavoritesSnapshot => {
   return useSyncExternalStore(
     subscribeToFavorites,
     getFavoritesSnapshot,
-    () => EMPTY_FAVORITES
+    () => EMPTY_FAVORITES,
   );
 };
 

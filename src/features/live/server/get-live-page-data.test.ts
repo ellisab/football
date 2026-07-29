@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { LiveScheduleResult } from "@footballleagues/core/live";
 import type { LeagueKey } from "@footballleagues/core/leagues";
+import type { LiveScheduleResult } from "@footballleagues/core/live";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
 import type { MatchdayRefreshResult } from "@/features/football/server/matchday-refresh-cache";
 import { getLivePageData } from "./get-live-page-data";
@@ -41,7 +41,7 @@ const match = ({
 
 const schedule = (
   matches: LiveScheduleResult["matches"],
-  failedLeagues: LeagueKey[] = []
+  failedLeagues: LeagueKey[] = [],
 ): LiveScheduleResult => ({
   checkedAt: NOW - 1_000,
   failedLeagues,
@@ -219,7 +219,10 @@ test("active matchday refresh concurrency never exceeds three", async () => {
 
   assert.equal(data.matches.length, 4);
   assert.equal(maximumActive, 3);
-  assert.deepEqual(requestedGroups.sort((a, b) => a - b), [1, 2, 3, 4]);
+  assert.deepEqual(
+    requestedGroups.sort((a, b) => a - b),
+    [1, 2, 3, 4],
+  );
 });
 
 test("partial and total discovery failures have distinct fallbacks", async () => {
@@ -241,8 +244,7 @@ test("partial and total discovery failures have distinct fallbacks", async () =>
   });
 
   const total = await getLivePageData({
-    loadSchedule: async () =>
-      schedule([], ["bl1", "bl2", "fbl1", "dfb", "cl"]),
+    loadSchedule: async () => schedule([], ["bl1", "bl2", "fbl1", "dfb", "cl"]),
     now: () => NOW,
   });
 

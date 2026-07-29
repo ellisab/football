@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { SearchX } from "lucide-react";
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -11,10 +11,12 @@ export default function NotFound() {
           </div>
           <div>
             <p className="eyebrow">Fehler 404</p>
-            <h1 className="page-title">Diese Seite steht nicht auf dem Spielplan</h1>
+            <h1 className="page-title">
+              Diese Seite steht nicht auf dem Spielplan
+            </h1>
             <p className="page-description">
-              Der Link ist möglicherweise veraltet. Suche direkt oder öffne einen
-              unterstützten Wettbewerb.
+              Der Link ist möglicherweise veraltet. Suche direkt oder öffne
+              einen unterstützten Wettbewerb.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

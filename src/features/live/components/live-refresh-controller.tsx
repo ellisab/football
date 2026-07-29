@@ -10,12 +10,12 @@ import {
 import { getMatchStatus } from "@/features/football/view-utils";
 import {
   getPollingScopes,
+  type LiveMatchItem,
+  type LiveMatchScope,
   mergeLiveDiscovery,
   mergeMatchdayPayload,
   parseLiveDiscoveryPayload,
   parseMatchdayPollingPayload,
-  type LiveMatchItem,
-  type LiveMatchScope,
 } from "./live-polling";
 
 const REFRESH_INTERVAL_MS = 45_000;
@@ -26,7 +26,9 @@ const getScopeKey = ({ group, league, season }: LiveMatchScope) =>
   `${league}:${season}:${group}`;
 
 const getRetryAtFromResponse = (response: Response) => {
-  const retryAfter = Number.parseFloat(response.headers.get("retry-after") ?? "");
+  const retryAfter = Number.parseFloat(
+    response.headers.get("retry-after") ?? "",
+  );
   return Number.isFinite(retryAfter) && retryAfter > 0
     ? Date.now() + retryAfter * 1_000
     : undefined;
@@ -38,9 +40,9 @@ export function LiveRefreshController({
   initialMatches: LiveMatchItem[];
 }) {
   const [items, setItems] = useState(initialMatches);
-  const [pendingKind, setPendingKind] = useState<
-    "discovery" | "scores" | null
-  >(null);
+  const [pendingKind, setPendingKind] = useState<"discovery" | "scores" | null>(
+    null,
+  );
   const [isDiscoveryDelayed, setIsDiscoveryDelayed] = useState(false);
   const [isScoreDelayed, setIsScoreDelayed] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
@@ -58,7 +60,8 @@ export function LiveRefreshController({
 
     const now = new Date();
     const scopes = getPollingScopes(itemsRef.current, now).filter(
-      (scope) => (retryAtByScope.current.get(getScopeKey(scope)) ?? 0) <= now.getTime()
+      (scope) =>
+        (retryAtByScope.current.get(getScopeKey(scope)) ?? 0) <= now.getTime(),
     );
 
     if (scopes.length === 0) {
@@ -93,7 +96,7 @@ export function LiveRefreshController({
 
           const payload = parseMatchdayPollingPayload(
             await response.json(),
-            scope
+            scope,
           );
           if (!payload) throw new Error("Unexpected matchday response");
 
@@ -104,10 +107,10 @@ export function LiveRefreshController({
           }
 
           return payload;
-        })
+        }),
       );
       const payloads = results.flatMap((result) =>
-        result.status === "fulfilled" ? [result.value] : []
+        result.status === "fulfilled" ? [result.value] : [],
       );
       const failed = results.some((result) => result.status === "rejected");
 
@@ -115,17 +118,17 @@ export function LiveRefreshController({
         setItems((current) =>
           payloads.reduce(
             (merged, payload) => mergeMatchdayPayload(merged, payload),
-            current
-          )
+            current,
+          ),
         );
 
         const checkedAt = Math.max(
-          ...payloads.map((payload) => payload.checkedAt ?? Date.now())
+          ...payloads.map((payload) => payload.checkedAt ?? Date.now()),
         );
         setLastChecked((current) =>
           current && current.getTime() > checkedAt
             ? current
-            : new Date(checkedAt)
+            : new Date(checkedAt),
         );
       }
 
@@ -133,8 +136,8 @@ export function LiveRefreshController({
         failed ||
           payloads.some(
             (payload) =>
-              payload.refreshFailed || payload.refreshState === "stale"
-          )
+              payload.refreshFailed || payload.refreshState === "stale",
+          ),
       );
     } finally {
       activeRequest.current = null;
@@ -167,14 +170,14 @@ export function LiveRefreshController({
       const mergedItems = mergeLiveDiscovery(
         itemsRef.current,
         payload.matches,
-        payload.failedLeagues
+        payload.failedLeagues,
       );
       itemsRef.current = mergedItems;
       setItems(mergedItems);
       setLastChecked((current) =>
         current && current.getTime() > payload.checkedAt
           ? current
-          : new Date(payload.checkedAt)
+          : new Date(payload.checkedAt),
       );
       setIsDiscoveryDelayed(payload.visibleErrors.length > 0);
       nextDiscoveryAt.current =
@@ -187,7 +190,7 @@ export function LiveRefreshController({
         setIsDiscoveryDelayed(true);
         nextDiscoveryAt.current = Math.max(
           nextDiscoveryAt.current,
-          Date.now() + DISCOVERY_RETRY_MS
+          Date.now() + DISCOVERY_RETRY_MS,
         );
       }
     } finally {
@@ -227,14 +230,14 @@ export function LiveRefreshController({
   const isPending = pendingKind !== null;
   const live = useMemo(
     () => items.filter((item) => getMatchStatus(item.match) === "live"),
-    [items]
+    [items],
   );
   const upcoming = useMemo(
     () =>
       items
         .filter((item) => getMatchStatus(item.match) === "upcoming")
         .slice(0, 5),
-    [items]
+    [items],
   );
 
   return (
@@ -249,14 +252,17 @@ export function LiveRefreshController({
               ? lastChecked
                 ? `Datenquelle verzögert. Letzter Stand von ${lastChecked.toLocaleTimeString(
                     "de-DE",
-                    { hour: "2-digit", minute: "2-digit" }
+                    { hour: "2-digit", minute: "2-digit" },
                   )} Uhr.`
                 : "Datenquelle verzögert. Der letzte bekannte Stand wird angezeigt."
               : lastChecked
-                ? `Zuletzt geprüft um ${lastChecked.toLocaleTimeString("de-DE", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })} Uhr.`
+                ? `Zuletzt geprüft um ${lastChecked.toLocaleTimeString(
+                    "de-DE",
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    },
+                  )} Uhr.`
                 : "Automatische Aktualisierung alle 45 Sekunden, solange der Tab sichtbar ist."}
         </p>
         <button

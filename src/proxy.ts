@@ -17,7 +17,10 @@ export function proxy() {
   const response = NextResponse.next();
 
   response.headers.set("Content-Security-Policy-Report-Only", REPORT_ONLY_CSP);
-  response.headers.set("Permissions-Policy", "camera=(), geolocation=(), microphone=()");
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), geolocation=(), microphone=()",
+  );
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-Content-Type-Options", "nosniff");
 
@@ -27,7 +30,8 @@ export function proxy() {
 export const config = {
   matcher: [
     {
-      source: "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
+      source:
+        "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

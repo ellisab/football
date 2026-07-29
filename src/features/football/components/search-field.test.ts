@@ -12,12 +12,12 @@ test("renders a labelled search input and submit action", () => {
       label: "Wettbewerbe durchsuchen",
       name: "q",
       placeholder: "Wettbewerb oder Region",
-    })
+    }),
   );
 
   assert.match(
     markup,
-    /<label id="competition-query-label" for="competition-query" class="sr-only">Wettbewerbe durchsuchen<\/label>/
+    /<label id="competition-query-label" for="competition-query" class="sr-only">Wettbewerbe durchsuchen<\/label>/,
   );
   assert.match(markup, /id="competition-query"/);
   assert.match(markup, /type="search"/);
@@ -25,7 +25,7 @@ test("renders a labelled search input and submit action", () => {
   assert.match(markup, /value="Bundesliga"/);
   assert.match(
     markup,
-    /<button type="submit" class="button-primary search-field__submit">Suchen<\/button>/
+    /<button type="submit" class="button-primary search-field__submit">Suchen<\/button>/,
   );
 });
 
@@ -37,7 +37,7 @@ test("only renders the clear action when it is available", () => {
       name: "q",
       onClear: () => undefined,
       showClear: false,
-    })
+    }),
   );
 
   assert.doesNotMatch(hiddenMarkup, /aria-label="Suchanfrage löschen"/);
@@ -49,7 +49,7 @@ test("only renders the clear action when it is available", () => {
       name: "q",
       onClear: () => undefined,
       showClear: true,
-    })
+    }),
   );
 
   assert.match(visibleMarkup, /type="button"/);

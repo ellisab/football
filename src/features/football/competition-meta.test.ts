@@ -14,7 +14,7 @@ test("competition catalog contains exactly the supported routes", () => {
       { key: "fbl1", href: "/competitions/women" },
       { key: "dfb", href: "/competitions/dfb-pokal" },
       { key: "cl", href: "/competitions/champions-league" },
-    ]
+    ],
   );
   assert.equal(getLeagueKeyFromSlug("unsupported"), undefined);
 });

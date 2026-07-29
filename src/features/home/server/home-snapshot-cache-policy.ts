@@ -5,7 +5,7 @@ type AsyncCacheStore = {
   set(
     key: string,
     value: unknown,
-    options?: { name?: string; tags?: string[]; ttl?: number }
+    options?: { name?: string; tags?: string[]; ttl?: number },
   ): Promise<void>;
 };
 
@@ -18,15 +18,17 @@ type SharedBackoffState<T> = {
   version: 1;
 };
 
-const FIXTURE_CRITICAL_HOME_ERRORS = new Set<HomeSnapshot["errorKeys"][number]>([
-  "current group",
-  "matchday",
-  "groups",
-  "playoffs",
-  "next groups",
-  "next matchday",
-  "knockout rounds",
-]);
+const FIXTURE_CRITICAL_HOME_ERRORS = new Set<HomeSnapshot["errorKeys"][number]>(
+  [
+    "current group",
+    "matchday",
+    "groups",
+    "playoffs",
+    "next groups",
+    "next matchday",
+    "knockout rounds",
+  ],
+);
 
 export class IncompleteSnapshotError extends Error {
   readonly errorKeys: readonly string[];
@@ -72,7 +74,7 @@ export class SnapshotBackoffOpenError extends Error {
 
 export const requireCacheableHomeSnapshot = (snapshot: HomeSnapshot) => {
   const criticalErrors = snapshot.errorKeys.filter((errorKey) =>
-    FIXTURE_CRITICAL_HOME_ERRORS.has(errorKey)
+    FIXTURE_CRITICAL_HOME_ERRORS.has(errorKey),
   );
 
   if (criticalErrors.length > 0 || snapshot.rateLimited) {
@@ -91,13 +93,13 @@ export const requireCacheableHomeSnapshot = (snapshot: HomeSnapshot) => {
 
 export const withSnapshotDeadline = <T>(
   promise: Promise<T>,
-  timeoutMs: number
+  timeoutMs: number,
 ): Promise<T> => {
   let timeout: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeout = setTimeout(
       () => reject(new SnapshotTimeoutError(timeoutMs)),
-      timeoutMs
+      timeoutMs,
     );
   });
 
@@ -108,7 +110,7 @@ export const withSnapshotDeadline = <T>(
 
 export const withAbortableSnapshotDeadline = async <T>(
   load: (signal: AbortSignal) => Promise<T>,
-  timeoutMs: number
+  timeoutMs: number,
 ): Promise<T> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -124,7 +126,7 @@ export const withAbortableSnapshotDeadline = async <T>(
 };
 
 const isSharedBackoffState = <T>(
-  value: unknown
+  value: unknown,
 ): value is SharedBackoffState<T> => {
   if (typeof value !== "object" || value === null) return false;
   const state = value as Partial<SharedBackoffState<T>>;
@@ -139,7 +141,7 @@ const isSharedBackoffState = <T>(
 
 const readSharedBackoffState = async <T>(
   cache: AsyncCacheStore,
-  key: string
+  key: string,
 ) => {
   try {
     const value = await cache.get(key);
@@ -182,10 +184,7 @@ const getErrorRetryAfterMs = (error: unknown) => {
     : undefined;
 };
 
-export const createSharedStaleBackoff = <
-  Args extends readonly unknown[],
-  T,
->(
+export const createSharedStaleBackoff = <Args extends readonly unknown[], T>(
   load: (...args: Args) => Promise<T>,
   getKey: (...args: Args) => string,
   {
@@ -206,7 +205,7 @@ export const createSharedStaleBackoff = <
     rateLimitScheduleMs?: readonly number[];
     scheduleMs?: readonly number[];
     ttlSeconds: number;
-  }
+  },
 ) => {
   if (scheduleMs.length < 1 || rateLimitScheduleMs.length < 1) {
     throw new RangeError("Backoff schedules must not be empty");
@@ -259,7 +258,7 @@ export const createSharedStaleBackoff = <
         schedule[Math.min(failureCount - 1, schedule.length - 1)]!;
       const retryDelay = Math.max(
         Math.round(baseDelay * (0.9 + random() * 0.2)),
-        getErrorRetryAfterMs(error) ?? 0
+        getErrorRetryAfterMs(error) ?? 0,
       );
       await writeSharedBackoffState({
         cache,
@@ -287,7 +286,7 @@ export const createSharedStaleBackoff = <
 
 export const createKeyedSingleFlight = <Args extends readonly unknown[], T>(
   load: (...args: Args) => Promise<T>,
-  getKey: (...args: Args) => string
+  getKey: (...args: Args) => string,
 ) => {
   const inFlight = new Map<string, Promise<T>>();
 
@@ -318,12 +317,8 @@ export const createStaleOnError = <Args extends readonly unknown[], T>(
     onStale,
   }: {
     maxEntries?: number;
-    onStale?: (context: {
-      args: Args;
-      error: unknown;
-      key: string;
-    }) => void;
-  } = {}
+    onStale?: (context: { args: Args; error: unknown; key: string }) => void;
+  } = {},
 ) => {
   if (!Number.isInteger(maxEntries) || maxEntries < 1) {
     throw new RangeError("maxEntries must be a positive integer");
@@ -357,7 +352,7 @@ export const createStaleOnError = <Args extends readonly unknown[], T>(
 export const mapWithConcurrency = async <Input, Output>(
   inputs: readonly Input[],
   concurrency: number,
-  mapper: (input: Input, index: number) => Promise<Output>
+  mapper: (input: Input, index: number) => Promise<Output>,
 ): Promise<Output[]> => {
   if (!Number.isInteger(concurrency) || concurrency < 1) {
     throw new RangeError("Concurrency must be a positive integer");
@@ -385,7 +380,7 @@ export const mapWithConcurrency = async <Input, Output>(
   };
 
   await Promise.all(
-    Array.from({ length: Math.min(concurrency, inputs.length) }, worker)
+    Array.from({ length: Math.min(concurrency, inputs.length) }, worker),
   );
 
   if (hasFailure) throw failure;

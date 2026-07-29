@@ -26,14 +26,16 @@ export default async function MatchPage({
         .sort((a, b) => getMatchTime(a) - getMatchTime(b))
     : [];
   const contextIndex = contextMatches.findIndex(
-    (candidate) => String(candidate.matchID) === matchId
+    (candidate) => String(candidate.matchID) === matchId,
   );
 
   return (
     <MatchDetailView
       competition={competition}
       match={match}
-      previousMatch={contextIndex > 0 ? contextMatches[contextIndex - 1] : undefined}
+      previousMatch={
+        contextIndex > 0 ? contextMatches[contextIndex - 1] : undefined
+      }
       nextMatch={
         contextIndex >= 0 && contextIndex < contextMatches.length - 1
           ? contextMatches[contextIndex + 1]

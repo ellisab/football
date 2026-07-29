@@ -2,10 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  DESKTOP_NAVIGATION,
-  isNavigationItemActive,
-} from "../navigation";
+import { DESKTOP_NAVIGATION, isNavigationItemActive } from "../navigation";
 
 export function PrimaryNavigation() {
   const pathname = usePathname();

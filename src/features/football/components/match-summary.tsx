@@ -1,15 +1,19 @@
-import type { CompetitionMatch } from "@/features/football/view-utils";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
-import { MatchCardList, type MatchCardItem } from "./match-card-list";
+import type { CompetitionMatch } from "@/features/football/view-utils";
+import { type MatchCardItem, MatchCardList } from "./match-card-list";
 
-const toMatchCardItem = ({ competition, match }: CompetitionMatch): MatchCardItem => {
+const toMatchCardItem = ({
+  competition,
+  match,
+}: CompetitionMatch): MatchCardItem => {
   const meta = getCompetitionMeta(competition.resolvedLeague);
 
   return {
     competitionId: competition.resolvedLeague,
     competitionLabel: meta.label,
     match,
-    roundLabel: match.group?.groupName ?? `Saison ${competition.resolvedSeason}`,
+    roundLabel:
+      match.group?.groupName ?? `Saison ${competition.resolvedSeason}`,
   };
 };
 

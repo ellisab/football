@@ -1,8 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import {
-  MatchdaySnapshotError,
-} from "@footballleagues/core/home";
+import { MatchdaySnapshotError } from "@footballleagues/core/home";
 import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   getMatchdayRetrySeconds,
   loadMatchdayWithBackoff,
@@ -53,13 +51,11 @@ export async function GET(request: NextRequest) {
       error instanceof MatchdayRefreshBackoffError
         ? error.status
         : error instanceof MatchdaySnapshotError
-        ? error.status
-        : ((error as { status?: number } | undefined)?.status ?? 500);
+          ? error.status
+          : ((error as { status?: number } | undefined)?.status ?? 500);
     const shouldShareFailure = status === 429 || status >= 500;
     const retryAt =
-      error instanceof MatchdayRefreshBackoffError
-        ? error.retryAt
-        : undefined;
+      error instanceof MatchdayRefreshBackoffError ? error.retryAt : undefined;
 
     return NextResponse.json(
       {
@@ -73,7 +69,7 @@ export async function GET(request: NextRequest) {
         headers: shouldShareFailure
           ? getSharedCacheHeaders({ retryAt, stale: true })
           : NO_STORE_HEADERS,
-      }
+      },
     );
   }
 }

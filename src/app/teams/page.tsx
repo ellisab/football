@@ -21,4 +21,5 @@ export default async function TeamsPage({
 
   return <TeamsView teams={teams} query={query.q?.trim() ?? ""} />;
 }
+
 import type { Metadata } from "next";

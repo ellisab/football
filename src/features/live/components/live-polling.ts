@@ -1,7 +1,4 @@
-import {
-  isLeagueKey,
-  type LeagueKey,
-} from "@footballleagues/core/leagues";
+import { isLeagueKey, type LeagueKey } from "@footballleagues/core/leagues";
 import { getMatchKickoffTimestamp } from "@footballleagues/core/matches";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
 import type { MatchCardItem } from "@/features/football/components/match-card-list";
@@ -42,7 +39,7 @@ const getScopeKey = ({ group, league, season }: LiveMatchScope) =>
 
 export const getPollingScopes = (
   items: readonly LiveMatchItem[],
-  now: Date = new Date()
+  now: Date = new Date(),
 ) => {
   const nowTimestamp = now.getTime();
   if (Number.isNaN(nowTimestamp)) return [];
@@ -97,7 +94,7 @@ const isLiveMatchItem = (value: unknown): value is LiveMatchItem => {
 };
 
 export const parseLiveDiscoveryPayload = (
-  value: unknown
+  value: unknown,
 ): LiveDiscoveryPayload | undefined => {
   if (
     !isRecord(value) ||
@@ -105,7 +102,7 @@ export const parseLiveDiscoveryPayload = (
     !Number.isFinite(value.checkedAt) ||
     !Array.isArray(value.failedLeagues) ||
     !value.failedLeagues.every(
-      (league) => typeof league === "string" && isLeagueKey(league)
+      (league) => typeof league === "string" && isLeagueKey(league),
     ) ||
     !Array.isArray(value.matches) ||
     !value.matches.every(isLiveMatchItem) ||
@@ -120,7 +117,7 @@ export const parseLiveDiscoveryPayload = (
 
 export const parseMatchdayPollingPayload = (
   value: unknown,
-  scope: LiveMatchScope
+  scope: LiveMatchScope,
 ): MatchdayPollingPayload | undefined => {
   if (!isRecord(value) || !isRecord(value.group)) return undefined;
   if (
@@ -137,12 +134,14 @@ export const parseMatchdayPollingPayload = (
 
 export const mergeMatchdayPayload = (
   items: readonly LiveMatchItem[],
-  payload: MatchdayPollingPayload
+  payload: MatchdayPollingPayload,
 ): LiveMatchItem[] => {
   const matchesById = new Map(
     payload.matches.flatMap((match) =>
-      typeof match.matchID === "number" ? [[match.matchID, match] as const] : []
-    )
+      typeof match.matchID === "number"
+        ? [[match.matchID, match] as const]
+        : [],
+    ),
   );
 
   return items.map((item) => {
@@ -165,10 +164,7 @@ const getLiveMatchKey = (item: LiveMatchItem) =>
     ? `${item.competitionId}:${item.match.matchID}`
     : undefined;
 
-const compareLiveMatchItems = (
-  left: LiveMatchItem,
-  right: LiveMatchItem
-) => {
+const compareLiveMatchItems = (left: LiveMatchItem, right: LiveMatchItem) => {
   const leftKickoff =
     getMatchKickoffTimestamp(left.match) ?? Number.POSITIVE_INFINITY;
   const rightKickoff =
@@ -176,25 +172,25 @@ const compareLiveMatchItems = (
   const byKickoff = leftKickoff - rightKickoff;
   if (byKickoff !== 0) return byKickoff;
 
-  const byCompetition = left.competitionId.localeCompare(
-    right.competitionId
-  );
+  const byCompetition = left.competitionId.localeCompare(right.competitionId);
   if (byCompetition !== 0) return byCompetition;
 
-  return (left.match.matchID ?? Number.MAX_SAFE_INTEGER) -
-    (right.match.matchID ?? Number.MAX_SAFE_INTEGER);
+  return (
+    (left.match.matchID ?? Number.MAX_SAFE_INTEGER) -
+    (right.match.matchID ?? Number.MAX_SAFE_INTEGER)
+  );
 };
 
 export const mergeLiveDiscovery = (
   currentItems: readonly LiveMatchItem[],
   discoveredItems: readonly LiveMatchItem[],
-  failedLeagues: readonly LeagueKey[] = []
+  failedLeagues: readonly LeagueKey[] = [],
 ): LiveMatchItem[] => {
   const currentByKey = new Map(
     currentItems.flatMap((item) => {
       const key = getLiveMatchKey(item);
       return key ? [[key, item] as const] : [];
-    })
+    }),
   );
 
   const mergedItems = discoveredItems.map((discoveredItem) => {
@@ -213,7 +209,7 @@ export const mergeLiveDiscovery = (
     discoveredItems.flatMap((item) => {
       const key = getLiveMatchKey(item);
       return key ? [key] : [];
-    })
+    }),
   );
   const failedLeagueSet = new Set(failedLeagues);
 

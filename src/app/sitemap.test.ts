@@ -13,6 +13,6 @@ test("sitemap contains exactly the supported competition routes", () => {
       "/competitions/women",
       "/competitions/dfb-pokal",
       "/competitions/champions-league",
-    ]
+    ],
   );
 });

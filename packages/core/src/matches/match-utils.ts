@@ -18,7 +18,8 @@ const MATCHDAY_REGEX = /(\d{1,2})\.\s*spieltag/i;
 const PLAYOFF_REGEX = /playoffs?/i;
 const GERMAN_KNOCKOUT_ROUND_REGEX = /\b\d+\.\s*runde\b/i;
 const KNOCKOUT_FIRST_LEG_REGEX = /\b(hinspiele?|first legs?|first leg)\b/i;
-const KNOCKOUT_SECOND_LEG_REGEX = /\b(rueckspiele?|rückspiele?|second legs?|second leg)\b/i;
+const KNOCKOUT_SECOND_LEG_REGEX =
+  /\b(rueckspiele?|rückspiele?|second legs?|second leg)\b/i;
 const KNOCKOUT_STAGE_SUFFIX_REGEX =
   /\b(hinspiele?|rueckspiele?|rückspiele?|first legs?|second legs?|first leg|second leg)\b/gi;
 const LOCALIZED_KNOCKOUT_ROUND_NAMES: Array<[RegExp, string]> = [
@@ -121,13 +122,15 @@ export const sortGoals = (match: ApiMatch) => {
   return {
     ...match,
     goals: [...match.goals].sort(
-      (a, b) => (a.matchMinute ?? 0) - (b.matchMinute ?? 0)
+      (a, b) => (a.matchMinute ?? 0) - (b.matchMinute ?? 0),
     ),
   };
 };
 
 const getMatchTime = (match: ApiMatch) => {
-  const timestamp = Date.parse(match.matchDateTimeUTC ?? match.matchDateTime ?? "");
+  const timestamp = Date.parse(
+    match.matchDateTimeUTC ?? match.matchDateTime ?? "",
+  );
   return Number.isNaN(timestamp) ? Number.MAX_SAFE_INTEGER : timestamp;
 };
 
@@ -166,7 +169,9 @@ export const getKnockoutStageName = (groupName?: string) => {
   return withoutLegLabel || normalized;
 };
 
-export const getKnockoutLeg = (groupName?: string): "first" | "second" | null => {
+export const getKnockoutLeg = (
+  groupName?: string,
+): "first" | "second" | null => {
   if (KNOCKOUT_FIRST_LEG_REGEX.test(groupName ?? "")) {
     return "first";
   }
@@ -202,7 +207,10 @@ export const isKnockoutGroup = (name?: string) => {
 };
 
 export const areAllMatchesFinished = (matches: ApiMatch[]) => {
-  return matches.length > 0 && matches.every((match) => match.matchIsFinished === true);
+  return (
+    matches.length > 0 &&
+    matches.every((match) => match.matchIsFinished === true)
+  );
 };
 
 export const hasAnyMatchResult = (matches: ApiMatch[]) => {
@@ -217,7 +225,7 @@ export const hasAnyMatchResult = (matches: ApiMatch[]) => {
 
 export const findNextGroup = (
   groups: Array<Pick<ApiGroup, "groupOrderID" | "groupName">>,
-  currentGroupOrderID?: number
+  currentGroupOrderID?: number,
 ) => {
   if (!currentGroupOrderID) return undefined;
 

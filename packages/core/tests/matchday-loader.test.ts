@@ -20,7 +20,10 @@ const createMatch = (matchID: number): ApiMatch => ({
 const createDataSource = ({
   getLastChangeDate,
   getMatchdayResults,
-}: Pick<FootballDataSource, "getLastChangeDate" | "getMatchdayResults">): FootballDataSource => ({
+}: Pick<
+  FootballDataSource,
+  "getLastChangeDate" | "getMatchdayResults"
+>): FootballDataSource => ({
   getAvailableLeagues: async () => [],
   getCurrentGroup: async () => ({}),
   getGroups: async () => [],
@@ -389,7 +392,7 @@ test("loadMatchdayResults still throws when a cold matchday load fails", async (
       leagueShortcut: "bl1",
       season: 2026,
     }),
-    (error) => error === failure
+    (error) => error === failure,
   );
 });
 
@@ -427,7 +430,7 @@ test("matchday cache evicts the least-recently-used entry at its size cap", asyn
       leagueShortcut: "cache-cap",
       season: 2026,
     }),
-    /matchday unavailable/
+    /matchday unavailable/,
   );
   const newest = await loadMatchdayResults({
     dataSource,

@@ -1,11 +1,7 @@
-import type { KnockoutTie } from "../../matches";
 import type { LeagueKey, LeagueOption } from "../../leagues";
+import type { KnockoutTie } from "../../matches";
 import type { ApiGroup, ApiMatch, ApiTableRow } from "../../openligadb";
-import type {
-  BracketRound,
-  HomeErrorKey,
-  HomeRoundSnapshot,
-} from "../types";
+import type { BracketRound, HomeErrorKey, HomeRoundSnapshot } from "../types";
 
 export type HomeMatchSectionState = {
   key: "next-round" | "matchday";

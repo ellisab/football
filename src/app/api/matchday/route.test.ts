@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test, { beforeEach } from "node:test";
-import { NextRequest } from "next/server";
 import { clearOpenLigaDbMemoryCache } from "@footballleagues/core/openligadb";
+import { NextRequest } from "next/server";
 import { GET } from "./route";
 
 beforeEach(() => {
@@ -11,7 +11,7 @@ beforeEach(() => {
 const jsonResponse = (
   body: unknown,
   status: number = 200,
-  headers?: HeadersInit
+  headers?: HeadersInit,
 ) => {
   return new Response(JSON.stringify(body), {
     status,
@@ -78,8 +78,8 @@ test("/api/matchday loads only the requested matchday", async () => {
   try {
     const response = await GET(
       new NextRequest(
-        "http://localhost/api/matchday?league=bl1&season=2025&group=10"
-      )
+        "http://localhost/api/matchday?league=bl1&season=2025&group=10",
+      ),
     );
     const payload = await response.json();
 
@@ -91,11 +91,11 @@ test("/api/matchday loads only the requested matchday", async () => {
     assert.equal(payload.matches[0]?.matchID, 100);
     assert.deepEqual(
       paths.filter((path) => path.startsWith("/getmatchdata")),
-      ["/getmatchdata/bl1/2025/10"]
+      ["/getmatchdata/bl1/2025/10"],
     );
     assert.deepEqual(
       paths.filter((path) => path.startsWith("/getlastchangedate")),
-      ["/getlastchangedate/bl1/2025/10"]
+      ["/getlastchangedate/bl1/2025/10"],
     );
     assert.equal(paths.includes("/getmatchdata/bl2/2025/10"), false);
     assert.equal(paths.includes("/getcurrentgroup/bl1"), false);
@@ -107,7 +107,7 @@ test("/api/matchday loads only the requested matchday", async () => {
 
 test("/api/matchday returns errors with no-store cache policy", async () => {
   const response = await GET(
-    new NextRequest("http://localhost/api/matchday?league=bl1")
+    new NextRequest("http://localhost/api/matchday?league=bl1"),
   );
   const payload = await response.json();
   const cacheControl = response.headers.get("cache-control") ?? "";
@@ -131,8 +131,8 @@ test("/api/matchday rejects unsupported league keys without loading data", async
   try {
     const response = await GET(
       new NextRequest(
-        "http://localhost/api/matchday?league=unsupported&season=2026&group=1"
-      )
+        "http://localhost/api/matchday?league=unsupported&season=2026&group=1",
+      ),
     );
     const payload = await response.json();
 
@@ -203,7 +203,7 @@ test("/api/matchday shares a stale response for the active backoff window", asyn
 
   try {
     const request = new NextRequest(
-      "http://localhost/api/matchday?league=bl1&season=2025&group=20"
+      "http://localhost/api/matchday?league=bl1&season=2025&group=20",
     );
     const first = await GET(request);
     assert.equal(first.status, 200);

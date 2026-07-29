@@ -1,12 +1,15 @@
-import Link from "next/link";
 import { ArrowRight, Shirt } from "lucide-react";
-import { TeamBadge } from "@/features/teams/components/team-badge";
-import type { TeamSummary } from "@/features/football/view-utils";
-import { MatchList } from "@/features/football/components/match-summary";
-import { EmptyState, PageIntro } from "@/features/football/components/product-ui";
-import { SearchField } from "@/features/football/components/search-field";
-import { getCompetitionMeta } from "@/features/football/competition-meta";
+import Link from "next/link";
 import { FavoriteButton } from "@/features/favorites";
+import { getCompetitionMeta } from "@/features/football/competition-meta";
+import { MatchList } from "@/features/football/components/match-summary";
+import {
+  EmptyState,
+  PageIntro,
+} from "@/features/football/components/product-ui";
+import { SearchField } from "@/features/football/components/search-field";
+import type { TeamSummary } from "@/features/football/view-utils";
+import { TeamBadge } from "@/features/teams/components/team-badge";
 
 const normalize = (value: string) =>
   value
@@ -44,7 +47,9 @@ function TeamCard({ team }: { team: TeamSummary }) {
       </div>
       <div className="team-card-facts">
         <span>
-          <strong>{team.tablePosition ? `#${team.tablePosition.position}` : "–"}</strong>
+          <strong>
+            {team.tablePosition ? `#${team.tablePosition.position}` : "–"}
+          </strong>
           Tabellenplatz
         </span>
         <span>
@@ -130,11 +135,13 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
           />
           <div className="min-w-0 flex-1">
             <p className="eyebrow">
-              {team.competitions.map((entry) => entry.label).join(" · ") || "Team"}
+              {team.competitions.map((entry) => entry.label).join(" · ") ||
+                "Team"}
             </p>
             <h1 className="page-title">{team.name}</h1>
             <p className="page-description">
-              Aktueller Ausschnitt mit nächster Partie, letztem Ergebnis und Tabelle.
+              Aktueller Ausschnitt mit nächster Partie, letztem Ergebnis und
+              Tabelle.
             </p>
           </div>
           <FavoriteButton kind="team" id={team.id} label={team.name} />
@@ -143,7 +150,9 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
         <section className="team-context-grid" aria-label="Teamkontext">
           <div>
             <span>Tabellenplatz</span>
-            <strong>{team.tablePosition ? `#${team.tablePosition.position}` : "–"}</strong>
+            <strong>
+              {team.tablePosition ? `#${team.tablePosition.position}` : "–"}
+            </strong>
           </div>
           <div>
             <span>Punkte</span>
@@ -192,7 +201,9 @@ export function TeamDetailView({ team }: { team: TeamSummary }) {
             <div className="section-heading-row">
               <div>
                 <h2 className="section-title">Wettbewerbe</h2>
-                <p className="section-description">Weitere Spiele und Tabellen öffnen.</p>
+                <p className="section-description">
+                  Weitere Spiele und Tabellen öffnen.
+                </p>
               </div>
             </div>
             <div className="context-link-list">

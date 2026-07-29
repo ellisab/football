@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
 import {
   getImageRequestHeaders,
   isAllowedImageHost,
   isSvgUrl,
   normalizeIconUrl,
 } from "@footballleagues/core/teams";
+import { type NextRequest, NextResponse } from "next/server";
 
 const CACHE_SECONDS = 60 * 60 * 24;
 

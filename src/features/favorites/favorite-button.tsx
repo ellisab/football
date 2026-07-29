@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Star } from "lucide-react";
 import { Button } from "@footballleagues/ui/button";
+import { Star } from "lucide-react";
+import { useState } from "react";
 import type { FavoriteKind } from "./favorites-storage";
 import { setFavorite, useIsFavorite } from "./favorites-store";
 
@@ -43,7 +43,7 @@ export function FavoriteButton({
     setAnnouncement(
       nextSelected
         ? `${label} wurde zu deinen Favoriten hinzugefügt.`
-        : `${label} wurde aus deinen Favoriten entfernt.`
+        : `${label} wurde aus deinen Favoriten entfernt.`,
     );
     onFavoriteChange?.(nextSelected);
   };
@@ -70,11 +70,14 @@ export function FavoriteButton({
           className="h-4 w-4"
           fill={selected ? "currentColor" : "none"}
         />
-        {showLabel ? (
-          <span>{selected ? "Favorisiert" : "Favorit"}</span>
-        ) : null}
+        {showLabel ? <span>{selected ? "Favorisiert" : "Favorit"}</span> : null}
       </Button>
-      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      <span
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {announcement}
       </span>
     </>

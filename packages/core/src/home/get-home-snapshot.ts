@@ -5,11 +5,11 @@ import {
   hasLeagueTable,
   isBundesligaMatchdayLeague,
   isLeagueKey,
+  type LeagueKey,
   pickLeagueEntryForSeason,
   resolveEffectiveLeagueShortcut,
   resolveLeagueSelection,
   resolveSeasonSelection,
-  type LeagueKey,
 } from "../leagues";
 import {
   areAllMatchesFinished,
@@ -17,12 +17,12 @@ import {
   sortGoals,
   sortMatchesByKickoff,
 } from "../matches";
-import { openLigaDbDataSource, type ApiGroup } from "../openligadb";
+import { type ApiGroup, openLigaDbDataSource } from "../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "./data-source";
-import { loadBracketMatches } from "./domain/load-bracket";
-import { loadMatchdayResults } from "./domain/matchday-loader";
-import { loadPrimaryHomeData } from "./domain/load-primary-data";
 import { normalizeLeagueEntries } from "./domain/league-groups";
+import { loadBracketMatches } from "./domain/load-bracket";
+import { loadPrimaryHomeData } from "./domain/load-primary-data";
+import { loadMatchdayResults } from "./domain/matchday-loader";
 import { resolveRoundSnapshots } from "./domain/resolve-rounds";
 import { getStatusCode } from "./domain/shared";
 import type { HomeErrorKey, HomeRoundSnapshot, HomeSnapshot } from "./types";
@@ -36,7 +36,7 @@ const getOrderedGroups = (groups: ApiGroup[]) => {
 const getGroupName = (
   groupOrderID: number | undefined,
   groups: ApiGroup[],
-  fallbackGroupName?: string
+  fallbackGroupName?: string,
 ) => {
   return (
     groups.find((group) => group?.groupOrderID === groupOrderID)?.groupName ??
@@ -217,10 +217,8 @@ const resolvePrimaryRoundSnapshot = async ({
 
         return {
           currentGroup: fallbackGroupResult?.group ?? currentGroup,
-          currentRound:
-            fallbackGroupResult?.round ??
-            currentRoundResult?.round ??
-            { matches: [] },
+          currentRound: fallbackGroupResult?.round ??
+            currentRoundResult?.round ?? { matches: [] },
           errorKeys: ["matchday"],
           rateLimited: true,
         };
@@ -263,8 +261,8 @@ const resolvePrimaryRoundSnapshot = async ({
 
     return {
       currentGroup: fallbackGroupResult?.group ?? currentGroup,
-      currentRound:
-        fallbackGroupResult?.round ?? currentRoundResult?.round ?? { matches: [] },
+      currentRound: fallbackGroupResult?.round ??
+        currentRoundResult?.round ?? { matches: [] },
       errorKeys: matchdayFailed ? ["matchday"] : [],
       rateLimited: false,
     };
@@ -332,8 +330,8 @@ const resolvePrimaryRoundSnapshot = async ({
 
   return {
     currentGroup: firstSeasonGroupResult?.group ?? currentGroup,
-    currentRound:
-      firstSeasonGroupResult?.round ?? currentRoundResult?.round ?? { matches: [] },
+    currentRound: firstSeasonGroupResult?.round ??
+      currentRoundResult?.round ?? { matches: [] },
     errorKeys: matchdayFailed ? ["matchday"] : [],
     rateLimited: false,
   };
@@ -348,7 +346,7 @@ export const getHomeSnapshot = async (
     dataSource?: FootballDataSource;
     requestOptions?: HomeRequestOptions;
     fallbackYear?: number;
-  }
+  },
 ): Promise<HomeSnapshot> => {
   if (params.league && !isLeagueKey(params.league)) {
     throw new Error(`Unsupported league: ${params.league}`);
@@ -357,9 +355,15 @@ export const getHomeSnapshot = async (
   const dataSource = options?.dataSource ?? openLigaDbDataSource;
   const requestOptions = options?.requestOptions;
   const referenceSeason = options?.fallbackYear ?? getCurrentSeasonYear();
-  const normalizedGroups = await normalizeLeagueEntries(dataSource, requestOptions);
+  const normalizedGroups = await normalizeLeagueEntries(
+    dataSource,
+    requestOptions,
+  );
   const availableGroupKeys = getAvailableGroupKeys(normalizedGroups);
-  const resolvedLeague = resolveLeagueSelection(params.league, availableGroupKeys);
+  const resolvedLeague = resolveLeagueSelection(
+    params.league,
+    availableGroupKeys,
+  );
 
   const leagueEntries = normalizedGroups.get(resolvedLeague) ?? [];
   const resolvedSeason = resolveSeasonSelection({
@@ -368,10 +372,13 @@ export const getHomeSnapshot = async (
     fallbackYear: referenceSeason,
   });
 
-  const entryForSeason = pickLeagueEntryForSeason(leagueEntries, resolvedSeason);
+  const entryForSeason = pickLeagueEntryForSeason(
+    leagueEntries,
+    resolvedSeason,
+  );
   const effectiveShortcut = resolveEffectiveLeagueShortcut(
     resolvedLeague,
-    entryForSeason?.leagueShortcut
+    entryForSeason?.leagueShortcut,
   );
 
   const primaryHomeData = await loadPrimaryHomeData({
@@ -404,8 +411,7 @@ export const getHomeSnapshot = async (
   dataErrors.push(...primaryRoundData.errorKeys);
 
   const roundData =
-    !primaryRoundData.rateLimited &&
-    primaryRoundData.currentGroup?.groupOrderID
+    !primaryRoundData.rateLimited && primaryRoundData.currentGroup?.groupOrderID
       ? await resolveRoundSnapshots({
           dataSource,
           currentGroup: primaryRoundData.currentGroup,

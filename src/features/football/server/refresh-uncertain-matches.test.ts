@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
 import {
+  type CompetitionMatch,
   getMatchScore,
   getMatchStatus,
-  type CompetitionMatch,
 } from "@/features/football/view-utils";
 import { refreshUncertainMatches } from "./refresh-uncertain-matches";
 
@@ -218,7 +218,7 @@ test("refreshUncertainMatches bounds direct refresh volume and concurrency", asy
       matchID: index + 1,
       matchDateTimeUTC: "2026-07-12T08:00:00Z",
       matchIsFinished: false,
-    })
+    }),
   );
   let active = 0;
   let maxActive = 0;

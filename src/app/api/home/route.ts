@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
 import { getHomeSnapshot } from "@footballleagues/core/home";
 import { isLeagueKey } from "@footballleagues/core/leagues";
 import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   IncompleteSnapshotError,
   requireCacheableHomeSnapshot,
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   if (league && !isLeagueKey(league)) {
     return NextResponse.json(
       { error: "Competition not found." },
-      { status: 404, headers: NO_STORE_HEADERS }
+      { status: 404, headers: NO_STORE_HEADERS },
     );
   }
 
@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
               revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot,
             },
           },
-        }
-      )
+        },
+      ),
     );
 
     return NextResponse.json(snapshot, {
@@ -50,12 +50,12 @@ export async function GET(request: NextRequest) {
       upstreamStatus === 429
         ? 429
         : error instanceof IncompleteSnapshotError
-        ? 502
-        : typeof upstreamStatus === "number" &&
-            upstreamStatus >= 400 &&
-            upstreamStatus <= 599
-          ? upstreamStatus
-          : 500;
+          ? 502
+          : typeof upstreamStatus === "number" &&
+              upstreamStatus >= 400 &&
+              upstreamStatus <= 599
+            ? upstreamStatus
+            : 500;
 
     return NextResponse.json(
       {
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       {
         status,
         headers: NO_STORE_HEADERS,
-      }
+      },
     );
   }
 }

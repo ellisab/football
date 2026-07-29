@@ -514,7 +514,7 @@ Server Components remain the default. Client code is limited to `PrimaryNavigati
 - Install with frozen lockfile.
 - Unit tests for status, date/query parsing, search ranking, favorite serialization, and partial data.
 - Existing core/API tests.
-- ESLint, strict TypeScript, Knip, and production build.
+- Biome, strict TypeScript, Knip, and production build.
 - Route discovery and direct URL reloads.
 - Search, favorites persistence, competition/season/matchday/date switching.
 - Keyboard-only traversal and focus visibility.
@@ -530,7 +530,7 @@ Server Components remain the default. Client code is limited to `PrimaryNavigati
 The latest repository-wide verification was recorded on 2026-07-22:
 
 - 60 application tests and 81 core-package tests passed when all test files were discovered;
-- strict TypeScript, repository ESLint, and the production build passed;
+- strict TypeScript, repository linting, and the production build passed;
 - `/` and `/live` browser smoke checks completed without application console errors;
 - the live browser used the scoped matchday refresh path instead of periodic full-page RSC
   refreshes.

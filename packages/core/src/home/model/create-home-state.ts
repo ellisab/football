@@ -4,7 +4,11 @@ import {
   isPlayoffRoundName,
 } from "../../matches";
 import type { HomeSnapshot } from "../types";
-import type { HomeRoundSectionState, HomeSectionState, HomeState } from "./types";
+import type {
+  HomeRoundSectionState,
+  HomeSectionState,
+  HomeState,
+} from "./types";
 
 const isKnockoutLeague = (leagueKey: HomeSnapshot["resolvedLeague"]) => {
   return leagueKey === "dfb" || leagueKey === "cl";
@@ -38,7 +42,9 @@ const buildRoundSectionState = ({
 
 export const createHomeState = (snapshot: HomeSnapshot): HomeState => {
   const usesKnockoutLabels = isKnockoutLeague(snapshot.resolvedLeague);
-  const currentStageName = getKnockoutStageName(snapshot.currentRound.groupName);
+  const currentStageName = getKnockoutStageName(
+    snapshot.currentRound.groupName,
+  );
   const nextStageName = getKnockoutStageName(snapshot.nextRound.groupName);
   const bracketMatches = usesKnockoutLabels
     ? snapshot.bracketMatches.filter((round) => {
@@ -63,7 +69,7 @@ export const createHomeState = (snapshot: HomeSnapshot): HomeState => {
         leagueKey: snapshot.resolvedLeague,
         key: "next-round",
         round: snapshot.nextRound,
-      })
+      }),
     );
   }
 
@@ -73,7 +79,7 @@ export const createHomeState = (snapshot: HomeSnapshot): HomeState => {
         leagueKey: snapshot.resolvedLeague,
         key: "matchday",
         round: snapshot.currentRound,
-      })
+      }),
     );
   }
 

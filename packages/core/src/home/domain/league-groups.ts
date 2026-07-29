@@ -11,11 +11,15 @@ export const getGroupsWithFallback = async (
   leagueKey: LeagueKey,
   leagueShortcut: string,
   season: number,
-  requestOptions?: HomeRequestOptions
+  requestOptions?: HomeRequestOptions,
 ) => {
   if (leagueKey !== "cl") {
     return {
-      groups: await dataSource.getGroups(leagueShortcut, season, requestOptions),
+      groups: await dataSource.getGroups(
+        leagueShortcut,
+        season,
+        requestOptions,
+      ),
       shortcut: leagueShortcut,
     };
   }
@@ -29,7 +33,11 @@ export const getGroupsWithFallback = async (
     if (getStatusCode(error) !== 404) throw error;
 
     return {
-      groups: await dataSource.getGroups(leagueShortcut, season, requestOptions),
+      groups: await dataSource.getGroups(
+        leagueShortcut,
+        season,
+        requestOptions,
+      ),
       shortcut: leagueShortcut,
     };
   }
@@ -37,7 +45,7 @@ export const getGroupsWithFallback = async (
 
 export const normalizeLeagueEntries = async (
   dataSource: FootballDataSource,
-  requestOptions?: HomeRequestOptions
+  requestOptions?: HomeRequestOptions,
 ) => {
   const availableLeagues = await dataSource.getAvailableLeagues(requestOptions);
   const groupedLeagues = buildLeagueEntriesByGroup(availableLeagues);
@@ -46,6 +54,6 @@ export const normalizeLeagueEntries = async (
     Array.from(groupedLeagues.entries()).map(([key, entries]) => [
       key,
       key === "bl2" ? keepLatestSeasonOnly(entries) : entries,
-    ])
+    ]),
   );
 };

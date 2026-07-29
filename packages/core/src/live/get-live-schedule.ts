@@ -1,19 +1,19 @@
 import {
-  LEAGUE_GROUPS,
   buildLeagueEntriesByGroup,
   getCurrentSeasonYear,
   getDataShortcutForLeague,
+  LEAGUE_GROUPS,
+  type LeagueKey,
   pickLeagueEntryForSeason,
   resolveEffectiveLeagueShortcut,
-  type LeagueKey,
 } from "../leagues";
 import { getMatchKickoffTimestamp } from "../matches";
 import {
-  OPENLIGADB_CACHE_SECONDS,
-  getAllMatches,
-  getAvailableLeaguesBySeason,
   type ApiLeague,
   type ApiMatch,
+  getAllMatches,
+  getAvailableLeaguesBySeason,
+  OPENLIGADB_CACHE_SECONDS,
 } from "../openligadb";
 import type {
   GetLiveScheduleOptions,
@@ -55,7 +55,7 @@ export const openLigaDbLiveDataSource: LiveDataSource = {
 
 const runWithTimeout = async <T>(
   operation: (signal: AbortSignal) => Promise<T>,
-  timeoutMs: number
+  timeoutMs: number,
 ): Promise<T> => {
   const controller = new AbortController();
   let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -64,7 +64,7 @@ const runWithTimeout = async <T>(
     timeout = setTimeout(() => {
       controller.abort();
       const error = new Error(
-        `Live schedule request timed out after ${timeoutMs}ms`
+        `Live schedule request timed out after ${timeoutMs}ms`,
       );
       error.name = "TimeoutError";
       reject(error);
@@ -93,7 +93,7 @@ const resolveCompetitionRequests = ({
   return LEAGUE_GROUPS.map(({ key: league }) => {
     const entry = pickLeagueEntryForSeason(
       entriesByLeague.get(league) ?? [],
-      season
+      season,
     );
     const fallbackShortcut = getDataShortcutForLeague(league);
 
@@ -102,7 +102,7 @@ const resolveCompetitionRequests = ({
       season,
       effectiveShortcut: resolveEffectiveLeagueShortcut(
         league,
-        entry?.leagueShortcut ?? fallbackShortcut
+        entry?.leagueShortcut ?? fallbackShortcut,
       ),
     };
   });
@@ -118,7 +118,7 @@ const loadCompetitionSchedules = async ({
   requestTimeoutMs: number;
 }): Promise<CompetitionLoadResult[]> => {
   const results: Array<CompetitionLoadResult | undefined> = new Array(
-    requests.length
+    requests.length,
   );
   let nextIndex = 0;
 
@@ -139,9 +139,9 @@ const loadCompetitionSchedules = async ({
                 next: {
                   revalidate: OPENLIGADB_CACHE_SECONDS.liveSchedule,
                 },
-              }
+              },
             ),
-          requestTimeoutMs
+          requestTimeoutMs,
         );
 
         if (!Array.isArray(matches)) {
@@ -165,12 +165,12 @@ const loadCompetitionSchedules = async ({
   await Promise.all(
     Array.from(
       { length: Math.min(LIVE_SCHEDULE_CONCURRENCY, requests.length) },
-      worker
-    )
+      worker,
+    ),
   );
 
   return results.filter(
-    (result): result is CompetitionLoadResult => result !== undefined
+    (result): result is CompetitionLoadResult => result !== undefined,
   );
 };
 
@@ -216,7 +216,7 @@ const getMatchKey = (candidate: LiveScheduleMatch) => {
 
 const compareCandidates = (
   left: TimedLiveScheduleMatch,
-  right: TimedLiveScheduleMatch
+  right: TimedLiveScheduleMatch,
 ) => {
   const byKickoff = left.kickoffTimestamp - right.kickoffTimestamp;
   if (byKickoff !== 0) return byKickoff;
@@ -230,14 +230,11 @@ const compareCandidates = (
 
   const byShortcut = compareStrings(
     left.effectiveShortcut,
-    right.effectiveShortcut
+    right.effectiveShortcut,
   );
   if (byShortcut !== 0) return byShortcut;
 
-  return compareStrings(
-    getFallbackMatchKey(left),
-    getFallbackMatchKey(right)
-  );
+  return compareStrings(getFallbackMatchKey(left), getFallbackMatchKey(right));
 };
 
 const selectScheduleMatches = ({
@@ -281,7 +278,7 @@ const selectScheduleMatches = ({
   const recentlyStarted = uniqueCandidates.filter(
     ({ kickoffTimestamp }) =>
       kickoffTimestamp >= nowTimestamp - LIVE_LOOKBACK_MS &&
-      kickoffTimestamp <= nowTimestamp
+      kickoffTimestamp <= nowTimestamp,
   );
   const upcoming = uniqueCandidates
     .filter(({ kickoffTimestamp }) => kickoffTimestamp > nowTimestamp)
@@ -298,7 +295,7 @@ const selectScheduleMatches = ({
 };
 
 export const getLiveSchedule = async (
-  options: GetLiveScheduleOptions = {}
+  options: GetLiveScheduleOptions = {},
 ): Promise<LiveScheduleResult> => {
   const now = options.now ?? new Date();
   const checkedAt = now.getTime();
@@ -308,10 +305,7 @@ export const getLiveSchedule = async (
 
   const requestTimeoutMs =
     options.requestTimeoutMs ?? LIVE_SCHEDULE_REQUEST_TIMEOUT_MS;
-  if (
-    !Number.isFinite(requestTimeoutMs) ||
-    requestTimeoutMs <= 0
-  ) {
+  if (!Number.isFinite(requestTimeoutMs) || requestTimeoutMs <= 0) {
     throw new RangeError("Live schedule timeout must be a positive number");
   }
 
@@ -328,7 +322,7 @@ export const getLiveSchedule = async (
             revalidate: OPENLIGADB_CACHE_SECONDS.availableLeagues,
           },
         }),
-      requestTimeoutMs
+      requestTimeoutMs,
     );
   } catch {
     // Known canonical shortcuts still allow partial live data when metadata fails.
@@ -350,7 +344,7 @@ export const getLiveSchedule = async (
       nowTimestamp: checkedAt,
     }),
     failedLeagues: results.flatMap((result) =>
-      result.status === "rejected" ? [result.request.league] : []
+      result.status === "rejected" ? [result.request.league] : [],
     ),
     checkedAt,
   };

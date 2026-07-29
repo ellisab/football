@@ -3,10 +3,10 @@ import {
   hasLeagueTable,
   type LeagueKey,
 } from "../../leagues";
-import type { ApiGroup, ApiMatch, ApiTableRow } from "../../openligadb";
 import { sortGoals } from "../../matches";
-import type { HomeErrorKey } from "../types";
+import type { ApiGroup, ApiMatch, ApiTableRow } from "../../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
+import type { HomeErrorKey } from "../types";
 import { getGroupsWithFallback } from "./league-groups";
 import { loadMatchdayResults } from "./matchday-loader";
 import { getStatusCode } from "./shared";
@@ -33,7 +33,7 @@ export const loadPrimaryHomeData = async ({
 }> => {
   const currentGroupPromise = dataSource.getCurrentGroup(
     effectiveShortcut,
-    requestOptions
+    requestOptions,
   );
   const tablePromise = hasLeagueTable(resolvedLeague)
     ? dataSource.getTable(effectiveShortcut, resolvedSeason, requestOptions)
@@ -43,7 +43,7 @@ export const loadPrimaryHomeData = async ({
     resolvedLeague,
     effectiveShortcut,
     resolvedSeason,
-    requestOptions
+    requestOptions,
   );
   const playoffMatchesPromise =
     resolvedLeague === "cl"
@@ -98,7 +98,7 @@ export const loadPrimaryHomeData = async ({
   const rateLimited =
     [currentGroupResult, tableResult, groupsResult, playoffResult].some(
       (result) =>
-        result.status === "rejected" && getStatusCode(result.reason) === 429
+        result.status === "rejected" && getStatusCode(result.reason) === 429,
     ) ||
     (playoffResult.status === "fulfilled" &&
       playoffResult.value.rateLimited === true);

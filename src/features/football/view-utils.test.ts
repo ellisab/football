@@ -22,30 +22,30 @@ test("football view status wrappers retain caller-compatible names without hidin
   assert.equal(
     getMatchStatus(
       { matchDateTimeUTC: "2026-07-11T19:00:00Z", matchIsFinished: false },
-      now
+      now,
     ),
-    "upcoming"
+    "upcoming",
   );
   assert.equal(
     getMatchStatus(
       { matchDateTimeUTC: "2026-07-11T17:00:00Z", matchIsFinished: false },
-      now
+      now,
     ),
-    "live"
+    "live",
   );
   assert.equal(
     getMatchStatus(
       { matchDateTimeUTC: "2026-07-11T12:00:00Z", matchIsFinished: false },
-      now
+      now,
     ),
-    "unknown"
+    "unknown",
   );
   assert.equal(
     getMatchStatusLabel(
       { matchDateTimeUTC: "2026-07-11T12:00:00Z", matchIsFinished: false },
-      now
+      now,
     ),
-    "Status unklar"
+    "Status unklar",
   );
 });
 
@@ -66,6 +66,6 @@ test("football view score and accessible-label wrappers preserve incomplete resu
   assert.equal(getMatchScore(match), "2:-");
   assert.equal(
     getMatchScreenReaderLabel(match, now),
-    "Team Eins gegen Team Zwei, Status unklar."
+    "Team Eins gegen Team Zwei, Status unklar.",
   );
 });

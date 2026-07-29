@@ -1,9 +1,5 @@
 import type { ApiLeague } from "../openligadb/index";
-import {
-  DEFAULT_LEAGUE,
-  isLeagueKey,
-  LEAGUE_GROUPS,
-} from "./constants";
+import { DEFAULT_LEAGUE, isLeagueKey, LEAGUE_GROUPS } from "./constants";
 import {
   formatSeasonRange,
   getCurrentSeasonYear,
@@ -24,11 +20,7 @@ export const hasLeagueTable = (leagueKey: LeagueKey) => {
   return leagueKey !== "dfb";
 };
 
-const BUNDESLIGA_MATCHDAY_LEAGUES = new Set<LeagueKey>([
-  "bl1",
-  "bl2",
-  "fbl1",
-]);
+const BUNDESLIGA_MATCHDAY_LEAGUES = new Set<LeagueKey>(["bl1", "bl2", "fbl1"]);
 
 export const isBundesligaMatchdayLeague = (leagueKey: LeagueKey) => {
   return BUNDESLIGA_MATCHDAY_LEAGUES.has(leagueKey);
@@ -45,7 +37,9 @@ export const isFootballLeague = (league: ApiLeague) => {
   );
 };
 
-const resolveGroupByShortcut = (leagueShortcut: string): LeagueKey | undefined => {
+const resolveGroupByShortcut = (
+  leagueShortcut: string,
+): LeagueKey | undefined => {
   let bestMatch: { key: LeagueKey; length: number } | undefined;
 
   for (const group of LEAGUE_GROUPS) {
@@ -62,7 +56,7 @@ const resolveGroupByShortcut = (leagueShortcut: string): LeagueKey | undefined =
 };
 
 export const resolveLeagueKey = (
-  league: Pick<ApiLeague, "leagueName" | "leagueShortcut">
+  league: Pick<ApiLeague, "leagueName" | "leagueShortcut">,
 ): LeagueKey | undefined => {
   const leagueShortcut = normalizeText(league.leagueShortcut);
   return resolveGroupByShortcut(leagueShortcut);
@@ -76,7 +70,11 @@ export const buildLeagueEntriesByGroup = (leagues: ApiLeague[]) => {
   }
 
   for (const league of leagues) {
-    if (!league.leagueShortcut || !league.leagueSeason || !isFootballLeague(league)) {
+    if (
+      !league.leagueShortcut ||
+      !league.leagueSeason ||
+      !isFootballLeague(league)
+    ) {
       continue;
     }
 
@@ -93,37 +91,44 @@ export const keepLatestSeasonOnly = (entries: ApiLeague[]) => {
   if (seasons.length === 0) return entries;
 
   const latest = seasons[0];
-  return entries.filter((entry) => parseSeasonValue(entry.leagueSeason) === latest);
+  return entries.filter(
+    (entry) => parseSeasonValue(entry.leagueSeason) === latest,
+  );
 };
 
-export const pickLeagueEntryForSeason = (entries: ApiLeague[], season: number) => {
+export const pickLeagueEntryForSeason = (
+  entries: ApiLeague[],
+  season: number,
+) => {
   const candidates = entries.filter(
-    (entry) => parseSeasonValue(entry.leagueSeason) === season
+    (entry) => parseSeasonValue(entry.leagueSeason) === season,
   );
   if (candidates.length === 0) return undefined;
 
   return candidates.sort((a, b) => {
     const aShortcut = a.leagueShortcut ?? "";
     const bShortcut = b.leagueShortcut ?? "";
-    return aShortcut.length - bShortcut.length || aShortcut.localeCompare(bShortcut);
+    return (
+      aShortcut.length - bShortcut.length || aShortcut.localeCompare(bShortcut)
+    );
   })[0];
 };
 
 export const getAvailableGroupKeys = (
-  groupedLeagues: Map<LeagueKey, ApiLeague[]>
+  groupedLeagues: Map<LeagueKey, ApiLeague[]>,
 ): LeagueKey[] => {
   return LEAGUE_GROUPS.map((group) => group.key).filter(
-    (key) => (groupedLeagues.get(key)?.length ?? 0) > 0
+    (key) => (groupedLeagues.get(key)?.length ?? 0) > 0,
   );
 };
 
 export const resolveLeagueSelection = (
   requestedLeague: string | undefined,
-  availableGroupKeys: LeagueKey[]
+  availableGroupKeys: LeagueKey[],
 ): LeagueKey => {
   const fallbackLeague = availableGroupKeys.includes(DEFAULT_LEAGUE)
     ? DEFAULT_LEAGUE
-    : availableGroupKeys[0] ?? DEFAULT_LEAGUE;
+    : (availableGroupKeys[0] ?? DEFAULT_LEAGUE);
   if (!requestedLeague) return fallbackLeague;
   if (!isLeagueKey(requestedLeague)) return fallbackLeague;
   return availableGroupKeys.includes(requestedLeague)
@@ -176,7 +181,8 @@ export const buildLeagueOptions = ({
       latestSeason !== undefined
         ? pickLeagueEntryForSeason(entries, latestSeason)
         : undefined;
-    const baseLabel = groupConfig?.label ?? latestEntry?.leagueName ?? key.toUpperCase();
+    const baseLabel =
+      groupConfig?.label ?? latestEntry?.leagueName ?? key.toUpperCase();
     const seasonLabel = formatSeasonRange(latestSeason);
 
     return {

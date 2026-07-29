@@ -1,13 +1,7 @@
 import { CalendarX2 } from "lucide-react";
 import Link from "next/link";
-import type { WebHomeViewModel } from "@/features/home/presenter/home-view-model";
-import {
-  getMatchStatus,
-  getStatusCounts,
-  getVisibleCompetitions,
-  collectTeams,
-  type CompetitionMatch,
-} from "@/features/football/view-utils";
+import { FavoriteSpotlight } from "@/features/favorites";
+import { getCompetitionMeta } from "@/features/football/competition-meta";
 import { DateNavigator } from "@/features/football/components/date-navigator";
 import { MatchList } from "@/features/football/components/match-summary";
 import {
@@ -17,8 +11,14 @@ import {
   PartialDataNotice,
   SectionHeading,
 } from "@/features/football/components/product-ui";
-import { getCompetitionMeta } from "@/features/football/competition-meta";
-import { FavoriteSpotlight } from "@/features/favorites";
+import {
+  type CompetitionMatch,
+  collectTeams,
+  getMatchStatus,
+  getStatusCounts,
+  getVisibleCompetitions,
+} from "@/features/football/view-utils";
+import type { WebHomeViewModel } from "@/features/home/presenter/home-view-model";
 
 function MatchSection({
   description,
@@ -33,7 +33,11 @@ function MatchSection({
 
   return (
     <section className="content-section">
-      <SectionHeading count={matches.length} description={description} title={title} />
+      <SectionHeading
+        count={matches.length}
+        description={description}
+        title={title}
+      />
       <MatchList matches={matches} />
     </section>
   );
@@ -69,11 +73,13 @@ export function TodayView({
   const counts = getStatusCounts(matches);
   const live = matches.filter((item) => getMatchStatus(item.match) === "live");
   const upcoming = matches.filter(
-    (item) => getMatchStatus(item.match) === "upcoming"
+    (item) => getMatchStatus(item.match) === "upcoming",
   );
-  const unknown = matches.filter((item) => getMatchStatus(item.match) === "unknown");
+  const unknown = matches.filter(
+    (item) => getMatchStatus(item.match) === "unknown",
+  );
   const finished = matches.filter(
-    (item) => getMatchStatus(item.match) === "finished"
+    (item) => getMatchStatus(item.match) === "finished",
   );
 
   return (
@@ -87,7 +93,10 @@ export function TodayView({
 
         <DateNavigator dateKey={dateKey} />
 
-        <div className="score-summary" aria-label="Zusammenfassung des Tages">
+        <section
+          className="score-summary"
+          aria-label="Zusammenfassung des Tages"
+        >
           <div>
             <strong>{matches.length}</strong>
             <span>Spiele</span>
@@ -104,19 +113,20 @@ export function TodayView({
             <strong>{counts.finished}</strong>
             <span>beendet</span>
           </div>
-        </div>
+        </section>
 
         <FavoriteSpotlight items={favoriteItems} />
 
         <DataNotice>
-          Die Datumsliste zeigt den aktuell geladenen Ausschnitt der unterstützten
-          Wettbewerbe. OpenLigaDB bietet keine vollständige wettbewerbsübergreifende
-          Datumssuche.
+          Die Datumsliste zeigt den aktuell geladenen Ausschnitt der
+          unterstützten Wettbewerbe. OpenLigaDB bietet keine vollständige
+          wettbewerbsübergreifende Datumssuche.
         </DataNotice>
         <PartialDataNotice errors={data.visibleErrors} />
 
         <p className="sr-only" aria-live="polite">
-          {matches.length} Spiele geladen, davon {counts.live} möglicherweise live.
+          {matches.length} Spiele geladen, davon {counts.live} möglicherweise
+          live.
         </p>
 
         {matches.length === 0 ? (

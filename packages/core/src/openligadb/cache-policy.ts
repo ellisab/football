@@ -16,7 +16,7 @@ export const OPENLIGADB_CACHE_SECONDS = {
 
 export const withOpenLigaDbCache = (
   options: FetchOptions | undefined,
-  revalidate: number
+  revalidate: number,
 ): FetchOptions => {
   if (options?.cache === "no-store") return options;
 

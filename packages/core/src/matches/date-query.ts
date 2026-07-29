@@ -16,7 +16,7 @@ const formatCalendarDate = (date: Date) => {
 };
 
 export const parseBerlinDateQuery = (
-  value: string | string[] | null | undefined
+  value: string | string[] | null | undefined,
 ): string | undefined => {
   if (typeof value !== "string") return undefined;
 
@@ -42,13 +42,17 @@ export const parseBerlinDateQuery = (
 
 export const shiftBerlinDateQuery = (
   value: string,
-  days: number
+  days: number,
 ): string | undefined => {
   const normalized = parseBerlinDateQuery(value);
   if (!normalized || !Number.isInteger(days)) return undefined;
 
   const [year, month, day] = normalized.split("-").map(Number);
-  const date = createCalendarDate(year as number, month as number, day as number);
+  const date = createCalendarDate(
+    year as number,
+    month as number,
+    day as number,
+  );
   date.setUTCDate(date.getUTCDate() + days);
 
   const shifted = formatCalendarDate(date);

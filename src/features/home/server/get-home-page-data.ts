@@ -1,3 +1,4 @@
+import { createHomeState, getHomeSnapshot } from "@footballleagues/core/home";
 import {
   DEFAULT_LEAGUE,
   getCurrentSeasonYear,
@@ -7,15 +8,14 @@ import {
   LEAGUE_GROUPS,
   type LeagueKey,
 } from "@footballleagues/core/leagues";
-import { createHomeState, getHomeSnapshot } from "@footballleagues/core/home";
 import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
 import { unstable_cache } from "next/cache";
 import { getFootballRuntimeCache } from "@/lib/server/runtime-cache";
-import { createWebHomeViewModel } from "../presenter/home-view-model";
 import type {
   WebCompetitionViewModel,
   WebHomeViewModel,
 } from "../presenter/home-view-model";
+import { createWebHomeViewModel } from "../presenter/home-view-model";
 import {
   createKeyedSingleFlight,
   createSharedStaleBackoff,
@@ -109,20 +109,20 @@ const loadHomeSnapshotSingleFlight = createKeyedSingleFlight(
         requireCacheableHomeSnapshot(
           await getHomeSnapshot(params, {
             requestOptions: { ...REVALIDATE, signal },
-          })
+          }),
         ),
-      HOME_SNAPSHOT_TIMEOUT_MS
+      HOME_SNAPSHOT_TIMEOUT_MS,
     ),
-  getCompetitionCacheKey
+  getCompetitionCacheKey,
 );
 const getCachedHomeSnapshot = unstable_cache(
   loadHomeSnapshotSingleFlight,
   ["home-snapshot", HOME_DATA_CACHE_VERSION],
-  { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot }
+  { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot },
 );
 
 const getCompetitionDataOrThrow = async (
-  params: CompetitionParams
+  params: CompetitionParams,
 ): Promise<WebCompetitionViewModel> => {
   const snapshot = await getCachedHomeSnapshot(params);
   const state = createHomeState(snapshot);
@@ -137,17 +137,17 @@ const getCompetitionDataWithStaleFallback = createStaleOnError(
   (params: CompetitionParams) =>
     withSnapshotDeadline(
       getCompetitionDataOrThrow(params),
-      HOME_SNAPSHOT_TIMEOUT_MS
+      HOME_SNAPSHOT_TIMEOUT_MS,
     ),
   getCompetitionCacheKey,
   {
     onStale: ({ args: [params], error }) =>
       logStaleSnapshot({ error, params, scope: "competition" }),
-  }
+  },
 );
 
 const getCompetitionData = async (
-  params: CompetitionParams
+  params: CompetitionParams,
 ): Promise<WebCompetitionViewModel> => {
   const startedAt = Date.now();
 
@@ -177,7 +177,7 @@ const getFallbackSeason = (value?: string) => {
 };
 
 const createFallbackCompetitionData = (
-  params: CompetitionParams
+  params: CompetitionParams,
 ): WebCompetitionViewModel => {
   const resolvedLeague = getFallbackLeague(params.league);
   const resolvedSeason = getFallbackSeason(params.season);
@@ -238,7 +238,7 @@ const createFallbackCompetitionData = (
 
 const createOverviewData = (
   seed: WebCompetitionViewModel,
-  competitions: WebCompetitionViewModel[]
+  competitions: WebCompetitionViewModel[],
 ): WebHomeViewModel => ({
   ...seed,
   competitions,
@@ -248,7 +248,7 @@ const createOverviewData = (
     new Set([
       ...seed.visibleErrors,
       ...competitions.flatMap((competition) => competition.visibleErrors),
-    ])
+    ]),
   ),
 });
 
@@ -261,7 +261,7 @@ const buildOverviewDataOrThrow = async () => {
       getCompetitionDataOrThrow({
         league: option.shortcut,
         season: String(option.seasons[0] ?? seed.resolvedSeason),
-      })
+      }),
   );
 
   return createOverviewData(seed, competitions);
@@ -276,33 +276,30 @@ const loadOverviewDataWithSharedBackoff = createSharedStaleBackoff(
     onStale: ({ error }) =>
       logStaleSnapshot({ error, params: {}, scope: "overview" }),
     ttlSeconds: OVERVIEW_STALE_TTL_SECONDS,
-  }
+  },
 );
 
 const buildOverviewDataSingleFlight = createSingleFlight(
-  loadOverviewDataWithSharedBackoff
+  loadOverviewDataWithSharedBackoff,
 );
 const getCachedOverviewData = unstable_cache(
   buildOverviewDataSingleFlight,
   ["home-overview", HOME_OVERVIEW_CACHE_VERSION],
-  { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot }
+  { revalidate: OPENLIGADB_CACHE_SECONDS.homeSnapshot },
 );
 
 const getOverviewDataWithStaleFallback = createStaleOnError(
   () =>
-    withSnapshotDeadline(
-      getCachedOverviewData(),
-      OVERVIEW_SNAPSHOT_TIMEOUT_MS
-    ),
+    withSnapshotDeadline(getCachedOverviewData(), OVERVIEW_SNAPSHOT_TIMEOUT_MS),
   () => "overview",
   {
     maxEntries: 1,
     onStale: ({ error }) =>
       logStaleSnapshot({ error, params: {}, scope: "overview" }),
-  }
+  },
 );
 const getOverviewDataSingleFlight = createSingleFlight(
-  getOverviewDataWithStaleFallback
+  getOverviewDataWithStaleFallback,
 );
 
 const createFallbackOverviewData = () => {
@@ -311,7 +308,7 @@ const createFallbackOverviewData = () => {
     createFallbackCompetitionData({
       league: option.shortcut,
       season: String(option.seasons[0] ?? seed.resolvedSeason),
-    })
+    }),
   );
 
   return createOverviewData(seed, competitions);

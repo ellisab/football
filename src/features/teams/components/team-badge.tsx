@@ -1,5 +1,8 @@
+import {
+  isAllowedImageHost,
+  normalizeIconUrl,
+} from "@footballleagues/core/teams";
 import Image from "next/image";
-import { isAllowedImageHost, normalizeIconUrl } from "@footballleagues/core/teams";
 
 type TeamBadgeProps = {
   name?: string;
@@ -41,7 +44,7 @@ export function TeamBadge({
     <div
       aria-hidden={decorative || undefined}
       aria-label={decorative ? undefined : (name ?? "Vereinswappen")}
-      role={decorative ? undefined : "img"}
+      role="img"
       className={`flex items-center justify-center rounded-full text-xs font-semibold text-[var(--text)] ${baseClassName}`}
       style={sizeStyle}
     >

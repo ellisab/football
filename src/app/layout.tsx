@@ -1,12 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import {
-  JetBrains_Mono,
-  Space_Grotesk,
-} from "next/font/google";
+import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import { siteUrl } from "@/lib/site-config";
-import { AppShell } from "@/features/shell/components/app-shell";
 import { Analytics } from "@vercel/analytics/next";
+import { AppShell } from "@/features/shell/components/app-shell";
+import { siteUrl } from "@/lib/site-config";
 
 const stadiumBodyFont = Space_Grotesk({
   weight: ["400", "500", "600", "700"],

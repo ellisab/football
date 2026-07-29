@@ -1,6 +1,6 @@
+import { ArrowRight, CircleAlert, Search } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRight, CircleAlert, Search } from "lucide-react";
 
 export function PageIntro({
   actions,
@@ -42,12 +42,15 @@ export function SectionHeading({
         <div className="flex items-center gap-2">
           <h2 className="section-title">{title}</h2>
           {typeof count === "number" ? (
-            <span className="count-badge" aria-label={`${count} Einträge`}>
-              {count}
+            <span className="count-badge">
+              <span aria-hidden="true">{count}</span>
+              <span className="sr-only">{count} Einträge</span>
             </span>
           ) : null}
         </div>
-        {description ? <p className="section-description">{description}</p> : null}
+        {description ? (
+          <p className="section-description">{description}</p>
+        ) : null}
       </div>
       {action}
     </div>
@@ -100,8 +103,8 @@ export function PartialDataNotice({ errors }: { errors: string[] }) {
     <div className="data-notice" role="status">
       <CircleAlert aria-hidden="true" className="h-4 w-4 shrink-0" />
       <p>
-        Einige Daten konnten nicht aktualisiert werden: {errors.join(", ")}. Bereits
-        verfügbare Informationen bleiben sichtbar.
+        Einige Daten konnten nicht aktualisiert werden: {errors.join(", ")}.
+        Bereits verfügbare Informationen bleiben sichtbar.
       </p>
     </div>
   );

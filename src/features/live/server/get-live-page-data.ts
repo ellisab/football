@@ -1,11 +1,8 @@
+import { LEAGUE_GROUPS, type LeagueKey } from "@footballleagues/core/leagues";
 import {
   getLiveSchedule,
   type LiveScheduleResult,
 } from "@footballleagues/core/live";
-import {
-  LEAGUE_GROUPS,
-  type LeagueKey,
-} from "@footballleagues/core/leagues";
 import { unstable_cache } from "next/cache";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
 import {
@@ -14,9 +11,9 @@ import {
 } from "@/features/football/server/matchday-refresh-cache";
 import {
   getPollingScopes,
-  mergeMatchdayPayload,
   type LiveMatchItem,
   type LiveMatchScope,
+  mergeMatchdayPayload,
 } from "../components/live-polling";
 
 const MATCHDAY_REFRESH_CONCURRENCY = 3;
@@ -68,7 +65,7 @@ type MatchdayRefreshOutcome =
 const getCachedLiveSchedule = unstable_cache(
   () => getLiveSchedule(),
   ["live-discovery", LIVE_DISCOVERY_CACHE_VERSION],
-  { revalidate: LIVE_DISCOVERY_REVALIDATE_SECONDS }
+  { revalidate: LIVE_DISCOVERY_REVALIDATE_SECONDS },
 );
 
 const isValidGroup = (value: number | undefined): value is number =>
@@ -100,10 +97,10 @@ const toLiveMatchItem = ({
 
 const refreshMatchdays = async (
   scopes: readonly LiveMatchScope[],
-  loadMatchday: LoadMatchday
+  loadMatchday: LoadMatchday,
 ): Promise<MatchdayRefreshOutcome[]> => {
   const outcomes: Array<MatchdayRefreshOutcome | undefined> = new Array(
-    scopes.length
+    scopes.length,
   );
   let nextIndex = 0;
 
@@ -140,12 +137,12 @@ const refreshMatchdays = async (
       {
         length: Math.min(MATCHDAY_REFRESH_CONCURRENCY, scopes.length),
       },
-      worker
-    )
+      worker,
+    ),
   );
 
   return outcomes.filter(
-    (outcome): outcome is MatchdayRefreshOutcome => outcome !== undefined
+    (outcome): outcome is MatchdayRefreshOutcome => outcome !== undefined,
   );
 };
 

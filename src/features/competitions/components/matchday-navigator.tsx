@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { ApiGroup } from "@footballleagues/core/openligadb";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import Link from "next/link";
 
 const getGroupLabel = (group: ApiGroup) =>
   group.groupName?.trim() ||
@@ -46,7 +46,7 @@ export function MatchdayNavigator({
     .filter((group) => typeof group.groupOrderID === "number")
     .sort((a, b) => (a.groupOrderID ?? 0) - (b.groupOrderID ?? 0));
   const selectedIndex = ordered.findIndex(
-    (group) => group.groupOrderID === selectedMatchday
+    (group) => group.groupOrderID === selectedMatchday,
   );
   const previous = selectedIndex > 0 ? ordered[selectedIndex - 1] : undefined;
   const next =
@@ -81,7 +81,9 @@ export function MatchdayNavigator({
       <form className="matchday-select-form" method="get">
         <input type="hidden" name="season" value={season} />
         <input type="hidden" name="view" value={view} />
-        {scope !== "all" ? <input type="hidden" name="scope" value={scope} /> : null}
+        {scope !== "all" ? (
+          <input type="hidden" name="scope" value={scope} />
+        ) : null}
         <label htmlFor="matchday" className="sr-only">
           Spieltag oder Runde
         </label>
@@ -91,7 +93,9 @@ export function MatchdayNavigator({
           defaultValue={selectedMatchday ? String(selectedMatchday) : ""}
           className="select-control"
         >
-          {ordered.length === 0 ? <option value="">Aktuelle Runde</option> : null}
+          {ordered.length === 0 ? (
+            <option value="">Aktuelle Runde</option>
+          ) : null}
           {ordered.map((group) => (
             <option key={group.groupOrderID} value={group.groupOrderID}>
               {getGroupLabel(group)}
@@ -105,7 +109,13 @@ export function MatchdayNavigator({
 
       {currentMatchday && currentMatchday !== selectedMatchday ? (
         <Link
-          href={buildHref({ matchday: currentMatchday, season, slug, view, scope })}
+          href={buildHref({
+            matchday: currentMatchday,
+            season,
+            slug,
+            view,
+            scope,
+          })}
           className="matchday-current-link"
         >
           <RotateCcw aria-hidden="true" className="h-4 w-4" />

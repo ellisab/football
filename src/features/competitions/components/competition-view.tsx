@@ -1,10 +1,10 @@
-import Link from "next/link";
-import { List, Table2, Trophy } from "lucide-react";
 import type { ApiMatch, ApiTableRow } from "@footballleagues/core/openligadb";
-import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
+import { List, Table2, Trophy } from "lucide-react";
+import Link from "next/link";
+import { FavoriteButton } from "@/features/favorites";
 import {
-  getCompetitionMeta,
   getCompetitionHref,
+  getCompetitionMeta,
 } from "@/features/football/competition-meta";
 import { MatchList } from "@/features/football/components/match-summary";
 import {
@@ -13,12 +13,12 @@ import {
   PartialDataNotice,
   SectionHeading,
 } from "@/features/football/components/product-ui";
-import { StandingsCard } from "@/features/standings/components/standings-card";
-import { FavoriteButton } from "@/features/favorites";
 import {
   getMatchStatus,
   getStatusCounts,
 } from "@/features/football/view-utils";
+import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
+import { StandingsCard } from "@/features/standings/components/standings-card";
 import { MatchdayNavigator } from "./matchday-navigator";
 
 const tabHref = ({
@@ -60,16 +60,18 @@ export function CompetitionView({
   const meta = getCompetitionMeta(competition.resolvedLeague);
   const Icon = meta.icon;
   const tableSection = competition.sections.find(
-    (section) => section.renderKind === "table"
+    (section) => section.renderKind === "table",
   );
   const table =
-    tableSection?.renderKind === "table" ? tableSection.items : ([] as ApiTableRow[]);
+    tableSection?.renderKind === "table"
+      ? tableSection.items
+      : ([] as ApiTableRow[]);
   const seasonOption = competition.leagueOptions.find(
-    (option) => option.shortcut === competition.resolvedLeague
+    (option) => option.shortcut === competition.resolvedLeague,
   );
   const groups = competition.availableGroups ?? [];
   const statusCounts = getStatusCounts(
-    matches.map((match) => ({ competition, match }))
+    matches.map((match) => ({ competition, match })),
   );
   const visibleMatches = matches.filter((match) => {
     if (scope === "results") return getMatchStatus(match) === "finished";
@@ -111,14 +113,18 @@ export function CompetitionView({
               className="select-control"
               defaultValue={String(competition.resolvedSeason)}
             >
-              {(seasonOption?.seasons ?? [competition.resolvedSeason]).map((season) => (
-                <option key={season} value={season}>
-                  {season}
-                </option>
-              ))}
+              {(seasonOption?.seasons ?? [competition.resolvedSeason]).map(
+                (season) => (
+                  <option key={season} value={season}>
+                    {season}
+                  </option>
+                ),
+              )}
             </select>
             <input type="hidden" name="view" value={view} />
-            {scope !== "all" ? <input type="hidden" name="scope" value={scope} /> : null}
+            {scope !== "all" ? (
+              <input type="hidden" name="scope" value={scope} />
+            ) : null}
             <button className="button-secondary" type="submit">
               Wechseln
             </button>
@@ -165,7 +171,10 @@ export function CompetitionView({
         />
 
         {view === "matches" ? (
-          <div className="score-summary" aria-label="Status der ausgewählten Runde">
+          <section
+            className="score-summary"
+            aria-label="Status der ausgewählten Runde"
+          >
             <div>
               <strong>{matches.length}</strong>
               <span>Spiele</span>
@@ -182,7 +191,7 @@ export function CompetitionView({
               <strong>{statusCounts.finished}</strong>
               <span>beendet</span>
             </div>
-          </div>
+          </section>
         ) : null}
 
         <PartialDataNotice errors={competition.visibleErrors} />
@@ -214,8 +223,11 @@ export function CompetitionView({
             </nav>
             <SectionHeading
               title={
-                groups.find((group) => group.groupOrderID === selectedMatchday)?.groupName ??
-                (selectedMatchday ? `${selectedMatchday}. Spieltag` : "Aktuelle Spiele")
+                groups.find((group) => group.groupOrderID === selectedMatchday)
+                  ?.groupName ??
+                (selectedMatchday
+                  ? `${selectedMatchday}. Spieltag`
+                  : "Aktuelle Spiele")
               }
               count={visibleMatches.length}
               description={`Saison ${competition.resolvedSeason} · Anstoßzeiten in deiner lokalen Zeitzone.`}
@@ -229,19 +241,28 @@ export function CompetitionView({
                     shortcut: competition.resolvedLeague,
                     seasons: [competition.resolvedSeason],
                   },
-                  competition.resolvedSeason
+                  competition.resolvedSeason,
                 )}
                 actionLabel="Zur aktuellen Runde"
               />
             ) : visibleMatches.length > 0 ? (
               <MatchList
-                matches={visibleMatches.map((match) => ({ competition, match }))}
+                matches={visibleMatches.map((match) => ({
+                  competition,
+                  match,
+                }))}
                 showCompetition={false}
               />
             ) : (
               <EmptyState
                 title="Noch keine Spiele"
-                description={scope === "results" ? "Für diese Runde sind noch keine beendeten Partien verfügbar." : scope === "fixtures" ? "Für diese Runde sind keine offenen Partien verfügbar." : "Für diese Runde sind aktuell keine Partien verfügbar. Wähle eine andere Runde oder kehre zur aktuellen zurück."}
+                description={
+                  scope === "results"
+                    ? "Für diese Runde sind noch keine beendeten Partien verfügbar."
+                    : scope === "fixtures"
+                      ? "Für diese Runde sind keine offenen Partien verfügbar."
+                      : "Für diese Runde sind aktuell keine Partien verfügbar. Wähle eine andere Runde oder kehre zur aktuellen zurück."
+                }
                 actionHref="/today"
                 actionLabel="Heutige Spiele ansehen"
               />
@@ -254,7 +275,10 @@ export function CompetitionView({
               description="Nur verifizierbare Tabellenwerte – ohne abgeleitete Qualifikations- oder Abstiegszonen."
             />
             {table.length > 0 ? (
-              <StandingsCard table={table} emptyText="Keine Tabelle verfügbar." />
+              <StandingsCard
+                table={table}
+                emptyText="Keine Tabelle verfügbar."
+              />
             ) : (
               <EmptyState
                 title="Keine Tabelle verfügbar"

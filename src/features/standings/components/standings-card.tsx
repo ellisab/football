@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ApiTableRow } from "@footballleagues/core/openligadb";
 import {
   Table,
@@ -8,8 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@footballleagues/ui/table";
-import { TeamBadge } from "@/features/teams/components/team-badge";
+import Link from "next/link";
 import { getTeamId } from "@/features/football/view-utils";
+import { TeamBadge } from "@/features/teams/components/team-badge";
 
 type StandingsCardProps = {
   emptyText?: string;
@@ -43,9 +43,15 @@ export function StandingsCard({
             <TableHead className="w-12">Pos</TableHead>
             <TableHead>Team</TableHead>
             <TableHead className="w-12 text-center">Sp</TableHead>
-            <TableHead className="standings-secondary w-12 text-center">S</TableHead>
-            <TableHead className="standings-secondary w-12 text-center">U</TableHead>
-            <TableHead className="standings-secondary w-12 text-center">N</TableHead>
+            <TableHead className="standings-secondary w-12 text-center">
+              S
+            </TableHead>
+            <TableHead className="standings-secondary w-12 text-center">
+              U
+            </TableHead>
+            <TableHead className="standings-secondary w-12 text-center">
+              N
+            </TableHead>
             <TableHead className="w-14 text-center">TD</TableHead>
             <TableHead className="w-16 text-right">Pkt.</TableHead>
           </TableRow>
@@ -57,7 +63,10 @@ export function StandingsCard({
                 {index + 1}
               </TableCell>
               <TableCell className="min-w-[10rem] font-semibold text-[var(--text)]">
-                <Link href={`/teams/${getTeamId(row)}`} className="standings-team-link">
+                <Link
+                  href={`/teams/${getTeamId(row)}`}
+                  className="standings-team-link"
+                >
                   <TeamBadge
                     name={row.teamName}
                     iconUrl={row.teamIconUrl}
@@ -65,10 +74,14 @@ export function StandingsCard({
                     decorative
                     className="team-badge-surface shrink-0"
                   />
-                  <span className="truncate">{row.teamName ?? row.shortName ?? "Team"}</span>
+                  <span className="truncate">
+                    {row.teamName ?? row.shortName ?? "Team"}
+                  </span>
                 </Link>
               </TableCell>
-              <TableCell className="text-center">{value(row.matches)}</TableCell>
+              <TableCell className="text-center">
+                {value(row.matches)}
+              </TableCell>
               <TableCell className="standings-secondary text-center">
                 {value(row.won)}
               </TableCell>
@@ -78,7 +91,9 @@ export function StandingsCard({
               <TableCell className="standings-secondary text-center">
                 {value(row.lost)}
               </TableCell>
-              <TableCell className="text-center">{value(row.goalDiff)}</TableCell>
+              <TableCell className="text-center">
+                {value(row.goalDiff)}
+              </TableCell>
               <TableCell className="font-mono text-right font-bold text-[var(--text)]">
                 {value(row.points)}
               </TableCell>

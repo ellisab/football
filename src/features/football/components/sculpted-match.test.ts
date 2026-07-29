@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import type { ApiMatch } from "@footballleagues/core/openligadb";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { ApiMatch } from "@footballleagues/core/openligadb";
-import type { CompetitionMatch, TeamSummary } from "@/features/football/view-utils";
-import {
-  MatchCardList,
-  type MatchCardItem,
-} from "./match-card-list";
+import type {
+  CompetitionMatch,
+  TeamSummary,
+} from "@/features/football/view-utils";
+import { type MatchCardItem, MatchCardList } from "./match-card-list";
 import { MatchDetailView } from "./match-detail-view";
 import { MatchList } from "./match-summary";
 import { SculptedMatch } from "./sculpted-match";
@@ -32,7 +32,7 @@ const renderMatch = (href?: string) =>
       href,
       match: scheduledMatch,
       roundLabel: "Halbfinale",
-    })
+    }),
   );
 
 const competitionMatch: CompetitionMatch = {
@@ -53,7 +53,10 @@ const preparedMatch: MatchCardItem = {
 test("keeps the shared match card linked in match lists", () => {
   const markup = renderMatch("/matches/42");
 
-  assert.match(markup, /<a class="featured-match focus-ring"[^>]*href="\/matches\/42"/);
+  assert.match(
+    markup,
+    /<a class="featured-match focus-ring"[^>]*href="\/matches\/42"/,
+  );
   assert.match(markup, /class="featured-match__meta"/);
   assert.match(markup, /class="featured-match__board"/);
   assert.match(markup, />21:00</);
@@ -63,22 +66,28 @@ test("keeps the shared match card linked in match lists", () => {
 
 test("renders feeds with the canonical shared match-list wrapper", () => {
   const markup = renderToStaticMarkup(
-    createElement(MatchList, { matches: [competitionMatch] })
+    createElement(MatchList, { matches: [competitionMatch] }),
   );
 
   assert.match(markup, /^<div class="match-list match-list--sculpted">/);
-  assert.match(markup, /<a class="featured-match focus-ring"[^>]*href="\/matches\/42"/);
+  assert.match(
+    markup,
+    /<a class="featured-match focus-ring"[^>]*href="\/matches\/42"/,
+  );
   assert.match(markup, /Champions League/);
   assert.match(markup, /Halbfinale/);
 });
 
 test("renders prepared client feeds with the canonical shared card", () => {
   const markup = renderToStaticMarkup(
-    createElement(MatchCardList, { matches: [preparedMatch] })
+    createElement(MatchCardList, { matches: [preparedMatch] }),
   );
 
   assert.match(markup, /^<div class="match-list match-list--sculpted">/);
-  assert.match(markup, /<a class="featured-match focus-ring"[^>]*href="\/matches\/42"/);
+  assert.match(
+    markup,
+    /<a class="featured-match focus-ring"[^>]*href="\/matches\/42"/,
+  );
   assert.match(markup, /Champions League/);
   assert.match(markup, /Halbfinale/);
 });
@@ -96,11 +105,14 @@ test("renders the exact shared card without a self-link on match detail", () => 
 
 test("uses the shared card as the match-detail hero", () => {
   const markup = renderToStaticMarkup(
-    createElement(MatchDetailView, { match: scheduledMatch })
+    createElement(MatchDetailView, { match: scheduledMatch }),
   );
 
   assert.match(markup, /class="page-shell match-detail-page"/);
-  assert.match(markup, /<h1 class="sr-only">FC Beispiel gegen Sporting Muster<\/h1>/);
+  assert.match(
+    markup,
+    /<h1 class="sr-only">FC Beispiel gegen Sporting Muster<\/h1>/,
+  );
   assert.match(markup, /<article class="featured-match" aria-label="Spiel: /);
   assert.match(markup, /class="match-detail-support"/);
   assert.match(markup, /class="match-detail-meta"/);
@@ -111,9 +123,7 @@ test("uses the shared card as the match-detail hero", () => {
 
 test("uses canonical match feeds on team detail", () => {
   const team: TeamSummary = {
-    competitions: [
-      { label: "Champions League", league: "cl", season: 2099 },
-    ],
+    competitions: [{ label: "Champions League", league: "cl", season: 2099 }],
     id: "fc-beispiel",
     name: "FC Beispiel",
     recentMatches: [competitionMatch],
@@ -124,6 +134,6 @@ test("uses canonical match feeds on team detail", () => {
   assert.match(markup, /class="page-shell match-feed-page team-detail-page"/);
   assert.equal(
     (markup.match(/class="match-list match-list--sculpted"/g) ?? []).length,
-    2
+    2,
   );
 });

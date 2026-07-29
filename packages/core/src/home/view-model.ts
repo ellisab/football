@@ -1,5 +1,5 @@
 import { getLeagueLabel } from "../leagues";
-import { localizeGroupName, type KnockoutTie } from "../matches";
+import { type KnockoutTie, localizeGroupName } from "../matches";
 import type { ApiGroup, ApiMatch, ApiTableRow } from "../openligadb";
 import type { HomeState } from "./model";
 import type { HomeErrorKey, HomeRoundSnapshot } from "./types";
@@ -23,7 +23,7 @@ export const getHomeRoundTitle = (
   }: {
     usesKnockoutLabels: boolean;
     emptyFallback: string;
-  }
+  },
 ) => {
   if (round.groupName?.trim()) {
     return localizeGroupName(round.groupName);
@@ -99,7 +99,7 @@ export const createHomeViewModel = (
     }) => string;
     tableSubtitle?: string;
     tableEmptyText?: string;
-  }
+  },
 ): HomeViewModel => {
   const leagueLabel = getLeagueLabel(state.resolvedLeague);
 
@@ -110,7 +110,8 @@ export const createHomeViewModel = (
         kicker: "Tabelle",
         title: "Tabelle",
         subtitle:
-          options.tableSubtitle ?? "Aktualisierte Tabelle für die ausgewählte Saison.",
+          options.tableSubtitle ??
+          "Aktualisierte Tabelle für die ausgewählte Saison.",
         emptyText:
           options.tableEmptyText ?? "Tabellendaten sind noch nicht verfügbar.",
         renderKind: "table",

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { TodayView } from "@/features/today/components/today-view";
 import { resolveDateQuery } from "@/features/football/components/date-navigator";
+import { refreshUncertainMatches } from "@/features/football/server/refresh-uncertain-matches";
 import {
   getTodayCompetitionMatches,
   getVisibleCompetitions,
 } from "@/features/football/view-utils";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
-import { refreshUncertainMatches } from "@/features/football/server/refresh-uncertain-matches";
+import { TodayView } from "@/features/today/components/today-view";
 
 export const metadata: Metadata = {
   title: "Heute",

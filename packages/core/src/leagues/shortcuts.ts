@@ -6,7 +6,7 @@ export const getDataShortcutForLeague = (leagueKey: LeagueKey) => {
 
 export const resolveEffectiveLeagueShortcut = (
   leagueKey: LeagueKey,
-  entryShortcut?: string
+  entryShortcut?: string,
 ) => {
   if (leagueKey === "bl2") return "bl2";
   return entryShortcut ?? leagueKey;

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  getMatchdaySnapshot,
   type FootballDataSource,
+  getMatchdaySnapshot,
   type HomeRequestOptions,
 } from "../src/home";
 import { clearMatchdayCache } from "../src/home/domain/matchday-loader";
@@ -48,7 +48,7 @@ test("getMatchdaySnapshot separates cached metadata from blocking validation", a
       _leagueShortcut,
       _season,
       _groupOrderId,
-      options
+      options,
     ) => {
       lastChangeOptions = options;
       return "2026-07-22T18:00:00Z";
@@ -57,7 +57,7 @@ test("getMatchdaySnapshot separates cached metadata from blocking validation", a
       _leagueShortcut,
       _season,
       _groupOrderId,
-      options
+      options,
     ) => {
       matchdayOptions = options;
       return [{ matchID: 100, matchIsFinished: false }];
@@ -72,7 +72,7 @@ test("getMatchdaySnapshot separates cached metadata from blocking validation", a
       dataSource,
       requestOptions: metadataOptions,
       validationRequestOptions: validationOptions,
-    }
+    },
   );
 
   assert.equal(result.matches[0]?.matchID, 100);

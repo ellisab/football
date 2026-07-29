@@ -10,10 +10,7 @@ import type { ApiGroup, ApiMatch } from "../../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { BracketRound, HomeErrorKey, HomeRoundSnapshot } from "../types";
 import { loadMatchdayResults } from "./matchday-loader";
-import {
-  getStatusCode,
-  mapSettledWithConcurrency,
-} from "./shared";
+import { getStatusCode, mapSettledWithConcurrency } from "./shared";
 
 const dedupeMatches = (matches: ApiMatch[]) => {
   const seen = new Set<string>();
@@ -41,7 +38,9 @@ const mergeRoundsByStage = (rounds: BracketRound[]) => {
   >();
 
   const sortedRounds = [...rounds].sort(
-    (a, b) => (a.group.groupOrderID ?? Number.MAX_SAFE_INTEGER) - (b.group.groupOrderID ?? Number.MAX_SAFE_INTEGER)
+    (a, b) =>
+      (a.group.groupOrderID ?? Number.MAX_SAFE_INTEGER) -
+      (b.group.groupOrderID ?? Number.MAX_SAFE_INTEGER),
   );
 
   for (const round of sortedRounds) {
@@ -72,10 +71,10 @@ const mergeRoundsByStage = (rounds: BracketRound[]) => {
         : (existing.group.groupOrderID ?? round.group.groupOrderID);
     existing.minGroupOrderID = Math.min(
       existing.minGroupOrderID,
-      round.group.groupOrderID ?? Number.MAX_SAFE_INTEGER
+      round.group.groupOrderID ?? Number.MAX_SAFE_INTEGER,
     );
     existing.matches = dedupeMatches(
-      sortMatchesByKickoff([...existing.matches, ...normalizedMatches])
+      sortMatchesByKickoff([...existing.matches, ...normalizedMatches]),
     );
   }
 
@@ -91,7 +90,7 @@ const mergeRoundsByStage = (rounds: BracketRound[]) => {
 
 const selectLatestChampionsLeagueRound = (rounds: BracketRound[]) => {
   const roundsWithMatches = mergeRoundsByStage(rounds).filter(
-    (round) => round.matches.length > 0
+    (round) => round.matches.length > 0,
   );
 
   if (roundsWithMatches.length === 0) {
@@ -99,13 +98,15 @@ const selectLatestChampionsLeagueRound = (rounds: BracketRound[]) => {
   }
 
   const latestActiveRound = roundsWithMatches.find(
-    (round) => !areAllMatchesFinished(round.matches)
+    (round) => !areAllMatchesFinished(round.matches),
   );
 
   return [latestActiveRound ?? roundsWithMatches[roundsWithMatches.length - 1]];
 };
 
-const snapshotToBracketRound = (round: HomeRoundSnapshot): BracketRound | null => {
+const snapshotToBracketRound = (
+  round: HomeRoundSnapshot,
+): BracketRound | null => {
   if (!isKnockoutGroup(round.groupName) || round.matches.length === 0) {
     return null;
   }
@@ -178,7 +179,7 @@ export const loadBracketMatches = async ({
     {
       shouldStop: (error) => getStatusCode(error) === 429,
       shouldStopValue: (round) => round.rateLimited,
-    }
+    },
   );
 
   const errorKeys: HomeErrorKey[] = [];
@@ -210,21 +211,21 @@ export const loadBracketMatches = async ({
     };
   });
 
-  const allBracketRounds =
-    [
-      ...knockoutRounds,
-      ...(playoffMatches.length > 0
-        ? [
-            {
-              group: { groupName: "Playoffs", groupID: 9, groupOrderID: 9 },
-              matches: playoffMatches.map(sortGoals),
-            },
-          ]
-        : []),
-      ...[snapshotToBracketRound(currentRound), snapshotToBracketRound(nextRound)].filter(
-        (round): round is BracketRound => round !== null
-      ),
-    ];
+  const allBracketRounds = [
+    ...knockoutRounds,
+    ...(playoffMatches.length > 0
+      ? [
+          {
+            group: { groupName: "Playoffs", groupID: 9, groupOrderID: 9 },
+            matches: playoffMatches.map(sortGoals),
+          },
+        ]
+      : []),
+    ...[
+      snapshotToBracketRound(currentRound),
+      snapshotToBracketRound(nextRound),
+    ].filter((round): round is BracketRound => round !== null),
+  ];
 
   return {
     bracketMatches:

@@ -14,7 +14,7 @@ export default async function TeamPage({
   const { teamId } = await params;
   const data = await getHomePageData({});
   const team = collectTeams(getVisibleCompetitions(data)).find(
-    (entry) => entry.id === teamId
+    (entry) => entry.id === teamId,
   );
 
   if (!team) notFound();

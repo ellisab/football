@@ -58,7 +58,7 @@ export const getMatchKickoffTimestamp = (match: ApiMatch): number | null => {
 
 export const getMatchPresentationStatus = (
   match: ApiMatch,
-  now: Date = new Date()
+  now: Date = new Date(),
 ): MatchPresentationStatus => {
   if (match.matchIsFinished === true) return "finished";
 
@@ -77,7 +77,7 @@ export const getMatchPresentationStatus = (
 };
 
 export const getMatchPresentationScore = (
-  match: ApiMatch
+  match: ApiMatch,
 ): MatchPresentationScore => {
   const result = getFinalResult(match);
   const team1 = normalizeScorePoint(result?.pointsTeam1);
@@ -96,17 +96,17 @@ export const createMatchPresentation = (
     now?: Date;
     team1Fallback?: string;
     team2Fallback?: string;
-  } = {}
+  } = {},
 ): MatchPresentation => {
   const status = getMatchPresentationStatus(match, options.now);
   const score = getMatchPresentationScore(match);
   const team1 = normalizeTeamName(
     match.team1?.teamName ?? match.team1?.shortName,
-    options.team1Fallback ?? "Heimteam"
+    options.team1Fallback ?? "Heimteam",
   );
   const team2 = normalizeTeamName(
     match.team2?.teamName ?? match.team2?.shortName,
-    options.team2Fallback ?? "Auswärtsteam"
+    options.team2Fallback ?? "Auswärtsteam",
   );
   const teamsAndScore =
     score.team1 !== null && score.team2 !== null

@@ -6,12 +6,12 @@ export const getFinalResult = (match: ApiMatch) => {
   }
 
   const orderedResults = match.matchResults.filter(
-    (result) => typeof result.resultOrderID === "number"
+    (result) => typeof result.resultOrderID === "number",
   );
 
   if (orderedResults.length > 0) {
     return [...orderedResults].sort(
-      (a, b) => (b.resultOrderID ?? 0) - (a.resultOrderID ?? 0)
+      (a, b) => (b.resultOrderID ?? 0) - (a.resultOrderID ?? 0),
     )[0];
   }
 

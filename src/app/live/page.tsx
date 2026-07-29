@@ -5,7 +5,8 @@ import { getLivePageData } from "@/features/live/server/get-live-page-data";
 
 export const metadata: Metadata = {
   title: "Live",
-  description: "Möglicherweise laufende Fußballspiele und die nächsten Anstoßzeiten.",
+  description:
+    "Möglicherweise laufende Fußballspiele und die nächsten Anstoßzeiten.",
 };
 
 export default async function LivePage() {

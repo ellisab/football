@@ -5,12 +5,12 @@ import {
   getHomeSnapshot,
   type HomeSnapshot,
 } from "../src/home";
+import { clearMatchdayCache } from "../src/home/domain/matchday-loader";
 import {
-  clearOpenLigaDbMemoryCache,
   type ApiMatch,
   type ApiTableRow,
+  clearOpenLigaDbMemoryCache,
 } from "../src/openligadb";
-import { clearMatchdayCache } from "../src/home/domain/matchday-loader";
 
 beforeEach(() => {
   clearMatchdayCache();
@@ -27,10 +27,15 @@ const jsonResponse = (body: unknown, status: number = 200) => {
 };
 
 const createFetchMock = (
-  responder: (path: string) => Response | Promise<Response>
+  responder: (path: string) => Response | Promise<Response>,
 ) => {
   return async (input: RequestInfo | URL): Promise<Response> => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input.url;
     return responder(new URL(url).pathname);
   };
 };
@@ -40,7 +45,7 @@ const createFinishedMatch = (
   team1Id: number,
   team1Name: string,
   team2Id: number,
-  team2Name: string
+  team2Name: string,
 ): ApiMatch => ({
   matchID,
   matchDateTimeUTC: "2026-03-01T20:00:00Z",
@@ -55,7 +60,7 @@ const createUpcomingMatch = (
   team1Id: number,
   team1Name: string,
   team2Id: number,
-  team2Name: string
+  team2Name: string,
 ): ApiMatch => ({
   matchID,
   matchDateTimeUTC: "2026-03-08T20:00:00Z",
@@ -109,9 +114,12 @@ test("getHomeSnapshot defaults to Bundesliga when no league is requested", async
     assert.equal(snapshot.hasTable, true);
     assert.deepEqual(
       snapshot.leagueOptions.map((option) => option.shortcut),
-      ["bl1", "cl"]
+      ["bl1", "cl"],
     );
-    assert.equal(paths.some((path) => path.includes("dfb-international")), false);
+    assert.equal(
+      paths.some((path) => path.includes("dfb-international")),
+      false,
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -129,7 +137,7 @@ test("getHomeSnapshot rejects unsupported league keys before loading data", asyn
   try {
     await assert.rejects(
       getHomeSnapshot({ league: "unsupported", season: "2026" }),
-      /unsupported league/i
+      /unsupported league/i,
     );
     assert.equal(fetchCalled, false);
   } finally {
@@ -139,7 +147,9 @@ test("getHomeSnapshot rejects unsupported league keys before loading data", asyn
 
 test("getHomeSnapshot keeps an unfinished Bundesliga matchday current", async () => {
   const originalFetch = globalThis.fetch;
-  const table: ApiTableRow[] = [{ teamInfoId: 1, teamName: "Team A", points: 20 }];
+  const table: ApiTableRow[] = [
+    { teamInfoId: 1, teamName: "Team A", points: 20 },
+  ];
 
   globalThis.fetch = createFetchMock((path) => {
     switch (path) {
@@ -154,14 +164,18 @@ test("getHomeSnapshot keeps an unfinished Bundesliga matchday current", async ()
       case "/getbltable/bl1/2025":
         return jsonResponse(table);
       case "/getmatchdata/bl1/2025/10":
-        return jsonResponse([createUpcomingMatch(10, 1, "Team A", 2, "Team B")]);
+        return jsonResponse([
+          createUpcomingMatch(10, 1, "Team A", 2, "Team B"),
+        ]);
       case "/getavailablegroups/bl1/2025":
         return jsonResponse([
           { groupID: 10, groupName: "10. Spieltag", groupOrderID: 10 },
           { groupID: 11, groupName: "11. Spieltag", groupOrderID: 11 },
         ]);
       case "/getmatchdata/bl1/2025/11":
-        return jsonResponse([createUpcomingMatch(11, 3, "Team C", 4, "Team D")]);
+        return jsonResponse([
+          createUpcomingMatch(11, 3, "Team C", 4, "Team D"),
+        ]);
       default:
         return jsonResponse({ path }, 404);
     }
@@ -201,9 +215,13 @@ test("getHomeSnapshot exposes the next Bundesliga matchday after the current one
           { groupID: 11, groupName: "11. Spieltag", groupOrderID: 11 },
         ]);
       case "/getmatchdata/bl1/2025/10":
-        return jsonResponse([createFinishedMatch(10, 1, "Team A", 2, "Team B")]);
+        return jsonResponse([
+          createFinishedMatch(10, 1, "Team A", 2, "Team B"),
+        ]);
       case "/getmatchdata/bl1/2025/11":
-        return jsonResponse([createUpcomingMatch(11, 3, "Team C", 4, "Team D")]);
+        return jsonResponse([
+          createUpcomingMatch(11, 3, "Team C", 4, "Team D"),
+        ]);
       default:
         return jsonResponse({ path }, 404);
     }
@@ -313,9 +331,13 @@ for (const { league, leagueName, shortcut } of BUNDESLIGA_FAMILY_CASES) {
         case `/getbltable/${shortcut}/2026`:
           return jsonResponse([]);
         case `/getmatchdata/${shortcut}/2026/1`:
-          return jsonResponse([createUpcomingMatch(1, 1, "Team A", 2, "Team B")]);
+          return jsonResponse([
+            createUpcomingMatch(1, 1, "Team A", 2, "Team B"),
+          ]);
         case `/getmatchdata/${shortcut}/2026/34`:
-          return jsonResponse([createUpcomingMatch(34, 3, "Team C", 4, "Team D")]);
+          return jsonResponse([
+            createUpcomingMatch(34, 3, "Team C", 4, "Team D"),
+          ]);
         default:
           return jsonResponse({ path }, 404);
       }
@@ -324,7 +346,7 @@ for (const { league, leagueName, shortcut } of BUNDESLIGA_FAMILY_CASES) {
     try {
       const snapshot = await getHomeSnapshot(
         { league, season: "2026" },
-        { fallbackYear: 2026 }
+        { fallbackYear: 2026 },
       );
 
       assert.equal(snapshot.resolvedLeague, league);
@@ -355,7 +377,9 @@ test("getHomeSnapshot reports data errors without probing future Bundesliga roun
       case "/getbltable/bl1/2025":
         return jsonResponse({ message: "boom" }, 500);
       case "/getmatchdata/bl1/2025/5":
-        return jsonResponse([createUpcomingMatch(50, 1, "Team A", 2, "Team B")]);
+        return jsonResponse([
+          createUpcomingMatch(50, 1, "Team A", 2, "Team B"),
+        ]);
       case "/getavailablegroups/bl1/2025":
         return jsonResponse({ message: "groups failed" }, 500);
       case "/getmatchdata/bl1/2025/6":
@@ -386,7 +410,7 @@ test("getHomeSnapshot uses the first populated round for a future DFB season", a
     1,
     "VSG Altglienicke Berlin",
     2,
-    "VfL Wolfsburg"
+    "VfL Wolfsburg",
   );
 
   globalThis.fetch = createFetchMock((path) => {
@@ -423,7 +447,7 @@ test("getHomeSnapshot uses the first populated round for a future DFB season", a
   try {
     const snapshot = await getHomeSnapshot(
       { league: "dfb", season: "2026" },
-      { fallbackYear: 2025 }
+      { fallbackYear: 2025 },
     );
 
     assert.equal(snapshot.resolvedSeason, 2026);
@@ -431,7 +455,7 @@ test("getHomeSnapshot uses the first populated round for a future DFB season", a
     assert.equal(snapshot.currentRound.groupName, "1. Runde");
     assert.deepEqual(
       snapshot.currentRound.matches.map((match) => match.matchID),
-      [401]
+      [401],
     );
     assert.equal(snapshot.nextRound.matches.length, 0);
     assert.deepEqual(snapshot.errorKeys, []);
@@ -479,7 +503,7 @@ test("getHomeSnapshot keeps an empty first round shell for a future league seaso
   try {
     const snapshot = await getHomeSnapshot(
       { league: "bl1", season: "2026" },
-      { fallbackYear: 2025 }
+      { fallbackYear: 2025 },
     );
 
     assert.equal(snapshot.resolvedSeason, 2026);
@@ -529,7 +553,7 @@ test("getHomeSnapshot falls back to the latest available women season when 2026 
   try {
     const snapshot = await getHomeSnapshot(
       { league: "fbl1", season: "2026" },
-      { fallbackYear: 2025 }
+      { fallbackYear: 2025 },
     );
 
     assert.equal(snapshot.resolvedLeague, "fbl1");
@@ -586,18 +610,18 @@ test("getHomeSnapshot skips Champions League future-round probing when the first
   try {
     const snapshot = await getHomeSnapshot(
       { league: "cl", season: "2026" },
-      { fallbackYear: 2026 }
+      { fallbackYear: 2026 },
     );
 
     assert.equal(snapshot.currentRound.groupOrderID, 1);
     assert.equal(snapshot.nextRound.matches.length, 0);
     assert.equal(
       paths.filter((path) => path === "/getmatchdata/ucl/2026/2").length,
-      1
+      1,
     );
     assert.equal(
       paths.filter((path) => path === "/getmatchdata/ucl/2026/3").length,
-      1
+      1,
     );
   } finally {
     globalThis.fetch = originalFetch;
@@ -639,28 +663,44 @@ test("getHomeSnapshot merges both Champions League legs into the current round a
         return jsonResponse([
           {
             ...createUpcomingMatch(101, 1, "Club A", 2, "Club B"),
-            group: { groupName: "Achtelfinale Hinspiele", groupOrderID: 10, groupID: 10 },
+            group: {
+              groupName: "Achtelfinale Hinspiele",
+              groupOrderID: 10,
+              groupID: 10,
+            },
           },
         ]);
       case "/getmatchdata/ucl/2025/11":
         return jsonResponse([
           {
             ...createUpcomingMatch(102, 2, "Club B", 1, "Club A"),
-            group: { groupName: "Achtelfinale Rückspiele", groupOrderID: 11, groupID: 11 },
+            group: {
+              groupName: "Achtelfinale Rückspiele",
+              groupOrderID: 11,
+              groupID: 11,
+            },
           },
         ]);
       case "/getmatchdata/ucl/2025/12":
         return jsonResponse([
           {
             ...createUpcomingMatch(103, 3, "Club C", 4, "Club D"),
-            group: { groupName: "Viertelfinale Hinspiele", groupOrderID: 12, groupID: 12 },
+            group: {
+              groupName: "Viertelfinale Hinspiele",
+              groupOrderID: 12,
+              groupID: 12,
+            },
           },
         ]);
       case "/getmatchdata/ucl/2025/13":
         return jsonResponse([
           {
             ...createUpcomingMatch(104, 4, "Club D", 3, "Club C"),
-            group: { groupName: "Viertelfinale Rückspiele", groupOrderID: 13, groupID: 13 },
+            group: {
+              groupName: "Viertelfinale Rückspiele",
+              groupOrderID: 13,
+              groupID: 13,
+            },
           },
         ]);
       case "/getbltable/ucl/2025":
@@ -678,19 +718,19 @@ test("getHomeSnapshot merges both Champions League legs into the current round a
     assert.equal(snapshot.currentRound.matches.length, 2);
     assert.deepEqual(
       snapshot.currentRound.matches.map((match) => match.matchID),
-      [101, 102]
+      [101, 102],
     );
     assert.equal(snapshot.nextRound.groupName, "Viertelfinale");
     assert.equal(snapshot.nextRound.groupOrderID, 12);
     assert.deepEqual(
       snapshot.nextRound.matches.map((match) => match.matchID),
-      [103, 104]
+      [103, 104],
     );
     assert.equal(snapshot.bracketMatches.length, 1);
     assert.equal(snapshot.bracketMatches[0]?.group.groupName, "Achtelfinale");
     assert.deepEqual(
       snapshot.bracketMatches[0]?.matches.map((match) => match.matchID),
-      [101, 102]
+      [101, 102],
     );
     assert.deepEqual(snapshot.errorKeys, []);
   } finally {
@@ -711,7 +751,9 @@ test("createHomeState centralizes section shaping for Champions League playoff r
   const snapshot: HomeSnapshot = {
     resolvedLeague: "cl",
     resolvedSeason: 2025,
-    leagueOptions: [{ shortcut: "cl", label: "Champions League 2025/2026", seasons: [2025] }],
+    leagueOptions: [
+      { shortcut: "cl", label: "Champions League 2025/2026", seasons: [2025] },
+    ],
     currentRound: {
       groupName: "Playoffs",
       groupOrderID: 9,
@@ -739,7 +781,7 @@ test("createHomeState centralizes section shaping for Champions League playoff r
   assert.equal(state.bracketMatches.length, 0);
   assert.deepEqual(
     state.sections.map((section) => section.key),
-    ["next-round", "matchday", "table"]
+    ["next-round", "matchday", "table"],
   );
   assert.equal(state.sections[0]?.renderKind, "ties");
   assert.equal(state.sections[1]?.renderKind, "ties");
@@ -751,7 +793,9 @@ test("createHomeState removes visible DFB knockout stages from the bracket to av
   const snapshot: HomeSnapshot = {
     resolvedLeague: "dfb",
     resolvedSeason: 2025,
-    leagueOptions: [{ shortcut: "dfb", label: "DFB-Pokal 2025/2026", seasons: [2025] }],
+    leagueOptions: [
+      { shortcut: "dfb", label: "DFB-Pokal 2025/2026", seasons: [2025] },
+    ],
     currentRound: {
       groupName: "Halbfinale",
       groupOrderID: 5,
@@ -785,11 +829,11 @@ test("createHomeState removes visible DFB knockout stages from the bracket to av
 
   assert.deepEqual(
     state.bracketMatches.map((round) => round.group.groupName),
-    ["Viertelfinale"]
+    ["Viertelfinale"],
   );
   assert.deepEqual(
     state.sections.map((section) => section.key),
-    ["next-round", "matchday"]
+    ["next-round", "matchday"],
   );
   assert.equal(state.usesKnockoutLabels, true);
 });

@@ -1,4 +1,7 @@
-import { resolveLeagueKey, type LeagueKey } from "@footballleagues/core/leagues";
+import {
+  type LeagueKey,
+  resolveLeagueKey,
+} from "@footballleagues/core/leagues";
 import {
   createMatchPresentation,
   getBerlinDateKey,
@@ -6,10 +9,10 @@ import {
   getMatchPresentationScore,
   isMatchOnBerlinDate,
 } from "@footballleagues/core/matches";
-import {
-  type ApiMatch,
-  type ApiTableRow,
-  type ApiTeam,
+import type {
+  ApiMatch,
+  ApiTableRow,
+  ApiTeam,
 } from "@footballleagues/core/openligadb";
 import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
 
@@ -105,7 +108,7 @@ export const getMatchScore = (match: ApiMatch) => {
 
 export const getMatchStatus = (
   match: ApiMatch,
-  now: Date = new Date()
+  now: Date = new Date(),
 ): MatchStatus => {
   const status = createMatchPresentation(match, { now }).status;
 
@@ -125,7 +128,7 @@ export const getMatchScreenReaderLabel = (match: ApiMatch, now?: Date) => {
 };
 
 export const getCompetitionMatches = (
-  competition: WebCompetitionViewModel
+  competition: WebCompetitionViewModel,
 ): ApiMatch[] => {
   const sectionMatches = competition.sections.flatMap((section) => {
     if (section.renderKind === "matches") return section.items;
@@ -135,14 +138,18 @@ export const getCompetitionMatches = (
 
     return [];
   });
-  const bracketMatches = competition.bracketMatches.flatMap((round) => round.matches);
+  const bracketMatches = competition.bracketMatches.flatMap(
+    (round) => round.matches,
+  );
   return [...sectionMatches, ...bracketMatches];
 };
 
-export const getVisibleCompetitions = (data: WebCompetitionViewModel & {
-  competitions?: WebCompetitionViewModel[];
-  isOverview?: boolean;
-}) => {
+export const getVisibleCompetitions = (
+  data: WebCompetitionViewModel & {
+    competitions?: WebCompetitionViewModel[];
+    isOverview?: boolean;
+  },
+) => {
   return data.isOverview && data.competitions?.length
     ? data.competitions
     : [data];
@@ -177,7 +184,7 @@ export const getTodayCompetitionMatches = ({
 };
 
 export const getAllCompetitionMatches = (
-  competitions: WebCompetitionViewModel[]
+  competitions: WebCompetitionViewModel[],
 ): CompetitionMatch[] => {
   const seen = new Set<string>();
   const matches: CompetitionMatch[] = [];
@@ -225,7 +232,7 @@ export const getStatusCounts = (matches: CompetitionMatch[]) => {
       live: 0,
       unknown: 0,
       upcoming: 0,
-    } satisfies Record<MatchStatus, number>
+    } satisfies Record<MatchStatus, number>,
   );
 };
 
@@ -240,15 +247,19 @@ const normalizeTeamId = (value: string) => {
       .normalize("NFKD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
+      .replace(/^-+|-+$/g, ""),
   );
 };
 
 export const getTeamId = (team?: ApiTeam | ApiTableRow) => {
   const numericId =
-    "teamId" in (team ?? {}) ? (team as ApiTeam).teamId : (team as ApiTableRow)?.teamInfoId;
+    "teamId" in (team ?? {})
+      ? (team as ApiTeam).teamId
+      : (team as ApiTableRow)?.teamInfoId;
   const name =
-    "teamName" in (team ?? {}) ? team?.teamName : (team as ApiTableRow | undefined)?.teamName;
+    "teamName" in (team ?? {})
+      ? team?.teamName
+      : (team as ApiTableRow | undefined)?.teamName;
 
   if (typeof numericId === "number") return String(numericId);
   if (name) return normalizeTeamId(name);
@@ -256,22 +267,22 @@ export const getTeamId = (team?: ApiTeam | ApiTableRow) => {
 };
 
 export const resolveCompetitionLeagueForMatch = (
-  match: ApiMatch
+  match: ApiMatch,
 ): LeagueKey | undefined => {
   return resolveLeagueKey(match);
 };
 
 export const findMatchById = (
   competitions: WebCompetitionViewModel[],
-  matchId: string
+  matchId: string,
 ) => {
   return getAllCompetitionMatches(competitions).find(
-    (item) => String(item.match.matchID) === matchId
+    (item) => String(item.match.matchID) === matchId,
   );
 };
 
 export const collectTeams = (
-  competitions: WebCompetitionViewModel[]
+  competitions: WebCompetitionViewModel[],
 ): TeamSummary[] => {
   const teams = new Map<string, TeamSummary>();
   const allMatches = getAllCompetitionMatches(competitions);
@@ -304,7 +315,11 @@ export const collectTeams = (
       } satisfies TeamSummary);
 
     summary.iconUrl ??= iconUrl;
-    if (!summary.competitions.some((entry) => entry.league === competition.resolvedLeague)) {
+    if (
+      !summary.competitions.some(
+        (entry) => entry.league === competition.resolvedLeague,
+      )
+    ) {
       summary.competitions.push({
         label: competition.leagueLabel,
         league: competition.resolvedLeague,
@@ -321,7 +336,8 @@ export const collectTeams = (
       if (status === "finished") {
         if (
           !summary.recentMatches.some(
-            (entry) => getMatchIdentity(entry.match) === getMatchIdentity(match.match)
+            (entry) =>
+              getMatchIdentity(entry.match) === getMatchIdentity(match.match),
           )
         ) {
           summary.recentMatches.push(match);
@@ -335,7 +351,8 @@ export const collectTeams = (
       } else if (status === "live" || status === "upcoming") {
         if (
           !summary.upcomingMatches.some(
-            (entry) => getMatchIdentity(entry.match) === getMatchIdentity(match.match)
+            (entry) =>
+              getMatchIdentity(entry.match) === getMatchIdentity(match.match),
           )
         ) {
           summary.upcomingMatches.push(match);
@@ -353,7 +370,9 @@ export const collectTeams = (
   };
 
   for (const competition of competitions) {
-    const table = competition.sections.find((section) => section.renderKind === "table");
+    const table = competition.sections.find(
+      (section) => section.renderKind === "table",
+    );
     if (table?.renderKind === "table") {
       table.items.forEach((row, index) => {
         upsertTeam({
@@ -386,10 +405,10 @@ export const collectTeams = (
 
   for (const team of teams.values()) {
     team.recentMatches.sort(
-      (a, b) => getMatchTime(b.match) - getMatchTime(a.match)
+      (a, b) => getMatchTime(b.match) - getMatchTime(a.match),
     );
     team.upcomingMatches.sort(
-      (a, b) => getMatchTime(a.match) - getMatchTime(b.match)
+      (a, b) => getMatchTime(a.match) - getMatchTime(b.match),
     );
   }
 

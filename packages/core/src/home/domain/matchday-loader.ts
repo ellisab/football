@@ -1,5 +1,5 @@
-import { OPENLIGADB_CACHE_SECONDS } from "../../openligadb/cache-policy";
 import type { ApiMatch } from "../../openligadb";
+import { OPENLIGADB_CACHE_SECONDS } from "../../openligadb/cache-policy";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import { getRetryAfterMs, getStatusCode } from "./shared";
 
@@ -77,7 +77,7 @@ const logMatchdayCache = (
     groupOrderId: number;
     leagueShortcut: string;
     season: number;
-  }
+  },
 ) => {
   if (!shouldLogDiagnostics()) return;
 
@@ -136,7 +136,7 @@ export const loadMatchdayResults = async ({
         leagueShortcut,
         season,
         groupOrderId,
-        requestOptions
+        requestOptions,
       );
     } catch (error) {
       lastChangeUnavailable = true;
@@ -192,16 +192,19 @@ export const loadMatchdayResults = async ({
       leagueShortcut,
       season,
       groupOrderId,
-      requestOptions
+      requestOptions,
     );
   } catch (error) {
     if (!cached) throw error;
 
     if (shouldLogDiagnostics()) {
-      console.warn("[OpenLigaDB] matchday refresh failed; serving stale cache", {
-        ...cacheContext,
-        status: getStatusCode(error),
-      });
+      console.warn(
+        "[OpenLigaDB] matchday refresh failed; serving stale cache",
+        {
+          ...cacheContext,
+          status: getStatusCode(error),
+        },
+      );
     }
 
     logMatchdayCache("stale", cacheContext);
@@ -222,10 +225,10 @@ export const loadMatchdayResults = async ({
       ? "bypass"
       : "miss"
     : lastChangeUnavailable
-    ? "unchecked"
-    : cached
-      ? "stale"
-      : "miss";
+      ? "unchecked"
+      : cached
+        ? "stale"
+        : "miss";
 
   setCachedMatchday(cacheKey, {
     dataUpdatedAt: now,

@@ -3,8 +3,8 @@ import test from "node:test";
 import {
   normalizeSearchText,
   rankSearchResults,
-  scoreSearchItem,
   type SearchResultItem,
+  scoreSearchItem,
 } from "./search-ranking";
 
 const items: SearchResultItem[] = [
@@ -39,7 +39,10 @@ const items: SearchResultItem[] = [
 ];
 
 test("normalizeSearchText folds European names and punctuation", () => {
-  assert.equal(normalizeSearchText("  Borussia Mönchengladbach  "), "borussia monchengladbach");
+  assert.equal(
+    normalizeSearchText("  Borussia Mönchengladbach  "),
+    "borussia monchengladbach",
+  );
   assert.equal(normalizeSearchText("Preußen Münster"), "preussen munster");
   assert.equal(normalizeSearchText("1. FC Köln"), "1 fc koln");
   assert.equal(normalizeSearchText("ŁKS Łódź"), "lks lodz");
@@ -71,8 +74,14 @@ test("ranking supports kind filters and result limits", () => {
 
   assert.deepEqual(
     rankSearchResults(broadItems, "bundesliga", { kinds: ["team"] }),
-    []
+    [],
   );
-  assert.equal(rankSearchResults(broadItems, "bundesliga", { limit: 1 }).length, 1);
-  assert.deepEqual(rankSearchResults(broadItems, "bundesliga", { limit: 0 }), []);
+  assert.equal(
+    rankSearchResults(broadItems, "bundesliga", { limit: 1 }).length,
+    1,
+  );
+  assert.deepEqual(
+    rankSearchResults(broadItems, "bundesliga", { limit: 0 }),
+    [],
+  );
 });

@@ -1,13 +1,17 @@
 import {
   getAvailableGroupKeys,
   isLeagueKey,
+  type LeagueKey,
   pickLeagueEntryForSeason,
   resolveEffectiveLeagueShortcut,
   resolveSeasonSelection,
-  type LeagueKey,
 } from "../leagues";
 import { sortGoals, sortMatchesByKickoff } from "../matches";
-import { openLigaDbDataSource, type ApiGroup, type ApiMatch } from "../openligadb";
+import {
+  type ApiGroup,
+  type ApiMatch,
+  openLigaDbDataSource,
+} from "../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "./data-source";
 import {
   getGroupsWithFallback,
@@ -72,7 +76,7 @@ export const getMatchdaySnapshot = async (
     dataSource?: FootballDataSource;
     requestOptions?: HomeRequestOptions;
     validationRequestOptions?: HomeRequestOptions;
-  }
+  },
 ): Promise<MatchdaySnapshot> => {
   const requestedLeague = getRequestedLeague(params.league);
   const groupOrderId = parsePositiveInteger(params.group);
@@ -85,7 +89,10 @@ export const getMatchdaySnapshot = async (
   const requestOptions = options?.requestOptions;
   const validationRequestOptions =
     options?.validationRequestOptions ?? requestOptions;
-  const normalizedGroups = await normalizeLeagueEntries(dataSource, requestOptions);
+  const normalizedGroups = await normalizeLeagueEntries(
+    dataSource,
+    requestOptions,
+  );
   const availableGroupKeys = getAvailableGroupKeys(normalizedGroups);
 
   if (!availableGroupKeys.includes(requestedLeague)) {
@@ -97,10 +104,13 @@ export const getMatchdaySnapshot = async (
     entries: leagueEntries,
     requestedSeason: params.season,
   });
-  const entryForSeason = pickLeagueEntryForSeason(leagueEntries, resolvedSeason);
+  const entryForSeason = pickLeagueEntryForSeason(
+    leagueEntries,
+    resolvedSeason,
+  );
   const effectiveShortcut = resolveEffectiveLeagueShortcut(
     requestedLeague,
-    entryForSeason?.leagueShortcut
+    entryForSeason?.leagueShortcut,
   );
 
   let groups: ApiGroup[] = [];
@@ -112,7 +122,7 @@ export const getMatchdaySnapshot = async (
         requestedLeague,
         effectiveShortcut,
         resolvedSeason,
-        requestOptions
+        requestOptions,
       )
     ).groups;
   } catch (error) {
@@ -140,7 +150,8 @@ export const getMatchdaySnapshot = async (
     effectiveShortcut,
     group: {
       groupID: group?.groupID,
-      groupName: group?.groupName ?? matchdayResult.matches[0]?.group?.groupName,
+      groupName:
+        group?.groupName ?? matchdayResult.matches[0]?.group?.groupName,
       groupOrderID: groupOrderId,
     },
     lastChanged: matchdayResult.lastChanged,

@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { getMatchdaySnapshot } from "@footballleagues/core/home";
 import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { CompetitionView } from "@/features/competitions/components/competition-view";
 import {
   getCompetitionMeta,
@@ -34,7 +34,7 @@ const withMatchdayTimeout = <T,>(promise: Promise<T>) => {
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeout = setTimeout(
       () => reject(new Error("Matchday request timed out")),
-      MATCHDAY_REQUEST_TIMEOUT_MS
+      MATCHDAY_REQUEST_TIMEOUT_MS,
     );
   });
 
@@ -44,7 +44,7 @@ const withMatchdayTimeout = <T,>(promise: Promise<T>) => {
 };
 
 const getSectionMatches = (
-  data: Awaited<ReturnType<typeof getHomePageData>>
+  data: Awaited<ReturnType<typeof getHomePageData>>,
 ) => {
   const section = data.sections.find((entry) => entry.key === "matchday");
   if (!section || section.renderKind === "table") return [];
@@ -75,7 +75,9 @@ export default async function CompetitionPage({
     season: query.season,
   });
 
-  const currentSection = data.sections.find((entry) => entry.key === "matchday");
+  const currentSection = data.sections.find(
+    (entry) => entry.key === "matchday",
+  );
   const currentMatchday =
     currentSection && currentSection.renderKind !== "table"
       ? currentSection.groupOrderID
@@ -107,8 +109,8 @@ export default async function CompetitionPage({
             requestOptions: {
               next: { revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday },
             },
-          }
-        )
+          },
+        ),
       );
       matches = snapshot.matches;
     } catch {

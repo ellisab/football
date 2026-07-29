@@ -34,7 +34,8 @@ export const normalizeFavoriteId = (value: unknown): string | undefined => {
   if (typeof value !== "string" && typeof value !== "number") return undefined;
 
   const normalized = String(value).trim();
-  if (!normalized || normalized.length > MAX_FAVORITE_ID_LENGTH) return undefined;
+  if (!normalized || normalized.length > MAX_FAVORITE_ID_LENGTH)
+    return undefined;
 
   return normalized;
 };
@@ -61,23 +62,20 @@ const normalizeCompetitionIds = (value: unknown): string[] => {
   return normalizeIds(value).filter(isLeagueKey);
 };
 
-const getTypedLegacyIds = (
-  value: unknown,
-  kind: FavoriteKind
-): string[] => {
+const getTypedLegacyIds = (value: unknown, kind: FavoriteKind): string[] => {
   if (!Array.isArray(value)) return [];
 
   return normalizeIds(
     value.flatMap((candidate) => {
       const record = asRecord(candidate);
       return record?.kind === kind ? [record.id] : [];
-    })
+    }),
   );
 };
 
 const getFirstKnownIds = (
   record: Record<string, unknown>,
-  keys: readonly string[]
+  keys: readonly string[],
 ): string[] | undefined => {
   for (const key of keys) {
     if (Array.isArray(record[key])) return normalizeIds(record[key]);
@@ -107,7 +105,10 @@ export const parseFavoritesValue = (value: unknown): FavoritesSnapshot => {
     return EMPTY_FAVORITES;
   }
 
-  const typedCompetitionIds = getTypedLegacyIds(record.favorites, "competition");
+  const typedCompetitionIds = getTypedLegacyIds(
+    record.favorites,
+    "competition",
+  );
   const typedTeamIds = getTypedLegacyIds(record.favorites, "team");
 
   return createFavoritesSnapshot({
@@ -121,7 +122,9 @@ export const parseFavoritesValue = (value: unknown): FavoritesSnapshot => {
   });
 };
 
-export const parseFavoritesStorage = (raw: string | null): FavoritesSnapshot => {
+export const parseFavoritesStorage = (
+  raw: string | null,
+): FavoritesSnapshot => {
   if (!raw) return EMPTY_FAVORITES;
 
   try {
@@ -144,17 +147,15 @@ export const serializeFavorites = (snapshot: FavoritesSnapshot): string => {
 export const isFavorite = (
   snapshot: FavoritesSnapshot,
   kind: FavoriteKind,
-  id: unknown
+  id: unknown,
 ): boolean => {
   const normalizedId = normalizeFavoriteId(id);
-  if (
-    !normalizedId ||
-    (kind === "competition" && !isLeagueKey(normalizedId))
-  ) {
+  if (!normalizedId || (kind === "competition" && !isLeagueKey(normalizedId))) {
     return false;
   }
 
-  const ids = kind === "competition" ? snapshot.competitionIds : snapshot.teamIds;
+  const ids =
+    kind === "competition" ? snapshot.competitionIds : snapshot.teamIds;
   return ids.includes(normalizedId);
 };
 
@@ -162,7 +163,7 @@ export const updateFavorite = (
   snapshot: FavoritesSnapshot,
   kind: FavoriteKind,
   id: unknown,
-  selected: boolean
+  selected: boolean,
 ): FavoritesSnapshot => {
   const normalizedId = normalizeFavoriteId(id);
   if (

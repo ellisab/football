@@ -1,8 +1,8 @@
 "use client";
 
+import { CalendarDays, Radio, Shield, Star } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Radio, Shield, Star } from "lucide-react";
 import { isNavigationItemActive } from "../navigation";
 
 const mobileItems = [

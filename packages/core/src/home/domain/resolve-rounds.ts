@@ -16,8 +16,8 @@ import { getGroupsWithFallback } from "./league-groups";
 import { loadMatchdayResults } from "./matchday-loader";
 import {
   getStatusCode,
-  mapSettledWithConcurrency,
   MAX_NEXT_GROUP_LOOKAHEAD,
+  mapSettledWithConcurrency,
 } from "./shared";
 
 const dedupeMatches = (matches: ReturnType<typeof sortMatchesByKickoff>) => {
@@ -41,7 +41,7 @@ const getGroupNameForMatches = (
   groupOrderID: number,
   groups: ApiGroup[],
   matches: ReturnType<typeof sortMatchesByKickoff>,
-  fallbackGroupName?: string
+  fallbackGroupName?: string,
 ) => {
   return (
     groups.find((group) => group?.groupOrderID === groupOrderID)?.groupName ??
@@ -76,7 +76,7 @@ const loadCandidateRounds = async ({
         season: resolvedSeason,
       });
       const matches = sortMatchesByKickoff(
-        matchdayResult.matches.map(sortGoals)
+        matchdayResult.matches.map(sortGoals),
       );
 
       return {
@@ -93,7 +93,7 @@ const loadCandidateRounds = async ({
     {
       shouldStop: (error) => getStatusCode(error) === 429,
       shouldStopValue: (round) => round.rateLimited,
-    }
+    },
   );
 
   const rounds = settledRounds.map((result) => {
@@ -105,9 +105,8 @@ const loadCandidateRounds = async ({
 
     return {
       groupOrderID: result.input,
-      groupName: groups.find(
-        (group) => group?.groupOrderID === result.input
-      )?.groupName,
+      groupName: groups.find((group) => group?.groupOrderID === result.input)
+        ?.groupName,
       lastChanged: undefined,
       matches: [] as ReturnType<typeof sortMatchesByKickoff>,
       failed: status !== 404,
@@ -143,12 +142,18 @@ const buildChampionsLeagueStageSnapshot = async ({
   requestOptions?: HomeRequestOptions;
 }) => {
   const stageName =
-    getKnockoutStageName(seedGroupName ?? seedMatches[0]?.group?.groupName) ?? seedGroupName;
-  const seedLeg = getKnockoutLeg(seedGroupName ?? seedMatches[0]?.group?.groupName);
+    getKnockoutStageName(seedGroupName ?? seedMatches[0]?.group?.groupName) ??
+    seedGroupName;
+  const seedLeg = getKnockoutLeg(
+    seedGroupName ?? seedMatches[0]?.group?.groupName,
+  );
   const knownStageGroupOrderIDs = groups
     .filter((group) => getKnockoutStageName(group?.groupName) === stageName)
     .map((group) => group.groupOrderID)
-    .filter((groupOrderID): groupOrderID is number => typeof groupOrderID === "number");
+    .filter(
+      (groupOrderID): groupOrderID is number =>
+        typeof groupOrderID === "number",
+    );
   const fallbackCompanionGroupOrderIDs =
     seedLeg === "first"
       ? [seedGroupOrderID + 1]
@@ -160,30 +165,28 @@ const buildChampionsLeagueStageSnapshot = async ({
       seedGroupOrderID,
       ...knownStageGroupOrderIDs,
       ...fallbackCompanionGroupOrderIDs,
-    ])
+    ]),
   ).filter((groupOrderID) => groupOrderID > 0);
-  const stageMatches = new Map<number, ReturnType<typeof sortMatchesByKickoff>>([
-    [seedGroupOrderID, seedMatches],
-  ]);
+  const stageMatches = new Map<number, ReturnType<typeof sortMatchesByKickoff>>(
+    [[seedGroupOrderID, seedMatches]],
+  );
   const companionGroupOrderIDs = candidateGroupOrderIDs.filter(
-    (groupOrderID) => groupOrderID !== seedGroupOrderID
+    (groupOrderID) => groupOrderID !== seedGroupOrderID,
   );
 
-  const {
-    rateLimited: companionRateLimited,
-    rounds: companionRounds,
-  } = await loadCandidateRounds({
-    dataSource,
-    effectiveShortcut,
-    resolvedSeason,
-    candidateGroupOrderIDs: companionGroupOrderIDs,
-    groups,
-    requestOptions,
-  });
+  const { rateLimited: companionRateLimited, rounds: companionRounds } =
+    await loadCandidateRounds({
+      dataSource,
+      effectiveShortcut,
+      resolvedSeason,
+      candidateGroupOrderIDs: companionGroupOrderIDs,
+      groups,
+      requestOptions,
+    });
 
   if (companionRounds.some((round) => round.failed)) {
     const error = new Error(
-      "Champions-League-Begleitrunden konnten nicht geladen werden"
+      "Champions-League-Begleitrunden konnten nicht geladen werden",
     );
 
     if (companionRateLimited) {
@@ -207,7 +210,7 @@ const buildChampionsLeagueStageSnapshot = async ({
 
   const groupOrderIDs = Array.from(stageMatches.keys()).sort((a, b) => a - b);
   const matches = dedupeMatches(
-    sortMatchesByKickoff(Array.from(stageMatches.values()).flat())
+    sortMatchesByKickoff(Array.from(stageMatches.values()).flat()),
   );
 
   return {
@@ -255,7 +258,9 @@ const resolveChampionsLeagueRoundSnapshots = async ({
     groupOrderIDs: [currentGroupOrderID],
     snapshot: {
       groupName:
-        getKnockoutStageName(currentGroup.groupName ?? currentRound.groupName) ??
+        getKnockoutStageName(
+          currentGroup.groupName ?? currentRound.groupName,
+        ) ??
         currentGroup.groupName ??
         currentRound.groupName,
       groupOrderID: currentGroupOrderID,
@@ -296,31 +301,32 @@ const resolveChampionsLeagueRoundSnapshots = async ({
     .map((group) => group?.groupOrderID)
     .filter(
       (groupOrderID): groupOrderID is number =>
-        typeof groupOrderID === "number" && groupOrderID > lastCurrentStageGroupOrderID
+        typeof groupOrderID === "number" &&
+        groupOrderID > lastCurrentStageGroupOrderID,
     )
     .sort((a, b) => a - b);
   const fallbackFutureGroupOrderIDs = Array.from(
     { length: MAX_NEXT_GROUP_LOOKAHEAD },
-    (_, index) => lastCurrentStageGroupOrderID + index + 1
+    (_, index) => lastCurrentStageGroupOrderID + index + 1,
   );
   const candidateNextGroupOrderIDs = Array.from(
-    new Set([...knownFutureGroupOrderIDs, ...fallbackFutureGroupOrderIDs])
-  ).filter((groupOrderID) => !currentStage.groupOrderIDs.includes(groupOrderID));
+    new Set([...knownFutureGroupOrderIDs, ...fallbackFutureGroupOrderIDs]),
+  ).filter(
+    (groupOrderID) => !currentStage.groupOrderIDs.includes(groupOrderID),
+  );
   let nextRound: HomeRoundSnapshot = {
     matches: [],
   };
 
-  const {
-    rateLimited: candidateRateLimited,
-    rounds: candidateRounds,
-  } = await loadCandidateRounds({
-    dataSource,
-    effectiveShortcut,
-    resolvedSeason,
-    candidateGroupOrderIDs: candidateNextGroupOrderIDs,
-    groups,
-    requestOptions,
-  });
+  const { rateLimited: candidateRateLimited, rounds: candidateRounds } =
+    await loadCandidateRounds({
+      dataSource,
+      effectiveShortcut,
+      resolvedSeason,
+      candidateGroupOrderIDs: candidateNextGroupOrderIDs,
+      groups,
+      requestOptions,
+    });
 
   if (candidateRateLimited) {
     return {
@@ -439,7 +445,7 @@ export const resolveRoundSnapshots = async ({
     .map((group) => group?.groupOrderID)
     .filter(
       (groupOrderID): groupOrderID is number =>
-        typeof groupOrderID === "number"
+        typeof groupOrderID === "number",
     )
     .sort((a, b) => a - b);
   const initialGroupOrderID = currentGroup.groupOrderID as number | undefined;
@@ -485,7 +491,7 @@ export const resolveRoundSnapshots = async ({
         resolvedLeague,
         effectiveShortcut,
         resolvedSeason,
-        requestOptions
+        requestOptions,
       );
 
       scheduleGroups = Array.isArray(fallbackGroupData.groups)
@@ -513,12 +519,12 @@ export const resolveRoundSnapshots = async ({
     .map((group) => group?.groupOrderID)
     .filter(
       (groupOrderID): groupOrderID is number =>
-        typeof groupOrderID === "number" && groupOrderID > currentGroupOrderID
+        typeof groupOrderID === "number" && groupOrderID > currentGroupOrderID,
     )
     .sort((a, b) => a - b);
   const fallbackFutureGroupOrderIDs = Array.from(
     { length: MAX_NEXT_GROUP_LOOKAHEAD },
-    (_, index) => currentGroupOrderID + index + 1
+    (_, index) => currentGroupOrderID + index + 1,
   );
   const candidateNextGroupOrderIDs = Array.from(
     new Set([
@@ -527,20 +533,18 @@ export const resolveRoundSnapshots = async ({
         : []),
       ...knownFutureGroupOrderIDs,
       ...fallbackFutureGroupOrderIDs,
-    ])
+    ]),
   );
 
-  const {
-    rateLimited: candidateRateLimited,
-    rounds: candidateRounds,
-  } = await loadCandidateRounds({
-    dataSource,
-    effectiveShortcut,
-    resolvedSeason,
-    candidateGroupOrderIDs: candidateNextGroupOrderIDs,
-    groups: scheduleGroups,
-    requestOptions,
-  });
+  const { rateLimited: candidateRateLimited, rounds: candidateRounds } =
+    await loadCandidateRounds({
+      dataSource,
+      effectiveShortcut,
+      resolvedSeason,
+      candidateGroupOrderIDs: candidateNextGroupOrderIDs,
+      groups: scheduleGroups,
+      requestOptions,
+    });
 
   for (const candidateRound of candidateRounds) {
     if (candidateRound.failed) {

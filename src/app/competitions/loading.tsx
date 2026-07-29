@@ -1,6 +1,19 @@
+const COMPETITION_SKELETON_KEYS = [
+  "competition-skeleton-1",
+  "competition-skeleton-2",
+  "competition-skeleton-3",
+  "competition-skeleton-4",
+  "competition-skeleton-5",
+  "competition-skeleton-6",
+] as const;
+
 export default function CompetitionsLoading() {
   return (
-    <div className="page-shell" aria-busy="true" aria-label="Wettbewerbe werden geladen">
+    <section
+      className="page-shell"
+      aria-busy="true"
+      aria-label="Wettbewerbe werden geladen"
+    >
       <div className="wide-column">
         <div className="skeleton-heading">
           <span />
@@ -9,12 +22,12 @@ export default function CompetitionsLoading() {
         </div>
         <div className="skeleton-control" />
         <div className="skeleton-card-grid" aria-hidden="true">
-          {Array.from({ length: 6 }, (_, index) => (
-            <div className="skeleton-card" key={index} />
+          {COMPETITION_SKELETON_KEYS.map((key) => (
+            <div className="skeleton-card" key={key} />
           ))}
         </div>
         <p className="sr-only">Wettbewerbe und Spieltage werden geladen.</p>
       </div>
-    </div>
+    </section>
   );
 }

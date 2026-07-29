@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { getLeagueKeyFromSlug } from "@/features/football/competition-meta";
 import { TablesView } from "@/features/football/components/tables-view";
 import { getVisibleCompetitions } from "@/features/football/view-utils";
-import { getLeagueKeyFromSlug } from "@/features/football/competition-meta";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 
 export const metadata: Metadata = {

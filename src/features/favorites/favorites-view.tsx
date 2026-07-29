@@ -1,14 +1,14 @@
 "use client";
 
+import { Star, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Star, Trophy, Users } from "lucide-react";
-import type { SearchResultItem } from "@/features/search";
 import { FavoriteButton, useFavorites } from "@/features/favorites";
 import {
-  MatchCardList,
   type MatchCardItem,
+  MatchCardList,
 } from "@/features/football/components/match-card-list";
+import type { SearchResultItem } from "@/features/search";
 
 export type FavoriteMatchItem = MatchCardItem & {
   teamIds: string[];
@@ -35,13 +35,15 @@ export function FavoritesView({
     visibleCount: MATCH_PAGE_SIZE,
   });
   const favoriteCompetitions = competitions.filter((item) =>
-    favorites.competitionIds.includes(item.id)
+    favorites.competitionIds.includes(item.id),
   );
-  const favoriteTeams = teams.filter((item) => favorites.teamIds.includes(item.id));
+  const favoriteTeams = teams.filter((item) =>
+    favorites.teamIds.includes(item.id),
+  );
   const relevantMatches = matches.filter(
     (match) =>
       favorites.competitionIds.includes(match.competitionId) ||
-      match.teamIds.some((id) => favorites.teamIds.includes(id))
+      match.teamIds.some((id) => favorites.teamIds.includes(id)),
   );
   const requestedMatchCount =
     matchReveal.favoritesKey === favoritesKey
@@ -50,7 +52,8 @@ export function FavoritesView({
   const visibleMatches = relevantMatches.slice(0, requestedMatchCount);
   const remainingMatchCount = relevantMatches.length - visibleMatches.length;
   const nextMatchCount = Math.min(MATCH_PAGE_SIZE, remainingMatchCount);
-  const isEmpty = favoriteCompetitions.length === 0 && favoriteTeams.length === 0;
+  const isEmpty =
+    favoriteCompetitions.length === 0 && favoriteTeams.length === 0;
 
   return (
     <div className="page-shell match-feed-page favorites-page">
@@ -60,8 +63,8 @@ export function FavoritesView({
             <p className="eyebrow">Lokal auf diesem Gerät</p>
             <h1 className="page-title">Favoriten</h1>
             <p className="page-description">
-              Deine Teams und Wettbewerbe bleiben in diesem Browser gespeichert. Ein
-              Konto ist nicht nötig.
+              Deine Teams und Wettbewerbe bleiben in diesem Browser gespeichert.
+              Ein Konto ist nicht nötig.
             </p>
           </div>
         </header>
@@ -76,8 +79,8 @@ export function FavoritesView({
                 Noch keine Favoriten
               </h2>
               <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
-                Markiere einen Wettbewerb oder ein Team mit dem Stern. Deine Auswahl
-                erscheint anschließend hier.
+                Markiere einen Wettbewerb oder ein Team mit dem Stern. Deine
+                Auswahl erscheint anschließend hier.
               </p>
             </div>
             <Link href="/competitions" className="button-primary">
@@ -95,7 +98,10 @@ export function FavoritesView({
                       Direkt zu Spieltagen, Ergebnissen und Tabellen.
                     </p>
                   </div>
-                  <Trophy aria-hidden="true" className="h-5 w-5 text-[var(--text-soft)]" />
+                  <Trophy
+                    aria-hidden="true"
+                    className="h-5 w-5 text-[var(--text-soft)]"
+                  />
                 </div>
                 <ul className="favorite-list">
                   {favoriteCompetitions.map((item) => (
@@ -126,7 +132,10 @@ export function FavoritesView({
                       Nächste Spiele und aktueller Tabellenkontext.
                     </p>
                   </div>
-                  <Users aria-hidden="true" className="h-5 w-5 text-[var(--text-soft)]" />
+                  <Users
+                    aria-hidden="true"
+                    className="h-5 w-5 text-[var(--text-soft)]"
+                  />
                 </div>
                 <ul className="favorite-list">
                   {favoriteTeams.map((item) => (
@@ -174,7 +183,8 @@ export function FavoritesView({
                         onClick={() =>
                           setMatchReveal({
                             favoritesKey,
-                            visibleCount: visibleMatches.length + nextMatchCount,
+                            visibleCount:
+                              visibleMatches.length + nextMatchCount,
                           })
                         }
                         type="button"

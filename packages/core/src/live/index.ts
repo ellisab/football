@@ -1,2 +1,2 @@
-export * from "./types";
 export * from "./get-live-schedule";
+export * from "./types";

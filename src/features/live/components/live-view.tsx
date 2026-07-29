@@ -3,8 +3,8 @@ import {
   PageIntro,
   PartialDataNotice,
 } from "@/features/football/components/product-ui";
-import { LiveRefreshController } from "./live-refresh-controller";
 import type { LiveMatchItem } from "./live-polling";
+import { LiveRefreshController } from "./live-refresh-controller";
 
 export function LiveView({
   initialMatches,
@@ -29,9 +29,9 @@ export function LiveView({
         />
 
         <DataNotice>
-          OpenLigaDB liefert weder einen bestätigten Live-Schalter noch die aktuelle
-          Spielminute. „Läuft möglicherweise“ wird nur aus Anstoßzeit und fehlendem
-          Endstatus abgeleitet.
+          OpenLigaDB liefert weder einen bestätigten Live-Schalter noch die
+          aktuelle Spielminute. „Läuft möglicherweise“ wird nur aus Anstoßzeit
+          und fehlendem Endstatus abgeleitet.
         </DataNotice>
         <PartialDataNotice errors={visibleErrors} />
         <LiveRefreshController initialMatches={initialMatches} />

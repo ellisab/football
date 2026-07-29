@@ -35,7 +35,10 @@ export const normalizeSearchText = (value: string): string => {
   return value
     .normalize("NFKD")
     .toLowerCase()
-    .replace(/[æđðłøœßþ]/g, (character) => CHARACTER_FOLDS[character] ?? character)
+    .replace(
+      /[æđðłøœßþ]/g,
+      (character) => CHARACTER_FOLDS[character] ?? character,
+    )
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[’']/g, "")
     .replace(/[^a-z0-9]+/g, " ")
@@ -64,7 +67,7 @@ const getEditDistance = (left: string, right: string, maximum: number) => {
       const value = Math.min(
         (current[rightIndex - 1] ?? maximum) + 1,
         (previous[rightIndex] ?? maximum) + 1,
-        (previous[rightIndex - 1] ?? maximum) + substitutionCost
+        (previous[rightIndex - 1] ?? maximum) + substitutionCost,
       );
 
       current[rightIndex] = value;
@@ -81,7 +84,7 @@ const getEditDistance = (left: string, right: string, maximum: number) => {
 const scoreNormalizedCandidate = (
   candidate: string,
   normalizedQuery: string,
-  queryTokens: string[]
+  queryTokens: string[],
 ): number => {
   if (!candidate) return 0;
   if (candidate === normalizedQuery) return 1_200;
@@ -94,12 +97,14 @@ const scoreNormalizedCandidate = (
 
   const candidateTokens = candidate.split(" ");
   const allExact = queryTokens.every((queryToken) =>
-    candidateTokens.includes(queryToken)
+    candidateTokens.includes(queryToken),
   );
   if (allExact) return 760;
 
   const allPrefix = queryTokens.every((queryToken) =>
-    candidateTokens.some((candidateToken) => candidateToken.startsWith(queryToken))
+    candidateTokens.some((candidateToken) =>
+      candidateToken.startsWith(queryToken),
+    ),
   );
   if (allPrefix) return 680;
 
@@ -109,7 +114,7 @@ const scoreNormalizedCandidate = (
     const closest = candidateTokens.reduce(
       (best, candidateToken) =>
         Math.min(best, getEditDistance(queryToken, candidateToken, maximum)),
-      maximum + 1
+      maximum + 1,
     );
 
     if (closest > maximum) return 0;
@@ -121,7 +126,7 @@ const scoreNormalizedCandidate = (
 
 export const scoreSearchItem = (
   item: SearchResultItem,
-  query: string
+  query: string,
 ): number => {
   const normalizedQuery = normalizeSearchText(query);
   if (!normalizedQuery) return 0;
@@ -142,35 +147,39 @@ export const scoreSearchItem = (
           scoreNormalizedCandidate(
             normalizeSearchText(candidate.value),
             normalizedQuery,
-            queryTokens
-          ) * candidate.weight
+            queryTokens,
+          ) * candidate.weight,
         ),
-      0
-    )
+      0,
+    ),
   );
 };
 
 export const rankSearchResults = (
   items: readonly SearchResultItem[],
   query: string,
-  { kinds, limit = 12 }: SearchRankingOptions = {}
+  { kinds, limit = 12 }: SearchRankingOptions = {},
 ): RankedSearchResult[] => {
   if (!normalizeSearchText(query) || limit <= 0) return [];
 
   const allowedKinds = kinds ? new Set(kinds) : undefined;
 
   return items
-    .map((item, index) => ({ item, index, score: scoreSearchItem(item, query) }))
+    .map((item, index) => ({
+      item,
+      index,
+      score: scoreSearchItem(item, query),
+    }))
     .filter(
       (result) =>
         result.score > 0 &&
-        (!allowedKinds || allowedKinds.has(result.item.kind))
+        (!allowedKinds || allowedKinds.has(result.item.kind)),
     )
     .sort(
       (left, right) =>
         right.score - left.score ||
         left.item.label.localeCompare(right.item.label, "de") ||
-        left.index - right.index
+        left.index - right.index,
     )
     .slice(0, limit)
     .map(({ item, score }) => ({ item, score }));

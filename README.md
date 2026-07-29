@@ -37,6 +37,11 @@ pnpm run lint
 pnpm run typecheck
 ```
 
+Apply Biome's safe lint, formatting, and import fixes:
+```
+pnpm run lint:fix
+```
+
 ## Documentation
 
 - [Product and visual specification](docs/definitive-football-product-redesign.md)

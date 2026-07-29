@@ -13,37 +13,31 @@ test("match presentation distinguishes scheduled, estimated live, finished, and 
   assert.equal(
     getMatchPresentationStatus(
       { matchDateTimeUTC: "2026-07-11T19:00:00Z", matchIsFinished: false },
-      now
+      now,
     ),
-    "scheduled"
+    "scheduled",
   );
   assert.equal(
     getMatchPresentationStatus(
       { matchDateTimeUTC: "2026-07-11T17:00:00Z", matchIsFinished: false },
-      now
+      now,
     ),
-    "live-estimate"
+    "live-estimate",
   );
   assert.equal(
     getMatchPresentationStatus(
       { matchDateTimeUTC: "2026-07-11T12:00:00Z", matchIsFinished: false },
-      now
+      now,
     ),
-    "status-unknown"
+    "status-unknown",
   );
   assert.equal(
-    getMatchPresentationStatus(
-      { matchIsFinished: true },
-      now
-    ),
-    "finished"
+    getMatchPresentationStatus({ matchIsFinished: true }, now),
+    "finished",
   );
   assert.equal(
-    getMatchPresentationStatus(
-      { matchIsFinished: false },
-      now
-    ),
-    "status-unknown"
+    getMatchPresentationStatus({ matchIsFinished: false }, now),
+    "status-unknown",
   );
 });
 
@@ -62,7 +56,7 @@ test("match presentation preserves missing score values and provides German acce
       team1: { teamName: "Bayern München" },
       team2: { teamName: "Borussia Dortmund" },
     },
-    { now: new Date("2026-07-11T18:00:00Z") }
+    { now: new Date("2026-07-11T18:00:00Z") },
   );
 
   assert.deepEqual(presentation.score, {
@@ -73,7 +67,7 @@ test("match presentation preserves missing score values and provides German acce
   assert.equal(presentation.statusLabel, "Läuft möglicherweise");
   assert.equal(
     presentation.screenReaderLabel,
-    "Bayern München gegen Borussia Dortmund, läuft möglicherweise."
+    "Bayern München gegen Borussia Dortmund, läuft möglicherweise.",
   );
 });
 
@@ -94,7 +88,7 @@ test("match presentation announces a complete finished score concisely", () => {
 
   assert.equal(
     presentation.screenReaderLabel,
-    "Bayern München 2, Borussia Dortmund 1, beendet."
+    "Bayern München 2, Borussia Dortmund 1, beendet.",
   );
 });
 

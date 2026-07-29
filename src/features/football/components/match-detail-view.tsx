@@ -1,16 +1,16 @@
-import Link from "next/link";
-import { CalendarDays, Goal, MapPin, Trophy } from "lucide-react";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
-import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
+import { CalendarDays, Goal, MapPin, Trophy } from "lucide-react";
+import Link from "next/link";
+import { FavoriteButton } from "@/features/favorites";
+import { getCompetitionMeta } from "@/features/football/competition-meta";
+import { SculptedMatch } from "@/features/football/components/sculpted-match";
 import {
   getMatchStatus,
   getTeamId,
   getTeamLabel,
   getVenueLabel,
 } from "@/features/football/view-utils";
-import { getCompetitionMeta } from "@/features/football/competition-meta";
-import { FavoriteButton } from "@/features/favorites";
-import { SculptedMatch } from "@/features/football/components/sculpted-match";
+import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
 
 const fullDateFormatter = new Intl.DateTimeFormat("de-DE", {
   dateStyle: "full",
@@ -62,21 +62,24 @@ export function MatchDetailView({
 }) {
   const status = getMatchStatus(match);
   const venue = getVenueLabel(match);
-  const meta = competition ? getCompetitionMeta(competition.resolvedLeague) : undefined;
+  const meta = competition
+    ? getCompetitionMeta(competition.resolvedLeague)
+    : undefined;
   const competitionName = meta?.label ?? match.leagueName ?? "Wettbewerb";
   const season = competition?.resolvedSeason ?? match.leagueSeason;
   const roundLabel =
-    match.group?.groupName ?? (season ? `Saison ${season}` : "Runde noch offen");
+    match.group?.groupName ??
+    (season ? `Saison ${season}` : "Runde noch offen");
   const competitionHref = meta
     ? season
       ? `${meta.href}?season=${season}`
       : meta.href
     : undefined;
   const periodResults = [...(match.matchResults ?? [])].sort(
-    (a, b) => (a.resultOrderID ?? 0) - (b.resultOrderID ?? 0)
+    (a, b) => (a.resultOrderID ?? 0) - (b.resultOrderID ?? 0),
   );
   const goals = [...(match.goals ?? [])].sort(
-    (a, b) => (a.matchMinute ?? 0) - (b.matchMinute ?? 0)
+    (a, b) => (a.matchMinute ?? 0) - (b.matchMinute ?? 0),
   );
 
   return (
@@ -84,7 +87,8 @@ export function MatchDetailView({
       <div className="content-column">
         <section className="match-detail-hero">
           <h1 className="sr-only">
-            {getTeamLabel(match.team1, "Heimteam")} gegen {getTeamLabel(match.team2, "Auswärtsteam")}
+            {getTeamLabel(match.team1, "Heimteam")} gegen{" "}
+            {getTeamLabel(match.team2, "Auswärtsteam")}
           </h1>
           <SculptedMatch
             competitionLabel={competitionName}
@@ -104,7 +108,9 @@ export function MatchDetailView({
                   {competitionName}
                 </span>
               )}
-              <span className={`match-detail-kickoff match-detail-kickoff--${status}`}>
+              <span
+                className={`match-detail-kickoff match-detail-kickoff--${status}`}
+              >
                 <CalendarDays aria-hidden="true" className="h-4 w-4" />
                 {getFullKickoff(match)}
               </span>
@@ -118,7 +124,10 @@ export function MatchDetailView({
               </span>
             </div>
             {match.team1 || match.team2 ? (
-              <nav className="match-detail-team-actions" aria-label="Teams und Favoriten">
+              <nav
+                className="match-detail-team-actions"
+                aria-label="Teams und Favoriten"
+              >
                 <TeamAction team={match.team1} />
                 <TeamAction team={match.team2} />
               </nav>
@@ -131,17 +140,23 @@ export function MatchDetailView({
             <div className="section-heading-row">
               <div>
                 <h2 className="section-title">Tore</h2>
-                <p className="section-description">Vom Datenfeed bestätigte Torereignisse.</p>
+                <p className="section-description">
+                  Vom Datenfeed bestätigte Torereignisse.
+                </p>
               </div>
             </div>
             {goals.length > 0 ? (
               <ol className="event-list">
                 {goals.map((goal, index) => (
                   <li key={goal.goalID ?? `${goal.goalGetterName}-${index}`}>
-                    <span className="event-minute">{goal.matchMinute ?? "–"}&apos;</span>
+                    <span className="event-minute">
+                      {goal.matchMinute ?? "–"}&apos;
+                    </span>
                     <Goal aria-hidden="true" className="h-4 w-4" />
                     <span className="min-w-0 flex-1">
-                      <strong>{goal.goalGetterName ?? "Torschütze nicht angegeben"}</strong>
+                      <strong>
+                        {goal.goalGetterName ?? "Torschütze nicht angegeben"}
+                      </strong>
                       <small>
                         {goal.isPenalty ? "Elfmeter" : "Tor"}
                         {goal.isOwnGoal ? " · Eigentor" : ""}
@@ -167,14 +182,20 @@ export function MatchDetailView({
             <div className="section-heading-row">
               <div>
                 <h2 className="section-title">Ergebnisphasen</h2>
-                <p className="section-description">Zwischen- und Endstände aus der Quelle.</p>
+                <p className="section-description">
+                  Zwischen- und Endstände aus der Quelle.
+                </p>
               </div>
             </div>
             {periodResults.length > 0 ? (
               <dl className="result-phase-list">
                 {periodResults.map((result, index) => (
                   <div key={result.resultID ?? `${result.resultName}-${index}`}>
-                    <dt>{result.resultName ?? result.resultDescription ?? "Ergebnis"}</dt>
+                    <dt>
+                      {result.resultName ??
+                        result.resultDescription ??
+                        "Ergebnis"}
+                    </dt>
                     <dd>
                       {result.pointsTeam1 ?? "–"}:{result.pointsTeam2 ?? "–"}
                     </dd>
@@ -182,7 +203,9 @@ export function MatchDetailView({
                 ))}
               </dl>
             ) : (
-              <p className="inline-empty">Noch keine Ergebnisphasen verfügbar.</p>
+              <p className="inline-empty">
+                Noch keine Ergebnisphasen verfügbar.
+              </p>
             )}
           </aside>
         </div>
@@ -196,7 +219,8 @@ export function MatchDetailView({
               <Link href={`/matches/${previousMatch.matchID}`}>
                 <small>Vorheriges Spiel</small>
                 <strong>
-                  {getTeamLabel(previousMatch.team1, "Offen")} gegen {getTeamLabel(previousMatch.team2, "Offen")}
+                  {getTeamLabel(previousMatch.team1, "Offen")} gegen{" "}
+                  {getTeamLabel(previousMatch.team2, "Offen")}
                 </strong>
               </Link>
             ) : null}
@@ -204,7 +228,8 @@ export function MatchDetailView({
               <Link href={`/matches/${nextMatch.matchID}`}>
                 <small>Nächstes Spiel</small>
                 <strong>
-                  {getTeamLabel(nextMatch.team1, "Offen")} gegen {getTeamLabel(nextMatch.team2, "Offen")}
+                  {getTeamLabel(nextMatch.team1, "Offen")} gegen{" "}
+                  {getTeamLabel(nextMatch.team2, "Offen")}
                 </strong>
               </Link>
             ) : null}

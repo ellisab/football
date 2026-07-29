@@ -27,7 +27,7 @@ const toWikimediaThumbPngPath = (pathname: string, thumbSize: number) => {
   const directory = pathname.slice(0, -(fileName.length + 1));
   const thumbDirectory = directory.replace(
     "/wikipedia/commons/",
-    "/wikipedia/commons/thumb/"
+    "/wikipedia/commons/thumb/",
   );
 
   return `${thumbDirectory}/${fileName}/${thumbSize}px-${fileName}.png`;
@@ -46,7 +46,7 @@ export const isAllowedImageHost = (iconUrl?: string) => {
 
 export const normalizeIconUrl = (
   iconUrl?: string,
-  options?: NormalizeIconUrlOptions
+  options?: NormalizeIconUrlOptions,
 ) => {
   if (!iconUrl) return undefined;
 
@@ -58,7 +58,11 @@ export const normalizeIconUrl = (
   try {
     const url = new URL(iconUrl);
 
-    if (forceHttps && url.protocol === "http:" && ALLOWED_IMAGE_HOST_SET.has(url.hostname)) {
+    if (
+      forceHttps &&
+      url.protocol === "http:" &&
+      ALLOWED_IMAGE_HOST_SET.has(url.hostname)
+    ) {
       url.protocol = "https:";
     }
 

@@ -1,13 +1,13 @@
-import {
-  getMatchById,
-  OPENLIGADB_CACHE_SECONDS,
-  type ApiMatch,
-} from "@footballleagues/core/openligadb";
 import { resolveLeagueKey } from "@footballleagues/core/leagues";
 import { getMatchKickoffTimestamp } from "@footballleagues/core/matches";
 import {
-  getMatchStatus,
+  type ApiMatch,
+  getMatchById,
+  OPENLIGADB_CACHE_SECONDS,
+} from "@footballleagues/core/openligadb";
+import {
   type CompetitionMatch,
+  getMatchStatus,
 } from "@/features/football/view-utils";
 
 const MAX_REFRESH_MATCHES = 8;
@@ -57,7 +57,11 @@ export const refreshUncertainMatches = async ({
     .filter(({ item }) => isRefreshCandidate(item, now))
     .slice(0, MAX_REFRESH_MATCHES);
 
-  for (let offset = 0; offset < candidates.length; offset += REFRESH_CONCURRENCY) {
+  for (
+    let offset = 0;
+    offset < candidates.length;
+    offset += REFRESH_CONCURRENCY
+  ) {
     const batch = candidates.slice(offset, offset + REFRESH_CONCURRENCY);
     const refreshedBatch = await Promise.all(
       batch.map(async ({ item }) => {
@@ -72,7 +76,7 @@ export const refreshUncertainMatches = async ({
         } catch {
           return item.match;
         }
-      })
+      }),
     );
 
     refreshedBatch.forEach((match, batchIndex) => {

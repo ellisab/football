@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { SearchPageView } from "@/features/search/search-page";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
+import { SearchPageView } from "@/features/search/search-page";
 
 export const metadata: Metadata = {
   title: "Suchen",

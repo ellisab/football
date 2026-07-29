@@ -50,7 +50,7 @@ export function SearchExperience({
   const [query, setQuery] = useState(initialQuery);
   const results = useMemo(
     () => rankSearchResults(items, query, { limit: resultLimit }),
-    [items, query, resultLimit]
+    [items, query, resultLimit],
   );
   const groupedResults = useMemo(() => {
     const groups = new Map<SearchResultKind, typeof results>();
@@ -110,7 +110,13 @@ export function SearchExperience({
         />
       </form>
 
-      <p id={statusId} role="status" aria-live="polite" aria-atomic="true" className="text-sm opacity-70">
+      <p
+        id={statusId}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="text-sm opacity-70"
+      >
         {hasQuery
           ? results.length === 1
             ? "1 Ergebnis"
@@ -118,7 +124,11 @@ export function SearchExperience({
           : emptyMessage}
       </p>
 
-      <div id={resultsId} aria-label="Suchergebnisse" className="grid min-w-0 gap-5">
+      <section
+        id={resultsId}
+        aria-label="Suchergebnisse"
+        className="grid min-w-0 gap-5"
+      >
         {hasQuery && results.length === 0 ? (
           <p className="rounded-xl border border-[var(--border)] bg-[var(--surface-subtle)] p-4 text-sm text-[var(--text-muted)]">
             {noResultsMessage}
@@ -142,7 +152,9 @@ export function SearchExperience({
                       className="group flex min-h-14 items-center justify-between gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface-subtle)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[color-mix(in_srgb,var(--focus)_20%,transparent)]"
                     >
                       <span className="min-w-0">
-                        <span className="block truncate font-semibold">{item.label}</span>
+                        <span className="block truncate font-semibold">
+                          {item.label}
+                        </span>
                         {item.description ? (
                           <span className="mt-0.5 block truncate text-sm opacity-65">
                             {item.description}
@@ -159,7 +171,7 @@ export function SearchExperience({
             </section>
           ))
         )}
-      </div>
+      </section>
     </section>
   );
 }

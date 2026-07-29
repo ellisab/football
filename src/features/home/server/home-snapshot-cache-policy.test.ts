@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { HomeSnapshot } from "@footballleagues/core/home";
 import {
-  createSharedStaleBackoff,
   createKeyedSingleFlight,
+  createSharedStaleBackoff,
   createSingleFlight,
   createStaleOnError,
   IncompleteSnapshotError,
@@ -48,7 +48,7 @@ test("cache policy rejects fixture-critical home errors", () => {
       () => requireCacheableHomeSnapshot(homeSnapshot([errorKey])),
       (error) =>
         error instanceof IncompleteSnapshotError &&
-        error.errorKeys.includes(errorKey)
+        error.errorKeys.includes(errorKey),
     );
   }
 });
@@ -66,16 +66,14 @@ test("cache policy rejects a rate-limited snapshot even with only a table error"
 
   assert.throws(
     () => requireCacheableHomeSnapshot(snapshot),
-    (error) =>
-      error instanceof IncompleteSnapshotError && error.status === 429
+    (error) => error instanceof IncompleteSnapshotError && error.status === 429,
   );
 });
 
 test("snapshot deadline rejects instead of resolving a cacheable fallback", async () => {
   await assert.rejects(
     withSnapshotDeadline(new Promise(() => undefined), 5),
-    (error) =>
-      error instanceof SnapshotTimeoutError && error.timeoutMs === 5
+    (error) => error instanceof SnapshotTimeoutError && error.timeoutMs === 5,
   );
 });
 
@@ -91,10 +89,9 @@ test("abortable snapshot deadline cancels the underlying work", async () => {
             reject(new DOMException("Aborted", "AbortError"));
           });
         }),
-      5
+      5,
     ),
-    (error) =>
-      error instanceof SnapshotTimeoutError && error.timeoutMs === 5
+    (error) => error instanceof SnapshotTimeoutError && error.timeoutMs === 5,
   );
 
   assert.equal(observedAbort, true);
@@ -125,7 +122,7 @@ test("shared backoff serves last-good data and suppresses repeated work", async 
       random: () => 0.5,
       scheduleMs: [60_000],
       ttlSeconds: 3_600,
-    }
+    },
   );
 
   assert.deepEqual(await load(), { fixtures: [101, 202] });
@@ -160,7 +157,7 @@ test("shared backoff keeps cold failures visible but skips their retry window", 
       random: () => 0.5,
       scheduleMs: [60_000],
       ttlSeconds: 3_600,
-    }
+    },
   );
 
   await assert.rejects(load(), /cold failure/);
@@ -204,7 +201,7 @@ test("keyed single-flight shares only matching work", async () => {
       await new Promise((resolve) => setTimeout(resolve, 1));
       return key.toUpperCase();
     },
-    (key) => key
+    (key) => key,
   );
 
   const [first, duplicate, different] = await Promise.all([
@@ -222,7 +219,7 @@ test("stale-on-error returns the identical last success but never hides a cold f
     async () => {
       throw new Error("cold failure");
     },
-    () => "overview"
+    () => "overview",
   );
   await assert.rejects(cold, /cold failure/);
 
@@ -235,7 +232,7 @@ test("stale-on-error returns the identical last success but never hides a cold f
       return fixtureSnapshot;
     },
     () => "overview",
-    { onStale: () => staleEvents += 1 }
+    { onStale: () => (staleEvents += 1) },
   );
 
   assert.equal(await load(), fixtureSnapshot);
@@ -275,7 +272,9 @@ test("concurrency mapper stops scheduling and drains active work after a failure
       active += 1;
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, value === 0 ? 1 : 8));
+        await new Promise((resolve) =>
+          setTimeout(resolve, value === 0 ? 1 : 8),
+        );
         if (value === 0) throw failure;
         completed += 1;
         return value;
@@ -283,7 +282,7 @@ test("concurrency mapper stops scheduling and drains active work after a failure
         active -= 1;
       }
     }),
-    (error) => error === failure
+    (error) => error === failure,
   );
 
   assert.equal(calls, 3);

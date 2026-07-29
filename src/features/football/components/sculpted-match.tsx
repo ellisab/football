@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { Radio } from "lucide-react";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
-import { TeamBadge } from "@/features/teams/components/team-badge";
+import { Radio } from "lucide-react";
+import Link from "next/link";
 import {
   formatMatchTime,
   getMatchScore,
@@ -10,6 +9,7 @@ import {
   getMatchStatusLabel,
   getTeamLabel,
 } from "@/features/football/view-utils";
+import { TeamBadge } from "@/features/teams/components/team-badge";
 
 const centerLabel = (match: ApiMatch) => {
   const status = getMatchStatus(match);
@@ -86,8 +86,14 @@ export function SculptedMatch({
           iconUrl={match.team1?.teamIconUrl}
           score={score[0] ?? "–"}
         />
-        <div className="featured-match__signal" data-status={status} aria-hidden="true">
-          {status === "live" ? <Radio className="featured-match__live-icon" /> : null}
+        <div
+          className="featured-match__signal"
+          data-status={status}
+          aria-hidden="true"
+        >
+          {status === "live" ? (
+            <Radio className="featured-match__live-icon" />
+          ) : null}
           <strong>{centerLabel(match)}</strong>
           <span>{getMatchStatusLabel(match)}</span>
         </div>

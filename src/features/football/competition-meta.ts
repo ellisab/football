@@ -2,10 +2,10 @@ import type { LeagueKey, LeagueOption } from "@footballleagues/core/leagues";
 import {
   Flag,
   Goal,
+  type LucideIcon,
   Shield,
   Shirt,
   Trophy,
-  type LucideIcon,
 } from "lucide-react";
 
 export type CompetitionMeta = {
@@ -91,7 +91,7 @@ export const getCompetitionCatalog = () => {
 
 export const getCompetitionHref = (
   option: Pick<LeagueOption, "seasons" | "shortcut">,
-  season?: number
+  season?: number,
 ) => {
   const resolvedSeason = season ?? option.seasons[0];
   const baseHref = getCompetitionMeta(option.shortcut).href;
@@ -101,6 +101,6 @@ export const getCompetitionHref = (
 
 export const getLeagueKeyFromSlug = (slug: string): LeagueKey | undefined => {
   return (Object.keys(COMPETITION_META) as LeagueKey[]).find(
-    (key) => COMPETITION_META[key].slug === slug
+    (key) => COMPETITION_META[key].slug === slug,
   );
 };

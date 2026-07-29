@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { RotateCcw, TriangleAlert } from "lucide-react";
+import Link from "next/link";
 
 export default function AppError({ reset }: { reset: () => void }) {
   return (
@@ -13,10 +13,12 @@ export default function AppError({ reset }: { reset: () => void }) {
           </div>
           <div>
             <p className="eyebrow">Verbindung unterbrochen</p>
-            <h1 className="page-title">Die Daten konnten nicht geladen werden</h1>
+            <h1 className="page-title">
+              Die Daten konnten nicht geladen werden
+            </h1>
             <p className="page-description">
-              Der Rahmen bleibt verfügbar. Versuche die Anfrage erneut oder kehre zum
-              heutigen Spielplan zurück.
+              Der Rahmen bleibt verfügbar. Versuche die Anfrage erneut oder
+              kehre zum heutigen Spielplan zurück.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test, { beforeEach } from "node:test";
-import { NextRequest } from "next/server";
 import { clearOpenLigaDbMemoryCache } from "@footballleagues/core/openligadb";
+import { NextRequest } from "next/server";
 import { GET } from "./route";
 
 beforeEach(() => {
@@ -11,7 +11,7 @@ beforeEach(() => {
 const jsonResponse = (
   body: unknown,
   status: number = 200,
-  headers?: HeadersInit
+  headers?: HeadersInit,
 ) => {
   return new Response(JSON.stringify(body), {
     status,
@@ -33,7 +33,9 @@ test("/api/home rejects unsupported league keys without loading data", async () 
 
   try {
     const response = await GET(
-      new NextRequest("http://localhost/api/home?league=unsupported&season=2026")
+      new NextRequest(
+        "http://localhost/api/home?league=unsupported&season=2026",
+      ),
     );
     const payload = await response.json();
 
@@ -80,7 +82,7 @@ test("/api/home does not cache a fixture-critical partial snapshot", async () =>
 
   try {
     const response = await GET(
-      new NextRequest("http://localhost/api/home?league=bl1&season=2025")
+      new NextRequest("http://localhost/api/home?league=bl1&season=2025"),
     );
     const payload = await response.json();
     const cacheControl = response.headers.get("cache-control") ?? "";
@@ -140,7 +142,7 @@ test("/api/home preserves 429 for a rate-limited partial snapshot", async () => 
 
   try {
     const response = await GET(
-      new NextRequest("http://localhost/api/home?league=bl1&season=2099")
+      new NextRequest("http://localhost/api/home?league=bl1&season=2099"),
     );
     const cacheControl = response.headers.get("cache-control") ?? "";
 

@@ -1,6 +1,6 @@
 export {
-  ALLOWED_IMAGE_HOSTS,
   ALLOWED_IMAGE_HOST_SET,
+  ALLOWED_IMAGE_HOSTS,
   ALLOWED_IMAGE_REMOTE_PATTERNS,
 } from "./allowed-image-hosts";
 

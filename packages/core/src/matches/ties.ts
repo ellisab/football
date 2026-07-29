@@ -1,4 +1,4 @@
-import { getFinalResult, type ApiMatch, type ApiTeam } from "../openligadb";
+import { type ApiMatch, type ApiTeam, getFinalResult } from "../openligadb";
 
 type TieTeam = Pick<ApiTeam, "teamId" | "teamName" | "teamIconUrl">;
 
@@ -27,14 +27,16 @@ type TieAccumulator = {
 type AggregateLeader = "team1" | "team2" | null;
 
 const getMatchTime = (match: ApiMatch) => {
-  const timestamp = Date.parse(match.matchDateTimeUTC ?? match.matchDateTime ?? "");
+  const timestamp = Date.parse(
+    match.matchDateTimeUTC ?? match.matchDateTime ?? "",
+  );
   return Number.isNaN(timestamp) ? Number.MAX_SAFE_INTEGER : timestamp;
 };
 
 const toTeamIdentity = (
   team: ApiTeam | undefined,
   match: ApiMatch,
-  side: "home" | "away"
+  side: "home" | "away",
 ) => {
   if (typeof team?.teamId === "number") {
     return `id:${team.teamId}`;
@@ -52,7 +54,10 @@ const toTeamIdentity = (
   return `unknown:${matchKey}:${side}`;
 };
 
-const createTieTeam = (team: ApiTeam | undefined, fallback: string): TieTeam => ({
+const createTieTeam = (
+  team: ApiTeam | undefined,
+  fallback: string,
+): TieTeam => ({
   teamId: team?.teamId,
   teamName: team?.teamName ?? fallback,
   teamIconUrl: team?.teamIconUrl,
@@ -68,7 +73,7 @@ const compareMatches = (a: ApiMatch, b: ApiMatch) => {
 const toAggregateScore = (
   matches: ApiMatch[],
   team1Identity: string,
-  team2Identity: string
+  team2Identity: string,
 ) => {
   let team1 = 0;
   let team2 = 0;
@@ -111,7 +116,9 @@ const toAggregateScore = (
   };
 };
 
-export const groupKnockoutMatchesByTie = (matches: ApiMatch[]): KnockoutTie[] => {
+export const groupKnockoutMatchesByTie = (
+  matches: ApiMatch[],
+): KnockoutTie[] => {
   const ties = new Map<string, TieAccumulator>();
 
   for (const match of matches) {
@@ -129,10 +136,16 @@ export const groupKnockoutMatchesByTie = (matches: ApiMatch[]): KnockoutTie[] =>
     if (existing) {
       existing.matches.push(match);
       if (!existing.teamByIdentity.has(homeIdentity)) {
-        existing.teamByIdentity.set(homeIdentity, createTieTeam(match.team1, "Heim"));
+        existing.teamByIdentity.set(
+          homeIdentity,
+          createTieTeam(match.team1, "Heim"),
+        );
       }
       if (!existing.teamByIdentity.has(awayIdentity)) {
-        existing.teamByIdentity.set(awayIdentity, createTieTeam(match.team2, "Gast"));
+        existing.teamByIdentity.set(
+          awayIdentity,
+          createTieTeam(match.team2, "Gast"),
+        );
       }
       continue;
     }
@@ -167,9 +180,11 @@ export const groupKnockoutMatchesByTie = (matches: ApiMatch[]): KnockoutTie[] =>
         aggregateScore: toAggregateScore(
           sortedMatches,
           tie.team1Identity,
-          tie.team2Identity
+          tie.team2Identity,
         ),
       };
     })
-    .sort((a, b) => compareMatches(a.matches[0] as ApiMatch, b.matches[0] as ApiMatch));
+    .sort((a, b) =>
+      compareMatches(a.matches[0] as ApiMatch, b.matches[0] as ApiMatch),
+    );
 };

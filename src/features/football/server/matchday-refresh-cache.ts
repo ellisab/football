@@ -75,7 +75,7 @@ const isMatchdaySnapshot = (value: unknown): value is MatchdaySnapshot =>
   isRecord(value.group);
 
 const isMatchdayRefreshState = (
-  value: unknown
+  value: unknown,
 ): value is MatchdayRefreshState =>
   isRecord(value) &&
   value.version === CACHE_RECORD_VERSION &&
@@ -85,9 +85,7 @@ const isMatchdayRefreshState = (
   (value.lastGood === undefined || isMatchdaySnapshot(value.lastGood)) &&
   (value.lastGoodAt === undefined || typeof value.lastGoodAt === "number");
 
-const isOriginCooldownState = (
-  value: unknown
-): value is OriginCooldownState =>
+const isOriginCooldownState = (value: unknown): value is OriginCooldownState =>
   isRecord(value) &&
   value.version === CACHE_RECORD_VERSION &&
   typeof value.failureCount === "number" &&
@@ -99,9 +97,8 @@ const getStatusCode = (error: unknown) => {
 };
 
 const getRetryAfterMs = (error: unknown) => {
-  const retryAfterMs = (
-    error as { retryAfterMs?: number } | undefined
-  )?.retryAfterMs;
+  const retryAfterMs = (error as { retryAfterMs?: number } | undefined)
+    ?.retryAfterMs;
   return typeof retryAfterMs === "number" &&
     Number.isFinite(retryAfterMs) &&
     retryAfterMs >= 0
@@ -148,7 +145,7 @@ const safeGet = async (cache: CacheStore, key: string) => {
 const safeSet = async (
   cache: CacheStore,
   key: string,
-  value: MatchdayRefreshState | OriginCooldownState
+  value: MatchdayRefreshState | OriginCooldownState,
 ) => {
   try {
     await cache.set(key, value, {
@@ -186,7 +183,7 @@ const getBackoffMs = ({
 
 const getUsableLastGood = (
   state: MatchdayRefreshState | undefined,
-  now: number
+  now: number,
 ) =>
   state?.lastGood &&
   state.lastGoodAt !== undefined &&
@@ -214,7 +211,7 @@ const inFlightLoads = new Map<string, Promise<MatchdayRefreshResult>>();
 
 const loadValidatedSnapshot = (
   params: MatchdayParams,
-  loadSnapshot: typeof getMatchdaySnapshot
+  loadSnapshot: typeof getMatchdaySnapshot,
 ) => {
   const signal = AbortSignal.timeout(4_000);
 
@@ -242,7 +239,7 @@ export const loadMatchdayWithBackoff = async (
     loadSnapshot?: typeof getMatchdaySnapshot;
     now?: () => number;
     random?: () => number;
-  } = {}
+  } = {},
 ): Promise<MatchdayRefreshResult> => {
   const cacheKey = getCacheKey(params);
   if (!cacheKey) {
@@ -267,7 +264,7 @@ export const loadMatchdayWithBackoff = async (
     const lastGood = getUsableLastGood(state, currentTime);
     const activeRetryAt = Math.max(
       state?.retryAt ?? 0,
-      originCooldown?.retryAt ?? 0
+      originCooldown?.retryAt ?? 0,
     );
 
     if (activeRetryAt > currentTime) {
@@ -332,7 +329,7 @@ export const loadMatchdayWithBackoff = async (
       const failureCount =
         Math.max(
           state?.failureCount ?? 0,
-          status === 429 ? (originCooldown?.failureCount ?? 0) : 0
+          status === 429 ? (originCooldown?.failureCount ?? 0) : 0,
         ) + 1;
       const retryAt =
         checkedAt +
@@ -377,7 +374,7 @@ export const loadMatchdayWithBackoff = async (
       const failureCount =
         Math.max(
           state?.failureCount ?? 0,
-          status === 429 ? (originCooldown?.failureCount ?? 0) : 0
+          status === 429 ? (originCooldown?.failureCount ?? 0) : 0,
         ) + 1;
       const retryAt =
         failedAt +
@@ -433,5 +430,5 @@ export const loadMatchdayWithBackoff = async (
 
 export const getMatchdayRetrySeconds = (
   retryAt: number | undefined,
-  now: number = Date.now()
+  now: number = Date.now(),
 ) => Math.max(1, Math.ceil(((retryAt ?? now) - now) / 1_000));
