@@ -42,9 +42,9 @@ export function TeamBadge({
 
   return (
     <div
-      aria-hidden={decorative || undefined}
-      aria-label={decorative ? undefined : (name ?? "Vereinswappen")}
-      role="img"
+      {...(decorative
+        ? { "aria-hidden": true }
+        : { "aria-label": name ?? "Vereinswappen", role: "img" as const })}
       className={`flex items-center justify-center rounded-full text-xs font-semibold text-[var(--text)] ${baseClassName}`}
       style={sizeStyle}
     >
