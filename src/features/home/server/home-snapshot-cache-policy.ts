@@ -62,7 +62,7 @@ export class SnapshotTimeoutError extends Error {
   }
 }
 
-export class SnapshotBackoffOpenError extends Error {
+class SnapshotBackoffOpenError extends Error {
   readonly retryAt: number;
 
   constructor(retryAt: number) {

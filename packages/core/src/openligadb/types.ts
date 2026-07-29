@@ -83,12 +83,6 @@ export type ApiTableRow = {
   goalDiff?: number;
 };
 
-export type ApiGroupTable = {
-  teamGroupId?: number;
-  teamGroupName?: string;
-  teams?: ApiTableRow[];
-};
-
 export type FetchOptions = RequestInit & {
   next?: {
     revalidate?: number;

@@ -1,5 +1,5 @@
 export const MAX_NEXT_GROUP_LOOKAHEAD = 8;
-export const GROUP_REQUEST_CONCURRENCY = 3;
+const GROUP_REQUEST_CONCURRENCY = 3;
 
 export const getStatusCode = (error: unknown) => {
   const reason = error as { status?: number } | undefined;

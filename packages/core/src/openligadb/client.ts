@@ -1,7 +1,6 @@
 import { OPENLIGADB_CACHE_SECONDS, withOpenLigaDbCache } from "./cache-policy";
 import type {
   ApiGroup,
-  ApiGroupTable,
   ApiLeague,
   ApiMatch,
   ApiTableRow,
@@ -518,17 +517,6 @@ export const getTable = async (
 ) => {
   return fetchJson<ApiTableRow[]>(
     `/getbltable/${leagueShortcut}/${season}`,
-    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.table),
-  );
-};
-
-export const getGroupTable = async (
-  leagueShortcut: string,
-  season: number,
-  options?: FetchOptions,
-) => {
-  return fetchJson<ApiGroupTable[]>(
-    `/getgrouptable/${leagueShortcut}/${season}`,
     withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.table),
   );
 };

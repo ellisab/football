@@ -1,7 +1,4 @@
-import {
-  type LeagueKey,
-  resolveLeagueKey,
-} from "@footballleagues/core/leagues";
+import type { LeagueKey } from "@footballleagues/core/leagues";
 import {
   createMatchPresentation,
   getBerlinDateKey,
@@ -59,7 +56,7 @@ export const getMatchTime = (match: ApiMatch) => {
   return getMatchKickoffTimestamp(match) ?? Number.MAX_SAFE_INTEGER;
 };
 
-export const getMatchIdentity = (match: ApiMatch) => {
+const getMatchIdentity = (match: ApiMatch) => {
   return [
     match.matchID,
     match.matchDateTimeUTC ?? match.matchDateTime,
@@ -264,12 +261,6 @@ export const getTeamId = (team?: ApiTeam | ApiTableRow) => {
   if (typeof numericId === "number") return String(numericId);
   if (name) return normalizeTeamId(name);
   return "team";
-};
-
-export const resolveCompetitionLeagueForMatch = (
-  match: ApiMatch,
-): LeagueKey | undefined => {
-  return resolveLeagueKey(match);
 };
 
 export const findMatchById = (

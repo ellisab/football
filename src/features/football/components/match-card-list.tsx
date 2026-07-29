@@ -8,7 +8,7 @@ export type MatchCardItem = {
   roundLabel: string;
 };
 
-export function MatchCard({
+function MatchCard({
   compact = false,
   item,
   showCompetition = true,
