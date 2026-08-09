@@ -181,7 +181,10 @@ test("OpenLigaDB client applies a long Retry-After cooldown per endpoint", async
 
     assert.equal(upstreamCalls, 1);
     assert.equal(warnings.length, 1);
-    assert.equal((warnings[0]?.[0] as Record<string, unknown>).attempts, 1);
+    assert.equal(
+      (warnings[0]?.[0] as Record<string, unknown> | undefined)?.attempts,
+      1,
+    );
 
     const leagues = await getAvailableLeagues();
     assert.equal(upstreamCalls, 2);

@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Spieltag</title>
   <g fill="none" stroke="#737570" stroke-linecap="round" stroke-linejoin="round" stroke-width="12">
     <path d="M16 28V20C16 13.373 21.373 8 28 8H44" />
     <path d="M48 36V44C48 50.627 42.627 56 36 56H20" />
