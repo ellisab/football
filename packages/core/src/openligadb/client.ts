@@ -12,13 +12,7 @@ const API_BASE = "https://api.openligadb.de";
 const REQUEST_TIMEOUT_MS = 5_000;
 const RETRY_DELAYS_MS = [300, 900] as const;
 const MAX_RETRY_AFTER_MS = 2_000;
-const MEMORY_CACHE_MAX_AGE_MS = 5 * 60 * 1_000;
-export const OPENLIGADB_MEMORY_CACHE_MAX_ENTRIES = 128;
 const inFlightGetRequests = new Map<string, Promise<unknown>>();
-const successfulGetResponses = new Map<
-  string,
-  { expiresAt: number; value: unknown }
->();
 const endpointCooldowns = new Map<
   string,
   { expiresAt: number; status: number }
@@ -108,55 +102,6 @@ const getSingleFlightKey = (
     revalidate: options?.next?.revalidate ?? null,
     tags: options?.next?.tags ? [...options.next.tags].sort() : [],
   });
-};
-
-const getMemoryCacheTtlMs = (options: FetchOptions | undefined) => {
-  if (options?.cache === "no-store") return undefined;
-
-  const revalidate = options?.next?.revalidate;
-  if (
-    typeof revalidate !== "number" ||
-    !Number.isFinite(revalidate) ||
-    revalidate <= 0
-  ) {
-    return undefined;
-  }
-
-  return Math.min(revalidate * 1_000, MEMORY_CACHE_MAX_AGE_MS);
-};
-
-const getSuccessfulResponse = <T>(requestKey: string) => {
-  const entry = successfulGetResponses.get(requestKey);
-  if (!entry) return undefined;
-  if (entry.expiresAt <= Date.now()) {
-    successfulGetResponses.delete(requestKey);
-    return undefined;
-  }
-
-  successfulGetResponses.delete(requestKey);
-  successfulGetResponses.set(requestKey, entry);
-  return entry.value as T;
-};
-
-const setSuccessfulResponse = (
-  requestKey: string,
-  value: unknown,
-  ttlMs: number,
-) => {
-  successfulGetResponses.delete(requestKey);
-  successfulGetResponses.set(requestKey, {
-    expiresAt: Date.now() + ttlMs,
-    value,
-  });
-
-  if (successfulGetResponses.size > OPENLIGADB_MEMORY_CACHE_MAX_ENTRIES) {
-    const oldestKey = successfulGetResponses.keys().next().value;
-    if (oldestKey !== undefined) successfulGetResponses.delete(oldestKey);
-  }
-};
-
-export const clearOpenLigaDbMemoryCache = () => {
-  successfulGetResponses.clear();
 };
 
 const createOpenLigaDbError = (status: number, retryAfterMs?: number) => {
@@ -356,27 +301,14 @@ const fetchJson = <T>(
   const requestKey = getSingleFlightKey(endpointKey, options);
   if (!requestKey) return executeFetchJson<T>(path, options, baseUrl);
 
-  const memoryCacheTtlMs = getMemoryCacheTtlMs(options);
-  if (memoryCacheTtlMs !== undefined) {
-    const cached = getSuccessfulResponse<T>(requestKey);
-    if (cached !== undefined) return Promise.resolve(cached);
-  }
-
   const existingRequest = inFlightGetRequests.get(requestKey);
   if (existingRequest) return existingRequest as Promise<T>;
 
-  const request = executeFetchJson<T>(path, options, baseUrl)
-    .then((value) => {
-      if (memoryCacheTtlMs !== undefined) {
-        setSuccessfulResponse(requestKey, value, memoryCacheTtlMs);
-      }
-      return value;
-    })
-    .finally(() => {
-      if (inFlightGetRequests.get(requestKey) === request) {
-        inFlightGetRequests.delete(requestKey);
-      }
-    });
+  const request = executeFetchJson<T>(path, options, baseUrl).finally(() => {
+    if (inFlightGetRequests.get(requestKey) === request) {
+      inFlightGetRequests.delete(requestKey);
+    }
+  });
 
   inFlightGetRequests.set(requestKey, request);
   return request;
@@ -423,18 +355,6 @@ export const getCurrentGroup = async (
   );
 };
 
-export const getLastChangeDate = async (
-  leagueShortcut: string,
-  season: number,
-  groupOrderId: number,
-  options?: FetchOptions,
-) => {
-  return fetchJson<string>(
-    `/getlastchangedate/${leagueShortcut}/${season}/${groupOrderId}`,
-    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
-  );
-};
-
 export const getMatchdayResults = async (
   leagueShortcut: string,
   season: number,
@@ -445,7 +365,7 @@ export const getMatchdayResults = async (
     `/getmatchdata/${leagueShortcut}/${season}/${groupOrderId}`,
     withOpenLigaDbCache(
       options,
-      getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.matchday),
+      getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
     ),
   );
 };
@@ -494,7 +414,7 @@ export const getMatchesByGroup = async (
       `/getmatchbygroup/${leagueShortcut}/${groupOrderId}/${season}`,
       withOpenLigaDbCache(
         options,
-        getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.matchday),
+        getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
       ),
     );
   } catch (error) {
@@ -504,7 +424,7 @@ export const getMatchesByGroup = async (
       `/getmatchdata/${leagueShortcut}/${season}/${groupOrderId}`,
       withOpenLigaDbCache(
         options,
-        getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.matchday),
+        getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
       ),
     );
   }

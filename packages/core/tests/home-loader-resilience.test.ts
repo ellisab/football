@@ -1,16 +1,11 @@
 import assert from "node:assert/strict";
-import test, { beforeEach } from "node:test";
+import test from "node:test";
 import type { FootballDataSource } from "../src/home";
 import { getHomeSnapshot } from "../src/home";
 import { getGroupsWithFallback } from "../src/home/domain/league-groups";
 import { loadBracketMatches } from "../src/home/domain/load-bracket";
-import { clearMatchdayCache } from "../src/home/domain/matchday-loader";
 import { resolveRoundSnapshots } from "../src/home/domain/resolve-rounds";
 import type { ApiGroup, ApiMatch } from "../src/openligadb";
-
-beforeEach(() => {
-  clearMatchdayCache();
-});
 
 const createDataSource = (
   overrides: Partial<FootballDataSource> = {},
@@ -18,7 +13,6 @@ const createDataSource = (
   getAvailableLeagues: async () => [],
   getCurrentGroup: async () => ({}),
   getGroups: async () => [],
-  getLastChangeDate: async () => "2026-07-11T12:00:00Z",
   getMatchdayResults: async () => [],
   getMatchesByGroup: async () => [],
   getTable: async () => [],
@@ -114,53 +108,6 @@ test("loadBracketMatches stops scheduling knockout requests after a 429", async 
   assert.equal(requestCount, 3);
   assert.deepEqual(result.errorKeys, ["knockout rounds"]);
   assert.equal(result.rateLimited, true);
-});
-
-test("loadBracketMatches stops after a warm stale result signals rate limiting", async (t) => {
-  const originalNow = Date.now;
-  let now = 1_000;
-  Date.now = () => now;
-  t.after(() => {
-    Date.now = originalNow;
-  });
-  const groups = createGroups(9);
-  let rateLimited = false;
-  let lastChangeCalls = 0;
-  let matchdayCalls = 0;
-  const dataSource = createDataSource({
-    getLastChangeDate: async () => {
-      lastChangeCalls += 1;
-      if (rateLimited) throw createStatusError(429);
-      return "2026-07-11T12:00:00Z";
-    },
-    getMatchdayResults: async (...args) => {
-      const groupOrderId = args[2];
-      matchdayCalls += 1;
-      return [createFinishedMatch(groupOrderId)];
-    },
-  });
-  const params = {
-    dataSource,
-    resolvedLeague: "dfb" as const,
-    currentRound: { matches: [] },
-    nextRound: { matches: [] },
-    groups,
-    playoffMatches: [],
-    effectiveShortcut: "dfb",
-    resolvedSeason: 2026,
-  };
-
-  await loadBracketMatches(params);
-  now += 61_000;
-  rateLimited = true;
-  lastChangeCalls = 0;
-  matchdayCalls = 0;
-  const stale = await loadBracketMatches(params);
-
-  assert.equal(lastChangeCalls, 3);
-  assert.equal(matchdayCalls, 0);
-  assert.deepEqual(stale.errorKeys, ["knockout rounds"]);
-  assert.equal(stale.rateLimited, true);
 });
 
 for (const { status, expectedErrors } of [

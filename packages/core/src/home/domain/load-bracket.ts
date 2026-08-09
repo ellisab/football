@@ -157,7 +157,6 @@ export const loadBracketMatches = async ({
           group,
           matches: [] as ApiMatch[],
           rateLimited: false,
-          refreshFailed: false,
         };
       }
 
@@ -172,8 +171,7 @@ export const loadBracketMatches = async ({
       return {
         group,
         matches: matchdayResult.matches.map(sortGoals),
-        rateLimited: matchdayResult.rateLimited === true,
-        refreshFailed: matchdayResult.refreshFailed === true,
+        rateLimited: false,
       };
     },
     {
@@ -188,9 +186,6 @@ export const loadBracketMatches = async ({
     const fallbackGroup = result.input;
 
     if (result.status === "fulfilled") {
-      if (result.value.refreshFailed) {
-        errorKeys.push("knockout rounds");
-      }
       rateLimited = rateLimited || result.value.rateLimited;
 
       return {

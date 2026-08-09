@@ -56,8 +56,6 @@ export const loadPrimaryHomeData = async ({
         })
       : Promise.resolve({
           matches: [] as ApiMatch[],
-          rateLimited: false,
-          refreshFailed: false,
         });
 
   const [currentGroupResult, tableResult, groupsResult, playoffResult] =
@@ -88,20 +86,17 @@ export const loadPrimaryHomeData = async ({
         })();
   const playoffMatches =
     playoffResult.status === "fulfilled"
-      ? (() => {
-          if (playoffResult.value.refreshFailed) {
-            errorKeys.push("playoffs");
-          }
-          return playoffResult.value.matches.map(sortGoals);
-        })()
+      ? playoffResult.value.matches.map(sortGoals)
       : (errorKeys.push("playoffs"), []);
-  const rateLimited =
-    [currentGroupResult, tableResult, groupsResult, playoffResult].some(
-      (result) =>
-        result.status === "rejected" && getStatusCode(result.reason) === 429,
-    ) ||
-    (playoffResult.status === "fulfilled" &&
-      playoffResult.value.rateLimited === true);
+  const rateLimited = [
+    currentGroupResult,
+    tableResult,
+    groupsResult,
+    playoffResult,
+  ].some(
+    (result) =>
+      result.status === "rejected" && getStatusCode(result.reason) === 429,
+  );
 
   return {
     currentGroup,

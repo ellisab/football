@@ -6,12 +6,9 @@ export const OPENLIGADB_CACHE_SECONDS = {
   teams: 60 * 60 * 24 * 3,
   table: 60 * 60 * 3,
   currentGroup: 60 * 5,
-  matchday: 60 * 10,
   liveMatchday: 30,
   liveSchedule: 60 * 15,
   seasonMatches: 60 * 60 * 12,
-  homeSnapshot: 60 * 5,
-  staleWhileRevalidate: 60 * 5,
 } as const;
 
 export const withOpenLigaDbCache = (

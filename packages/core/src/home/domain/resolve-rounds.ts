@@ -82,12 +82,10 @@ const loadCandidateRounds = async ({
       return {
         groupOrderID,
         groupName: getGroupNameForMatches(groupOrderID, groups, matches),
-        lastChanged: matchdayResult.lastChanged,
         matches,
-        failed: matchdayResult.refreshFailed === true,
-        rateLimited: matchdayResult.rateLimited === true,
-        refreshFailed: matchdayResult.refreshFailed === true,
-        status: matchdayResult.rateLimited ? 429 : undefined,
+        failed: false,
+        rateLimited: false,
+        status: undefined,
       };
     },
     {
@@ -107,11 +105,9 @@ const loadCandidateRounds = async ({
       groupOrderID: result.input,
       groupName: groups.find((group) => group?.groupOrderID === result.input)
         ?.groupName,
-      lastChanged: undefined,
       matches: [] as ReturnType<typeof sortMatchesByKickoff>,
       failed: status !== 404,
       rateLimited: status === 429,
-      refreshFailed: status !== 404,
       status,
     };
   });
@@ -561,7 +557,6 @@ export const resolveRoundSnapshots = async ({
         latestResultsRound = {
           groupName: candidateRound.groupName,
           groupOrderID: candidateRound.groupOrderID,
-          lastChanged: candidateRound.lastChanged,
           matches: candidateRound.matches,
         };
         continue;
@@ -570,7 +565,6 @@ export const resolveRoundSnapshots = async ({
       nextRound = {
         groupName: candidateRound.groupName,
         groupOrderID: candidateRound.groupOrderID,
-        lastChanged: candidateRound.lastChanged,
         matches: candidateRound.matches,
       };
       break;
@@ -580,7 +574,6 @@ export const resolveRoundSnapshots = async ({
       latestResultsRound = {
         groupName: candidateRound.groupName,
         groupOrderID: candidateRound.groupOrderID,
-        lastChanged: candidateRound.lastChanged,
         matches: candidateRound.matches,
       };
       continue;
@@ -589,7 +582,6 @@ export const resolveRoundSnapshots = async ({
     nextRound = {
       groupName: candidateRound.groupName,
       groupOrderID: candidateRound.groupOrderID,
-      lastChanged: candidateRound.lastChanged,
       matches: candidateRound.matches,
     };
     break;

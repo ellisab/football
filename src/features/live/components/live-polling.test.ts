@@ -45,7 +45,7 @@ test("polling scopes deduplicate an active matchday", () => {
   assert.deepEqual(scopes, [scope]);
 });
 
-test("polling omits finished, distant, undated, and old matches", () => {
+test("polling keeps overdue unfinished matches until the provider settles them", () => {
   const now = new Date("2026-07-22T18:00:00Z");
   const scopes = getPollingScopes(
     [
@@ -77,11 +77,12 @@ test("polling omits finished, distant, undated, and old matches", () => {
     now,
   );
 
-  assert.deepEqual(scopes, []);
+  assert.deepEqual(scopes, [scope]);
 });
 
 test("payload validation rejects data for a different scope", () => {
   const payload = {
+    checkedAt: Date.now(),
     group: { groupOrderID: 10 },
     matches: [],
     resolvedLeague: "bl2",
@@ -116,6 +117,7 @@ test("payload merging updates only the exact competition and matchday", () => {
   };
 
   const merged = mergeMatchdayPayload([original, other], {
+    checkedAt: Date.now(),
     group: { groupOrderID: 10 },
     matches: [updated],
     resolvedLeague: "bl1",

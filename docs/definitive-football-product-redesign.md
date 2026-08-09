@@ -51,7 +51,7 @@ return `404`. The two old polling systems were replaced by one scoped live refre
 ### Retain
 
 - Next.js App Router and Server Components by default.
-- OpenLigaDB typed transport types, data-source abstraction, retry/backoff, caching, and last-change matchday cache.
+- OpenLigaDB typed transport types, data-source abstraction, retry/backoff, and endpoint caching.
 - League discovery, season resolution, matchday loading, and tie grouping.
 - `TeamBadge` host validation, Next Image sizing, and missing-image fallback.
 - Berlin date utilities, match IDs, competition slugs, and the narrow matchday API.

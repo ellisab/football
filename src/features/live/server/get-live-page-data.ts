@@ -1,14 +1,14 @@
+import {
+  getMatchdaySnapshot,
+  type MatchdaySnapshot,
+} from "@footballleagues/core/home";
 import { LEAGUE_GROUPS, type LeagueKey } from "@footballleagues/core/leagues";
 import {
   getLiveSchedule,
   type LiveScheduleResult,
 } from "@footballleagues/core/live";
-import { unstable_cache } from "next/cache";
+import { OPENLIGADB_CACHE_SECONDS } from "@footballleagues/core/openligadb";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
-import {
-  loadMatchdayWithBackoff,
-  type MatchdayRefreshResult,
-} from "@/features/football/server/matchday-refresh-cache";
 import {
   getPollingScopes,
   type LiveMatchItem,
@@ -17,8 +17,6 @@ import {
 } from "../components/live-polling";
 
 const MATCHDAY_REFRESH_CONCURRENCY = 3;
-const LIVE_DISCOVERY_CACHE_VERSION = "schedule-v1";
-const LIVE_DISCOVERY_REVALIDATE_SECONDS = 60;
 const OPENLIGADB_UNAVAILABLE_ERROR = "OpenLigaDB ist gerade nicht verfügbar";
 const PARTIAL_SCHEDULE_ERROR =
   "Spielpläne einzelner Wettbewerbe sind gerade nicht verfügbar";
@@ -30,7 +28,7 @@ type LoadMatchday = (params: {
   group: number;
   league: LeagueKey;
   season: string;
-}) => Promise<MatchdayRefreshResult>;
+}) => Promise<MatchdaySnapshot>;
 
 export type LivePageData = {
   checkedAt: number;
@@ -52,7 +50,7 @@ export type LiveDiscoveryDependencies = Pick<
 
 type MatchdayRefreshOutcome =
   | {
-      payload: MatchdayRefreshResult;
+      payload: MatchdaySnapshot;
       scope: LiveMatchScope;
       status: "fulfilled";
     }
@@ -62,11 +60,12 @@ type MatchdayRefreshOutcome =
       status: "rejected";
     };
 
-const getCachedLiveSchedule = unstable_cache(
-  () => getLiveSchedule(),
-  ["live-discovery", LIVE_DISCOVERY_CACHE_VERSION],
-  { revalidate: LIVE_DISCOVERY_REVALIDATE_SECONDS },
-);
+const loadCurrentMatchday: LoadMatchday = (params) =>
+  getMatchdaySnapshot(params, {
+    requestOptions: {
+      next: { revalidate: OPENLIGADB_CACHE_SECONDS.liveMatchday },
+    },
+  });
 
 const isValidGroup = (value: number | undefined): value is number =>
   Number.isInteger(value) && (value ?? 0) > 0;
@@ -151,7 +150,7 @@ const isTotalDiscoveryFailure = (schedule: LiveScheduleResult) =>
   new Set(schedule.failedLeagues).size >= LEAGUE_GROUPS.length;
 
 export const getLiveDiscoveryData = async ({
-  loadSchedule = getCachedLiveSchedule,
+  loadSchedule = getLiveSchedule,
   now = Date.now,
 }: LiveDiscoveryDependencies = {}): Promise<LivePageData> => {
   let schedule: LiveScheduleResult;
@@ -191,8 +190,8 @@ export const getLiveDiscoveryData = async ({
 };
 
 export const getLivePageData = async ({
-  loadMatchday = loadMatchdayWithBackoff,
-  loadSchedule = getCachedLiveSchedule,
+  loadMatchday = loadCurrentMatchday,
+  loadSchedule = getLiveSchedule,
   now = Date.now,
 }: LivePageDataDependencies = {}): Promise<LivePageData> => {
   const discovery = await getLiveDiscoveryData({ loadSchedule, now });
@@ -211,7 +210,6 @@ export const getLivePageData = async ({
 
     matches = mergeMatchdayPayload(matches, outcome.payload);
     checkedAt = Math.max(checkedAt, outcome.payload.checkedAt);
-    refreshFailed ||= outcome.payload.refreshState === "stale";
   }
 
   if (refreshFailed) visibleErrors.push(PARTIAL_SCORE_ERROR);

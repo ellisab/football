@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import type { MatchdaySnapshot } from "@footballleagues/core/home";
 import type { LeagueKey } from "@footballleagues/core/leagues";
 import type { LiveScheduleResult } from "@footballleagues/core/live";
 import type { ApiMatch } from "@footballleagues/core/openligadb";
-import type { MatchdayRefreshResult } from "@/features/football/server/matchday-refresh-cache";
 import { getLivePageData } from "./get-live-page-data";
 
 const NOW = new Date("2026-07-22T18:00:00Z").getTime();
@@ -53,17 +53,14 @@ const refreshedMatchday = ({
   group = 10,
   league = "bl1",
   matches = [],
-  refreshState = "fresh",
   season = 2026,
 }: {
   checkedAt?: number;
   group?: number;
   league?: LeagueKey;
   matches?: ApiMatch[];
-  refreshState?: "fresh" | "stale";
   season?: number;
-}): MatchdayRefreshResult => ({
-  cacheStatus: refreshState === "stale" ? "stale" : "miss",
+}): MatchdaySnapshot => ({
   checkedAt,
   effectiveShortcut: league,
   group: {
@@ -71,8 +68,6 @@ const refreshedMatchday = ({
     groupOrderID: group,
   },
   matches,
-  refreshFailed: refreshState === "stale" ? true : undefined,
-  refreshState,
   resolvedLeague: league,
   resolvedSeason: season,
 });
@@ -158,34 +153,6 @@ test("a failed active refresh preserves schedule matches and reports partial dat
   });
 
   assert.equal(data.matches[0]?.match, original.match);
-  assert.deepEqual(data.visibleErrors, [
-    "Einige Live-Spielstände sind gerade nicht verfügbar",
-  ]);
-});
-
-test("a stale matchday payload is merged and reported as partial data", async () => {
-  const original = match({ id: 100 });
-  const stale: ApiMatch = {
-    ...original.match,
-    matchResults: [
-      {
-        pointsTeam1: 1,
-        pointsTeam2: 0,
-        resultOrderID: 1,
-      },
-    ],
-  };
-  const data = await getLivePageData({
-    loadMatchday: async () =>
-      refreshedMatchday({
-        matches: [stale],
-        refreshState: "stale",
-      }),
-    loadSchedule: async () => schedule([original]),
-    now: () => NOW,
-  });
-
-  assert.equal(data.matches[0]?.match, stale);
   assert.deepEqual(data.visibleErrors, [
     "Einige Live-Spielstände sind gerade nicht verfügbar",
   ]);

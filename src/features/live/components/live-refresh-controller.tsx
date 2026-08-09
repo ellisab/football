@@ -100,12 +100,6 @@ export function LiveRefreshController({
           );
           if (!payload) throw new Error("Unexpected matchday response");
 
-          if (payload.retryAt && payload.retryAt > Date.now()) {
-            retryAtByScope.current.set(getScopeKey(scope), payload.retryAt);
-          } else {
-            retryAtByScope.current.delete(getScopeKey(scope));
-          }
-
           return payload;
         }),
       );
@@ -123,7 +117,7 @@ export function LiveRefreshController({
         );
 
         const checkedAt = Math.max(
-          ...payloads.map((payload) => payload.checkedAt ?? Date.now()),
+          ...payloads.map((payload) => payload.checkedAt),
         );
         setLastChecked((current) =>
           current && current.getTime() > checkedAt
@@ -132,13 +126,7 @@ export function LiveRefreshController({
         );
       }
 
-      setIsScoreDelayed(
-        failed ||
-          payloads.some(
-            (payload) =>
-              payload.refreshFailed || payload.refreshState === "stale",
-          ),
-      );
+      setIsScoreDelayed(failed);
     } finally {
       activeRequest.current = null;
       setPendingKind(null);

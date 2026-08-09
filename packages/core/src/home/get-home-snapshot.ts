@@ -90,11 +90,10 @@ const loadRoundSnapshot = async ({
       round: {
         groupName: getGroupName(groupOrderID, groups, group.groupName),
         groupOrderID,
-        lastChanged: matchdayResult.lastChanged,
         matches,
       },
-      failed: matchdayResult.refreshFailed === true,
-      status: matchdayResult.rateLimited ? 429 : undefined,
+      failed: false,
+      status: undefined,
     };
   } catch (error) {
     const status = getStatusCode(error);

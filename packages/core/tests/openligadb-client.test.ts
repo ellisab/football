@@ -1,24 +1,17 @@
 import assert from "node:assert/strict";
-import test, { beforeEach } from "node:test";
+import test from "node:test";
 import {
-  clearOpenLigaDbMemoryCache,
   getAllMatches,
   getAvailableLeagues,
   getAvailableTeams,
   getCurrentGroup,
   getGroups,
-  getLastChangeDate,
   getMatchById,
   getMatchdayResults,
   getMatchesByGroup,
   getMatchesByTeamId,
   OPENLIGADB_CACHE_SECONDS,
-  OPENLIGADB_MEMORY_CACHE_MAX_ENTRIES,
 } from "../src/openligadb";
-
-beforeEach(() => {
-  clearOpenLigaDbMemoryCache();
-});
 
 const jsonResponse = (
   body: unknown,
@@ -136,53 +129,6 @@ test("OpenLigaDB client shares one retry sequence across concurrent identical GE
 
     await getAvailableLeagues({ cache: "no-store" });
     assert.equal(attempts, 3);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test("OpenLigaDB client reuses a successful response within its memory TTL", async () => {
-  const originalFetch = globalThis.fetch;
-  let attempts = 0;
-
-  globalThis.fetch = async () => {
-    attempts += 1;
-    return jsonResponse([{ leagueShortcut: "bl1" }]);
-  };
-
-  try {
-    const first = await getAvailableLeagues();
-    const second = await getAvailableLeagues();
-
-    assert.equal(attempts, 1);
-    assert.equal(first, second);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test("OpenLigaDB response memory cache evicts its least-recently-used entry", async () => {
-  const originalFetch = globalThis.fetch;
-  let attempts = 0;
-
-  globalThis.fetch = async () => {
-    attempts += 1;
-    return jsonResponse([]);
-  };
-
-  try {
-    for (
-      let index = 1;
-      index <= OPENLIGADB_MEMORY_CACHE_MAX_ENTRIES + 1;
-      index += 1
-    ) {
-      await getGroups(`cache-${index}`, 2026);
-    }
-
-    assert.equal(attempts, OPENLIGADB_MEMORY_CACHE_MAX_ENTRIES + 1);
-    await getGroups("cache-1", 2026);
-    await getGroups(`cache-${OPENLIGADB_MEMORY_CACHE_MAX_ENTRIES + 1}`, 2026);
-    assert.equal(attempts, OPENLIGADB_MEMORY_CACHE_MAX_ENTRIES + 2);
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -427,22 +373,19 @@ test("OpenLigaDB live snapshot resources use a shorter positive caller TTL", asy
   }
 });
 
-test("OpenLigaDB live validation preserves blocking no-store requests", async () => {
+test("OpenLigaDB matchday requests preserve blocking no-store", async () => {
   const originalFetch = globalThis.fetch;
   const requests: Array<{ input: RequestInfo | URL; init?: RequestInit }> = [];
 
   globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     requests.push({ input, init });
-    return String(input).includes("/getlastchangedate/")
-      ? jsonResponse("2026-07-22T18:00:00Z")
-      : jsonResponse([]);
+    return jsonResponse([]);
   };
 
   try {
-    await getLastChangeDate("bl1", 2026, 1, { cache: "no-store" });
     await getMatchdayResults("bl1", 2026, 1, { cache: "no-store" });
 
-    assert.equal(requests.length, 2);
+    assert.equal(requests.length, 1);
     for (const { init } of requests) {
       assert.equal(init?.cache, "no-store");
       assert.equal(init?.next, undefined);

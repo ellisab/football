@@ -5,11 +5,8 @@ import {
   getMatchdaySnapshot,
   type HomeRequestOptions,
 } from "../src/home";
-import { clearMatchdayCache } from "../src/home/domain/matchday-loader";
 
-test("getMatchdaySnapshot separates cached metadata from blocking validation", async () => {
-  clearMatchdayCache();
-
+test("getMatchdaySnapshot passes request options to metadata and matchday data", async () => {
   const metadataOptions: HomeRequestOptions = {
     next: { revalidate: 30 },
   };
@@ -18,7 +15,6 @@ test("getMatchdaySnapshot separates cached metadata from blocking validation", a
   };
   let availableLeagueOptions: HomeRequestOptions | undefined;
   let groupOptions: HomeRequestOptions | undefined;
-  let lastChangeOptions: HomeRequestOptions | undefined;
   let matchdayOptions: HomeRequestOptions | undefined;
 
   const dataSource: FootballDataSource = {
@@ -43,15 +39,6 @@ test("getMatchdaySnapshot separates cached metadata from blocking validation", a
           groupOrderID: 10,
         },
       ];
-    },
-    getLastChangeDate: async (
-      _leagueShortcut,
-      _season,
-      _groupOrderId,
-      options,
-    ) => {
-      lastChangeOptions = options;
-      return "2026-07-22T18:00:00Z";
     },
     getMatchdayResults: async (
       _leagueShortcut,
@@ -78,8 +65,7 @@ test("getMatchdaySnapshot separates cached metadata from blocking validation", a
   assert.equal(result.matches[0]?.matchID, 100);
   assert.equal(availableLeagueOptions, metadataOptions);
   assert.equal(groupOptions, metadataOptions);
-  assert.equal(lastChangeOptions, validationOptions);
   assert.equal(matchdayOptions, validationOptions);
-  assert.equal(lastChangeOptions?.cache, "no-store");
-  assert.equal(lastChangeOptions?.next, undefined);
+  assert.equal(matchdayOptions?.cache, "no-store");
+  assert.equal(matchdayOptions?.next, undefined);
 });

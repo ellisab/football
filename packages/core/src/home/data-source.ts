@@ -17,12 +17,6 @@ export type FootballDataSource = {
     leagueShortcut: string,
     options?: HomeRequestOptions,
   ): Promise<ApiGroup>;
-  getLastChangeDate(
-    leagueShortcut: string,
-    season: number,
-    groupOrderId: number,
-    options?: HomeRequestOptions,
-  ): Promise<string>;
   getMatchdayResults(
     leagueShortcut: string,
     season: number,

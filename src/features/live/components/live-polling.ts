@@ -4,7 +4,6 @@ import type { ApiMatch } from "@footballleagues/core/openligadb";
 import type { MatchCardItem } from "@/features/football/components/match-card-list";
 
 const POLL_BEFORE_KICKOFF_MS = 30 * 60 * 1_000;
-const POLL_AFTER_KICKOFF_MS = 6 * 60 * 60 * 1_000;
 
 export type LiveMatchScope = {
   group: number;
@@ -17,14 +16,11 @@ export type LiveMatchItem = MatchCardItem & {
 };
 
 export type MatchdayPollingPayload = {
-  checkedAt?: number;
+  checkedAt: number;
   group: { groupOrderID?: number };
   matches: ApiMatch[];
-  refreshFailed?: true;
-  refreshState?: "fresh" | "stale";
   resolvedLeague: LeagueKey;
   resolvedSeason: number;
-  retryAt?: number;
 };
 
 export type LiveDiscoveryPayload = {
@@ -53,10 +49,7 @@ export const getPollingScopes = (
     if (kickoffTimestamp === null) continue;
 
     const untilKickoff = kickoffTimestamp - nowTimestamp;
-    if (
-      untilKickoff > POLL_BEFORE_KICKOFF_MS ||
-      untilKickoff < -POLL_AFTER_KICKOFF_MS
-    ) {
+    if (untilKickoff > POLL_BEFORE_KICKOFF_MS) {
       continue;
     }
 
@@ -121,6 +114,8 @@ export const parseMatchdayPollingPayload = (
 ): MatchdayPollingPayload | undefined => {
   if (!isRecord(value) || !isRecord(value.group)) return undefined;
   if (
+    typeof value.checkedAt !== "number" ||
+    !Number.isFinite(value.checkedAt) ||
     value.resolvedLeague !== scope.league ||
     value.resolvedSeason !== scope.season ||
     value.group.groupOrderID !== scope.group ||

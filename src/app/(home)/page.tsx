@@ -2,7 +2,6 @@ import { isLeagueKey } from "@footballleagues/core/leagues";
 import { redirect } from "next/navigation";
 import { getCompetitionMeta } from "@/features/football/competition-meta";
 import { resolveDateQuery } from "@/features/football/components/date-navigator";
-import { refreshUncertainMatches } from "@/features/football/server/refresh-uncertain-matches";
 import {
   getTodayCompetitionMatches,
   getVisibleCompetitions,
@@ -33,11 +32,10 @@ export default async function Home({
 
   const data = await getHomePageData({});
   const dateKey = resolveDateQuery(params.date);
-  const cachedMatches = getTodayCompetitionMatches({
+  const matches = getTodayCompetitionMatches({
     competitions: getVisibleCompetitions(data),
     date: new Date(`${dateKey}T12:00:00.000Z`),
   });
-  const matches = await refreshUncertainMatches({ matches: cachedMatches });
 
   return <TodayView data={data} dateKey={dateKey} matches={matches} />;
 }

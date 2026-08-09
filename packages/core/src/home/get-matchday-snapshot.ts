@@ -17,10 +17,7 @@ import {
   getGroupsWithFallback,
   normalizeLeagueEntries,
 } from "./domain/league-groups";
-import {
-  loadMatchdayResults,
-  type MatchdayCacheStatus,
-} from "./domain/matchday-loader";
+import { loadMatchdayResults } from "./domain/matchday-loader";
 import { getStatusCode } from "./domain/shared";
 
 export class MatchdaySnapshotError extends Error {
@@ -34,15 +31,10 @@ export class MatchdaySnapshotError extends Error {
 }
 
 export type MatchdaySnapshot = {
-  cacheStatus: MatchdayCacheStatus;
-  dataUpdatedAt?: number;
+  checkedAt: number;
   effectiveShortcut: string;
   group: Pick<ApiGroup, "groupID" | "groupName" | "groupOrderID">;
-  lastChanged?: string;
   matches: ApiMatch[];
-  rateLimited?: boolean;
-  retryAfterMs?: number;
-  refreshFailed?: true;
   resolvedLeague: LeagueKey;
   resolvedSeason: number;
 };
@@ -138,15 +130,13 @@ export const getMatchdaySnapshot = async (
   const matchdayResult = await loadMatchdayResults({
     dataSource,
     groupOrderId,
-    lastChangeStrategy: "always",
     leagueShortcut: effectiveShortcut,
     requestOptions: validationRequestOptions,
     season: resolvedSeason,
   });
 
   return {
-    cacheStatus: matchdayResult.cacheStatus,
-    dataUpdatedAt: matchdayResult.dataUpdatedAt,
+    checkedAt: Date.now(),
     effectiveShortcut,
     group: {
       groupID: group?.groupID,
@@ -154,11 +144,7 @@ export const getMatchdaySnapshot = async (
         group?.groupName ?? matchdayResult.matches[0]?.group?.groupName,
       groupOrderID: groupOrderId,
     },
-    lastChanged: matchdayResult.lastChanged,
     matches: sortMatchesByKickoff(matchdayResult.matches.map(sortGoals)),
-    rateLimited: matchdayResult.rateLimited,
-    retryAfterMs: matchdayResult.retryAfterMs,
-    refreshFailed: matchdayResult.refreshFailed,
     resolvedLeague: requestedLeague,
     resolvedSeason,
   };
