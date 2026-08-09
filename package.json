@@ -17,20 +17,20 @@
     "@footballleagues/core": "workspace:*",
     "@footballleagues/ui": "workspace:*",
     "@vercel/analytics": "^2.0.1",
-    "lucide-react": "^1.27.0",
-    "next": "16.2.12",
+    "lucide-react": "^1.29.0",
+    "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.6",
+    "@biomejs/biome": "2.5.7",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^26.1.1",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "@typescript/native": "npm:typescript@^7.0.2",
     "tailwindcss": "^4.3.3",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.9",
     "typescript": "npm:@typescript/typescript6@^6.0.2"
   }
 }
