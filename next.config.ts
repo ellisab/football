@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 import { ALLOWED_IMAGE_REMOTE_PATTERNS } from "./packages/core/src/teams/allowed-image-hosts";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Next uses the TS6 API bridge; the project typecheck runs the TS7 CLI.
+    useTypeScriptCli: false,
+  },
   transpilePackages: ["@footballleagues/core", "@footballleagues/ui"],
   typescript: {
     // `pnpm run build` runs the TypeScript 7 CLI before Next.js compiles.
