@@ -437,7 +437,10 @@ export const getTable = async (
 ) => {
   return fetchJson<ApiTableRow[]>(
     `/getbltable/${leagueShortcut}/${season}`,
-    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.table),
+    withOpenLigaDbCache(
+      options,
+      getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
+    ),
   );
 };
 

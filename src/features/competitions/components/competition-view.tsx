@@ -18,7 +18,7 @@ import {
   getStatusCounts,
 } from "@/features/football/view-utils";
 import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
-import { StandingsCard } from "@/features/standings/components/standings-card";
+import { StandingsRefreshController } from "@/features/standings/components/standings-refresh-controller";
 import { MatchdayNavigator } from "./matchday-navigator";
 
 const tabHref = ({
@@ -275,9 +275,10 @@ export function CompetitionView({
               description="Nur verifizierbare Tabellenwerte – ohne abgeleitete Qualifikations- oder Abstiegszonen."
             />
             {table.length > 0 ? (
-              <StandingsCard
-                table={table}
-                emptyText="Keine Tabelle verfügbar."
+              <StandingsRefreshController
+                initialTable={table}
+                league={competition.resolvedLeague}
+                season={competition.resolvedSeason}
               />
             ) : (
               <EmptyState
