@@ -21,6 +21,8 @@ const DFL_RIGHTS_SOURCE =
 const WOW_RIGHTS_SOURCE =
   "https://www.wowtv.de/hilfe/artikel/bundesliga-bei-wow";
 const RTL_PLUS_SOURCE = "https://plus.rtl.de/lp/bundesliga";
+const UCL_RIGHTS_SOURCE =
+  "https://www.aboutamazon.de/news/entertainment/live-sport-bei-prime-video";
 
 const BERLIN_KICKOFF_FORMATTER = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
@@ -173,6 +175,10 @@ const isSupportedSeason = (season: number | undefined) => {
   );
 };
 
+const isSupportedChampionsLeagueSeason = (season: number | undefined) => {
+  return season === 2025 || season === 2026;
+};
+
 const isSameInstant = (left: string | undefined, right: string) => {
   if (!left) return false;
   const leftTimestamp = Date.parse(normalizeUtcDateTime(left));
@@ -296,6 +302,35 @@ const getSecondBundesligaBroadcasts = (match: ApiMatch): MatchBroadcast[] => {
   return uniqueBroadcasts(broadcasts);
 };
 
+const getChampionsLeagueBroadcasts = (match: ApiMatch): MatchBroadcast[] => {
+  const slot = getKickoffSlot(match);
+
+  if (!slot) return [];
+
+  // Prime Video chooses one exclusive Tuesday match. OpenLigaDB does not say
+  // which one, so Tuesday cards show both possible services until a verified
+  // manual override replaces the pair with the exact assignment.
+  if (slot.weekday === 2) {
+    const note = "Genaue Dienstag-Zuordnung noch nicht bestätigt";
+    return uniqueBroadcasts([
+      createBroadcast("prime-video", "individual", {
+        note,
+        sourceUrl: UCL_RIGHTS_SOURCE,
+      }),
+      createBroadcast("dazn", "individual", {
+        note,
+        sourceUrl: UCL_RIGHTS_SOURCE,
+      }),
+    ]);
+  }
+
+  return [
+    createBroadcast("dazn", "individual", {
+      sourceUrl: UCL_RIGHTS_SOURCE,
+    }),
+  ];
+};
+
 export const getMatchBroadcasts = ({
   competitionId,
   manualOverrides = DEFAULT_MANUAL_OVERRIDES,
@@ -314,7 +349,9 @@ export const getMatchBroadcasts = ({
 
   if (
     !isSupportedBroadcastLeague(competitionId) ||
-    !isSupportedSeason(match.leagueSeason)
+    (competitionId === "cl"
+      ? !isSupportedChampionsLeagueSeason(match.leagueSeason)
+      : !isSupportedSeason(match.leagueSeason))
   ) {
     return { broadcasts: [], status: "unsupported" };
   }
@@ -322,7 +359,9 @@ export const getMatchBroadcasts = ({
   const broadcasts =
     competitionId === "bl1"
       ? getBundesligaBroadcasts(match)
-      : getSecondBundesligaBroadcasts(match);
+      : competitionId === "bl2"
+        ? getSecondBundesligaBroadcasts(match)
+        : getChampionsLeagueBroadcasts(match);
 
   return {
     broadcasts,

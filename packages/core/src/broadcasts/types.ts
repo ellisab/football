@@ -3,6 +3,7 @@ import type { LeagueKey } from "../leagues";
 export const SUPPORTED_BROADCAST_LEAGUES = [
   "bl1",
   "bl2",
+  "cl",
 ] as const satisfies readonly LeagueKey[];
 
 export type SupportedBroadcastLeague =
@@ -31,6 +32,7 @@ export const BROADCASTER_ORDER = [
   "sky",
   "wow",
   "rtl-plus",
+  "prime-video",
   "dazn",
 ] as const;
 

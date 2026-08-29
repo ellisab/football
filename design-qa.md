@@ -1,44 +1,46 @@
-**Comparison Target**
+# Champions League broadcast dock design QA
 
-- Source visual truth: `/var/folders/wq/vxdybprx2hxf69zpn1yfzc9w0000gn/T/TemporaryItems/NSIRD_screencaptureui_o76GBt/Screenshot 2026-07-20 at 00.53.27.png` (reported Favorites defect) and `https://www.spieltag.day/today?date=2026-08-09` captured at `/private/tmp/football-today-canonical.png` (canonical Heute card).
-- Rendered implementation: `http://127.0.0.1:3000/favorites` captured at `/private/tmp/football-favorites-after.png`; mobile capture at `/private/tmp/football-favorites-mobile.png`.
-- Viewports: 1280 × 720 desktop and 390 × 844 mobile.
-- State: 1. FC Nürnberg favorited; relevant 2. Bundesliga and DFB-Pokal fixtures visible. The canonical Heute comparison uses the 9 August 2026 fixtures so the Nürnberg–Dresden card is present in both views.
-- Full-view comparison evidence: `/private/tmp/football-card-target-comparison.png` (canonical Heute on the left, local Favorites on the right). The normalized defect comparison is `/private/tmp/football-favorites-comparison.png` (deployed Favorites before on the left, local Favorites after on the right).
-- Focused comparison: not needed. At original resolution, each full-view capture makes the card typography, badge assets, center signal, spacing, radii, and shadows clearly legible; DOM measurements were used to confirm the exact widths and overflow behavior.
+- Source visual truth: `/Users/alex/Desktop/Screenshot 2026-08-29 at 19.52.48.png`
+- Browser-rendered implementation: `/tmp/football-champions-league-viewport.png`
+- Focused implementation crop: `/tmp/football-champions-league-dock.png`
+- Route: `http://localhost:3000/competitions/champions-league?season=2026`
+- Viewport: 430 × 900 CSS px, device pixel ratio 1
+- Source pixels: 428 × 112
+- Implementation focus pixels: 416 × 128
+- State: first Champions League round, Tuesday fixture showing `prime`, `DAZN`, and `08.09.2026`
+- Density normalization: both images were inspected at original pixel density. The source is a tighter crop of the existing Bundesliga dock; the implementation crop retains surrounding match-card context so alignment and attachment to the card can be judged.
 
-**Findings**
+## Findings
 
-- No actionable P0, P1, or P2 differences remain.
-- Fonts and typography: Favorites uses the same `SculptedMatch` renderer as Heute/Live. Team names now receive 207px per track on desktop instead of 31px, removing the unintended ellipsis and stacked fragments while preserving the established weights, sizes, line heights, and status treatment.
-- Spacing and layout rhythm: canonical Heute and Favorites cards both measure 1040px at the 1280px viewport. All shared match lists are capped at 65rem and centered; the card gaps, radii, elevation, and vertical rhythm match. The 390px mobile viewport renders 358px-wide cards with a 390px document width and no horizontal overflow.
-- Colors and visual tokens: unchanged shared tokens and component styles are used throughout; no route-specific color drift was introduced.
-- Image quality and asset fidelity: the existing team badge assets and badge surfaces are reused without substitutions, cropping, or scaling artifacts.
-- Copy and content: competition, round, team, kickoff, and status content remains driven by the same data and shared component. Favorites sorting and filtering are unchanged; 12 matches remain the initial batch while every remaining match is now accessible progressively.
-- Accessibility and interaction: the favorite-team control was exercised through the UI, persisted to Favorites, and the linked match cards retained their accessible game labels. The progressive reveal was verified from 12 of 19 to 19 of 19 matches, removed its button when complete, reset when the favorite selection changed, and issued no additional server request. Team Detail also renders its fixtures through the canonical shared list. Browser console warnings/errors checked: none.
+No actionable P0, P1, or P2 differences remain.
 
-**Comparison History**
+- Fonts and typography: the Champions League dock reuses the existing stadium-body family, weight, tabular date numerals, and compact broadcaster marks from the Bundesliga dock. The intentional copy differences are `prime`, `DAZN`, and the Champions League fixture date.
+- Spacing and layout rhythm: the pill remains centered against the match card with the same border, radius, padding, elevation, and responsive sizing rules as Bundesliga and 2. Bundesliga.
+- Colors and visual tokens: background, border, text, muted icon, and shadow values are inherited from the same production component and tokens as the reference.
+- Image quality and asset fidelity: no raster assets are introduced. The existing Lucide TV icon and code-native broadcaster wordmarks are reused consistently with the established component.
+- Copy and content: Tuesday correctly shows both possible German services (`prime` and `DAZN`) plus the OpenLigaDB fixture date. Wednesday and other non-Tuesday fixtures show `DAZN` plus the date.
 
-- Iteration 1 — [P2] Desktop team names were unreadable in Favorites. Evidence: the deployed Favorites capture measured a 688px card and only 31px of rendered width per team-name track, despite 79–90px of content, matching the truncation in the supplied screenshot.
-- Fix: introduced a lean `MatchCardItem`/`MatchCardList` adapter so Favorites shares the canonical renderer without serializing full competition models, routed Team Detail through `MatchList`, introduced the shared `match-feed-page` width used by Heute/Live, and capped every canonical match list at 65rem.
-- Post-fix evidence: Favorites and canonical Heute both measure 1040px; the Nürnberg and Dresden name tracks each measure 207px with no truncation. Competition lists now use the same 1040px cap. Mobile verification found no page overflow.
+## Full-view comparison evidence
 
-**Open Questions**
+The 430 × 900 browser capture shows the dock attached to the bottom center of the first Champions League match card without overlap, clipping, or horizontal overflow. The surrounding card retains its existing team, kickoff, and round hierarchy.
 
-- None.
+## Focused-region comparison evidence
 
-**Implementation Checklist**
+The source and focused implementation crop were opened together. The implementation uses the same rounded white dock treatment, TV icon placement, broadcaster wordmarks, date alignment, border, and shadow language. Width differs intentionally because the broadcaster content differs from the Bundesliga reference and the implementation was captured at a 1× responsive viewport.
 
-- [x] Use the canonical shared match-card list path in Favorites.
-- [x] Use the canonical `MatchList` path in Team Detail.
-- [x] Share the Heute/Live desktop feed width with Favorites and Team Detail.
-- [x] Cap shared match lists to one consistent site-wide card width.
-- [x] Reveal additional favorite matches in batches of 12 without another data request.
-- [x] Verify desktop and mobile favorite flows in the browser.
-- [x] Check console errors, types, lint, and automated tests.
+## Interaction and runtime verification
 
-**Follow-up Polish**
+- Champions League route loaded with 18 current fixtures from OpenLigaDB.
+- The first match card navigated to `/matches/87388`, and its match-detail heading rendered.
+- Browser console errors checked: none.
+- Responsive card and dock checked at 430 × 900.
 
-- No P3 follow-up is required for this change.
+## Comparison history
+
+No visual P0/P1/P2 issue was found in the normalized comparison, so no corrective visual iteration was required.
+
+## Follow-up polish
+
+None required for this request.
 
 final result: passed

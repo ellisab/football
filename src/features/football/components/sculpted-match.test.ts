@@ -57,7 +57,7 @@ test("keeps the shared match card linked in match lists", () => {
 
   assert.match(
     markup,
-    /<a class="featured-match focus-ring"[^>]*href="\/matches\/42"/,
+    /<a class="featured-match focus-ring featured-match--has-dock"[^>]*href="\/matches\/42"/,
   );
   assert.match(markup, /class="featured-match__meta"/);
   assert.match(markup, /class="featured-match__board"/);
@@ -74,7 +74,7 @@ test("renders feeds with the canonical shared match-list wrapper", () => {
   assert.match(markup, /^<div class="match-list match-list--sculpted">/);
   assert.match(
     markup,
-    /<a class="featured-match focus-ring"[^>]*href="\/matches\/42"/,
+    /<a class="featured-match focus-ring featured-match--has-dock"[^>]*href="\/matches\/42"/,
   );
   assert.match(markup, /Champions League/);
   assert.match(markup, /Halbfinale/);
@@ -88,7 +88,7 @@ test("renders prepared client feeds with the canonical shared card", () => {
   assert.match(markup, /^<div class="match-list match-list--sculpted">/);
   assert.match(
     markup,
-    /<a class="featured-match focus-ring"[^>]*href="\/matches\/42"/,
+    /<a class="featured-match focus-ring featured-match--has-dock"[^>]*href="\/matches\/42"/,
   );
   assert.match(markup, /Champions League/);
   assert.match(markup, /Halbfinale/);
@@ -97,7 +97,10 @@ test("renders prepared client feeds with the canonical shared card", () => {
 test("renders the exact shared card without a self-link on match detail", () => {
   const markup = renderMatch();
 
-  assert.match(markup, /<article class="featured-match" aria-label="Spiel: /);
+  assert.match(
+    markup,
+    /<article class="featured-match featured-match--has-dock" aria-label="Spiel: /,
+  );
   assert.match(markup, /class="featured-match__meta"/);
   assert.match(markup, /class="featured-match__board"/);
   assert.doesNotMatch(markup, /href="\/matches\/42"/);
@@ -115,7 +118,10 @@ test("uses the shared card as the match-detail hero", () => {
     markup,
     /<h1 class="sr-only">FC Beispiel gegen Sporting Muster<\/h1>/,
   );
-  assert.match(markup, /<article class="featured-match" aria-label="Spiel: /);
+  assert.match(
+    markup,
+    /<article class="featured-match featured-match--has-dock" aria-label="Spiel: /,
+  );
   assert.match(markup, /class="match-detail-support"/);
   assert.match(markup, /class="match-detail-meta"/);
   assert.match(markup, /class="match-detail-team-actions"/);
@@ -272,12 +278,57 @@ for (const competition of [
   });
 }
 
-test("omits the dock for Champions League", () => {
+test("renders a date-only dock for Champions League outside a known rights cycle", () => {
   const markup = renderMatch();
 
-  assert.doesNotMatch(markup, /featured-match__broadcast-dock/);
-  assert.doesNotMatch(markup, /featured-match--has-dock/);
+  assert.match(markup, /featured-match featured-match--has-dock/);
+  assert.match(
+    markup,
+    /class="featured-match__broadcast-dock" data-state="date-only"/,
+  );
+  assert.match(markup, /featured-match__broadcast-date">31\.12\.2099/);
+  assert.match(markup, /Datum: 31\.12\.2099\./);
   assert.doesNotMatch(markup, /Übertragung:/);
+});
+
+test("renders DAZN and the date for a Champions League Wednesday match", () => {
+  const markup = renderToStaticMarkup(
+    createElement(SculptedMatch, {
+      competitionId: "cl",
+      competitionLabel: "Champions League",
+      match: {
+        ...scheduledMatch,
+        leagueSeason: 2026,
+        matchDateTimeUTC: "2026-09-16T19:00:00Z",
+      },
+      roundLabel: "Ligaphase",
+    }),
+  );
+
+  assert.match(markup, /featured-match featured-match--has-dock/);
+  assert.match(markup, /data-broadcaster="dazn"/);
+  assert.match(markup, /featured-match__broadcast-date">16\.09\.2026/);
+  assert.match(markup, /Übertragung: DAZN/);
+});
+
+test("shows DAZN, Prime Video, and the date for Champions League Tuesday", () => {
+  const markup = renderToStaticMarkup(
+    createElement(SculptedMatch, {
+      competitionId: "cl",
+      competitionLabel: "Champions League",
+      match: {
+        ...scheduledMatch,
+        leagueSeason: 2026,
+        matchDateTimeUTC: "2026-09-15T19:00:00Z",
+      },
+      roundLabel: "Ligaphase",
+    }),
+  );
+
+  assert.match(markup, /data-state="available"/);
+  assert.match(markup, /data-broadcaster="prime-video"/);
+  assert.match(markup, /data-broadcaster="dazn"/);
+  assert.match(markup, /featured-match__broadcast-date">15\.09\.2026/);
 });
 
 test("renders broadcasters on match detail from resolved competition context", () => {

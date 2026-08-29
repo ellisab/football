@@ -343,16 +343,73 @@ test("marks unknown Bundesliga slots as unconfirmed without inventing a sender",
   assert.deepEqual(result, { broadcasts: [], status: "unconfirmed" });
 });
 
-test("does not apply Bundesliga rules to another canonical competition", () => {
+test("derives DAZN for non-Tuesday Champions League matches", () => {
   const result = getMatchBroadcasts({
     competitionId: "cl",
     match: createMatch({
       leagueShortcut: "bl1",
-      matchDateTimeUTC: "2026-08-29T13:30:00Z",
+      matchDateTimeUTC: "2026-09-16T19:00:00Z",
+    }),
+  });
+
+  assert.deepEqual(signatures(result), ["dazn:individual"]);
+  assert.equal(result.status, "available");
+});
+
+test("shows both possible services for Champions League Tuesday", () => {
+  const result = getMatchBroadcasts({
+    competitionId: "cl",
+    match: createMatch({ matchDateTimeUTC: "2026-09-15T19:00:00Z" }),
+  });
+
+  assert.deepEqual(signatures(result), [
+    "prime-video:individual",
+    "dazn:individual",
+  ]);
+  assert.equal(result.status, "available");
+  assert.ok(
+    result.broadcasts.every(
+      (broadcast) =>
+        broadcast.note === "Genaue Dienstag-Zuordnung noch nicht bestätigt",
+    ),
+  );
+});
+
+test("fails closed after the current Champions League rights cycle", () => {
+  const result = getMatchBroadcasts({
+    competitionId: "cl",
+    match: createMatch({
+      leagueSeason: 2027,
+      matchDateTimeUTC: "2027-09-15T19:00:00Z",
     }),
   });
 
   assert.deepEqual(result, { broadcasts: [], status: "unsupported" });
+});
+
+test("uses a verified Prime Video override for its Champions League selection", () => {
+  const match = createMatch({ matchDateTimeUTC: "2026-09-15T19:00:00Z" });
+  const override: ManualBroadcastOverride = {
+    awayTeamId: 2,
+    broadcasters: [{ broadcasterId: "prime-video", coverage: "individual" }],
+    competitionId: "cl",
+    homeTeamId: 1,
+    kickoffUtc: "2026-09-15T19:00:00Z",
+    matchId: 42,
+    matchKey: "cl:42",
+    season: 2026,
+    sourceUrl:
+      "https://www.aboutamazon.de/news/entertainment/live-sport-bei-prime-video",
+    verifiedAt: "2026-09-01T10:00:00Z",
+  };
+  const result = getMatchBroadcasts({
+    competitionId: "cl",
+    manualOverrides: [override],
+    match,
+  });
+
+  assert.deepEqual(signatures(result), ["prime-video:individual"]);
+  assert.equal(result.broadcasts[0]?.certainty, "verified");
 });
 
 test("a matching editorial override fully replaces inferred broadcasters", () => {

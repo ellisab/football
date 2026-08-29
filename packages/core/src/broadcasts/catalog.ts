@@ -53,6 +53,13 @@ const BROADCASTER_PROFILES: Record<BroadcasterId, BroadcasterProfile> = {
     ownership: "private",
     shortName: "RTL+",
   },
+  "prime-video": {
+    access: "subscription",
+    medium: "stream",
+    name: "Prime Video",
+    ownership: "private",
+    shortName: "prime",
+  },
   dazn: {
     access: "subscription",
     medium: "stream",

@@ -83,10 +83,14 @@ export function SculptedMatch({
   const broadcastResolution: MatchBroadcastResolution = competitionId
     ? getMatchBroadcasts({ competitionId, match })
     : { broadcasts: [], status: "unsupported" };
+  const alwaysShowDate =
+    competitionId === "dfb" ||
+    competitionId === "fbl1" ||
+    competitionId === "cl";
   const isDateOnlyCompetition =
-    competitionId === "dfb" || competitionId === "fbl1";
+    alwaysShowDate && broadcastResolution.status === "unsupported";
   const hasDock =
-    isDateOnlyCompetition || broadcastResolution.status !== "unsupported";
+    alwaysShowDate || broadcastResolution.status !== "unsupported";
   const dateLabel = formatMatchDate(match);
   const body = (
     <>
