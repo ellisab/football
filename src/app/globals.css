@@ -1608,6 +1608,20 @@
   background: var(--canvas);
 }
 
+.matchday-signal-field {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: block;
+  width: 100vw;
+  height: 100svh;
+  pointer-events: none;
+}
+
+.matchday-signal-field[data-unavailable="true"] {
+  display: none;
+}
+
 .app-shell__content {
   min-width: 0;
   flex: 1;
