@@ -2,12 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
+const TOUCH_TAP_TOLERANCE = 10;
+const SHADER_REVISION = "soft-glass-v11";
+
 const shader = /* wgsl */ `
 struct SignalUniforms {
-  viewport: vec4f,
+  display: vec4f,
   pointer: vec4f,
-  motion: vec4f,
-  state: vec4f,
+  material: vec4f,
 }
 
 @group(0) @binding(0) var<uniform> u: SignalUniforms;
@@ -22,28 +24,73 @@ fn vertexMain(@builtin(vertex_index) vertexIndex: u32) -> @builtin(position) vec
   return vec4f(positions[vertexIndex], 0.0, 1.0);
 }
 
-fn band(distance: f32, radius: f32, width: f32) -> f32 {
-  return 1.0 - smoothstep(width, width + 1.35 * u.viewport.z, abs(distance - radius));
+fn softCircle(distance: f32, radius: f32, feather: f32) -> f32 {
+  return 1.0 - smoothstep(radius - feather, radius + feather, distance);
+}
+
+fn softBand(distance: f32, radius: f32, width: f32) -> f32 {
+  return 1.0 - smoothstep(width, width + 2.0 * u.display.x, abs(distance - radius));
 }
 
 @fragment
 fn fragmentMain(@builtin(position) fragment: vec4f) -> @location(0) vec4f {
   let q = fragment.xy - u.pointer.xy;
   let distance = length(q);
-  let dpr = u.viewport.z;
-  let touch = u.motion.z;
-  let visibility = u.pointer.z * u.state.z;
-  let clickOrigin = mix(10.2, 12.9, touch) * dpr;
+  let dpr = u.display.x;
+  let touch = u.material.x;
+  let live = u.material.y;
+  let interactive = u.material.z;
+  let pressed = u.material.w;
+  let visibility = u.pointer.z;
+  let energy = clamp(u.pointer.w, 0.0, 1.0);
+  let age = 1.0 - energy;
+  let releaseCurve = 1.0 - pow(1.0 - age, 3.0);
+
+  let compactRadius = mix(21.0, 24.0, touch) * dpr;
+  let releasedRadius = mix(58.0, 52.0, touch) * dpr;
+  let radius = mix(
+    mix(compactRadius, releasedRadius, releaseCurve),
+    compactRadius * 0.92,
+    pressed
+  );
+  let feather = mix(8.0, 10.0, touch) * dpr;
+
+  let lens = softCircle(distance, radius, feather);
+  let interior = softCircle(distance, radius * 0.68, radius * 0.28);
+  let rim = softBand(distance, radius, mix(2.8, 3.4, touch) * dpr);
+  let upperHighlight = softCircle(
+    length(q - vec2f(-0.22 * radius, -0.28 * radius)),
+    radius * 0.23,
+    radius * 0.2
+  );
+  let lowerShade = softBand(
+    length(q - vec2f(0.08 * radius, 0.12 * radius)),
+    radius * 0.82,
+    radius * 0.12
+  ) * smoothstep(-0.15 * radius, 0.72 * radius, q.y);
+
+  let warmWhite = vec3f(0.995, 0.988, 0.955);
   let graphite = vec3f(0.145, 0.15, 0.137);
   let coral = vec3f(0.784, 0.169, 0.227);
-  let signalColor = mix(graphite, coral, u.motion.w);
+  let accent = mix(graphite, coral, live);
+  let accentAmount = rim * mix(0.38, 0.58, live);
+  let shadeAmount = lowerShade * mix(0.12, 0.2, interactive);
+  let signalColor = mix(
+    mix(warmWhite, graphite, shadeAmount),
+    accent,
+    accentAmount
+  );
 
-  let impulseAge = 1.0 - u.pointer.w;
-  let impulseRadius = (clickOrigin / dpr + 15.0 + impulseAge * mix(97.5, 60.0, touch)) * dpr;
-  let impulse = band(distance, impulseRadius, mix(1.35, 2.1, touch) * dpr)
-    * u.pointer.w * u.pointer.w;
+  let material =
+    lens * 0.035 +
+    interior * 0.045 +
+    upperHighlight * mix(0.16, 0.2, interactive) +
+    lowerShade * 0.055 +
+    rim * mix(0.22, 0.3, interactive);
+  let pressWeight = mix(1.0, 0.68, pressed);
+  let fade = pow(energy, 1.15) * pressWeight;
 
-  return vec4f(signalColor, visibility * impulse * 0.68);
+  return vec4f(signalColor, visibility * material * fade);
 }
 `;
 
@@ -64,7 +111,7 @@ const getInteractiveState = (target: EventTarget | null) => {
   };
 };
 
-export function MatchdaySignalField({ revision }: { revision: string }) {
+export function MatchdaySignalField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -73,12 +120,9 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     if (!canvas || !gpu || reducedMotion.matches) return;
-    canvas.dataset.shaderRevision = revision;
-
     let cancelled = false;
     let animationFrame = 0;
     let touchFadeTimer = 0;
-    let scrollTimer = 0;
     let context: GPUCanvasContext | null = null;
     let device: GPUDevice | null = null;
     let pipeline: GPURenderPipeline | null = null;
@@ -86,23 +130,21 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
     let uniformBuffer: GPUBuffer | null = null;
     let pixelRatio = 1;
     let lastFrame = performance.now();
-    let lastPointerX = window.innerWidth / 2;
-    let lastPointerY = window.innerHeight / 2;
-    let targetX = lastPointerX;
-    let targetY = lastPointerY;
-    let renderedX = targetX;
-    let renderedY = targetY;
-    let velocityX = 0;
-    let velocityY = 0;
+    let pointerX = window.innerWidth / 2;
+    let pointerY = window.innerHeight / 2;
     let targetVisibility = 0;
     let visibility = 0;
     let impulse = 0;
     let touch = 0;
     let interactive = 0;
     let live = 0;
-    let scrollAttenuation = 1;
+    let pressed = 0;
+    let activeTouchPointerId: number | null = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchMoved = false;
 
-    const uniforms = new Float32Array(16);
+    const uniforms = new Float32Array(12);
 
     const resize = () => {
       const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
@@ -129,33 +171,23 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
 
       const elapsed = Math.min((now - lastFrame) / 16.667, 2.5);
       lastFrame = now;
-      renderedX += (targetX - renderedX) * Math.min(0.3 * elapsed, 0.72);
-      renderedY += (targetY - renderedY) * Math.min(0.3 * elapsed, 0.72);
-      velocityX *= 0.76 ** elapsed;
-      velocityY *= 0.76 ** elapsed;
       visibility +=
         (targetVisibility - visibility) * Math.min(0.22 * elapsed, 0.65);
-      impulse *= 0.9 ** elapsed;
-      scrollAttenuation +=
-        (1 - scrollAttenuation) * Math.min(0.12 * elapsed, 0.4);
+      impulse *= 0.86 ** elapsed;
 
       uniforms.set([
-        canvas.width,
-        canvas.height,
         pixelRatio,
-        now / 1000,
-        renderedX * pixelRatio,
-        renderedY * pixelRatio,
+        0,
+        0,
+        0,
+        pointerX * pixelRatio,
+        pointerY * pixelRatio,
         visibility,
         impulse,
-        velocityX * pixelRatio,
-        velocityY * pixelRatio,
         touch,
         live,
         interactive,
-        0,
-        scrollAttenuation,
-        0,
+        pressed,
       ]);
       device.queue.writeBuffer(uniformBuffer, 0, uniforms);
 
@@ -189,13 +221,8 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
 
     const updatePointer = (event: PointerEvent) => {
       const isTouch = event.pointerType === "touch";
-      const verticalOffset = isTouch ? 24 : 0;
-      targetX = event.clientX;
-      targetY = Math.max(0, event.clientY - verticalOffset);
-      velocityX += event.clientX - lastPointerX;
-      velocityY += event.clientY - lastPointerY;
-      lastPointerX = event.clientX;
-      lastPointerY = event.clientY;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
       touch = isTouch ? 1 : 0;
       const targetState = getInteractiveState(event.target);
       interactive = targetState.interactive;
@@ -204,9 +231,35 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
       if (!isTouch) targetVisibility = 1;
     };
 
+    const onPointerMove = (event: PointerEvent) => {
+      if (
+        event.pointerType === "touch" &&
+        event.pointerId === activeTouchPointerId &&
+        Math.hypot(event.clientX - touchStartX, event.clientY - touchStartY) >
+          TOUCH_TAP_TOLERANCE
+      ) {
+        touchMoved = true;
+      }
+
+      updatePointer(event);
+    };
+
     const onPointerDown = (event: PointerEvent) => {
       window.clearTimeout(touchFadeTimer);
       updatePointer(event);
+
+      if (event.pointerType === "touch") {
+        activeTouchPointerId = event.pointerId;
+        touchStartX = event.clientX;
+        touchStartY = event.clientY;
+        touchMoved = false;
+        targetVisibility = 0;
+        impulse = 0;
+        startAnimation();
+        return;
+      }
+
+      pressed = 1;
       targetVisibility = 1;
       impulse = 1;
       startAnimation();
@@ -214,6 +267,32 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
 
     const onPointerUp = (event: PointerEvent) => {
       updatePointer(event);
+      pressed = 0;
+
+      if (event.pointerType === "touch") {
+        if (event.pointerId !== activeTouchPointerId) return;
+
+        const wasTap =
+          !touchMoved &&
+          Math.hypot(
+            event.clientX - touchStartX,
+            event.clientY - touchStartY,
+          ) <= TOUCH_TAP_TOLERANCE;
+        activeTouchPointerId = null;
+        touchMoved = false;
+
+        if (!wasTap) {
+          targetVisibility = 0;
+          interactive = 0;
+          live = 0;
+          impulse = 0;
+          startAnimation();
+          return;
+        }
+
+        targetVisibility = 1;
+      }
+
       impulse = 1;
       startAnimation();
       if (event.pointerType === "touch") {
@@ -225,8 +304,32 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
       }
     };
 
+    const onPointerCancel = (event: PointerEvent) => {
+      if (event.pointerType !== "touch") {
+        pressed = 0;
+        targetVisibility = 0;
+        impulse = 0;
+        startAnimation();
+        return;
+      }
+
+      if (event.pointerId !== activeTouchPointerId) {
+        return;
+      }
+
+      activeTouchPointerId = null;
+      touchMoved = false;
+      pressed = 0;
+      targetVisibility = 0;
+      interactive = 0;
+      live = 0;
+      impulse = 0;
+      startAnimation();
+    };
+
     const onPointerOut = (event: PointerEvent) => {
       if (event.relatedTarget === null && event.pointerType !== "touch") {
+        pressed = 0;
         targetVisibility = 0;
         interactive = 0;
         live = 0;
@@ -234,11 +337,12 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
     };
 
     const onScroll = () => {
-      scrollAttenuation = 0.18;
-      window.clearTimeout(scrollTimer);
-      scrollTimer = window.setTimeout(() => {
-        scrollAttenuation = 1;
-      }, 110);
+      if (activeTouchPointerId !== null) {
+        touchMoved = true;
+        targetVisibility = 0;
+        impulse = 0;
+        startAnimation();
+      }
     };
 
     const initialize = async () => {
@@ -299,10 +403,12 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
 
       resize();
       window.addEventListener("resize", resize);
-      window.addEventListener("pointermove", updatePointer, { passive: true });
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
       window.addEventListener("pointerdown", onPointerDown, { passive: true });
       window.addEventListener("pointerup", onPointerUp, { passive: true });
-      window.addEventListener("pointercancel", onPointerUp, { passive: true });
+      window.addEventListener("pointercancel", onPointerCancel, {
+        passive: true,
+      });
       window.addEventListener("pointerout", onPointerOut, { passive: true });
       window.addEventListener("scroll", onScroll, { passive: true });
     };
@@ -315,26 +421,25 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
       cancelled = true;
       window.cancelAnimationFrame(animationFrame);
       window.clearTimeout(touchFadeTimer);
-      window.clearTimeout(scrollTimer);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", updatePointer);
+      window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerCancel);
       window.removeEventListener("pointerout", onPointerOut);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [revision]);
+  }, []);
 
   return (
     <canvas
       className="matchday-signal-field"
-      data-shader-revision={revision}
+      data-shader-revision={SHADER_REVISION}
       ref={canvasRef}
     />
   );
 }
 
 export function MatchdayClickEffect() {
-  return <MatchdaySignalField revision="click-only-v8" />;
+  return <MatchdaySignalField />;
 }
