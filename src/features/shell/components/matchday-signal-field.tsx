@@ -22,54 +22,6 @@ fn vertexMain(@builtin(vertex_index) vertexIndex: u32) -> @builtin(position) vec
   return vec4f(positions[vertexIndex], 0.0, 1.0);
 }
 
-fn segmentDistance(point: vec2f, start: vec2f, end: vec2f) -> f32 {
-  let line = end - start;
-  let amount = clamp(dot(point - start, line) / max(dot(line, line), 0.001), 0.0, 1.0);
-  return length(point - (start + amount * line));
-}
-
-fn cubicPoint(start: vec2f, controlA: vec2f, controlB: vec2f, end: vec2f, amount: f32) -> vec2f {
-  let inverse = 1.0 - amount;
-  return inverse * inverse * inverse * start
-    + 3.0 * inverse * inverse * amount * controlA
-    + 3.0 * inverse * amount * amount * controlB
-    + amount * amount * amount * end;
-}
-
-fn cubicDistance(point: vec2f, start: vec2f, controlA: vec2f, controlB: vec2f, end: vec2f) -> f32 {
-  var minimum = 10000.0;
-  var previous = start;
-  for (var index = 1; index <= 20; index = index + 1) {
-    let amount = f32(index) / 20.0;
-    let current = cubicPoint(start, controlA, controlB, end, amount);
-    minimum = min(minimum, segmentDistance(point, previous, current));
-    previous = current;
-  }
-  return minimum;
-}
-
-fn brandStrokeDistance(point: vec2f) -> f32 {
-  let upperStem = segmentDistance(point, vec2f(-16.0, -4.0), vec2f(-16.0, -12.0));
-  let upperCurve = cubicDistance(
-    point,
-    vec2f(-16.0, -12.0),
-    vec2f(-16.0, -18.627),
-    vec2f(-10.627, -24.0),
-    vec2f(-4.0, -24.0)
-  );
-  let upperArm = segmentDistance(point, vec2f(-4.0, -24.0), vec2f(12.0, -24.0));
-  let lowerStem = segmentDistance(point, vec2f(16.0, 4.0), vec2f(16.0, 12.0));
-  let lowerCurve = cubicDistance(
-    point,
-    vec2f(16.0, 12.0),
-    vec2f(16.0, 18.627),
-    vec2f(10.627, 24.0),
-    vec2f(4.0, 24.0)
-  );
-  let lowerArm = segmentDistance(point, vec2f(4.0, 24.0), vec2f(-12.0, 24.0));
-  return min(min(upperStem, upperCurve), min(upperArm, min(lowerStem, min(lowerCurve, lowerArm))));
-}
-
 fn band(distance: f32, radius: f32, width: f32) -> f32 {
   return 1.0 - smoothstep(width, width + 1.35 * u.viewport.z, abs(distance - radius));
 }
@@ -80,57 +32,18 @@ fn fragmentMain(@builtin(position) fragment: vec4f) -> @location(0) vec4f {
   let distance = length(q);
   let dpr = u.viewport.z;
   let touch = u.motion.z;
-  let interactive = u.state.x;
   let visibility = u.pointer.z * u.state.z;
-  let logoScale = mix(0.34, 0.43, touch) * dpr * (1.0 + interactive * 0.04);
-  let logoRadius = 30.0 * logoScale;
+  let clickOrigin = mix(10.2, 12.9, touch) * dpr;
   let graphite = vec3f(0.145, 0.15, 0.137);
-  let silver = vec3f(0.45, 0.46, 0.435);
   let coral = vec3f(0.784, 0.169, 0.227);
   let signalColor = mix(graphite, coral, u.motion.w);
 
-  let logoPoint = q / logoScale;
-  let logoAntialias = 1.2 * dpr / logoScale;
-  let strokeDistance = brandStrokeDistance(logoPoint);
-  let logoStroke = 1.0 - smoothstep(6.0, 6.0 + logoAntialias, strokeDistance);
-  let logoDot = 1.0 - smoothstep(5.5, 5.5 + logoAntialias, length(logoPoint));
-  let logo = max(logoStroke, logoDot);
-  let logoStrokeBloom = 1.0 - smoothstep(6.0, 11.0 + logoAntialias, strokeDistance);
-  let logoDotBloom = 1.0 - smoothstep(5.5, 10.0 + logoAntialias, length(logoPoint));
-  let logoBloom = max(logoStrokeBloom, logoDotBloom);
-
-  let speed = min(length(u.motion.xy) / (34.0 * dpr), 1.0);
-  let trailEnd = u.pointer.xy - u.motion.xy * mix(1.8, 3.2, speed);
-  let trailDistance = segmentDistance(fragment.xy, u.pointer.xy, trailEnd);
-  let trail = (1.0 - smoothstep(0.75 * dpr, 2.2 * dpr, trailDistance))
-    * speed * (1.0 - smoothstep(0.0, 231.25 * dpr, distance));
-
-  let fieldRadius = mix(102.5, 132.5, touch) * dpr;
-  let fieldFalloff = pow(max(1.0 - distance / fieldRadius, 0.0), 2.0);
-  let displacement = dot(q, normalize(u.motion.xy + vec2f(0.001))) * speed * 0.055;
-  let filamentWave = abs(sin((q.y + displacement) / (10.0 * dpr)));
-  let filaments = smoothstep(0.925, 1.0, filamentWave) * fieldFalloff * speed;
-
   let impulseAge = 1.0 - u.pointer.w;
-  let impulseRadius = (logoRadius / dpr + 15.0 + impulseAge * mix(97.5, 60.0, touch)) * dpr;
+  let impulseRadius = (clickOrigin / dpr + 15.0 + impulseAge * mix(97.5, 60.0, touch)) * dpr;
   let impulse = band(distance, impulseRadius, mix(1.35, 2.1, touch) * dpr)
     * u.pointer.w * u.pointer.w;
 
-  let halo = exp(-(distance * distance) / max(2.0 * fieldRadius * fieldRadius, 1.0));
-  let alpha = visibility * clamp(
-    logo * mix(0.68, 0.9, interactive)
-      + logoBloom * 0.045
-      + trail * 0.2
-      + filaments * 0.07
-      + impulse * 0.46
-      + halo * 0.012,
-    0.0,
-    0.92
-  );
-
-  let detailAmount = clamp(logo + impulse * 0.7, 0.0, 1.0);
-  let color = mix(silver, signalColor, detailAmount);
-  return vec4f(color, alpha);
+  return vec4f(signalColor, visibility * impulse * 0.68);
 }
 `;
 
@@ -212,6 +125,7 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
       ) {
         return;
       }
+      animationFrame = 0;
 
       const elapsed = Math.min((now - lastFrame) / 16.667, 2.5);
       lastFrame = now;
@@ -262,6 +176,14 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
       pass.end();
       device.queue.submit([encoder.finish()]);
 
+      if (impulse > 0.002) {
+        animationFrame = window.requestAnimationFrame(draw);
+      }
+    };
+
+    const startAnimation = () => {
+      if (animationFrame) return;
+      lastFrame = performance.now();
       animationFrame = window.requestAnimationFrame(draw);
     };
 
@@ -287,11 +209,13 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
       updatePointer(event);
       targetVisibility = 1;
       impulse = 1;
+      startAnimation();
     };
 
     const onPointerUp = (event: PointerEvent) => {
       updatePointer(event);
       impulse = 1;
+      startAnimation();
       if (event.pointerType === "touch") {
         touchFadeTimer = window.setTimeout(() => {
           targetVisibility = 0;
@@ -381,7 +305,6 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
       window.addEventListener("pointercancel", onPointerUp, { passive: true });
       window.addEventListener("pointerout", onPointerOut, { passive: true });
       window.addEventListener("scroll", onScroll, { passive: true });
-      animationFrame = window.requestAnimationFrame(draw);
     };
 
     initialize().catch(() => {
@@ -412,6 +335,6 @@ export function MatchdaySignalField({ revision }: { revision: string }) {
   );
 }
 
-export function CompactMatchdaySignalField() {
-  return <MatchdaySignalField revision="exact-logo-v6" />;
+export function MatchdayClickEffect() {
+  return <MatchdaySignalField revision="click-only-v8" />;
 }

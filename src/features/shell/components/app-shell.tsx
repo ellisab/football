@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { AppHeader } from "./app-header";
-import { CompactMatchdaySignalField } from "./matchday-signal-field";
+import { MatchdayClickEffect } from "./matchday-signal-field";
 import { MobileNavigation } from "./mobile-navigation";
 import { SiteFooter } from "./site-footer";
 
@@ -10,7 +10,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a href="#main-content" className="skip-link">
         Zum Inhalt springen
       </a>
-      <CompactMatchdaySignalField />
+      <MatchdayClickEffect />
       <AppHeader />
       <main id="main-content" tabIndex={-1} className="app-shell__content">
         {children}
