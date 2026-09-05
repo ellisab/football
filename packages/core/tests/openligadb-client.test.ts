@@ -3,13 +3,10 @@ import test from "node:test";
 import {
   getAllMatches,
   getAvailableLeagues,
-  getAvailableTeams,
   getCurrentGroup,
   getGroups,
-  getMatchById,
   getMatchdayResults,
   getMatchesByGroup,
-  getMatchesByTeamId,
   OPENLIGADB_CACHE_SECONDS,
 } from "../src/openligadb";
 
@@ -241,32 +238,6 @@ test("OpenLigaDB client does not coalesce differing or unsafe GET options", asyn
   }
 });
 
-test("OpenLigaDB client loads bounded team fixtures with the live TTL", async () => {
-  const originalFetch = globalThis.fetch;
-  const requests: Array<{ input: RequestInfo | URL; init?: RequestInit }> = [];
-
-  globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-    requests.push({ input, init });
-    return jsonResponse([{ matchID: 12 }]);
-  };
-
-  try {
-    const matches = await getMatchesByTeamId(40, 8, 8);
-
-    assert.equal(
-      String(requests[0]?.input),
-      "https://api.openligadb.de/getmatchesbyteamid/40/8/8",
-    );
-    assert.equal(
-      requests[0]?.init?.next?.revalidate,
-      OPENLIGADB_CACHE_SECONDS.liveMatchday,
-    );
-    assert.equal(matches[0]?.matchID, 12);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
 test("OpenLigaDB client retries transient 5xx responses", async () => {
   const originalFetch = globalThis.fetch;
   let attempts = 0;
@@ -290,35 +261,6 @@ test("OpenLigaDB client retries transient 5xx responses", async () => {
 
     assert.equal(attempts, 2);
     assert.equal(groups[0]?.groupOrderID, 1);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test("OpenLigaDB client loads a single match with the live TTL", async () => {
-  const originalFetch = globalThis.fetch;
-  const requests: Array<{ input: RequestInfo | URL; init?: RequestInit }> = [];
-
-  globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-    requests.push({ input, init });
-    return jsonResponse({
-      matchID: 82127,
-      matchResults: [{ pointsTeam1: 0, pointsTeam2: 1 }],
-    });
-  };
-
-  try {
-    const match = await getMatchById(82127);
-
-    assert.equal(
-      String(requests[0]?.input),
-      "https://api.openligadb.de/getmatchdata/82127",
-    );
-    assert.equal(
-      requests[0]?.init?.next?.revalidate,
-      OPENLIGADB_CACHE_SECONDS.liveMatchday,
-    );
-    assert.equal(match.matchResults?.[0]?.pointsTeam2, 1);
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -474,14 +416,12 @@ test("OpenLigaDB static discovery resources keep their long TTLs", async () => {
 
     await getAvailableLeagues(shortCallerOptions);
     await getGroups("bl1", 2026, shortCallerOptions);
-    await getAvailableTeams("bl1", 2026, shortCallerOptions);
 
     assert.deepEqual(
       requests.map(({ next }) => next?.revalidate),
       [
         OPENLIGADB_CACHE_SECONDS.availableLeagues,
         OPENLIGADB_CACHE_SECONDS.groups,
-        OPENLIGADB_CACHE_SECONDS.teams,
       ],
     );
   } finally {

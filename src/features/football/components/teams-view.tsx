@@ -10,13 +10,7 @@ import {
 import { SearchField } from "@/features/football/components/search-field";
 import type { TeamSummary } from "@/features/football/view-utils";
 import { TeamBadge } from "@/features/teams/components/team-badge";
-
-const normalize = (value: string) =>
-  value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("de-DE")
-    .trim();
+import { normalizeDirectoryText } from "../normalize-directory-text";
 
 function TeamCard({ team }: { team: TeamSummary }) {
   return (
@@ -76,9 +70,11 @@ export function TeamsView({
   query?: string;
   teams: TeamSummary[];
 }) {
-  const normalizedQuery = normalize(query);
+  const normalizedQuery = normalizeDirectoryText(query);
   const filtered = normalizedQuery
-    ? teams.filter((team) => normalize(team.name).includes(normalizedQuery))
+    ? teams.filter((team) =>
+        normalizeDirectoryText(team.name).includes(normalizedQuery),
+      )
     : teams;
 
   return (

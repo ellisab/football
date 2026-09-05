@@ -1,4 +1,5 @@
 import { type ApiMatch, type ApiTeam, getFinalResult } from "../openligadb";
+import { compareMatchesByKickoff } from "./match-order";
 
 type TieTeam = Pick<ApiTeam, "teamId" | "teamName" | "teamIconUrl">;
 
@@ -25,13 +26,6 @@ type TieAccumulator = {
 };
 
 type AggregateLeader = "team1" | "team2" | null;
-
-const getMatchTime = (match: ApiMatch) => {
-  const timestamp = Date.parse(
-    match.matchDateTimeUTC ?? match.matchDateTime ?? "",
-  );
-  return Number.isNaN(timestamp) ? Number.MAX_SAFE_INTEGER : timestamp;
-};
 
 const toTeamIdentity = (
   team: ApiTeam | undefined,
@@ -62,13 +56,6 @@ const createTieTeam = (
   teamName: team?.teamName ?? fallback,
   teamIconUrl: team?.teamIconUrl,
 });
-
-const compareMatches = (a: ApiMatch, b: ApiMatch) => {
-  const byTime = getMatchTime(a) - getMatchTime(b);
-  if (byTime !== 0) return byTime;
-
-  return (a.matchID ?? 0) - (b.matchID ?? 0);
-};
 
 const toAggregateScore = (
   matches: ApiMatch[],
@@ -164,7 +151,7 @@ export const groupKnockoutMatchesByTie = (
 
   return Array.from(ties.values())
     .map((tie) => {
-      const sortedMatches = [...tie.matches].sort(compareMatches);
+      const sortedMatches = [...tie.matches].sort(compareMatchesByKickoff);
       const firstMatch = sortedMatches[0];
       const fallbackTeam1 = createTieTeam(firstMatch?.team1, "Team 1");
       const fallbackTeam2 = createTieTeam(firstMatch?.team2, "Team 2");
@@ -185,6 +172,9 @@ export const groupKnockoutMatchesByTie = (
       };
     })
     .sort((a, b) =>
-      compareMatches(a.matches[0] as ApiMatch, b.matches[0] as ApiMatch),
+      compareMatchesByKickoff(
+        a.matches[0] as ApiMatch,
+        b.matches[0] as ApiMatch,
+      ),
     );
 };

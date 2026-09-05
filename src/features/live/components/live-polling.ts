@@ -30,7 +30,7 @@ export type LiveDiscoveryPayload = {
   visibleErrors: string[];
 };
 
-const getScopeKey = ({ group, league, season }: LiveMatchScope) =>
+export const getScopeKey = ({ group, league, season }: LiveMatchScope) =>
   `${league}:${season}:${group}`;
 
 export const getPollingScopes = (

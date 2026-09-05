@@ -9,6 +9,7 @@ import {
   sortGoals,
   sortMatchesByKickoff,
 } from "../../matches";
+import { dedupeMatches } from "../../matches/dedupe-matches";
 import type { ApiGroup } from "../../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { HomeErrorKey, HomeRoundSnapshot } from "../types";
@@ -19,23 +20,6 @@ import {
   MAX_NEXT_GROUP_LOOKAHEAD,
   mapSettledWithConcurrency,
 } from "./shared";
-
-const dedupeMatches = (matches: ReturnType<typeof sortMatchesByKickoff>) => {
-  const seen = new Set<string>();
-
-  return matches.filter((match) => {
-    const key =
-      match.matchID?.toString() ??
-      `${match.team1?.teamId ?? "home"}-${match.team2?.teamId ?? "away"}-${match.matchDateTimeUTC ?? match.matchDateTime ?? "unknown"}`;
-
-    if (seen.has(key)) {
-      return false;
-    }
-
-    seen.add(key);
-    return true;
-  });
-};
 
 const getGroupNameForMatches = (
   groupOrderID: number,
@@ -90,7 +74,6 @@ const loadCandidateRounds = async ({
     },
     {
       shouldStop: (error) => getStatusCode(error) === 429,
-      shouldStopValue: (round) => round.rateLimited,
     },
   );
 

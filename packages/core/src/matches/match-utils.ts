@@ -1,13 +1,6 @@
 import type { ApiGroup, ApiMatch } from "../openligadb/index";
+import { compareMatchesByKickoff } from "./match-order";
 
-const kickoffFormatter = new Intl.DateTimeFormat("de-DE", {
-  weekday: "short",
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Europe/Berlin",
-});
 const berlinDateKeyFormatter = new Intl.DateTimeFormat("de-DE", {
   day: "2-digit",
   month: "2-digit",
@@ -32,13 +25,6 @@ const LOCALIZED_KNOCKOUT_ROUND_NAMES: Array<[RegExp, string]> = [
   [/^final$/i, "Finale"],
   [/^group stage$/i, "Gruppenphase"],
 ];
-
-export const formatKickoff = (value?: string) => {
-  if (!value) return "Termin offen";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Termin offen";
-  return kickoffFormatter.format(date);
-};
 
 export const getBerlinDateKey = (value?: Date | string) => {
   if (!value) return undefined;
@@ -66,16 +52,6 @@ export const isMatchOnBerlinDate = (match: ApiMatch, dateKey: string) => {
 
 export const getMatchdayNumber = (groupName: string) => {
   return groupName.match(MATCHDAY_REGEX)?.[1] ?? null;
-};
-
-export const getStageLabel = (groupName: string) => {
-  const normalized = groupName.trim();
-  if (!normalized) return "Spieltag";
-
-  const matchdayNumber = getMatchdayNumber(normalized);
-  if (matchdayNumber) return `${matchdayNumber}. Spieltag`;
-
-  return localizeGroupName(normalized);
 };
 
 export const localizeGroupName = (groupName?: string) => {
@@ -127,33 +103,8 @@ export const sortGoals = (match: ApiMatch) => {
   };
 };
 
-const getMatchTime = (match: ApiMatch) => {
-  const timestamp = Date.parse(
-    match.matchDateTimeUTC ?? match.matchDateTime ?? "",
-  );
-  return Number.isNaN(timestamp) ? Number.MAX_SAFE_INTEGER : timestamp;
-};
-
 export const sortMatchesByKickoff = (matches: ApiMatch[]) => {
-  return [...matches].sort((a, b) => {
-    const byTime = getMatchTime(a) - getMatchTime(b);
-    if (byTime !== 0) return byTime;
-
-    return (a.matchID ?? 0) - (b.matchID ?? 0);
-  });
-};
-
-export const sortMatchesByUpcomingFirst = (matches: ApiMatch[]) => {
-  return [...matches].sort((a, b) => {
-    const byStatus =
-      Number(a.matchIsFinished === true) - Number(b.matchIsFinished === true);
-    if (byStatus !== 0) return byStatus;
-
-    const byTime = getMatchTime(a) - getMatchTime(b);
-    if (byTime !== 0) return byTime;
-
-    return (a.matchID ?? 0) - (b.matchID ?? 0);
-  });
+  return [...matches].sort(compareMatchesByKickoff);
 };
 
 export const getKnockoutStageName = (groupName?: string) => {

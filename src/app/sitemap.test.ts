@@ -10,7 +10,6 @@ test("sitemap contains exactly the supported competition routes", () => {
     [
       "/competitions/bundesliga-1",
       "/competitions/bundesliga-2",
-      "/competitions/women",
       "/competitions/dfb-pokal",
       "/competitions/champions-league",
     ],

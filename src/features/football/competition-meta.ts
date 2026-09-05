@@ -1,16 +1,8 @@
 import type { LeagueKey, LeagueOption } from "@footballleagues/core/leagues";
-import {
-  Flag,
-  Goal,
-  type LucideIcon,
-  Shield,
-  Shirt,
-  Trophy,
-} from "lucide-react";
+import { Flag, Goal, type LucideIcon, Shirt, Trophy } from "lucide-react";
 
 export type CompetitionMeta = {
-  accentClass: string;
-  category: "Männer" | "Frauen" | "Global";
+  category: "Männer" | "Global";
   description: string;
   href: string;
   icon: LucideIcon;
@@ -22,7 +14,6 @@ export type CompetitionMeta = {
 
 const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
   bl1: {
-    accentClass: "from-[#f45f63] via-[#d8b86a] to-[#030708]",
     category: "Männer",
     description: "Spieltag, Ergebnisse und Tabelle der Bundesliga.",
     href: "/competitions/bundesliga-1",
@@ -33,7 +24,6 @@ const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     slug: "bundesliga-1",
   },
   bl2: {
-    accentClass: "from-[#ffb45f] via-[#f5edc9] to-[#43c886]",
     category: "Männer",
     description: "Spieltag, Ergebnisse und Tabelle der 2. Bundesliga.",
     href: "/competitions/bundesliga-2",
@@ -43,19 +33,7 @@ const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     shortLabel: "2. Bundesliga",
     slug: "bundesliga-2",
   },
-  fbl1: {
-    accentClass: "from-[#f06fb4] via-[#6eeaf2] to-[#43c886]",
-    category: "Frauen",
-    description: "Spieltag, Ergebnisse und Tabelle der Frauen-Bundesliga.",
-    href: "/competitions/women",
-    icon: Shield,
-    label: "Frauen-Bundesliga",
-    region: "Deutschland",
-    shortLabel: "Frauen-Bundesliga",
-    slug: "women",
-  },
   dfb: {
-    accentClass: "from-[#43c886] via-[#f5edc9] to-[#030708]",
     category: "Männer",
     description: "Runden und Ergebnisse des deutschen Pokalwettbewerbs.",
     href: "/competitions/dfb-pokal",
@@ -66,7 +44,6 @@ const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     slug: "dfb-pokal",
   },
   cl: {
-    accentClass: "from-[#6eeaf2] via-[#d8b86a] to-[#8c8cff]",
     category: "Männer",
     description: "Spieltage, K.-o.-Runden und Tabelle der Champions League.",
     href: "/competitions/champions-league",

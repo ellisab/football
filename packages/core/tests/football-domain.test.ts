@@ -3,23 +3,21 @@ import test from "node:test";
 import {
   buildLeagueEntriesByGroup,
   findNextGroup,
-  formatKickoff,
   getBerlinDateKey,
   getCurrentSeasonYear,
   getKnockoutLeg,
   getKnockoutStageName,
   getLeagueLabel,
   getMatchBerlinDateKey,
-  getStageLabel,
   groupKnockoutMatchesByTie,
   hasLeagueTable,
   isPlayoffRoundName,
+  localizeGroupName,
   normalizeIconUrl,
   resolveLeagueKey,
   resolveLeagueSelection,
   resolveSeasonSelection,
   sortGoals,
-  sortMatchesByUpcomingFirst,
 } from "../src/index";
 
 test("getCurrentSeasonYear uses July as season cutoff", () => {
@@ -114,31 +112,6 @@ test("sortGoals returns goals in chronological order", () => {
   );
 });
 
-test("sortMatchesByUpcomingFirst puts incoming fixtures before results", () => {
-  const sorted = sortMatchesByUpcomingFirst([
-    {
-      matchID: 1,
-      matchDateTimeUTC: "2026-03-01T20:00:00Z",
-      matchIsFinished: true,
-    },
-    {
-      matchID: 2,
-      matchDateTimeUTC: "2026-03-08T20:00:00Z",
-      matchIsFinished: false,
-    },
-    {
-      matchID: 3,
-      matchDateTimeUTC: "2026-03-05T20:00:00Z",
-      matchIsFinished: false,
-    },
-  ]);
-
-  assert.deepEqual(
-    sorted.map((match) => match.matchID),
-    [3, 2, 1],
-  );
-});
-
 test("findNextGroup returns the next higher group order", () => {
   const groups = [
     { groupOrderID: 1, groupName: "Matchday 1" },
@@ -152,10 +125,6 @@ test("findNextGroup returns the next higher group order", () => {
   assert.equal(next?.groupName, "Matchday 2");
 });
 
-test("formatKickoff renders UTC input in Europe/Berlin time", () => {
-  assert.equal(formatKickoff("2026-04-10T18:30:00Z"), "Fr., 10. Apr., 20:30");
-});
-
 test("Berlin date keys use the local matchday", () => {
   assert.equal(getBerlinDateKey("2026-06-14T22:30:00Z"), "2026-06-15");
   assert.equal(
@@ -167,8 +136,8 @@ test("Berlin date keys use the local matchday", () => {
 });
 
 test("stage helpers normalize matchday and playoff labels", () => {
-  assert.equal(getStageLabel("14. Spieltag"), "14. Spieltag");
-  assert.equal(getStageLabel("Quarter-finals"), "Viertelfinale");
+  assert.equal(localizeGroupName("14. Spieltag"), "14. Spieltag");
+  assert.equal(localizeGroupName("Quarter-finals"), "Viertelfinale");
   assert.equal(isPlayoffRoundName("Champions League Playoffs"), true);
   assert.equal(isPlayoffRoundName("Semi-finals"), false);
   assert.equal(getKnockoutStageName("Achtelfinale Hinspiele"), "Achtelfinale");
@@ -211,64 +180,12 @@ test("buildLeagueEntriesByGroup uses exact shortcut identities", () => {
   assert.equal(grouped.get("bl1")?.[0]?.leagueShortcut, "bl1");
 });
 
-test("buildLeagueEntriesByGroup maps women Bundesliga shortcuts to dedicated groups", () => {
-  const leagues = [
-    {
-      leagueShortcut: "fbl1",
-      leagueName: "1. Frauen-Bundesliga 2025",
-      leagueSeason: 2025,
-      sport: { sportName: "Fußball" },
-    },
-    {
-      leagueShortcut: "fbl2",
-      leagueName: "2. Frauen-Bundesliga 2025",
-      leagueSeason: 2025,
-      sport: { sportName: "Fußball" },
-    },
-  ];
-
-  const grouped = buildLeagueEntriesByGroup(leagues);
-
-  assert.equal(grouped.get("fbl1")?.length, 1);
-  assert.equal(grouped.get("fbl1")?.[0]?.leagueShortcut, "fbl1");
-  assert.equal(
-    grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "fbl2"),
-    false,
-  );
-});
-
-test("buildLeagueEntriesByGroup recognizes the current ffb1 Frauen-Bundesliga alias", () => {
+test("buildLeagueEntriesByGroup accepts configured aliases and ignores lookalikes", () => {
   const grouped = buildLeagueEntriesByGroup([
     {
-      leagueShortcut: "ffb1",
-      leagueName: "Frauen Fußballbundesliga",
+      leagueShortcut: "bl1-amateur",
+      leagueName: "Amateur-Bundesliga",
       leagueSeason: 2026,
-      sport: { sportName: "Fußball" },
-    },
-  ]);
-
-  assert.equal(grouped.get("fbl1")?.length, 1);
-  assert.equal(grouped.get("fbl1")?.[0]?.leagueShortcut, "ffb1");
-});
-
-test("buildLeagueEntriesByGroup resolves bl1f specifically and ignores bl2f", () => {
-  const leagues = [
-    {
-      leagueShortcut: "bl1f",
-      leagueName: "1. Frauen-Bundesliga",
-      leagueSeason: 2023,
-      sport: { sportName: "Frauenfußball" },
-    },
-    {
-      leagueShortcut: "bl2f",
-      leagueName: "2. Frauen-Bundesliga",
-      leagueSeason: 2024,
-      sport: { sportName: "Frauenfußball" },
-    },
-    {
-      leagueShortcut: "bl1fan",
-      leagueName: "1. Fußball-Fan-Bundesliga 2022/2023",
-      leagueSeason: 2022,
       sport: { sportName: "Fußball" },
     },
     {
@@ -277,27 +194,12 @@ test("buildLeagueEntriesByGroup resolves bl1f specifically and ignores bl2f", ()
       leagueSeason: 2018,
       sport: { sportName: "Fußball" },
     },
-  ];
+  ]);
 
-  const grouped = buildLeagueEntriesByGroup(leagues);
-
-  assert.equal(grouped.get("fbl1")?.length, 1);
-  assert.equal(grouped.get("fbl1")?.[0]?.leagueShortcut, "bl1f");
-  assert.equal(
-    grouped.get("fbl1")?.some((entry) => entry.leagueShortcut === "bl1fan"),
-    false,
-  );
-  assert.equal(
-    grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "bl2f"),
-    false,
-  );
-  assert.equal(
-    grouped.get("bl2")?.some((entry) => entry.leagueShortcut === "bl2f"),
-    false,
-  );
-  assert.equal(
-    grouped.get("bl1")?.some((entry) => entry.leagueShortcut === "bl1/arena"),
-    true,
+  assert.deepEqual([...grouped.keys()], ["bl1", "bl2", "dfb", "cl"]);
+  assert.deepEqual(
+    grouped.get("bl1")?.map((entry) => entry.leagueShortcut),
+    ["bl1/arena"],
   );
   assert.equal(grouped.get("bl2")?.length, 0);
 });

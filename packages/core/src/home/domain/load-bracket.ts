@@ -6,28 +6,12 @@ import {
   sortGoals,
   sortMatchesByKickoff,
 } from "../../matches";
+import { dedupeMatches } from "../../matches/dedupe-matches";
 import type { ApiGroup, ApiMatch } from "../../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { BracketRound, HomeErrorKey, HomeRoundSnapshot } from "../types";
 import { loadMatchdayResults } from "./matchday-loader";
 import { getStatusCode, mapSettledWithConcurrency } from "./shared";
-
-const dedupeMatches = (matches: ApiMatch[]) => {
-  const seen = new Set<string>();
-
-  return matches.filter((match) => {
-    const key =
-      match.matchID?.toString() ??
-      `${match.team1?.teamId ?? "home"}-${match.team2?.teamId ?? "away"}-${match.matchDateTimeUTC ?? match.matchDateTime ?? "unknown"}`;
-
-    if (seen.has(key)) {
-      return false;
-    }
-
-    seen.add(key);
-    return true;
-  });
-};
 
 const mergeRoundsByStage = (rounds: BracketRound[]) => {
   const mergedRounds = new Map<
@@ -156,7 +140,6 @@ export const loadBracketMatches = async ({
         return {
           group,
           matches: [] as ApiMatch[],
-          rateLimited: false,
         };
       }
 
@@ -171,12 +154,10 @@ export const loadBracketMatches = async ({
       return {
         group,
         matches: matchdayResult.matches.map(sortGoals),
-        rateLimited: false,
       };
     },
     {
       shouldStop: (error) => getStatusCode(error) === 429,
-      shouldStopValue: (round) => round.rateLimited,
     },
   );
 
@@ -186,8 +167,6 @@ export const loadBracketMatches = async ({
     const fallbackGroup = result.input;
 
     if (result.status === "fulfilled") {
-      rateLimited = rateLimited || result.value.rateLimited;
-
       return {
         group: result.value.group,
         matches: result.value.matches,

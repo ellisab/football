@@ -7,19 +7,13 @@ import {
   PageIntro,
 } from "@/features/football/components/product-ui";
 import { SearchField } from "@/features/football/components/search-field";
-
-const normalize = (value: string) =>
-  value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("de-DE")
-    .trim();
+import { normalizeDirectoryText } from "@/features/football/normalize-directory-text";
 
 export function CompetitionDirectory({ query = "" }: { query?: string }) {
-  const normalizedQuery = normalize(query);
+  const normalizedQuery = normalizeDirectoryText(query);
   const competitions = getCompetitionCatalog().filter((competition) => {
     if (!normalizedQuery) return true;
-    return normalize(
+    return normalizeDirectoryText(
       `${competition.label} ${competition.shortLabel} ${competition.region} ${competition.category}`,
     ).includes(normalizedQuery);
   });

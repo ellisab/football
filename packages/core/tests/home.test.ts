@@ -284,11 +284,6 @@ const BUNDESLIGA_FAMILY_CASES = [
     leagueName: "2. Fußball-Bundesliga 2026/2027",
     shortcut: "bl2",
   },
-  {
-    league: "fbl1",
-    leagueName: "1. Frauen-Bundesliga 2026/2027",
-    shortcut: "fbl1",
-  },
 ] as const;
 
 for (const { league, leagueName, shortcut } of BUNDESLIGA_FAMILY_CASES) {
@@ -508,7 +503,7 @@ test("getHomeSnapshot keeps an empty first round shell for a future league seaso
   }
 });
 
-test("getHomeSnapshot falls back to the latest available women season when 2026 is missing", async () => {
+test("getHomeSnapshot falls back to the latest available season when 2026 is missing", async () => {
   const originalFetch = globalThis.fetch;
 
   globalThis.fetch = createFetchMock((path) => {
@@ -516,24 +511,24 @@ test("getHomeSnapshot falls back to the latest available women season when 2026 
       case "/getavailableleagues":
         return jsonResponse([
           {
-            leagueShortcut: "fbl1",
-            leagueName: "1. Frauen-Bundesliga 2025",
+            leagueShortcut: "bl2",
+            leagueName: "2. Fußball-Bundesliga 2025",
             leagueSeason: 2025,
-            sport: { sportName: "Frauenfußball" },
+            sport: { sportName: "Fußball" },
           },
         ]);
-      case "/getcurrentgroup/fbl1":
+      case "/getcurrentgroup/bl2":
         return jsonResponse({
           groupID: 22,
           groupName: "22. Spieltag",
           groupOrderID: 22,
         });
-      case "/getavailablegroups/fbl1/2025":
+      case "/getavailablegroups/bl2/2025":
         return jsonResponse([
           { groupID: 22, groupName: "22. Spieltag", groupOrderID: 22 },
         ]);
-      case "/getbltable/fbl1/2025":
-      case "/getmatchdata/fbl1/2025/22":
+      case "/getbltable/bl2/2025":
+      case "/getmatchdata/bl2/2025/22":
         return jsonResponse([]);
       default:
         return jsonResponse({ path }, 404);
@@ -542,11 +537,11 @@ test("getHomeSnapshot falls back to the latest available women season when 2026 
 
   try {
     const snapshot = await getHomeSnapshot(
-      { league: "fbl1", season: "2026" },
+      { league: "bl2", season: "2026" },
       { fallbackYear: 2025 },
     );
 
-    assert.equal(snapshot.resolvedLeague, "fbl1");
+    assert.equal(snapshot.resolvedLeague, "bl2");
     assert.equal(snapshot.resolvedSeason, 2025);
     assert.deepEqual(snapshot.leagueOptions[0]?.seasons, [2025]);
   } finally {

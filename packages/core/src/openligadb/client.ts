@@ -4,7 +4,6 @@ import type {
   ApiLeague,
   ApiMatch,
   ApiTableRow,
-  ApiTeam,
   FetchOptions,
 } from "./types";
 
@@ -384,25 +383,6 @@ export const getAllMatches = async (
   );
 };
 
-export const getMatchById = async (matchId: number, options?: FetchOptions) => {
-  return fetchJson<ApiMatch>(
-    `/getmatchdata/${matchId}`,
-    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
-  );
-};
-
-export const getMatchesByTeamId = async (
-  teamId: number,
-  weeksPast: number,
-  weeksFuture: number,
-  options?: FetchOptions,
-) => {
-  return fetchJson<ApiMatch[]>(
-    `/getmatchesbyteamid/${teamId}/${weeksPast}/${weeksFuture}`,
-    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
-  );
-};
-
 export const getMatchesByGroup = async (
   leagueShortcut: string,
   season: number,
@@ -441,16 +421,5 @@ export const getTable = async (
       options,
       getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
     ),
-  );
-};
-
-export const getAvailableTeams = async (
-  leagueShortcut: string,
-  season: number,
-  options?: FetchOptions,
-) => {
-  return fetchJson<ApiTeam[]>(
-    `/getavailableteams/${leagueShortcut}/${season}`,
-    withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.teams),
   );
 };

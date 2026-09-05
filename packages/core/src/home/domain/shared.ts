@@ -6,15 +6,6 @@ export const getStatusCode = (error: unknown) => {
   return reason?.status;
 };
 
-export const getRetryAfterMs = (error: unknown) => {
-  const reason = error as { retryAfterMs?: number } | undefined;
-  return typeof reason?.retryAfterMs === "number" &&
-    Number.isFinite(reason.retryAfterMs) &&
-    reason.retryAfterMs >= 0
-    ? reason.retryAfterMs
-    : undefined;
-};
-
 export type BoundedSettledResult<Input, Output> =
   | {
       input: Input;
@@ -33,11 +24,9 @@ export const mapSettledWithConcurrency = async <Input, Output>(
   {
     concurrency = GROUP_REQUEST_CONCURRENCY,
     shouldStop = () => false,
-    shouldStopValue = () => false,
   }: {
     concurrency?: number;
     shouldStop?: (reason: unknown) => boolean;
-    shouldStopValue?: (value: Output) => boolean;
   } = {},
 ): Promise<Array<BoundedSettledResult<Input, Output>>> => {
   if (!Number.isInteger(concurrency) || concurrency < 1) {
@@ -65,10 +54,6 @@ export const mapSettledWithConcurrency = async <Input, Output>(
           status: "fulfilled",
           value,
         };
-
-        if (shouldStopValue(value)) {
-          stopped = true;
-        }
       } catch (reason) {
         results[index] = {
           input,

@@ -20,7 +20,7 @@ export const hasLeagueTable = (leagueKey: LeagueKey) => {
   return leagueKey !== "dfb";
 };
 
-const BUNDESLIGA_MATCHDAY_LEAGUES = new Set<LeagueKey>(["bl1", "bl2", "fbl1"]);
+const BUNDESLIGA_MATCHDAY_LEAGUES = new Set<LeagueKey>(["bl1", "bl2"]);
 
 export const isBundesligaMatchdayLeague = (leagueKey: LeagueKey) => {
   return BUNDESLIGA_MATCHDAY_LEAGUES.has(leagueKey);

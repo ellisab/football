@@ -30,11 +30,9 @@ export type TeamSummary = {
   id: string;
   name: string;
   nextMatch?: CompetitionMatch;
-  recentMatch?: CompetitionMatch;
   upcomingMatches: CompetitionMatch[];
   recentMatches: CompetitionMatch[];
   tablePosition?: {
-    competitionLabel: string;
     points?: number;
     position: number;
   };
@@ -160,34 +158,28 @@ export const getTodayCompetitionMatches = ({
   date?: Date;
 }): CompetitionMatch[] => {
   const dateKey = getBerlinDateKey(date) ?? "";
-  const seen = new Set<string>();
-  const matches: CompetitionMatch[] = [];
+  if (!dateKey) return [];
 
-  if (!dateKey) return matches;
-
-  for (const competition of competitions) {
-    for (const match of getCompetitionMatches(competition)) {
-      if (!isMatchOnBerlinDate(match, dateKey)) continue;
-
-      const identity = `${competition.resolvedLeague}-${getMatchIdentity(match)}`;
-      if (seen.has(identity)) continue;
-
-      seen.add(identity);
-      matches.push({ competition, match });
-    }
-  }
-
-  return sortCompetitionMatches(matches);
+  return collectCompetitionMatches(competitions, (match) =>
+    isMatchOnBerlinDate(match, dateKey),
+  );
 };
 
 export const getAllCompetitionMatches = (
   competitions: WebCompetitionViewModel[],
+): CompetitionMatch[] => collectCompetitionMatches(competitions);
+
+const collectCompetitionMatches = (
+  competitions: WebCompetitionViewModel[],
+  includeMatch?: (match: ApiMatch) => boolean,
 ): CompetitionMatch[] => {
   const seen = new Set<string>();
   const matches: CompetitionMatch[] = [];
 
   for (const competition of competitions) {
     for (const match of getCompetitionMatches(competition)) {
+      if (includeMatch && !includeMatch(match)) continue;
+
       const identity = `${competition.resolvedLeague}-${getMatchIdentity(match)}`;
       if (seen.has(identity)) continue;
 
@@ -253,10 +245,7 @@ export const getTeamId = (team?: ApiTeam | ApiTableRow) => {
     "teamId" in (team ?? {})
       ? (team as ApiTeam).teamId
       : (team as ApiTableRow)?.teamInfoId;
-  const name =
-    "teamName" in (team ?? {})
-      ? team?.teamName
-      : (team as ApiTableRow | undefined)?.teamName;
+  const name = team?.teamName;
 
   if (typeof numericId === "number") return String(numericId);
   if (name) return normalizeTeamId(name);
@@ -333,12 +322,6 @@ export const collectTeams = (
         ) {
           summary.recentMatches.push(match);
         }
-        const recentTime = summary.recentMatch
-          ? getMatchTime(summary.recentMatch.match)
-          : Number.NEGATIVE_INFINITY;
-        if (getMatchTime(match.match) >= recentTime) {
-          summary.recentMatch = match;
-        }
       } else if (status === "live" || status === "upcoming") {
         if (
           !summary.upcomingMatches.some(
@@ -372,7 +355,6 @@ export const collectTeams = (
           id: getTeamId(row),
           name: row.teamName ?? row.shortName ?? "Team",
           tablePosition: {
-            competitionLabel: competition.leagueLabel,
             points: row.points,
             position: index + 1,
           },

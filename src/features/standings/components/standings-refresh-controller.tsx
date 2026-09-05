@@ -2,11 +2,10 @@
 
 import type { LeagueKey } from "@footballleagues/core/leagues";
 import type { ApiTableRow } from "@footballleagues/core/openligadb";
-import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { RefreshStatus } from "@/features/football/refresh/refresh-status";
+import { useVisibleRefresh } from "@/features/football/refresh/use-visible-refresh";
 import { StandingsCard } from "./standings-card";
-
-const REFRESH_INTERVAL_MS = 45_000;
 
 type TablePayload = {
   checkedAt: number;
@@ -86,57 +85,17 @@ export function StandingsRefreshController({
     }
   }, [league, season]);
 
-  useEffect(() => {
-    void refresh();
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") void refresh();
-    };
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === "visible") void refresh();
-    }, REFRESH_INTERVAL_MS);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      window.clearInterval(interval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      activeRequest.current?.abort();
-    };
-  }, [refresh]);
+  useVisibleRefresh({ activeRequest, onRefresh: refresh });
 
   return (
     <>
-      <div className="live-refresh-controller">
-        <p role="status" aria-live="polite" aria-atomic="true">
-          {isPending
-            ? "Tabelle wird aktualisiert."
-            : isDelayed
-              ? lastChecked
-                ? `Datenquelle verzögert. Letzter Stand von ${lastChecked.toLocaleTimeString(
-                    "de-DE",
-                    { hour: "2-digit", minute: "2-digit" },
-                  )} Uhr.`
-                : "Datenquelle verzögert. Der letzte bekannte Stand wird angezeigt."
-              : lastChecked
-                ? `Zuletzt geprüft um ${lastChecked.toLocaleTimeString(
-                    "de-DE",
-                    { hour: "2-digit", minute: "2-digit" },
-                  )} Uhr.`
-                : "Automatische Aktualisierung alle 45 Sekunden, solange der Tab sichtbar ist."}
-        </p>
-        <button
-          type="button"
-          onClick={() => void refresh()}
-          disabled={isPending}
-          className="button-secondary"
-        >
-          <RefreshCw
-            aria-hidden="true"
-            className={`h-4 w-4 ${isPending ? "animate-spin" : ""}`}
-          />
-          Aktualisieren
-        </button>
-      </div>
+      <RefreshStatus
+        isDelayed={isDelayed}
+        isPending={isPending}
+        lastChecked={lastChecked}
+        onRefresh={refresh}
+        pendingMessage="Tabelle wird aktualisiert."
+      />
 
       <StandingsCard table={table} emptyText="Keine Tabelle verfügbar." />
     </>

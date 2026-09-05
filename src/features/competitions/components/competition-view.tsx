@@ -19,26 +19,8 @@ import {
 } from "@/features/football/view-utils";
 import type { WebCompetitionViewModel } from "@/features/home/presenter/home-view-model";
 import { StandingsRefreshController } from "@/features/standings/components/standings-refresh-controller";
+import { buildCompetitionHref } from "../competition-href";
 import { MatchdayNavigator } from "./matchday-navigator";
-
-const tabHref = ({
-  matchday,
-  season,
-  slug,
-  scope,
-  view,
-}: {
-  matchday?: number;
-  season: number;
-  slug: string;
-  scope?: "all" | "fixtures" | "results";
-  view: "matches" | "standings";
-}) => {
-  const query = new URLSearchParams({ season: String(season), view });
-  if (scope && scope !== "all") query.set("scope", scope);
-  if (matchday) query.set("matchday", String(matchday));
-  return `/competitions/${slug}?${query.toString()}`;
-};
 
 export function CompetitionView({
   competition,
@@ -132,7 +114,7 @@ export function CompetitionView({
 
           <nav className="segmented-control" aria-label="Wettbewerbsansicht">
             <Link
-              href={tabHref({
+              href={buildCompetitionHref({
                 matchday: selectedMatchday,
                 season: competition.resolvedSeason,
                 slug: meta.slug,
@@ -145,7 +127,7 @@ export function CompetitionView({
               Spiele
             </Link>
             <Link
-              href={tabHref({
+              href={buildCompetitionHref({
                 matchday: selectedMatchday,
                 season: competition.resolvedSeason,
                 slug: meta.slug,
@@ -208,7 +190,7 @@ export function CompetitionView({
               ).map(([value, label]) => (
                 <Link
                   key={value}
-                  href={tabHref({
+                  href={buildCompetitionHref({
                     matchday: selectedMatchday,
                     season: competition.resolvedSeason,
                     slug: meta.slug,
@@ -284,7 +266,7 @@ export function CompetitionView({
               <EmptyState
                 title="Keine Tabelle verfügbar"
                 description="Dieser Wettbewerb stellt für die ausgewählte Saison keine verlässlichen Tabellendaten bereit."
-                actionHref={tabHref({
+                actionHref={buildCompetitionHref({
                   matchday: selectedMatchday,
                   season: competition.resolvedSeason,
                   slug: meta.slug,

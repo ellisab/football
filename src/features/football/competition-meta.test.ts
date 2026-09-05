@@ -11,7 +11,6 @@ test("competition catalog contains exactly the supported routes", () => {
     [
       { key: "bl1", href: "/competitions/bundesliga-1" },
       { key: "bl2", href: "/competitions/bundesliga-2" },
-      { key: "fbl1", href: "/competitions/women" },
       { key: "dfb", href: "/competitions/dfb-pokal" },
       { key: "cl", href: "/competitions/champions-league" },
     ],

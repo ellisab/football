@@ -24,12 +24,6 @@ const AVAILABLE_LEAGUES: ApiLeague[] = [
     sport: { sportName: "Fußball" },
   },
   {
-    leagueShortcut: "ffb1",
-    leagueName: "Frauen-Bundesliga",
-    leagueSeason: 2026,
-    sport: { sportName: "Fußball" },
-  },
-  {
     leagueShortcut: "dfb",
     leagueName: "DFB-Pokal",
     leagueSeason: 2026,
@@ -113,7 +107,7 @@ test("getLiveSchedule resolves current-season aliases and applies cache policies
   );
   assert.deepEqual(
     scheduleCalls.map(({ shortcut, season }) => `${shortcut}:${season}`).sort(),
-    ["bl1:2026", "bl2:2026", "dfb:2026", "ffb1:2026", "ucl:2026"],
+    ["bl1:2026", "bl2:2026", "dfb:2026", "ucl:2026"],
   );
   assert.equal(
     scheduleCalls.every(
@@ -142,11 +136,6 @@ test("getLiveSchedule selects recent unfinished matches and five upcoming global
         createMatch({ id: 201, offsetMinutes: 10 }),
         createMatch({ id: 202, offsetMinutes: 20 }),
         createMatch({ id: 202, offsetMinutes: 20 }),
-      ],
-    ],
-    [
-      "ffb1",
-      [
         createMatch({ finished: true, id: 104, offsetMinutes: -60 }),
         {
           ...createMatch({ id: 105, offsetMinutes: -30 }),
@@ -297,5 +286,5 @@ test("getLiveSchedule falls back to canonical shortcuts when metadata is unavail
   const result = await getLiveSchedule({ dataSource, now: NOW });
 
   assert.deepEqual(result.failedLeagues, []);
-  assert.deepEqual(shortcuts.sort(), ["bl1", "bl2", "dfb", "fbl1", "ucl"]);
+  assert.deepEqual(shortcuts.sort(), ["bl1", "bl2", "dfb", "ucl"]);
 });

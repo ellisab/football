@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { LivePageData } from "@/features/live/server/get-live-page-data";
-import { buildLiveScopesResponse } from "./route";
+import { buildLiveScopesResponse } from "./response";
 
 const liveData = (overrides: Partial<LivePageData> = {}): LivePageData => ({
   checkedAt: Date.parse("2026-07-22T18:00:00Z"),

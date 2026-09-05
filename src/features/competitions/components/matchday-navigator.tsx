@@ -1,29 +1,11 @@
 import type { ApiGroup } from "@footballleagues/core/openligadb";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import Link from "next/link";
+import { buildCompetitionHref } from "../competition-href";
 
 const getGroupLabel = (group: ApiGroup) =>
   group.groupName?.trim() ||
   (group.groupOrderID ? `${group.groupOrderID}. Spieltag` : "Runde");
-
-const buildHref = ({
-  matchday,
-  season,
-  slug,
-  scope,
-  view,
-}: {
-  matchday?: number;
-  season: number;
-  slug: string;
-  scope?: "all" | "fixtures" | "results";
-  view: "matches" | "standings";
-}) => {
-  const query = new URLSearchParams({ season: String(season), view });
-  if (scope && scope !== "all") query.set("scope", scope);
-  if (matchday) query.set("matchday", String(matchday));
-  return `/competitions/${slug}?${query.toString()}`;
-};
 
 export function MatchdayNavigator({
   currentMatchday,
@@ -60,7 +42,7 @@ export function MatchdayNavigator({
     <div className="matchday-navigator">
       {previous?.groupOrderID ? (
         <Link
-          href={buildHref({
+          href={buildCompetitionHref({
             matchday: previous.groupOrderID,
             season,
             slug,
@@ -109,7 +91,7 @@ export function MatchdayNavigator({
 
       {currentMatchday && currentMatchday !== selectedMatchday ? (
         <Link
-          href={buildHref({
+          href={buildCompetitionHref({
             matchday: currentMatchday,
             season,
             slug,
@@ -125,7 +107,7 @@ export function MatchdayNavigator({
 
       {next?.groupOrderID ? (
         <Link
-          href={buildHref({
+          href={buildCompetitionHref({
             matchday: next.groupOrderID,
             season,
             slug,

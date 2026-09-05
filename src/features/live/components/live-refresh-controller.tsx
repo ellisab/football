@@ -1,29 +1,27 @@
 "use client";
 
-import { RefreshCw, Satellite } from "lucide-react";
+import { Satellite } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MatchCardList } from "@/features/football/components/match-card-list";
 import {
   EmptyState,
   SectionHeading,
 } from "@/features/football/components/product-ui";
+import { RefreshStatus } from "@/features/football/refresh/refresh-status";
+import { useVisibleRefresh } from "@/features/football/refresh/use-visible-refresh";
 import { getMatchStatus } from "@/features/football/view-utils";
 import {
   getPollingScopes,
+  getScopeKey,
   type LiveMatchItem,
-  type LiveMatchScope,
   mergeLiveDiscovery,
   mergeMatchdayPayload,
   parseLiveDiscoveryPayload,
   parseMatchdayPollingPayload,
 } from "./live-polling";
 
-const REFRESH_INTERVAL_MS = 45_000;
 const DISCOVERY_INTERVAL_MS = 5 * 60_000;
 const DISCOVERY_RETRY_MS = 60_000;
-
-const getScopeKey = ({ group, league, season }: LiveMatchScope) =>
-  `${league}:${season}:${group}`;
 
 const getRetryAtFromResponse = (response: Response) => {
   const retryAfter = Number.parseFloat(
@@ -195,24 +193,16 @@ export function LiveRefreshController({
     await refreshScores();
   }, [refreshDiscovery, refreshScores]);
 
-  useEffect(() => {
+  const startRefresh = useCallback(() => {
     nextDiscoveryAt.current = Date.now() + DISCOVERY_INTERVAL_MS;
-    void refreshScores();
+    return refreshScores();
+  }, [refreshScores]);
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") void runScheduledRefresh();
-    };
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === "visible") void runScheduledRefresh();
-    }, REFRESH_INTERVAL_MS);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      window.clearInterval(interval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      activeRequest.current?.abort();
-    };
-  }, [refreshScores, runScheduledRefresh]);
+  useVisibleRefresh({
+    activeRequest,
+    onRefresh: runScheduledRefresh,
+    onStart: startRefresh,
+  });
 
   const isDelayed = isDiscoveryDelayed || isScoreDelayed;
   const isPending = pendingKind !== null;
@@ -230,42 +220,17 @@ export function LiveRefreshController({
 
   return (
     <>
-      <div className="live-refresh-controller">
-        <p role="status" aria-live="polite" aria-atomic="true">
-          {isPending
-            ? pendingKind === "discovery"
-              ? "Spielplan wird aktualisiert."
-              : "Spielstände werden aktualisiert."
-            : isDelayed
-              ? lastChecked
-                ? `Datenquelle verzögert. Letzter Stand von ${lastChecked.toLocaleTimeString(
-                    "de-DE",
-                    { hour: "2-digit", minute: "2-digit" },
-                  )} Uhr.`
-                : "Datenquelle verzögert. Der letzte bekannte Stand wird angezeigt."
-              : lastChecked
-                ? `Zuletzt geprüft um ${lastChecked.toLocaleTimeString(
-                    "de-DE",
-                    {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    },
-                  )} Uhr.`
-                : "Automatische Aktualisierung alle 45 Sekunden, solange der Tab sichtbar ist."}
-        </p>
-        <button
-          type="button"
-          onClick={() => void refreshScores()}
-          disabled={isPending}
-          className="button-secondary"
-        >
-          <RefreshCw
-            aria-hidden="true"
-            className={`h-4 w-4 ${isPending ? "animate-spin" : ""}`}
-          />
-          Aktualisieren
-        </button>
-      </div>
+      <RefreshStatus
+        isDelayed={isDelayed}
+        isPending={isPending}
+        lastChecked={lastChecked}
+        onRefresh={refreshScores}
+        pendingMessage={
+          pendingKind === "discovery"
+            ? "Spielplan wird aktualisiert."
+            : "Spielstände werden aktualisiert."
+        }
+      />
 
       <p className="sr-only" aria-live="polite">
         {live.length} möglicherweise laufende Spiele gefunden.
