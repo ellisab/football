@@ -1,3 +1,4 @@
+import { mapSettledWithConcurrency } from "../../async";
 import { isBundesligaMatchdayLeague, type LeagueKey } from "../../leagues";
 import {
   areAllMatchesFinished,
@@ -15,11 +16,7 @@ import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { HomeErrorKey, HomeRoundSnapshot } from "../types";
 import { getGroupsWithFallback } from "./league-groups";
 import { loadMatchdayResults } from "./matchday-loader";
-import {
-  getStatusCode,
-  MAX_NEXT_GROUP_LOOKAHEAD,
-  mapSettledWithConcurrency,
-} from "./shared";
+import { getStatusCode, MAX_NEXT_GROUP_LOOKAHEAD } from "./shared";
 
 const getGroupNameForMatches = (
   groupOrderID: number,

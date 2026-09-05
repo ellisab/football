@@ -1,3 +1,4 @@
+import { type BoundedSettledResult, mapSettledWithConcurrency } from "../async";
 import {
   buildLeagueEntriesByGroup,
   getCurrentSeasonYear,
@@ -33,16 +34,10 @@ type CompetitionRequest = {
   effectiveShortcut: string;
 };
 
-type CompetitionLoadResult =
-  | {
-      request: CompetitionRequest;
-      status: "fulfilled";
-      matches: ApiMatch[];
-    }
-  | {
-      request: CompetitionRequest;
-      status: "rejected";
-    };
+type CompetitionLoadResult = BoundedSettledResult<
+  CompetitionRequest,
+  ApiMatch[]
+>;
 
 type TimedLiveScheduleMatch = LiveScheduleMatch & {
   kickoffTimestamp: number;
@@ -117,60 +112,27 @@ const loadCompetitionSchedules = async ({
   requests: CompetitionRequest[];
   requestTimeoutMs: number;
 }): Promise<CompetitionLoadResult[]> => {
-  const results: Array<CompetitionLoadResult | undefined> = new Array(
-    requests.length,
-  );
-  let nextIndex = 0;
+  return mapSettledWithConcurrency(
+    requests,
+    async (request) => {
+      const matches = await runWithTimeout(
+        (signal) =>
+          dataSource.getAllMatches(request.effectiveShortcut, request.season, {
+            signal,
+            next: {
+              revalidate: OPENLIGADB_CACHE_SECONDS.liveSchedule,
+            },
+          }),
+        requestTimeoutMs,
+      );
 
-  const worker = async () => {
-    while (nextIndex < requests.length) {
-      const index = nextIndex;
-      nextIndex += 1;
-      const request = requests[index] as CompetitionRequest;
-
-      try {
-        const matches = await runWithTimeout(
-          (signal) =>
-            dataSource.getAllMatches(
-              request.effectiveShortcut,
-              request.season,
-              {
-                signal,
-                next: {
-                  revalidate: OPENLIGADB_CACHE_SECONDS.liveSchedule,
-                },
-              },
-            ),
-          requestTimeoutMs,
-        );
-
-        if (!Array.isArray(matches)) {
-          throw new TypeError("Live schedule response must be an array");
-        }
-
-        results[index] = {
-          request,
-          status: "fulfilled",
-          matches,
-        };
-      } catch {
-        results[index] = {
-          request,
-          status: "rejected",
-        };
+      if (!Array.isArray(matches)) {
+        throw new TypeError("Live schedule response must be an array");
       }
-    }
-  };
 
-  await Promise.all(
-    Array.from(
-      { length: Math.min(LIVE_SCHEDULE_CONCURRENCY, requests.length) },
-      worker,
-    ),
-  );
-
-  return results.filter(
-    (result): result is CompetitionLoadResult => result !== undefined,
+      return matches;
+    },
+    { concurrency: LIVE_SCHEDULE_CONCURRENCY },
   );
 };
 
@@ -249,14 +211,14 @@ const selectScheduleMatches = ({
   for (const result of results) {
     if (result.status === "rejected") continue;
 
-    for (const match of result.matches) {
+    for (const match of result.value) {
       if (match.matchIsFinished === true) continue;
 
       const kickoffTimestamp = getMatchKickoffTimestamp(match);
       if (kickoffTimestamp === null) continue;
 
       candidates.push({
-        ...result.request,
+        ...result.input,
         match,
         kickoffTimestamp,
       });
@@ -344,7 +306,7 @@ export const getLiveSchedule = async (
       nowTimestamp: checkedAt,
     }),
     failedLeagues: results.flatMap((result) =>
-      result.status === "rejected" ? [result.request.league] : [],
+      result.status === "rejected" ? [result.input.league] : [],
     ),
     checkedAt,
   };

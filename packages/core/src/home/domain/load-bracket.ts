@@ -1,3 +1,4 @@
+import { mapSettledWithConcurrency } from "../../async";
 import type { LeagueKey } from "../../leagues";
 import {
   areAllMatchesFinished,
@@ -11,7 +12,7 @@ import type { ApiGroup, ApiMatch } from "../../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "../data-source";
 import type { BracketRound, HomeErrorKey, HomeRoundSnapshot } from "../types";
 import { loadMatchdayResults } from "./matchday-loader";
-import { getStatusCode, mapSettledWithConcurrency } from "./shared";
+import { getStatusCode } from "./shared";
 
 const mergeRoundsByStage = (rounds: BracketRound[]) => {
   const mergedRounds = new Map<

@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useId, useMemo, useRef, useState } from "react";
 import { SearchField } from "@/features/football/components/search-field";
 import {
-  rankSearchResults,
+  createSearchIndex,
+  rankSearchIndex,
   type SearchResultItem,
   type SearchResultKind,
 } from "./search-ranking";
@@ -48,9 +49,10 @@ export function SearchExperience({
   const statusId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState(initialQuery);
+  const searchIndex = useMemo(() => createSearchIndex(items), [items]);
   const results = useMemo(
-    () => rankSearchResults(items, query, { limit: resultLimit }),
-    [items, query, resultLimit],
+    () => rankSearchIndex(searchIndex, query, { limit: resultLimit }),
+    [searchIndex, query, resultLimit],
   );
   const groupedResults = useMemo(() => {
     const groups = new Map<SearchResultKind, typeof results>();

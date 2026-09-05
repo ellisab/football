@@ -1,6 +1,4 @@
 import {
-  buildLeagueOptions,
-  getAvailableGroupKeys,
   getCurrentSeasonYear,
   hasLeagueTable,
   isBundesligaMatchdayLeague,
@@ -19,12 +17,15 @@ import {
 } from "../matches";
 import { type ApiGroup, openLigaDbDataSource } from "../openligadb";
 import type { FootballDataSource, HomeRequestOptions } from "./data-source";
-import { normalizeLeagueEntries } from "./domain/league-groups";
 import { loadBracketMatches } from "./domain/load-bracket";
 import { loadPrimaryHomeData } from "./domain/load-primary-data";
 import { loadMatchdayResults } from "./domain/matchday-loader";
 import { resolveRoundSnapshots } from "./domain/resolve-rounds";
 import { getStatusCode } from "./domain/shared";
+import {
+  getHomeLeagueMetadata,
+  type HomeLeagueMetadata,
+} from "./get-home-league-metadata";
 import type { HomeErrorKey, HomeRoundSnapshot, HomeSnapshot } from "./types";
 
 const getOrderedGroups = (groups: ApiGroup[]) => {
@@ -345,6 +346,7 @@ export const getHomeSnapshot = async (
     dataSource?: FootballDataSource;
     requestOptions?: HomeRequestOptions;
     fallbackYear?: number;
+    leagueMetadata?: HomeLeagueMetadata;
   },
 ): Promise<HomeSnapshot> => {
   if (params.league && !isLeagueKey(params.league)) {
@@ -354,17 +356,15 @@ export const getHomeSnapshot = async (
   const dataSource = options?.dataSource ?? openLigaDbDataSource;
   const requestOptions = options?.requestOptions;
   const referenceSeason = options?.fallbackYear ?? getCurrentSeasonYear();
-  const normalizedGroups = await normalizeLeagueEntries(
-    dataSource,
-    requestOptions,
-  );
-  const availableGroupKeys = getAvailableGroupKeys(normalizedGroups);
+  const { groupedLeagues, availableGroupKeys, leagueOptions } =
+    options?.leagueMetadata ??
+    (await getHomeLeagueMetadata({ dataSource, requestOptions }));
   const resolvedLeague = resolveLeagueSelection(
     params.league,
     availableGroupKeys,
   );
 
-  const leagueEntries = normalizedGroups.get(resolvedLeague) ?? [];
+  const leagueEntries = groupedLeagues.get(resolvedLeague) ?? [];
   const resolvedSeason = resolveSeasonSelection({
     requestedSeason: params.season,
     entries: leagueEntries,
@@ -448,11 +448,6 @@ export const getHomeSnapshot = async (
       });
 
   dataErrors.push(...roundErrorKeys, ...bracketErrorKeys);
-
-  const leagueOptions = buildLeagueOptions({
-    availableGroupKeys,
-    groupedLeagues: normalizedGroups,
-  });
 
   return {
     resolvedLeague,

@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  createSearchIndex,
   normalizeSearchText,
+  rankSearchIndex,
   rankSearchResults,
   type SearchResultItem,
   scoreSearchItem,
@@ -37,6 +39,68 @@ const items: SearchResultItem[] = [
     aliases: ["Spieltag elf"],
   },
 ];
+
+test("prepared search preserves weighted ranking, fuzzy matching, and stable ties across queries", () => {
+  const candidates: SearchResultItem[] = [
+    { id: "exact", kind: "team", label: "Dortmund", href: "/exact" },
+    {
+      id: "alias",
+      kind: "team",
+      label: "BVB",
+      aliases: ["Dortmund"],
+      href: "/alias",
+    },
+    {
+      id: "keyword",
+      kind: "match",
+      label: "Spiel",
+      keywords: ["Dortmund"],
+      href: "/keyword",
+    },
+    {
+      id: "description",
+      kind: "match",
+      label: "Partie",
+      description: "Dortmund",
+      href: "/description",
+    },
+    { id: "tie", kind: "team", label: "Dortmund", href: "/tie" },
+  ];
+  const index = createSearchIndex(candidates);
+  assert.deepEqual(
+    rankSearchIndex(index, "Dortmund").map(({ item, score }) => [
+      item.id,
+      score,
+    ]),
+    [
+      ["exact", 1200],
+      ["tie", 1200],
+      ["alias", 1080],
+      ["keyword", 936],
+      ["description", 744],
+    ],
+  );
+  assert.deepEqual(
+    rankSearchIndex(index, "dortmud", { kinds: ["team"], limit: 2 }).map(
+      ({ item }) => item.id,
+    ),
+    ["exact", "tie"],
+  );
+  assert.deepEqual(rankSearchIndex(index, "!!!"), []);
+  assert.deepEqual(rankSearchIndex(index, "Dortmund", { limit: 0 }), []);
+  assert.deepEqual(rankSearchIndex(index, "handball"), []);
+});
+
+test("rebuilding the search index picks up changed items without retaining old candidates", () => {
+  const original = createSearchIndex(items);
+  const updated = createSearchIndex([
+    { id: "7", kind: "team", label: "Köln", href: "/teams/7" },
+  ]);
+  assert.equal(rankSearchIndex(original, "Dortmund")[0]?.item.id, "7");
+  assert.deepEqual(rankSearchIndex(updated, "Dortmund"), []);
+  assert.equal(rankSearchIndex(updated, "Koln")[0]?.item.label, "Köln");
+  assert.equal(rankSearchIndex(original, "BVB")[0]?.item.id, "7");
+});
 
 test("normalizeSearchText folds European names and punctuation", () => {
   assert.equal(

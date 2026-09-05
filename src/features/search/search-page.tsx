@@ -12,6 +12,7 @@ import { SearchExperience } from "@/features/search";
 
 export function buildSearchItems(data: WebHomeViewModel): SearchResultItem[] {
   const competitions = getVisibleCompetitions(data);
+  const matches = getAllCompetitionMatches(competitions);
   const competitionItems: SearchResultItem[] = competitions.map(
     (competition) => {
       const meta = getCompetitionMeta(competition.resolvedLeague);
@@ -26,7 +27,7 @@ export function buildSearchItems(data: WebHomeViewModel): SearchResultItem[] {
       };
     },
   );
-  const teamItems: SearchResultItem[] = collectTeams(competitions).map(
+  const teamItems: SearchResultItem[] = collectTeams(competitions, matches).map(
     (team) => ({
       id: team.id,
       kind: "team",
@@ -35,7 +36,7 @@ export function buildSearchItems(data: WebHomeViewModel): SearchResultItem[] {
       description: team.competitions.map((entry) => entry.label).join(" · "),
     }),
   );
-  const matchItems: SearchResultItem[] = getAllCompetitionMatches(competitions)
+  const matchItems: SearchResultItem[] = matches
     .filter((item) => item.match.matchID)
     .map((item) => ({
       id: String(item.match.matchID),

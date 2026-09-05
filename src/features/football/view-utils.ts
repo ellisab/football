@@ -4,6 +4,7 @@ import {
   getBerlinDateKey,
   getMatchKickoffTimestamp,
   getMatchPresentationScore,
+  getMatchPresentationStatus,
   isMatchOnBerlinDate,
 } from "@footballleagues/core/matches";
 import type {
@@ -105,7 +106,7 @@ export const getMatchStatus = (
   match: ApiMatch,
   now: Date = new Date(),
 ): MatchStatus => {
-  const status = createMatchPresentation(match, { now }).status;
+  const status = getMatchPresentationStatus(match, now);
 
   if (status === "finished") return "finished";
   if (status === "live-estimate") return "live";
@@ -160,16 +161,19 @@ export const getTodayCompetitionMatches = ({
   const dateKey = getBerlinDateKey(date) ?? "";
   if (!dateKey) return [];
 
-  return collectCompetitionMatches(competitions, (match) =>
-    isMatchOnBerlinDate(match, dateKey),
+  return sortCompetitionMatches(
+    collectUniqueCompetitionMatches(competitions, (match) =>
+      isMatchOnBerlinDate(match, dateKey),
+    ),
   );
 };
 
 export const getAllCompetitionMatches = (
   competitions: WebCompetitionViewModel[],
-): CompetitionMatch[] => collectCompetitionMatches(competitions);
+): CompetitionMatch[] =>
+  sortCompetitionMatches(collectUniqueCompetitionMatches(competitions));
 
-const collectCompetitionMatches = (
+const collectUniqueCompetitionMatches = (
   competitions: WebCompetitionViewModel[],
   includeMatch?: (match: ApiMatch) => boolean,
 ): CompetitionMatch[] => {
@@ -188,26 +192,34 @@ const collectCompetitionMatches = (
     }
   }
 
-  return sortCompetitionMatches(matches);
+  return matches;
 };
 
 const sortCompetitionMatches = (matches: CompetitionMatch[]) => {
-  return [...matches].sort((a, b) => {
-    const statusRank = (item: CompetitionMatch) => {
-      const status = getMatchStatus(item.match);
-      if (status === "live") return 0;
-      if (status === "upcoming") return 1;
-      if (status === "unknown") return 2;
-      return 3;
-    };
-    const byStatus = statusRank(a) - statusRank(b);
-    if (byStatus !== 0) return byStatus;
+  if (matches.length < 2) return matches;
 
-    const byTime = getMatchTime(a.match) - getMatchTime(b.match);
-    if (byTime !== 0) return byTime;
-
-    return a.competition.leagueLabel.localeCompare(b.competition.leagueLabel);
-  });
+  const now = new Date();
+  const ranks: Record<MatchStatus, number> = {
+    live: 0,
+    upcoming: 1,
+    unknown: 2,
+    finished: 3,
+  };
+  return matches
+    .map((item) => ({
+      item,
+      rank: ranks[getMatchStatus(item.match, now)],
+      kickoff: getMatchTime(item.match),
+    }))
+    .sort(
+      (a, b) =>
+        a.rank - b.rank ||
+        a.kickoff - b.kickoff ||
+        a.item.competition.leagueLabel.localeCompare(
+          b.item.competition.leagueLabel,
+        ),
+    )
+    .map(({ item }) => item);
 };
 
 export const getStatusCounts = (matches: CompetitionMatch[]) => {
@@ -256,50 +268,68 @@ export const findMatchById = (
   competitions: WebCompetitionViewModel[],
   matchId: string,
 ) => {
-  return getAllCompetitionMatches(competitions).find(
-    (item) => String(item.match.matchID) === matchId,
-  );
+  return sortCompetitionMatches(
+    collectUniqueCompetitionMatches(competitions).filter(
+      ({ match }) => String(match.matchID) === matchId,
+    ),
+  )[0];
 };
 
 export const collectTeams = (
   competitions: WebCompetitionViewModel[],
+  allMatches: readonly CompetitionMatch[] = getAllCompetitionMatches(
+    competitions,
+  ),
 ): TeamSummary[] => {
-  const teams = new Map<string, TeamSummary>();
-  const allMatches = getAllCompetitionMatches(competitions);
+  const teams = new Map<
+    string,
+    {
+      summary: TeamSummary;
+      leagues: Set<LeagueKey>;
+      recentIds: Set<string>;
+      upcomingIds: Set<string>;
+      nextTime: number;
+    }
+  >();
+  const matchTimes = new Map<CompetitionMatch, number>();
+  const now = new Date();
 
   const upsertTeam = ({
     competition,
     iconUrl,
     id,
-    match,
     name,
     tablePosition,
   }: {
     competition: WebCompetitionViewModel;
     iconUrl?: string;
     id: string;
-    match?: CompetitionMatch;
     name: string;
     tablePosition?: TeamSummary["tablePosition"];
   }) => {
-    const existing = teams.get(id);
-    const summary =
-      existing ??
-      ({
-        competitions: [],
-        iconUrl,
-        id,
-        name,
-        recentMatches: [],
-        upcomingMatches: [],
-      } satisfies TeamSummary);
+    let entry = teams.get(id);
+    if (!entry) {
+      entry = {
+        summary: {
+          competitions: [],
+          iconUrl,
+          id,
+          name,
+          recentMatches: [],
+          upcomingMatches: [],
+        },
+        leagues: new Set(),
+        recentIds: new Set(),
+        upcomingIds: new Set(),
+        nextTime: Number.POSITIVE_INFINITY,
+      };
+      teams.set(id, entry);
+    }
+    const { summary, leagues } = entry;
 
     summary.iconUrl ??= iconUrl;
-    if (
-      !summary.competitions.some(
-        (entry) => entry.league === competition.resolvedLeague,
-      )
-    ) {
+    if (!leagues.has(competition.resolvedLeague)) {
+      leagues.add(competition.resolvedLeague);
       summary.competitions.push({
         label: competition.leagueLabel,
         league: competition.resolvedLeague,
@@ -307,40 +337,8 @@ export const collectTeams = (
       });
     }
 
-    if (tablePosition && !summary.tablePosition) {
-      summary.tablePosition = tablePosition;
-    }
-
-    if (match) {
-      const status = getMatchStatus(match.match);
-      if (status === "finished") {
-        if (
-          !summary.recentMatches.some(
-            (entry) =>
-              getMatchIdentity(entry.match) === getMatchIdentity(match.match),
-          )
-        ) {
-          summary.recentMatches.push(match);
-        }
-      } else if (status === "live" || status === "upcoming") {
-        if (
-          !summary.upcomingMatches.some(
-            (entry) =>
-              getMatchIdentity(entry.match) === getMatchIdentity(match.match),
-          )
-        ) {
-          summary.upcomingMatches.push(match);
-        }
-        const nextTime = summary.nextMatch
-          ? getMatchTime(summary.nextMatch.match)
-          : Number.POSITIVE_INFINITY;
-        if (getMatchTime(match.match) <= nextTime) {
-          summary.nextMatch = match;
-        }
-      }
-    }
-
-    teams.set(id, summary);
+    if (tablePosition) summary.tablePosition ??= tablePosition;
+    return entry;
   };
 
   for (const competition of competitions) {
@@ -364,32 +362,49 @@ export const collectTeams = (
   }
 
   for (const item of allMatches) {
+    const status = getMatchStatus(item.match, now);
+    const identity = getMatchIdentity(item.match);
+    const kickoff = getMatchTime(item.match);
+    matchTimes.set(item, kickoff);
     for (const team of [item.match.team1, item.match.team2]) {
       if (!team) continue;
-      upsertTeam({
+      const entry = upsertTeam({
         competition: item.competition,
         iconUrl: team.teamIconUrl,
         id: getTeamId(team),
-        match: item,
         name: getTeamLabel(team, "Team"),
       });
+      const { summary, recentIds, upcomingIds } = entry;
+      if (status === "finished" && !recentIds.has(identity)) {
+        recentIds.add(identity);
+        summary.recentMatches.push(item);
+      } else if (status === "live" || status === "upcoming") {
+        if (!upcomingIds.has(identity)) {
+          upcomingIds.add(identity);
+          summary.upcomingMatches.push(item);
+        }
+        if (kickoff <= entry.nextTime) {
+          entry.nextTime = kickoff;
+          summary.nextMatch = item;
+        }
+      }
     }
   }
 
-  for (const team of teams.values()) {
-    team.recentMatches.sort(
-      (a, b) => getMatchTime(b.match) - getMatchTime(a.match),
-    );
+  for (const { summary: team } of teams.values()) {
+    team.recentMatches.sort((a, b) => matchTimes.get(b)! - matchTimes.get(a)!);
     team.upcomingMatches.sort(
-      (a, b) => getMatchTime(a.match) - getMatchTime(b.match),
+      (a, b) => matchTimes.get(a)! - matchTimes.get(b)!,
     );
   }
 
-  return [...teams.values()].sort((a, b) => {
-    const aPosition = a.tablePosition?.position ?? Number.MAX_SAFE_INTEGER;
-    const bPosition = b.tablePosition?.position ?? Number.MAX_SAFE_INTEGER;
-    if (aPosition !== bPosition) return aPosition - bPosition;
+  return [...teams.values()]
+    .map(({ summary }) => summary)
+    .sort((a, b) => {
+      const aPosition = a.tablePosition?.position ?? Number.MAX_SAFE_INTEGER;
+      const bPosition = b.tablePosition?.position ?? Number.MAX_SAFE_INTEGER;
+      if (aPosition !== bPosition) return aPosition - bPosition;
 
-    return a.name.localeCompare(b.name);
-  });
+      return a.name.localeCompare(b.name);
+    });
 };

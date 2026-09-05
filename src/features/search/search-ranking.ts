@@ -20,6 +20,18 @@ export type SearchRankingOptions = {
   limit?: number;
 };
 
+type SearchCandidate = {
+  value: string;
+  tokens: string[];
+  weight: number;
+};
+
+export type SearchIndex = readonly {
+  item: SearchResultItem;
+  index: number;
+  candidates: SearchCandidate[];
+}[];
+
 const CHARACTER_FOLDS: Record<string, string> = {
   æ: "ae",
   đ: "d",
@@ -82,7 +94,7 @@ const getEditDistance = (left: string, right: string, maximum: number) => {
 };
 
 const scoreNormalizedCandidate = (
-  candidate: string,
+  { value: candidate, tokens: candidateTokens }: SearchCandidate,
   normalizedQuery: string,
   queryTokens: string[],
 ): number => {
@@ -95,7 +107,6 @@ const scoreNormalizedCandidate = (
   const substringIndex = candidate.indexOf(normalizedQuery);
   if (substringIndex >= 0) return 820 - Math.min(substringIndex * 3, 180);
 
-  const candidateTokens = candidate.split(" ");
   const allExact = queryTokens.every((queryToken) =>
     candidateTokens.includes(queryToken),
   );
@@ -124,57 +135,76 @@ const scoreNormalizedCandidate = (
   return Math.max(220, 520 - fuzzyDistance * 70);
 };
 
+const prepareCandidates = (item: SearchResultItem): SearchCandidate[] =>
+  [
+    { value: item.label, weight: 1 },
+    ...(item.aliases ?? []).map((value) => ({ value, weight: 0.9 })),
+    ...(item.keywords ?? []).map((value) => ({ value, weight: 0.78 })),
+    ...(item.description ? [{ value: item.description, weight: 0.62 }] : []),
+  ].map(({ value, weight }) => {
+    const normalized = normalizeSearchText(value);
+    return { value: normalized, tokens: normalized.split(" "), weight };
+  });
+
+export const createSearchIndex = (
+  items: readonly SearchResultItem[],
+): SearchIndex =>
+  items.map((item, index) => ({
+    item,
+    index,
+    candidates: prepareCandidates(item),
+  }));
+
+const scoreCandidates = (
+  candidates: SearchCandidate[],
+  normalizedQuery: string,
+  queryTokens: string[],
+): number =>
+  Math.round(
+    candidates.reduce(
+      (best, candidate) =>
+        Math.max(
+          best,
+          scoreNormalizedCandidate(candidate, normalizedQuery, queryTokens) *
+            candidate.weight,
+        ),
+      0,
+    ),
+  );
+
 export const scoreSearchItem = (
   item: SearchResultItem,
   query: string,
 ): number => {
   const normalizedQuery = normalizeSearchText(query);
-  if (!normalizedQuery) return 0;
-
-  const queryTokens = normalizedQuery.split(" ");
-  const candidates = [
-    { value: item.label, weight: 1 },
-    ...(item.aliases ?? []).map((value) => ({ value, weight: 0.9 })),
-    ...(item.keywords ?? []).map((value) => ({ value, weight: 0.78 })),
-    ...(item.description ? [{ value: item.description, weight: 0.62 }] : []),
-  ];
-
-  return Math.round(
-    candidates.reduce(
-      (best, candidate) =>
-        Math.max(
-          best,
-          scoreNormalizedCandidate(
-            normalizeSearchText(candidate.value),
-            normalizedQuery,
-            queryTokens,
-          ) * candidate.weight,
-        ),
-      0,
-    ),
-  );
+  return normalizedQuery
+    ? scoreCandidates(
+        prepareCandidates(item),
+        normalizedQuery,
+        normalizedQuery.split(" "),
+      )
+    : 0;
 };
 
-export const rankSearchResults = (
-  items: readonly SearchResultItem[],
+export const rankSearchIndex = (
+  searchIndex: SearchIndex,
   query: string,
   { kinds, limit = 12 }: SearchRankingOptions = {},
 ): RankedSearchResult[] => {
-  if (!normalizeSearchText(query) || limit <= 0) return [];
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery || limit <= 0) return [];
 
+  const queryTokens = normalizedQuery.split(" ");
   const allowedKinds = kinds ? new Set(kinds) : undefined;
 
-  return items
-    .map((item, index) => ({
+  return searchIndex
+    .filter(({ item }) => !allowedKinds || allowedKinds.has(item.kind))
+    .map(({ item, index, candidates }) => ({
       item,
       index,
-      score: scoreSearchItem(item, query),
+      score: scoreCandidates(candidates, normalizedQuery, queryTokens),
     }))
-    .filter(
-      (result) =>
-        result.score > 0 &&
-        (!allowedKinds || allowedKinds.has(result.item.kind)),
-    )
+    .filter((result) => result.score > 0)
     .sort(
       (left, right) =>
         right.score - left.score ||
@@ -183,4 +213,14 @@ export const rankSearchResults = (
     )
     .slice(0, limit)
     .map(({ item, score }) => ({ item, score }));
+};
+
+export const rankSearchResults = (
+  items: readonly SearchResultItem[],
+  query: string,
+  options: SearchRankingOptions = {},
+): RankedSearchResult[] => {
+  if (!query.trim() || (options.limit !== undefined && options.limit <= 0))
+    return [];
+  return rankSearchIndex(createSearchIndex(items), query, options);
 };

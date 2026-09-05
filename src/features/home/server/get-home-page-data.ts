@@ -1,4 +1,10 @@
-import { createHomeState, getHomeSnapshot } from "@footballleagues/core/home";
+import {
+  createHomeState,
+  type FootballDataSource,
+  getHomeLeagueMetadata,
+  getHomeSnapshot,
+  type HomeLeagueMetadata,
+} from "@footballleagues/core/home";
 import {
   DEFAULT_LEAGUE,
   getCurrentSeasonYear,
@@ -7,6 +13,7 @@ import {
   isLeagueKey,
   LEAGUE_GROUPS,
   type LeagueKey,
+  resolveLeagueSelection,
 } from "@footballleagues/core/leagues";
 import type {
   WebCompetitionViewModel,
@@ -92,10 +99,11 @@ const createFallbackCompetitionData = (
 
 const getCompetitionData = async (
   params: CompetitionParams,
+  options?: Parameters<typeof getHomeSnapshot>[1],
 ): Promise<WebCompetitionViewModel> => {
   try {
     const snapshot = requireCacheableHomeSnapshot(
-      await getHomeSnapshot(params),
+      await getHomeSnapshot(params, options),
     );
     const state = createHomeState(snapshot);
 
@@ -130,19 +138,76 @@ const createOverviewData = (
   ),
 });
 
-export const getHomePageData = async (params: {
-  group?: string;
-  league?: string;
-  season?: string;
-}) => {
-  if (params.league) return getCompetitionData(params);
+export const getHomePageData = async (
+  params: {
+    group?: string;
+    league?: string;
+    season?: string;
+  },
+  { dataSource }: { dataSource?: FootballDataSource } = {},
+): Promise<WebHomeViewModel> => {
+  if (params.league) return getCompetitionData(params, { dataSource });
 
-  const seed = await getCompetitionData({});
+  let leagueMetadata: HomeLeagueMetadata;
+  try {
+    leagueMetadata = await getHomeLeagueMetadata({ dataSource });
+  } catch (error) {
+    console.warn("[OpenLigaDB] overview league metadata failed", {
+      errorName: error instanceof Error ? error.name : "UnknownError",
+      event: "home_league_metadata_failed",
+    });
+    const seed = createFallbackCompetitionData({});
+    return createOverviewData(
+      seed,
+      await Promise.all(
+        seed.leagueOptions.map((option) =>
+          option.shortcut === seed.resolvedLeague
+            ? seed
+            : getCompetitionData(
+                {
+                  league: option.shortcut,
+                  season: String(option.seasons[0] ?? seed.resolvedSeason),
+                },
+                { dataSource },
+              ),
+        ),
+      ),
+    );
+  }
+
+  const options = { dataSource, leagueMetadata };
+  const seedLeague = resolveLeagueSelection(
+    undefined,
+    leagueMetadata.availableGroupKeys,
+  );
+  const seedPromise = getCompetitionData({}, options);
+  const pending = new Map<string, Promise<WebCompetitionViewModel>>();
+  const loadCompetition = (params: CompetitionParams) => {
+    const key = `${params.league}:${params.season}`;
+    let promise = pending.get(key);
+    if (!promise) {
+      promise = getCompetitionData(params, options);
+      pending.set(key, promise);
+    }
+    return promise;
+  };
+
+  // Start the remaining leagues before the seed's fixtures and table finish.
+  for (const option of leagueMetadata.leagueOptions) {
+    if (option.shortcut !== seedLeague) {
+      void loadCompetition({
+        league: option.shortcut,
+        season: String(option.seasons[0] ?? getCurrentSeasonYear()),
+      });
+    }
+  }
+
+  const seed = await seedPromise;
   const competitions = await Promise.all(
     seed.leagueOptions.map((option) =>
       option.shortcut === seed.resolvedLeague
         ? seed
-        : getCompetitionData({
+        : loadCompetition({
             league: option.shortcut,
             season: String(option.seasons[0] ?? seed.resolvedSeason),
           }),

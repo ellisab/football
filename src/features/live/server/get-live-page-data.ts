@@ -1,3 +1,4 @@
+import { mapSettledWithConcurrency } from "@footballleagues/core/async";
 import {
   getMatchdaySnapshot,
   type MatchdaySnapshot,
@@ -48,18 +49,6 @@ export type LiveDiscoveryDependencies = Pick<
   "loadSchedule" | "now"
 >;
 
-type MatchdayRefreshOutcome =
-  | {
-      payload: MatchdaySnapshot;
-      scope: LiveMatchScope;
-      status: "fulfilled";
-    }
-  | {
-      reason: unknown;
-      scope: LiveMatchScope;
-      status: "rejected";
-    };
-
 const loadCurrentMatchday: LoadMatchday = (params) =>
   getMatchdaySnapshot(params, {
     requestOptions: {
@@ -94,56 +83,20 @@ const toLiveMatchItem = ({
   };
 };
 
-const refreshMatchdays = async (
+const refreshMatchdays = (
   scopes: readonly LiveMatchScope[],
   loadMatchday: LoadMatchday,
-): Promise<MatchdayRefreshOutcome[]> => {
-  const outcomes: Array<MatchdayRefreshOutcome | undefined> = new Array(
-    scopes.length,
+) =>
+  mapSettledWithConcurrency(
+    scopes,
+    (scope) =>
+      loadMatchday({
+        group: scope.group,
+        league: scope.league,
+        season: String(scope.season),
+      }),
+    { concurrency: MATCHDAY_REFRESH_CONCURRENCY },
   );
-  let nextIndex = 0;
-
-  const worker = async () => {
-    while (true) {
-      const index = nextIndex;
-      nextIndex += 1;
-      if (index >= scopes.length) return;
-
-      const scope = scopes[index]!;
-
-      try {
-        outcomes[index] = {
-          payload: await loadMatchday({
-            group: scope.group,
-            league: scope.league,
-            season: String(scope.season),
-          }),
-          scope,
-          status: "fulfilled",
-        };
-      } catch (reason) {
-        outcomes[index] = {
-          reason,
-          scope,
-          status: "rejected",
-        };
-      }
-    }
-  };
-
-  await Promise.all(
-    Array.from(
-      {
-        length: Math.min(MATCHDAY_REFRESH_CONCURRENCY, scopes.length),
-      },
-      worker,
-    ),
-  );
-
-  return outcomes.filter(
-    (outcome): outcome is MatchdayRefreshOutcome => outcome !== undefined,
-  );
-};
 
 const isTotalDiscoveryFailure = (schedule: LiveScheduleResult) =>
   schedule.matches.length === 0 &&
@@ -208,8 +161,8 @@ export const getLivePageData = async ({
       continue;
     }
 
-    matches = mergeMatchdayPayload(matches, outcome.payload);
-    checkedAt = Math.max(checkedAt, outcome.payload.checkedAt);
+    matches = mergeMatchdayPayload(matches, outcome.value);
+    checkedAt = Math.max(checkedAt, outcome.value.checkedAt);
   }
 
   if (refreshFailed) visibleErrors.push(PARTIAL_SCORE_ERROR);
