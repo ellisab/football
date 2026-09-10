@@ -1,7 +1,4 @@
-import {
-  DataNotice,
-  PageIntro,
-} from "@/features/football/components/product-ui";
+import { PageIntro } from "@/features/football/components/product-ui";
 import type { LiveMatchItem } from "./live-polling";
 import { LiveRefreshController } from "./live-refresh-controller";
 
@@ -17,19 +14,8 @@ export function LiveView({
           eyebrow="Live-Zentrale"
           title="Jetzt im Spiel"
           description="Spielstände werden pro aktivem Spieltag gemeinsam aktualisiert. Live-Hinweise werden bewusst als Schätzung gekennzeichnet."
-          actions={
-            <span className="live-indicator">
-              <span aria-hidden="true" />
-              Datenstatus aktiv
-            </span>
-          }
         />
 
-        <DataNotice>
-          OpenLigaDB liefert weder einen bestätigten Live-Schalter noch die
-          aktuelle Spielminute. „Läuft möglicherweise“ wird nur aus Anstoßzeit
-          und fehlendem Endstatus abgeleitet.
-        </DataNotice>
         <LiveRefreshController initialMatches={initialMatches} />
       </div>
     </div>
