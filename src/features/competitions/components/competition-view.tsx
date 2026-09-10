@@ -10,7 +10,6 @@ import { MatchList } from "@/features/football/components/match-summary";
 import {
   EmptyState,
   PageIntro,
-  PartialDataNotice,
   SectionHeading,
 } from "@/features/football/components/product-ui";
 import {
@@ -175,8 +174,6 @@ export function CompetitionView({
             </div>
           </section>
         ) : null}
-
-        <PartialDataNotice errors={competition.visibleErrors} />
 
         {view === "matches" ? (
           <section className="content-section">

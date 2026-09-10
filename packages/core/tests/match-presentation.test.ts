@@ -2,10 +2,57 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   createMatchPresentation,
+  getMatchPresentationScore,
   getMatchPresentationStatus,
   parseBerlinDateQuery,
   shiftBerlinDateQuery,
 } from "../src/index";
+
+test("live scores use goal events instead of an empty final-result placeholder", () => {
+  const match = {
+    matchIsFinished: false,
+    matchResults: [
+      { resultOrderID: 1, pointsTeam1: 0, pointsTeam2: 1 },
+      { resultOrderID: 2, pointsTeam1: 0, pointsTeam2: 0 },
+    ],
+    goals: [
+      { matchMinute: 48, scoreTeam1: 1, scoreTeam2: 1 },
+      { matchMinute: 39, scoreTeam1: 0, scoreTeam2: 1 },
+    ],
+  };
+
+  assert.equal(getMatchPresentationScore(match).label, "1:1");
+  assert.equal(
+    getMatchPresentationScore({ ...match, goals: [match.goals[1]] }).label,
+    "0:1",
+  );
+  assert.equal(getMatchPresentationScore({ ...match, goals: [] }).label, "0:1");
+  assert.equal(
+    getMatchPresentationScore({ ...match, matchIsFinished: true }).label,
+    "0:0",
+  );
+});
+
+test("live scores allow result updates ahead of goals and ignore invalid events", () => {
+  assert.equal(
+    getMatchPresentationScore({
+      matchIsFinished: false,
+      matchResults: [{ resultOrderID: 2, pointsTeam1: 2, pointsTeam2: 1 }],
+      goals: [
+        { scoreTeam1: 1, scoreTeam2: 1 },
+        { scoreTeam1: 99 },
+        { scoreTeam1: -1, scoreTeam2: 99 },
+        { scoreTeam1: 1.5, scoreTeam2: 99 },
+      ],
+    }).label,
+    "2:1",
+  );
+  assert.equal(
+    getMatchPresentationScore({ goals: [{ scoreTeam1: 0, scoreTeam2: 1 }] })
+      .label,
+    "0:1",
+  );
+});
 
 test("match presentation distinguishes scheduled, estimated live, finished, and unknown states", () => {
   const now = new Date("2026-07-11T18:00:00Z");

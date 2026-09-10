@@ -95,17 +95,3 @@ export function EmptyState({
     </section>
   );
 }
-
-export function PartialDataNotice({ errors }: { errors: string[] }) {
-  if (errors.length === 0) return null;
-
-  return (
-    <div className="data-notice" role="status">
-      <CircleAlert aria-hidden="true" className="h-4 w-4 shrink-0" />
-      <p>
-        Einige Daten konnten nicht aktualisiert werden: {errors.join(", ")}.
-        Bereits verfügbare Informationen bleiben sichtbar.
-      </p>
-    </div>
-  );
-}

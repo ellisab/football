@@ -1,17 +1,14 @@
 import {
   DataNotice,
   PageIntro,
-  PartialDataNotice,
 } from "@/features/football/components/product-ui";
 import type { LiveMatchItem } from "./live-polling";
 import { LiveRefreshController } from "./live-refresh-controller";
 
 export function LiveView({
   initialMatches,
-  visibleErrors,
 }: {
   initialMatches: LiveMatchItem[];
-  visibleErrors: string[];
 }) {
   return (
     <div className="page-shell match-feed-page live-page">
@@ -33,7 +30,6 @@ export function LiveView({
           aktuelle Spielminute. „Läuft möglicherweise“ wird nur aus Anstoßzeit
           und fehlendem Endstatus abgeleitet.
         </DataNotice>
-        <PartialDataNotice errors={visibleErrors} />
         <LiveRefreshController initialMatches={initialMatches} />
       </div>
     </div>

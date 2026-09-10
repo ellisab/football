@@ -13,10 +13,5 @@ export default async function LivePage() {
   await connection();
   const data = await getLivePageData();
 
-  return (
-    <LiveView
-      initialMatches={data.matches}
-      visibleErrors={data.visibleErrors}
-    />
-  );
+  return <LiveView initialMatches={data.matches} />;
 }

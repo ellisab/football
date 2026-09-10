@@ -80,8 +80,35 @@ export const getMatchPresentationScore = (
   match: ApiMatch,
 ): MatchPresentationScore => {
   const result = getFinalResult(match);
-  const team1 = normalizeScorePoint(result?.pointsTeam1);
-  const team2 = normalizeScorePoint(result?.pointsTeam2);
+  let team1 = normalizeScorePoint(result?.pointsTeam1);
+  let team2 = normalizeScorePoint(result?.pointsTeam2);
+
+  if (match.matchIsFinished !== true) {
+    // OpenLigaDB can leave the final result at 0:0 during play. Results and
+    // goal events update independently, so use the furthest cumulative score
+    // in this response. Never carry a score over from an older response.
+    const candidates = [
+      ...(match.matchResults ?? []).map((entry) => [
+        entry.pointsTeam1,
+        entry.pointsTeam2,
+      ]),
+      ...(match.goals ?? []).map((goal) => [goal.scoreTeam1, goal.scoreTeam2]),
+    ];
+
+    for (const [home, away] of candidates) {
+      const candidate1 = normalizeScorePoint(home);
+      const candidate2 = normalizeScorePoint(away);
+      if (candidate1 === null || candidate2 === null) continue;
+      if (
+        team1 === null ||
+        team2 === null ||
+        candidate1 + candidate2 > team1 + team2
+      ) {
+        team1 = candidate1;
+        team2 = candidate2;
+      }
+    }
+  }
 
   return {
     team1,

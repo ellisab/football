@@ -5,10 +5,8 @@ import { getCompetitionMeta } from "@/features/football/competition-meta";
 import { DateNavigator } from "@/features/football/components/date-navigator";
 import { MatchList } from "@/features/football/components/match-summary";
 import {
-  DataNotice,
   EmptyState,
   PageIntro,
-  PartialDataNotice,
   SectionHeading,
 } from "@/features/football/components/product-ui";
 import {
@@ -116,13 +114,6 @@ export function TodayView({
         </section>
 
         <FavoriteSpotlight items={favoriteItems} />
-
-        <DataNotice>
-          Die Datumsliste zeigt den aktuell geladenen Ausschnitt der
-          unterstützten Wettbewerbe. OpenLigaDB bietet keine vollständige
-          wettbewerbsübergreifende Datumssuche.
-        </DataNotice>
-        <PartialDataNotice errors={data.visibleErrors} />
 
         <p className="sr-only" aria-live="polite">
           {matches.length} Spiele geladen, davon {counts.live} möglicherweise
