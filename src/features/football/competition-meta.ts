@@ -53,6 +53,16 @@ const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     shortLabel: "UCL",
     slug: "champions-league",
   },
+  uel: {
+    category: "Männer",
+    description: "Spieltage, K.-o.-Runden und Tabelle der Europa League.",
+    href: "/competitions/europa-league",
+    icon: Trophy,
+    label: "Europa League",
+    region: "Europa",
+    shortLabel: "UEL",
+    slug: "europa-league",
+  },
 };
 
 export const getCompetitionMeta = (league: LeagueKey): CompetitionMeta => {

@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/competitions/bundesliga-2", priority: 0.88 },
     { path: "/competitions/dfb-pokal", priority: 0.85 },
     { path: "/competitions/champions-league", priority: 0.88 },
+    { path: "/competitions/europa-league", priority: 0.88 },
     { path: "/tables", priority: 0.82 },
     { path: "/teams", priority: 0.8 },
     { path: "/search", priority: 0.72 },
