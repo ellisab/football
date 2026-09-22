@@ -1,4 +1,4 @@
-export type LeagueKey = "bl1" | "bl2" | "dfb" | "cl" | "uel";
+export type LeagueKey = "bl1" | "bl2" | "dfb" | "cl" | "uel" | "nla";
 
 export type LeagueGroupConfig = {
   key: LeagueKey;

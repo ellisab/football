@@ -113,7 +113,14 @@ test("getLiveSchedule resolves current-season aliases and applies cache policies
   );
   assert.deepEqual(
     scheduleCalls.map(({ shortcut, season }) => `${shortcut}:${season}`).sort(),
-    ["bl1:2026", "bl2:2026", "dfb:2026", "ucl:2026", "uel2026:2026"],
+    [
+      "bl1:2026",
+      "bl2:2026",
+      "dfb:2026",
+      "nla:2026",
+      "ucl:2026",
+      "uel2026:2026",
+    ],
   );
   assert.equal(
     scheduleCalls.every(
@@ -292,5 +299,12 @@ test("getLiveSchedule falls back to canonical shortcuts when metadata is unavail
   const result = await getLiveSchedule({ dataSource, now: NOW });
 
   assert.deepEqual(result.failedLeagues, []);
-  assert.deepEqual(shortcuts.sort(), ["bl1", "bl2", "dfb", "ucl", "uel2026"]);
+  assert.deepEqual(shortcuts.sort(), [
+    "bl1",
+    "bl2",
+    "dfb",
+    "nla",
+    "ucl",
+    "uel2026",
+  ]);
 });

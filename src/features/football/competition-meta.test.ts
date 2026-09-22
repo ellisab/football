@@ -14,6 +14,7 @@ test("competition catalog contains exactly the supported routes", () => {
       { key: "dfb", href: "/competitions/dfb-pokal" },
       { key: "cl", href: "/competitions/champions-league" },
       { key: "uel", href: "/competitions/europa-league" },
+      { key: "nla", href: "/competitions/nations-league" },
     ],
   );
   assert.equal(getLeagueKeyFromSlug("unsupported"), undefined);

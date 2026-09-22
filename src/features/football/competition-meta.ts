@@ -63,6 +63,16 @@ const COMPETITION_META: Record<LeagueKey, CompetitionMeta> = {
     shortLabel: "UEL",
     slug: "europa-league",
   },
+  nla: {
+    category: "Männer",
+    description: "Spieltage, Ergebnisse und Tabelle der Nations League A.",
+    href: "/competitions/nations-league",
+    icon: Flag,
+    label: "Nations League A",
+    region: "Europa",
+    shortLabel: "NLA",
+    slug: "nations-league",
+  },
 };
 
 export const getCompetitionMeta = (league: LeagueKey): CompetitionMeta => {

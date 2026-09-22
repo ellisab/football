@@ -29,6 +29,11 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
     // The 2025 `uel` feed contains only knockout games, not a league table.
     shortcutMatch: ["uel2026"],
   },
+  {
+    key: "nla",
+    label: "Nations League A",
+    shortcutMatch: ["nla"],
+  },
 ];
 
 export const isLeagueKey = (value: string): value is LeagueKey => {
