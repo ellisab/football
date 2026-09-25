@@ -1,4 +1,5 @@
 import { OPENLIGADB_CACHE_SECONDS, withOpenLigaDbCache } from "./cache-policy";
+import { buildNationsLeagueTable } from "./nations-league-table";
 import type {
   ApiGroup,
   ApiLeague,
@@ -415,11 +416,14 @@ export const getTable = async (
   season: number,
   options?: FetchOptions,
 ) => {
-  return fetchJson<ApiTableRow[]>(
+  const table = await fetchJson<ApiTableRow[]>(
     `/getbltable/${leagueShortcut}/${season}`,
     withOpenLigaDbCache(
       options,
       getShorterRevalidate(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
     ),
   );
+  if (leagueShortcut.toLowerCase() !== "nla") return table;
+  const matches = await getAllMatches(leagueShortcut, season, options);
+  return buildNationsLeagueTable(table, matches);
 };

@@ -31,6 +31,37 @@ export function StandingsCard({
     );
   }
 
+  const groupNames = [
+    ...new Set(table.map((row) => row.teamGroupName?.trim()).filter(Boolean)),
+  ].sort();
+  if (groupNames.length > 0) {
+    const groups = [
+      ...groupNames,
+      ...(table.some((row) => !row.teamGroupName?.trim()) ? [undefined] : []),
+    ];
+    return (
+      <div className="grid gap-6">
+        {groups.map((group) => (
+          <section
+            key={group ?? "unknown"}
+            aria-label={group ? `Gruppe ${group}` : "Ohne Gruppenzuordnung"}
+          >
+            <h3 className="mb-3 font-semibold">
+              {group ? `Gruppe ${group}` : "Ohne Gruppenzuordnung"}
+            </h3>
+            <StandingsCard
+              table={table
+                .filter(
+                  (row) => (row.teamGroupName?.trim() || undefined) === group,
+                )
+                .map((row) => ({ ...row, teamGroupName: undefined }))}
+            />
+          </section>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="standings-surface">
       <Table className="standings-table">
