@@ -5,6 +5,7 @@ import {
   getAvailableLeagues,
   getCurrentGroup,
   getGroups,
+  getMatchById,
   getMatchdayResults,
   getMatchesByGroup,
   OPENLIGADB_CACHE_SECONDS,
@@ -545,5 +546,30 @@ test("OpenLigaDB client does not retry non-transient 404 responses", async () =>
   } finally {
     globalThis.fetch = originalFetch;
     console.warn = originalWarn;
+  }
+});
+
+test("direct match lookup uses short cache and distinguishes 404 from broken responses", async () => {
+  const originalFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async (url, options) => {
+      assert.equal(String(url), "https://api.openligadb.de/getmatchdata/85228");
+      assert.equal(
+        (options as { next: { revalidate: number } }).next.revalidate,
+        OPENLIGADB_CACHE_SECONDS.liveMatchday,
+      );
+      return jsonResponse({ matchID: 85228 });
+    };
+    assert.equal((await getMatchById(85228))?.matchID, 85228);
+    globalThis.fetch = async () => jsonResponse({}, 404);
+    assert.equal(await getMatchById(999999999), null);
+    globalThis.fetch = async () => jsonResponse({ matchID: 7 });
+    await assert.rejects(getMatchById(85228), /Invalid match response/);
+    globalThis.fetch = async () => {
+      throw new TypeError("network unavailable");
+    };
+    await assert.rejects(getMatchById(85228), /network unavailable/);
+  } finally {
+    globalThis.fetch = originalFetch;
   }
 });

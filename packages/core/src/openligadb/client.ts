@@ -427,3 +427,22 @@ export const getTable = async (
   const matches = await getAllMatches(leagueShortcut, season, options);
   return buildNationsLeagueTable(table, matches);
 };
+
+export const getMatchById = async (
+  matchId: number,
+  options?: FetchOptions,
+): Promise<ApiMatch | null> => {
+  if (!Number.isSafeInteger(matchId) || matchId <= 0) return null;
+  try {
+    const match = await fetchJson<ApiMatch>(
+      `/getmatchdata/${matchId}`,
+      withOpenLigaDbCache(options, OPENLIGADB_CACHE_SECONDS.liveMatchday),
+    );
+    if (!match || match.matchID !== matchId)
+      throw new Error("Invalid match response");
+    return match;
+  } catch (error) {
+    if (getStatusCode(error) === 404) return null;
+    throw error;
+  }
+};

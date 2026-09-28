@@ -90,6 +90,11 @@ export function TodayView({
         />
 
         <DateNavigator dateKey={dateKey} />
+        {data.visibleErrors.map((message) => (
+          <p key={message} role="alert" className="inline-empty">
+            {message}
+          </p>
+        ))}
 
         <section
           className="score-summary"
@@ -122,8 +127,16 @@ export function TodayView({
 
         {matches.length === 0 ? (
           <EmptyState
-            title="Keine Spiele in diesem Ausschnitt"
-            description="Für das gewählte Datum sind in den aktuell geladenen Spieltagen keine Partien vorhanden. Wechsle das Datum oder öffne einen Wettbewerb."
+            title={
+              data.visibleErrors.length
+                ? "Spielplan unvollständig"
+                : "Keine Spiele an diesem Tag"
+            }
+            description={
+              data.visibleErrors.length
+                ? "Die Spieldaten konnten nicht vollständig geladen werden. Bitte versuche es erneut."
+                : "Für das gewählte Datum sind in den unterstützten Wettbewerben keine Partien angesetzt."
+            }
             icon={<CalendarX2 aria-hidden="true" className="h-5 w-5" />}
           />
         ) : (

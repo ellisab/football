@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { resolveDateQuery } from "@/features/football/components/date-navigator";
-import {
-  getTodayCompetitionMatches,
-  getVisibleCompetitions,
-} from "@/features/football/view-utils";
-import { getHomePageData } from "@/features/home/server/get-home-page-data";
 import { TodayView } from "@/features/today/components/today-view";
+import { getTodayPageData } from "@/features/today/server/get-today-page-data";
 
 export const metadata: Metadata = {
   title: "Heute",
@@ -19,11 +15,7 @@ export default async function TodayPage({
 }) {
   const params = await searchParams;
   const dateKey = resolveDateQuery(params.date);
-  const data = await getHomePageData({});
-  const matches = getTodayCompetitionMatches({
-    competitions: getVisibleCompetitions(data),
-    date: new Date(`${dateKey}T12:00:00.000Z`),
-  });
+  const { data, matches } = await getTodayPageData(dateKey);
 
   return <TodayView data={data} dateKey={dateKey} matches={matches} />;
 }

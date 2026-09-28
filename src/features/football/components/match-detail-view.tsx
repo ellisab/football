@@ -63,11 +63,9 @@ export function MatchDetailView({
 }) {
   const status = getMatchStatus(match);
   const venue = getVenueLabel(match);
-  const meta = competition
-    ? getCompetitionMeta(competition.resolvedLeague)
-    : undefined;
-  const competitionName = meta?.label ?? match.leagueName ?? "Wettbewerb";
   const competitionId = competition?.resolvedLeague ?? resolveLeagueKey(match);
+  const meta = competitionId ? getCompetitionMeta(competitionId) : undefined;
+  const competitionName = meta?.label ?? match.leagueName ?? "Wettbewerb";
   const season = competition?.resolvedSeason ?? match.leagueSeason;
   const roundLabel =
     match.group?.groupName ??
