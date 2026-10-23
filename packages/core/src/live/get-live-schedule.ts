@@ -90,7 +90,7 @@ const resolveCompetitionRequests = ({
       entriesByLeague.get(league) ?? [],
       season,
     );
-    const fallbackShortcut = getDataShortcutForLeague(league, season);
+    const fallbackShortcut = getDataShortcutForLeague(league);
 
     return {
       league,

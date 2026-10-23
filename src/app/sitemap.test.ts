@@ -12,7 +12,6 @@ test("sitemap contains exactly the supported competition routes", () => {
       "/competitions/bundesliga-2",
       "/competitions/dfb-pokal",
       "/competitions/champions-league",
-      "/competitions/europa-league",
     ],
   );
 });

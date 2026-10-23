@@ -24,12 +24,6 @@ export const LEAGUE_GROUPS: LeagueGroupConfig[] = [
     shortcutMatch: ["cl", "ucl"],
   },
   {
-    key: "uel",
-    label: "Europa League",
-    // The 2025 `uel` feed contains only knockout games, not a league table.
-    shortcutMatch: ["uel2026"],
-  },
-  {
     key: "nla",
     label: "Nations League A",
     shortcutMatch: ["nla"],

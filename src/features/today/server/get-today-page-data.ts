@@ -55,7 +55,7 @@ export const getTodayPageData = async (
         : season;
     const shortcut =
       pickLeagueEntryForSeason(available, resolvedSeason)?.leagueShortcut ??
-      getDataShortcutForLeague(league, resolvedSeason);
+      getDataShortcutForLeague(league);
     return { league, season: resolvedSeason, shortcut };
   });
   const leagueOptions = requests.map(({ league, season }) => ({

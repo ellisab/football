@@ -35,12 +35,6 @@ const AVAILABLE_LEAGUES: ApiLeague[] = [
     leagueSeason: 2026,
     sport: { sportName: "Football" },
   },
-  {
-    leagueShortcut: "uel2026",
-    leagueName: "Europa League 2026/27",
-    leagueSeason: 2026,
-    sport: { sportName: "Fußball" },
-  },
 ];
 
 const createDataSource = (
@@ -113,14 +107,7 @@ test("getLiveSchedule resolves current-season aliases and applies cache policies
   );
   assert.deepEqual(
     scheduleCalls.map(({ shortcut, season }) => `${shortcut}:${season}`).sort(),
-    [
-      "bl1:2026",
-      "bl2:2026",
-      "dfb:2026",
-      "nla:2026",
-      "ucl:2026",
-      "uel2026:2026",
-    ],
+    ["bl1:2026", "bl2:2026", "dfb:2026", "nla:2026", "ucl:2026"],
   );
   assert.equal(
     scheduleCalls.every(
@@ -130,6 +117,40 @@ test("getLiveSchedule resolves current-season aliases and applies cache policies
     true,
   );
   assert.equal(OPENLIGADB_CACHE_SECONDS.liveSchedule, 15 * 60);
+});
+
+test("getLiveSchedule ignores removed Europa League feeds in the provider directory", async () => {
+  const scheduleCalls: string[] = [];
+  const dataSource = createDataSource({
+    getAvailableLeaguesBySeason: async () => [
+      ...AVAILABLE_LEAGUES,
+      ...["uel", "uel2026"].map((leagueShortcut) => ({
+        leagueShortcut,
+        leagueName: "Europa League",
+        leagueSeason: 2026,
+        sport: { sportName: "Fußball" },
+      })),
+    ],
+    getAllMatches: async (shortcut) => {
+      scheduleCalls.push(shortcut);
+      if (shortcut === "bl1") {
+        return [createMatch({ id: 400, offsetMinutes: -30 })];
+      }
+      if (shortcut === "uel" || shortcut === "uel2026") {
+        return [createMatch({ id: 401, offsetMinutes: -30 })];
+      }
+      return [];
+    },
+  });
+
+  const result = await getLiveSchedule({ dataSource, now: NOW });
+
+  assert.equal(scheduleCalls.includes("uel"), false);
+  assert.equal(scheduleCalls.includes("uel2026"), false);
+  assert.deepEqual(
+    result.matches.map(({ match }) => match.matchID),
+    [400],
+  );
 });
 
 test("getLiveSchedule selects recent unfinished matches and five upcoming globally", async () => {
@@ -299,12 +320,5 @@ test("getLiveSchedule falls back to canonical shortcuts when metadata is unavail
   const result = await getLiveSchedule({ dataSource, now: NOW });
 
   assert.deepEqual(result.failedLeagues, []);
-  assert.deepEqual(shortcuts.sort(), [
-    "bl1",
-    "bl2",
-    "dfb",
-    "nla",
-    "ucl",
-    "uel2026",
-  ]);
+  assert.deepEqual(shortcuts.sort(), ["bl1", "bl2", "dfb", "nla", "ucl"]);
 });

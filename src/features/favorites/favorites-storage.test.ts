@@ -73,16 +73,21 @@ test("current empty collections are not repopulated from stale legacy fields", (
 test("unsupported competition favorites are removed from stored and updated state", () => {
   const parsed = parseFavoritesValue({
     version: 1,
-    competitionIds: ["legacy", "bl1"],
+    competitionIds: ["legacy", "uel", "bl1"],
     teamIds: [],
   });
 
   assert.deepEqual(parsed.competitionIds, ["bl1"]);
   assert.equal(isFavorite(parsed, "competition", "legacy"), false);
+  assert.equal(isFavorite(parsed, "competition", "uel"), false);
   assert.equal(updateFavorite(parsed, "competition", "legacy", true), parsed);
+  assert.equal(updateFavorite(parsed, "competition", "uel", true), parsed);
   assert.deepEqual(
     JSON.parse(
-      serializeFavorites({ competitionIds: ["legacy", "cl"], teamIds: [] }),
+      serializeFavorites({
+        competitionIds: ["legacy", "uel", "cl"],
+        teamIds: [],
+      }),
     ).competitionIds,
     ["cl"],
   );

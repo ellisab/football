@@ -196,10 +196,7 @@ test("buildLeagueEntriesByGroup accepts configured aliases and ignores lookalike
     },
   ]);
 
-  assert.deepEqual(
-    [...grouped.keys()],
-    ["bl1", "bl2", "dfb", "cl", "uel", "nla"],
-  );
+  assert.deepEqual([...grouped.keys()], ["bl1", "bl2", "dfb", "cl", "nla"]);
   assert.deepEqual(
     grouped.get("bl1")?.map((entry) => entry.leagueShortcut),
     ["bl1/arena"],

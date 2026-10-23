@@ -211,14 +211,13 @@ test("partial and total discovery failures have distinct fallbacks", async () =>
   });
 
   const total = await getLivePageData({
-    loadSchedule: async () =>
-      schedule([], ["bl1", "bl2", "dfb", "cl", "uel", "nla"]),
+    loadSchedule: async () => schedule([], ["bl1", "bl2", "dfb", "cl", "nla"]),
     now: () => NOW,
   });
 
   assert.deepEqual(total, {
     checkedAt: NOW - 1_000,
-    failedLeagues: ["bl1", "bl2", "dfb", "cl", "uel", "nla"],
+    failedLeagues: ["bl1", "bl2", "dfb", "cl", "nla"],
     matches: [],
     visibleErrors: ["OpenLigaDB ist gerade nicht verfügbar"],
   });
