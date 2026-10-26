@@ -17,13 +17,13 @@
     "@footballleagues/core": "workspace:*",
     "@footballleagues/ui": "workspace:*",
     "@vercel/analytics": "^2.0.1",
-    "lucide-react": "^1.57.0",
+    "lucide-react": "^1.61.0",
     "next": "16.4.2",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
+    "@biomejs/biome": "2.6.2",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
