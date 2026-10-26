@@ -13,7 +13,6 @@
 ## Findings
 
 No actionable P0, P1, or P2 differences remain.
-
 - Fonts and typography: the Champions League dock reuses the existing stadium-body family, weight, tabular date numerals, and compact broadcaster marks from the Bundesliga dock. The intentional copy differences are `prime`, `DAZN`, and the Champions League fixture date.
 - Spacing and layout rhythm: the pill remains centered against the match card with the same border, radius, padding, elevation, and responsive sizing rules as Bundesliga and 2. Bundesliga.
 - Colors and visual tokens: background, border, text, muted icon, and shadow values are inherited from the same production component and tokens as the reference.

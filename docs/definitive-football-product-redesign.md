@@ -194,7 +194,6 @@ search, team, and favorites routes retain its shallow information architecture, 
 language, and server-first behavior.
 
 The current visual layer is **Sculpted Light**:
-
 - warm-white canvas, white and pale-gray surfaces, charcoal text, and hairline borders;
 - subtle shadows and dimensional controls used to create hierarchy rather than decoration;
 - Space Grotesk for product text and JetBrains Mono for time and compact data;
@@ -528,7 +527,6 @@ Server Components remain the default. Client code is limited to `PrimaryNavigati
 ### Latest recorded verification
 
 The latest repository-wide verification was recorded on 2026-07-22:
-
 - 60 application tests and 81 core-package tests passed when all test files were discovered;
 - strict TypeScript, repository linting, and the production build passed;
 - `/` and `/live` browser smoke checks completed without application console errors;

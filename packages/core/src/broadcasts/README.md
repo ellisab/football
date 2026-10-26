@@ -18,7 +18,6 @@ Highlight programmes and delayed replays are outside this module.
 ## Manual overrides
 
 `data/manual-overrides.json` is the editorial escape hatch for:
-
 - the exact RTL or NITRO assignment;
 - the two special SAT.1 winter Friday matches;
 - rescheduled fixtures and other published exceptions.
