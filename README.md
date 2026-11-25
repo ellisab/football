@@ -15,22 +15,26 @@ packages/
 ## Quick start
 
 Install dependencies:
+
 ```
 pnpm install
 ```
 
 Optional environment variables:
+
 ```
 # Web canonical metadata / sitemap host
 SITE_URL=http://localhost:3000
 ```
 
 Web (Next.js):
+
 ```
 pnpm run dev
 ```
 
 Common checks:
+
 ```
 pnpm run build
 pnpm run lint
@@ -38,6 +42,7 @@ pnpm run typecheck
 ```
 
 Apply Biome's safe lint, formatting, and import fixes:
+
 ```
 pnpm run lint:fix
 ```
