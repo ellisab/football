@@ -24,6 +24,7 @@ The temporary `AUDIT[...]` source comments have been removed. This report retain
 | Route export error | Moved `buildLiveScopesResponse` and its cache headers to [response.ts](../src/app/api/live-scopes/response.ts). The [route module](../src/app/api/live-scopes/route.ts) now exports only `GET`, as required by Next.js; response tests import the helper directly.                                                                                                                                                                                                                               |
 
 Removed CSS classes:
+
 - `match-summary`, `match-summary-compact`, `match-time-column`, `match-time`, `match-date`, `match-score-number`, `match-kickoff`, `match-competition-line`, `match-team-line`, `match-team-name`
 - `today-competition-group`, `today-competition-heading`
 - `favorite-match-list`, `featured-match-list`, `surface-panel`, `section-label`, `control`
@@ -33,6 +34,7 @@ The dynamic `match-detail-kickoff--upcoming` selector is preserved. A comparison
 The six test-only helpers were removed from the private core package together with four tests that exclusively exercised removed functionality. Shared localization and discovery-cache assertions were retained and adjusted to use the surviving APIs. Seven regression tests were added for ordering, deduplication, Berlin date boundaries, team identity, visible-tab scheduling/cleanup, and refresh status announcements.
 
 Validation:
+
 - **153 tests passed**, with no failures, skips, or cancellations, using `node --import tsx --test 'src/**/*.test.ts' 'packages/core/tests/**/*.test.ts'`.
 - **Route generation and TypeScript passed**, including `noUnusedLocals`, `noUnusedParameters`, and unreachable-code checks.
 - **Production build passed** with `./node_modules/.bin/next build --webpack`, including static page generation and build tracing. The default Turbopack build could not finish because this environment prohibits its internal worker from binding a port. The webpack flag was used only for verification; project build configuration is unchanged.
